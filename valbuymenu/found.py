@@ -1,11 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
-from PIL import Image
 
 root = tk.Tk()
 root.title("Image Editor")
 
-image = tk.PhotoImage(file="plzwork.png")
+image = tk.PhotoImage(file="images/plzwork.png")
 
 # Tools frame
 tools_frame = tk.Frame(root, width=200, height=400, bg="skyblue")

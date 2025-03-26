@@ -27,16 +27,19 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="p-6 md:w-2/3">
-                <h2 className="text-2xl font-bold mb-2">Embedded Systems Project</h2>
+                <h2 className="text-2xl font-bold mb-2">Tesla Model A</h2>
                 <p className="text-muted-foreground mb-4">
-                  A microcontroller-based system for real-time data processing and control. This project demonstrates my
-                  ability to work with hardware interfaces and develop efficient embedded software.
+                  Built an autonomous EV with a 3D-printed PLA chassis, integrating MOSFETs, DC motors, 9-volt
+                  batteries, & breadboards. Programmed in AVR C for Arduino to use PWM for all-wheel drive on the 4 DC
+                  motor wheels for breaking & accelerating. Implemented real-time 180° object detection with 3
+                  ultrasonic sensors & 3 LEDs to slow & stop the vehicle within 0.5s.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">C++</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Arduino</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">IoT</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Sensors</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">AVR C</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">3D Printing</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">MOSFETs</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Arduino IDE</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Soldering</span>
                 </div>
                 <div className="flex gap-3">
                   <Button size="sm" variant="outline" className="group">
@@ -45,7 +48,7 @@ export default function ProjectsPage() {
                   </Button>
                   <Button size="sm" className="group">
                     <ExternalLink className="mr-2 h-4 w-4" />
-                    Live Demo
+                    Demo
                   </Button>
                 </div>
               </div>
@@ -61,21 +64,22 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="p-6 md:w-2/3">
-                <h2 className="text-2xl font-bold mb-2">FPGA Implementation</h2>
+                <h2 className="text-2xl font-bold mb-2">4-bit Arithmetic Logic Unit (ALU) Circuit</h2>
                 <p className="text-muted-foreground mb-4">
-                  Digital design project implementing custom algorithms on FPGA hardware. This project showcases my
-                  skills in digital logic design and hardware description languages.
+                  Built ALU that performed XOR, AND, OR, XNOR, NAND, NOR, magnitude comparison, & addition for 2 4-bit
+                  binary inputs. Achieved result using 13 logic gate integrated circuit chips, 4 8x1 multiplexers, & 5
+                  LEDs with 100% accuracy.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">VHDL</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Verilog</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Digital Logic</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Xilinx</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Logic IC Chips</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Multiplexers</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">LEDs</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Breadboards</span>
                 </div>
                 <div className="flex gap-3">
                   <Button size="sm" variant="outline" className="group">
                     <Github className="mr-2 h-4 w-4" />
-                    View Code
+                    View Files
                   </Button>
                   <Button size="sm" className="group">
                     <ExternalLink className="mr-2 h-4 w-4" />
@@ -95,15 +99,17 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="p-6 md:w-2/3">
-                <h2 className="text-2xl font-bold mb-2">PCB Design Project</h2>
+                <h2 className="text-2xl font-bold mb-2">60-Second Stopwatch Circuit</h2>
                 <p className="text-muted-foreground mb-4">
-                  Custom printed circuit board design for a specialized application. This project demonstrates my skills
-                  in electronic design, component selection, and PCB layout.
+                  Created 1-minute BCD counter using a sequential logic design with the ability to stop, resume, & reset
+                  with 100% accuracy. Utilized 2 D-flip flops, 2 seven-segment BCD displays, an astable multivibrator, &
+                  a 555 timer to generate a clock signal.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Eagle CAD</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Electronics</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Circuit Design</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Logic IC Chips</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Digital Logic</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Breadboard</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">555 Timer</span>
                 </div>
                 <div className="flex gap-3">
                   <Button size="sm" variant="outline" className="group">
@@ -112,7 +118,7 @@ export default function ProjectsPage() {
                   </Button>
                   <Button size="sm" className="group">
                     <ExternalLink className="mr-2 h-4 w-4" />
-                    Project Report
+                    Documentation
                   </Button>
                 </div>
               </div>
@@ -128,16 +134,17 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="p-6 md:w-2/3">
-                <h2 className="text-2xl font-bold mb-2">Robotics Control System</h2>
+                <h2 className="text-2xl font-bold mb-2">Design Sequence Hackathons</h2>
                 <p className="text-muted-foreground mb-4">
-                  Development of a control system for an autonomous robot. This project combines hardware interfacing,
-                  sensor integration, and algorithm implementation.
+                  Collaborated with 3 peers to integrate, program, & present a robot arm & an Etch-a-Sketch under a
+                  6-hour time constraint. Demonstrated rapid prototyping and problem-solving skills in a high-pressure
+                  environment.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Python</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">ROS</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Control Systems</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Robotics</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Arduino IDE</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Motors</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Servos</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Breadboard</span>
                 </div>
                 <div className="flex gap-3">
                   <Button size="sm" variant="outline" className="group">
@@ -146,7 +153,7 @@ export default function ProjectsPage() {
                   </Button>
                   <Button size="sm" className="group">
                     <ExternalLink className="mr-2 h-4 w-4" />
-                    Demo Video
+                    Demo
                   </Button>
                 </div>
               </div>
@@ -157,3 +164,4 @@ export default function ProjectsPage() {
     </main>
   )
 }
+

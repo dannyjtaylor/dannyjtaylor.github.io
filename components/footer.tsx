@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Github, Linkedin, Mail } from "lucide-react"
+import { Github, Linkedin, ExternalLink } from "lucide-react"
 
 export default function Footer() {
   return (
@@ -32,11 +32,33 @@ export default function Footer() {
               <Linkedin className="h-5 w-5" />
             </Link>
             <Link
-              href="mailto:dannyengineers@outlook.com"
+              href="https://www.twitch.tv/fierylights"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Email"
+              aria-label="Twitch"
             >
-              <Mail className="h-5 w-5" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"></path>
+              </svg>
+            </Link>
+            <Link
+              href="https://linktr.ee/dtaylor6456"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="LinkTree"
+            >
+              <ExternalLink className="h-5 w-5" />
             </Link>
           </div>
         </div>

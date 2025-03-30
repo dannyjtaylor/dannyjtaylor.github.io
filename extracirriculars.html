@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extracurriculars | Danny Taylor</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="vscode-container">
+        <!-- VSCode Top Bar -->
+        <div class="vscode-top-bar">
+            <div class="vscode-title">Danny Taylor - Portfolio</div>
+            <div class="vscode-controls">
+                <button class="vscode-button icon-button">
+                    <i data-lucide="x" class="lucide-icon"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- VSCode Main Content -->
+        <div class="vscode-main">
+            <!-- Sidebar Icons -->
+            <div class="vscode-sidebar-icons">
+                <a href="index.html" class="vscode-icon-button">
+                    <i data-lucide="home" class="lucide-icon"></i>
+                </a>
+                <a href="experience.html" class="vscode-icon-button">
+                    <i data-lucide="briefcase" class="lucide-icon"></i>
+                </a>
+                <a href="projects.html" class="vscode-icon-button">
+                    <i data-lucide="folder-kanban" class="lucide-icon"></i>
+                </a>
+                <a href="extracurriculars.html" class="vscode-icon-button active">
+                    <i data-lucide="users" class="lucide-icon"></i>
+                </a>
+                <a href="contact.html" class="vscode-icon-button">
+                    <i data-lucide="mail" class="lucide-icon"></i>
+                </a>
+                
+                <div class="vscode-sidebar-spacer"></div>
+                
+                <a href="https://github.com/dannyjtaylor" target="_blank" rel="noopener noreferrer" class="vscode-icon-button">
+                    <i data-lucide="github" class="lucide-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/dannyjtaylor/" target="_blank" rel="noopener noreferrer" class="vscode-icon-button">
+                    <i data-lucide="linkedin" class="lucide-icon"></i>
+                </a>
+                <a href="https://www.twitch.tv/fierylights" target="_blank" rel="noopener noreferrer" class="vscode-icon-button">
+                    <i data-lucide="twitch" class="lucide-icon"></i>
+                </a>
+                <a href="https://linktr.ee/dtaylor6456" target="_blank" rel="noopener noreferrer" class="vscode-icon-button">
+                    <i data-lucide="link-2" class="lucide-icon"></i>
+                </a>
+            </div>
+            
+            <!-- File Explorer -->
+            <div class="vscode-explorer">
+                <div class="vscode-explorer-header">EXPLORER</div>
+                <div class="vscode-explorer-content">
+                    <!-- Pages Folder -->
+                    <div class="vscode-folder">
+                        <div class="vscode-folder-header" data-folder="pages">
+                            <i data-lucide="chevron-down" class="lucide-icon folder-icon"></i>
+                            <span>pages</span>
+                        </div>
+                        <div class="vscode-folder-content" id="pages-folder">
+                            <a href="index.html" class="vscode-file">
+                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
+                                <span>home.html</span>
+                            </a>
+                            <a href="experience.html" class="vscode-file">
+                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
+                                <span>experience.html</span>
+                            </a>
+                            <a href="projects.html" class="vscode-file">
+                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
+                                <span>projects.html</span>
+                            </a>
+                            <a href="extracurriculars.html" class="vscode-file active">
+                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
+                                <span>extracurriculars.html</span>
+                            </a>
+                            <a href="contact.html" class="vscode-file">
+                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
+                                <span>contact.html</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Components Folder -->
+                    <div class="vscode-folder">
+                        <div class="vscode-folder-header" data-folder="components">
+                            <i data-lucide="chevron-right" class="lucide-icon folder-icon"></i>
+                            <span>components</span>
+                        </div>
+                        <div class="vscode-folder-content" id="components-folder" style="display: none;">
+                            <div class="vscode-file">
+                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
+                                <span>vscode-layout.css</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Assets Folder -->
+                    <div class="vscode-folder">
+                        <div class="vscode-folder-header" data-folder="assets">
+                            <i data-lucide="chevron-right" class="lucide-icon folder-icon"></i>
+                            <span>assets</span>
+                        </div>
+                        <div class="vscode-folder-content" id="assets-folder" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="vscode-content-container">
+                <!-- Tabs -->
+                <div class="vscode-tabs">
+                    <div class="vscode-tab active">
+                        <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
+                        <span>extracurriculars.html</span>
+                    </div>
+                </div>
+                
+                <!-- Content -->
+                <div class="vscode-content">
+                    <div class="extracurriculars-page">
+                        <div class="code-comment">// Beyond Coding</div>
+                        <h1 class="code-function">Extracurricular Activities</h1>
+                        <div class="code-string">/* What I do outside of work */</div>
+                        
+                        <div class="extracurricular-cards">
+                            <div class="vscode-card">
+                                <div class="card-header with-icon">
+                                    <i data-lucide="twitch" class="lucide-icon twitch-icon"></i>
+                                    <div>
+                                        <h2 class="card-title code-type">Twitch Streaming</h2>
+                                        <div class="card-subtitle code-property">@fierylights</div>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                                    <p class="code-text">
+                                        I regularly stream coding sessions, game development, and gaming on Twitch. Join me to learn, collaborate, and have fun!
+                                    </p>
+                                    <div class="code-line">
+                                        <span class="code-keyword">const</span> <span class="code-type">streamSchedule</span> <span class="code-operator">=</span> <span class="code-string">[</span>
+                                    </div>
+                                    <ul class="code-list">
+                                        <li>Coding Sessions: Tuesdays & Thursdays @ 7PM EST</li>
+                                        <li>Game Development: Wednesdays @ 8PM EST</li>
+                                        <li>Gaming: Weekends @ 3PM EST</li>
+                                    </ul>
+                                    <div class="code-line">
+                                        <span class="code-string">]</span><span class="code-operator">;</span>
+                                    </div>
+                                    
+                                    <div class="badge-container">
+                                        <span class="code-badge">Live Coding</span>
+                                        <span class="code-badge">Game Dev</span>
+                                        <span class="code-badge">Gaming</span>
+                                        <span class="code-badge">Tech Talks</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="vscode-card">
+                                <div class="card-header with-icon">
+                                    <i data-lucide="users" class="lucide-icon community-icon"></i>
+                                    <div>
+                                        <h2 class="card-title code-type">Tech Community Involvement</h2>
+                                        <div class="card-subtitle code-property">Meetups & Conferences</div>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                                    <p class="code-text">
+                                        I actively participate in and organize tech meetups and conferences to share knowledge and connect with fellow developers.
+                                    </p>
+                                    <div class="code-line">
+                                        <span class="code-keyword">const</span> <span class="code-type">contributions</span> <span class="code-operator">=</span> <span class="code-string">[</span>
+                                    </div>
+                                    <ul class="code-list">
+                                        <li>Co-organizer of local JavaScript meetup group</li>
+                                        <li>Speaker at React Conference 2023</li>
+                                        <li>Workshop leader for "Intro to Web Development" series</li>
+                                        <li>Mentor for coding bootcamp graduates</li>
+                                    </ul>
+                                    <div class="code-line">
+                                        <span class="code-string">]</span><span class="code-operator">;</span>
+                                    </div>
+                                    
+                                    <div class="badge-container">
+                                        <span class="code-badge">Speaking</span>
+                                        <span class="code-badge">Organizing</span>
+                                        <span class="code-badge">Mentoring</span>
+                                        <span class="code-badge">Networking</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="vscode-card">
+                                <div class="card-header with-icon">
+                                    <i data-lucide="book-open" class="lucide-icon writing-icon"></i>
+                                    <div>
+                                        <h2 class="card-title code-type">Technical Writing</h2>
+                                        <div class="card-subtitle code-property">Blogs & Tutorials</div>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                                    <p class="code-text">
+                                        I write technical articles and tutorials to share my knowledge and help others learn new technologies.
+                                    </p>
+                                    <div class="code-line">
+                                        <span class="code-keyword">const</span> <span class="code-type">recentArticles</span> <span class="code-operator">=</span> <span class="code-string">[</span>
+                                    </div>
+                                    <ul class="code-list">
+                                        <li>"Building a VSCode-themed Portfolio with HTML/CSS/JS"</li>
+                                        <li>"Optimizing JavaScript Performance: Advanced Techniques"</li>
+                                        <li>"From Junior to Senior: My Developer Journey"</li>
+                                        <li>"The Ultimate Guide to Modern CSS"</li>
+                                    </ul>
+                                    <div class="code-line">
+                                        <span class="code-string">]</span><span class="code-operator">;</span>
+                                    </div>
+                                    
+                                    <div class="badge-container">
+                                        <span class="code-badge">Medium</span>
+                                        <span class="code-badge">Dev.to</span>
+                                        <span class="code-badge">Personal Blog</span>
+                                        <span class="code-badge">Technical Writing</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="vscode-card">
+                                <div class="card-header with-icon">
+                                    <i data-lucide="award" class="lucide-icon award-icon"></i>
+                                    <div>
+                                        <h2 class="card-title code-type">Hackathons & Competitions</h2>
+                                        <div class="card-subtitle code-property">Challenges & Awards</div>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                                    <p class="code-text">
+                                        I regularly participate in hackathons and coding competitions to challenge myself and collaborate with other developers.
+                                    </p>
+                                    <div class="code-line">
+                                        <span class="code-keyword">const</span> <span class="code-type">achievements</span> <span class="code-operator">=</span> <span class="code-string">[</span>
+                                    </div>
+                                    <ul class="code-list">
+                                        <li>1st Place - Regional Web Dev Hackathon 2023</li>
+                                        <li>2nd Place - AI Innovation Challenge</li>
+                                        <li>Finalist - International Coding Competition</li>
+                                        <li>Best UI/UX Award - Game Jam 2022</li>
+                                    </ul>
+                                    <div class="code-line">
+                                        <span class="code-string">]</span><span class="code-operator">;</span>
+                                    </div>
+                                    
+                                    <div class="badge-container">
+                                        <span class="code-badge">Hackathons</span>
+                                        <span class="code-badge">Game Jams</span>
+                                        <span class="code-badge">Coding Challenges</span>
+                                        <span class="code-badge">Team Projects</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Bar -->
+                <div class="vscode-status-bar">
+                    <div class="status-item">main</div>
+                    <div class="status-right">
+                        <div class="status-item">HTML</div>
+                        <div class="status-item">UTF-8</div>
+                        <div class="status-item">LF</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

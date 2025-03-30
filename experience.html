@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danny Taylor | Portfolio</title>
+    <title>Experience | Danny Taylor</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,10 +26,10 @@
         <div class="vscode-main">
             <!-- Sidebar Icons -->
             <div class="vscode-sidebar-icons">
-                <a href="index.html" class="vscode-icon-button active">
+                <a href="index.html" class="vscode-icon-button">
                     <i data-lucide="home" class="lucide-icon"></i>
                 </a>
-                <a href="experience.html" class="vscode-icon-button">
+                <a href="experience.html" class="vscode-icon-button active">
                     <i data-lucide="briefcase" class="lucide-icon"></i>
                 </a>
                 <a href="projects.html" class="vscode-icon-button">
@@ -69,11 +69,11 @@
                             <span>pages</span>
                         </div>
                         <div class="vscode-folder-content" id="pages-folder">
-                            <a href="index.html" class="vscode-file active">
+                            <a href="index.html" class="vscode-file">
                                 <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
                                 <span>home.html</span>
                             </a>
-                            <a href="experience.html" class="vscode-file">
+                            <a href="experience.html" class="vscode-file active">
                                 <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
                                 <span>experience.html</span>
                             </a>
@@ -103,10 +103,6 @@
                                 <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
                                 <span>vscode-layout.css</span>
                             </div>
-                            <div class="vscode-file">
-                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                                <span>home-page.js</span>
-                            </div>
                         </div>
                     </div>
                     
@@ -127,77 +123,130 @@
                 <div class="vscode-tabs">
                     <div class="vscode-tab active">
                         <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                        <span>home.html</span>
+                        <span>experience.html</span>
                     </div>
                 </div>
                 
                 <!-- Content -->
                 <div class="vscode-content">
-                    <div class="home-page">
-                        <div class="code-comment">// Welcome to my portfolio</div>
-                        <h1 class="code-function">Danny Taylor</h1>
-                        <div class="code-string">/* Full Stack Developer */</div>
+                    <div class="experience-page">
+                        <div class="code-comment">// Professional Experience</div>
+                        <h1 class="code-function">Work History</h1>
+                        <div class="code-string">/* A timeline of my professional journey */</div>
                         
-                        <div class="vscode-card">
-                            <div class="card-content">
-                                <div class="code-line">
-                                    <span class="code-keyword">const</span> <span class="code-type">aboutMe</span> <span class="code-operator">=</span> <span class="code-string">{</span>
+                        <div class="experience-cards">
+                            <div class="vscode-card">
+                                <div class="card-header">
+                                    <div class="card-header-content">
+                                        <h2 class="card-title code-type">Senior Software Engineer</h2>
+                                        <div class="card-subtitle code-property">Tech Company Inc.</div>
+                                    </div>
+                                    <div class="card-date code-string">2021 - Present</div>
                                 </div>
-                                
-                                <div class="code-line indented">
-                                    <span class="code-property">summary</span><span class="code-operator">:</span> <span class="code-string">"Full Stack Developer with a passion for creating elegant solutions to complex problems"</span><span class="code-operator">,</span>
-                                </div>
-                                
-                                <div class="code-line indented">
-                                    <span class="code-property">skills</span><span class="code-operator">:</span> <span class="code-string">[</span>
-                                </div>
-                                <div class="code-line double-indented">
+                                <div class="card-content">
+                                    <div class="code-line">
+                                        <span class="code-keyword">const</span> <span class="code-type">responsibilities</span> <span class="code-operator">=</span> <span class="code-string">[</span>
+                                    </div>
+                                    <ul class="code-list">
+                                        <li>Led the development of a microservices architecture that improved system scalability by 200%</li>
+                                        <li>Mentored junior developers and conducted code reviews to ensure code quality</li>
+                                        <li>Implemented CI/CD pipelines that reduced deployment time by 75%</li>
+                                        <li>Collaborated with product managers to define and prioritize features</li>
+                                    </ul>
+                                    <div class="code-line">
+                                        <span class="code-string">]</span><span class="code-operator">;</span>
+                                    </div>
+                                    
                                     <div class="badge-container">
-                                        <span class="code-badge">JavaScript</span>
-                                        <span class="code-badge">TypeScript</span>
                                         <span class="code-badge">React</span>
-                                        <span class="code-badge">Next.js</span>
                                         <span class="code-badge">Node.js</span>
-                                        <span class="code-badge">Python</span>
-                                        <span class="code-badge">SQL</span>
-                                        <span class="code-badge">Git</span>
                                         <span class="code-badge">AWS</span>
                                         <span class="code-badge">Docker</span>
+                                        <span class="code-badge">Kubernetes</span>
                                     </div>
                                 </div>
-                                <div class="code-line indented">
-                                    <span class="code-string">]</span><span class="code-operator">,</span>
+                            </div>
+                            
+                            <div class="vscode-card">
+                                <div class="card-header">
+                                    <div class="card-header-content">
+                                        <h2 class="card-title code-type">Full Stack Developer</h2>
+                                        <div class="card-subtitle code-property">Startup Solutions LLC</div>
+                                    </div>
+                                    <div class="card-date code-string">2018 - 2021</div>
                                 </div>
-                                
-                                <div class="code-line indented">
-                                    <span class="code-property">interests</span><span class="code-operator">:</span> <span class="code-string">[</span>
-                                </div>
-                                <div class="code-line double-indented">
+                                <div class="card-content">
+                                    <div class="code-line">
+                                        <span class="code-keyword">const</span> <span class="code-type">achievements</span> <span class="code-operator">=</span> <span class="code-string">[</span>
+                                    </div>
+                                    <ul class="code-list">
+                                        <li>Developed and maintained multiple client-facing web applications</li>
+                                        <li>Reduced page load time by 40% through code optimization and lazy loading</li>
+                                        <li>Implemented responsive designs that improved mobile user engagement by 65%</li>
+                                        <li>Built RESTful APIs that served data to both web and mobile applications</li>
+                                    </ul>
+                                    <div class="code-line">
+                                        <span class="code-string">]</span><span class="code-operator">;</span>
+                                    </div>
+                                    
                                     <div class="badge-container">
-                                        <span class="code-badge">Web Development</span>
-                                        <span class="code-badge">Open Source</span>
-                                        <span class="code-badge">UI/UX Design</span>
-                                        <span class="code-badge">Gaming</span>
-                                        <span class="code-badge">Streaming</span>
+                                        <span class="code-badge">JavaScript</span>
+                                        <span class="code-badge">React</span>
+                                        <span class="code-badge">Express</span>
+                                        <span class="code-badge">MongoDB</span>
+                                        <span class="code-badge">PostgreSQL</span>
                                     </div>
                                 </div>
-                                <div class="code-line indented">
-                                    <span class="code-string">]</span>
+                            </div>
+                            
+                            <div class="vscode-card">
+                                <div class="card-header">
+                                    <div class="card-header-content">
+                                        <h2 class="card-title code-type">Junior Web Developer</h2>
+                                        <div class="card-subtitle code-property">Digital Agency Co.</div>
+                                    </div>
+                                    <div class="card-date code-string">2016 - 2018</div>
                                 </div>
-                                
-                                <div class="code-line">
-                                    <span class="code-string">}</span><span class="code-operator">;</span>
+                                <div class="card-content">
+                                    <div class="code-line">
+                                        <span class="code-keyword">const</span> <span class="code-type">projects</span> <span class="code-operator">=</span> <span class="code-string">[</span>
+                                    </div>
+                                    <ul class="code-list">
+                                        <li>Created responsive websites for various clients across different industries</li>
+                                        <li>Collaborated with designers to implement pixel-perfect UI components</li>
+                                        <li>Maintained and updated existing client websites</li>
+                                        <li>Participated in client meetings to gather requirements and provide technical insights</li>
+                                    </ul>
+                                    <div class="code-line">
+                                        <span class="code-string">]</span><span class="code-operator">;</span>
+                                    </div>
+                                    
+                                    <div class="badge-container">
+                                        <span class="code-badge">HTML</span>
+                                        <span class="code-badge">CSS</span>
+                                        <span class="code-badge">JavaScript</span>
+                                        <span class="code-badge">jQuery</span>
+                                        <span class="code-badge">PHP</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="code-comment">// Navigate through the sidebar to explore more sections</div>
-                        
-                        <div class="code-keyword">function <span class="code-function">getInTouch</span>() {</div>
-                        <div class="code-line indented">
-                            return <span class="code-string">"Feel free to connect with me on LinkedIn or GitHub!"</span>;
+                        <div class="code-comment">// Education</div>
+                        <div class="vscode-card">
+                            <div class="card-header">
+                                <div class="card-header-content">
+                                    <h2 class="card-title code-type">Bachelor of Science in Computer Science</h2>
+                                    <div class="card-subtitle code-property">University of Technology</div>
+                                </div>
+                                <div class="card-date code-string">2012 - 2016</div>
+                            </div>
+                            <div class="card-content">
+                                <div class="code-text">
+                                    Graduated with honors. Specialized in Software Engineering and Web Development.
+                                </div>
+                            </div>
                         </div>
-                        <div class="code-keyword">}</div>
                     </div>
                 </div>
                 

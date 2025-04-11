@@ -17,7 +17,6 @@ function initFolderToggles() {
             const folderId = this.getAttribute('data-folder');
             const folderContent = document.getElementById(`${folderId}-folder`);
             const folderIcon = this.querySelector('.folder-icon');
-            
             if (folderContent.style.display === 'none') {
                 folderContent.style.display = 'block';
                 if (folderIcon) {

@@ -15,6 +15,8 @@
     --code-keyword: #569cd6;
     --code-function: #dcdcaa;
     --code-type: #4ec9b0;
+    --code-return: #c586c0; /* pink for return/keywords like in VSCode */
+    --code-punctuation: #d7ba7d; /* gold/yellow for punctuation like () {} */
     --code-string: #ce9178;
     --code-comment: #6a9955;
     --code-property: #9cdcfe;
@@ -317,6 +319,14 @@ a:hover {
 
 .code-type {
     color: var(--code-type);
+}
+
+.code-return {
+    color: var(--code-return);
+}
+
+.code-punctuation {
+    color: var(--code-punctuation);
 }
 
 .code-string {

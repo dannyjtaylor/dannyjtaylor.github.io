@@ -1,0 +1,327 @@
+/* Professional Layout */
+.professional-container {
+    display: none;
+    min-height: 100vh;
+    background: #ffffff;
+    font-family: 'Inter', sans-serif;
+    color: #333333;
+}
+
+.professional-layout .professional-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Professional Header */
+.professional-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.professional-nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 4rem;
+}
+
+.professional-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.professional-nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+}
+
+.professional-nav-links a {
+    text-decoration: none;
+    color: #6b7280;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.professional-nav-links a:hover,
+.professional-nav-links a.active {
+    color: #3b82f6;
+}
+
+/* Professional Main */
+.professional-main {
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    width: 100%;
+}
+
+/* Professional Hero */
+.professional-hero {
+    padding: 4rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.hero-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 4rem;
+    align-items: center;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+    line-height: 1.1;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    color: #3b82f6;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;
+}
+
+.description {
+    font-size: 1.125rem;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0 0 2rem 0;
+}
+
+.professional-cta {
+    display: flex;
+    gap: 1rem;
+}
+
+.professional-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.professional-btn-primary {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+.professional-btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.professional-btn-secondary {
+    background: transparent;
+    color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.professional-btn-secondary:hover {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+.hero-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-picture {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #e5e7eb;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Professional Sections */
+.professional-section {
+    padding: 4rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.professional-section:last-child {
+    border-bottom: none;
+}
+
+.professional-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 3rem 0;
+    text-align: center;
+}
+
+/* Professional Cards */
+.professional-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.professional-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.professional-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.professional-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.company {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #3b82f6;
+    margin: 0 0 0.25rem 0;
+}
+
+.date {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 0 1rem 0;
+}
+
+.professional-card p {
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
+}
+
+/* Professional Badges */
+.professional-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.professional-badge {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid #e5e7eb;
+}
+
+/* Professional Footer */
+.professional-footer {
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.professional-social {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.professional-social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 50%;
+    color: #6b7280;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.professional-social a:hover {
+    background: #3b82f6;
+    color: #ffffff;
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+.professional-footer p {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .professional-nav {
+        padding: 0 1rem;
+        flex-direction: column;
+        height: auto;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    .professional-nav-links {
+        margin-top: 1rem;
+        gap: 1rem;
+    }
+    
+    .professional-main {
+        padding: 0 1rem;
+    }
+    
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+    }
+    
+    .hero-text h1 {
+        font-size: 2.25rem;
+    }
+    
+    .professional-cta {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .professional-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .professional-section {
+        padding: 2rem 0;
+    }
+    
+    .professional-section h2 {
+        font-size: 1.875rem;
+    }
+}

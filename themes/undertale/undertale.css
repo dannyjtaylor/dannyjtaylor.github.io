@@ -1,0 +1,325 @@
+/* Undertale Layout */
+.undertale-container {
+    display: none;
+    min-height: 100vh;
+    background: #000000;
+    font-family: 'Courier New', monospace;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+.undertale-layout .undertale-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Undertale Battle UI */
+.undertale-battle-ui {
+    width: 100%;
+    max-width: 800px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+}
+
+/* Character Info */
+.undertale-character-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+}
+
+.undertale-heart {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff0000;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: heartbeat 2s ease-in-out infinite;
+}
+
+.undertale-heart-icon {
+    font-size: 24px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.undertale-character-stats {
+    flex: 1;
+}
+
+.undertale-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffff00;
+    margin-bottom: 8px;
+    text-shadow: 2px 2px 0px #000000;
+}
+
+.undertale-level {
+    font-size: 14px;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.undertale-hp {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.undertale-hp-label {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: bold;
+    min-width: 20px;
+}
+
+.undertale-hp-bar {
+    flex: 1;
+    height: 20px;
+    background: #000000;
+    border: 2px solid #ffffff;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.undertale-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff0000 0%, #ffff00 50%, #00ff00 100%);
+    width: 100%;
+    animation: hpGlow 3s ease-in-out infinite;
+}
+
+@keyframes hpGlow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.undertale-hp-value {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: bold;
+    min-width: 50px;
+}
+
+/* Battle Menu */
+.undertale-battle-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+}
+
+.undertale-menu-options {
+    display: flex;
+    gap: 20px;
+}
+
+.undertale-menu-option {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.undertale-menu-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #ffffff;
+}
+
+.undertale-menu-option.active {
+    background: rgba(255, 255, 0, 0.2);
+    border-color: #ffff00;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+}
+
+.undertale-menu-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #000000;
+}
+
+/* Action Button */
+.undertale-action-button {
+    background: linear-gradient(135deg, #ff0000 0%, #ff6666 100%);
+    color: #ffffff;
+    padding: 12px 24px;
+    border: 2px solid #ffffff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-shadow: 1px 1px 0px #000000;
+}
+
+.undertale-action-button:hover {
+    background: linear-gradient(135deg, #ff6666 0%, #ff9999 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3);
+}
+
+.undertale-action-button .lucide-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Battle Text */
+.undertale-battle-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.undertale-text-box {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+}
+
+.undertale-text-box::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    border-radius: 8px;
+    z-index: -1;
+    animation: borderGlow 3s linear infinite;
+}
+
+@keyframes borderGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.undertale-text-content {
+    font-size: 16px;
+    line-height: 1.4;
+    color: #ffffff;
+    text-shadow: 1px 1px 0px #000000;
+    animation: textFlicker 0.1s ease-in-out infinite alternate;
+}
+
+@keyframes textFlicker {
+    0% { opacity: 1; }
+    100% { opacity: 0.95; }
+}
+
+/* Soul (Cursor) */
+.undertale-soul {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #ff0000;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1000;
+    animation: soulFloat 2s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+@keyframes soulFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Undertale Preview */
+.undertale-preview {
+    background: #000000;
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.undertale-preview .undertale-header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.undertale-preview .undertale-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.undertale-preview .undertale-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .undertale-battle-ui {
+        padding: 10px;
+    }
+    
+    .undertale-character-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .undertale-battle-menu {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .undertale-menu-options {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .undertale-menu-option {
+        padding: 8px 16px;
+    }
+    
+    .undertale-text-content {
+        font-size: 14px;
+    }
+}

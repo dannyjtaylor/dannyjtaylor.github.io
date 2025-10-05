@@ -3,577 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daniel J. Taylor | Portfolio</title>
+    <title>Daniel J. Taylor | Portfolio - Theme Selector</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="home-page">
-    <!-- Professional Layout Container -->
-    <div class="professional-container">
-        <header class="professional-header">
-            <nav class="professional-nav">
-                <div class="professional-logo">Daniel J. Taylor</div>
-                <ul class="professional-nav-links">
-                    <li><a href="index.html" class="active">Home</a></li>
-                    <li><a href="experience.html">Experience</a></li>
-                    <li><a href="projects.html">Projects</a></li>
-                    <li><a href="extracurriculars.html">Leadership</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-        </header>
-
-        <main class="professional-main">
-            <section class="professional-hero">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h1>Daniel J. Taylor</h1>
-                        <p class="subtitle">Computer Engineering Student & Smart City Intern</p>
-                        <p class="description">
-                            Passionate about embedded systems, AI, and full-stack development. Currently pursuing a BS in Computer Engineering at Florida Polytechnic University with a 4.0 GPA, while working as a Smart City Student Intern for the City of Winter Haven.
-                        </p>
-                        <div class="professional-cta">
-                            <a href="projects.html" class="professional-btn professional-btn-primary">
-                                <i data-lucide="folder-kanban" class="lucide-icon"></i>
-                                View My Work
-                            </a>
-                            <a href="contact.html" class="professional-btn professional-btn-secondary">
-                                <i data-lucide="mail" class="lucide-icon"></i>
-                                Get In Touch
-                            </a>
-                        </div>
-                    </div>
-                    <div class="hero-image">
-                        <img src="https://media.licdn.com/dms/image/v2/D4E03AQG3aHm0m-yL3w/profile-displayphoto-crop_800_800/B4EZifyMUUGcAI-/0/1755027392199?e=1762387200&v=beta&t=m5ypTNm_qvERVMe-t5Tlwd-BxudrLlmkMiukAq3kq2Y" alt="Daniel J. Taylor" class="profile-picture" onerror="this.style.display='none'">
-                    </div>
-                </div>
-            </section>
-
-            <section class="professional-section">
-                <h2>About Me</h2>
-                <div class="professional-cards">
-                    <div class="professional-card">
-                        <h3>Education</h3>
-                        <p class="company">Florida Polytechnic University</p>
-                        <p class="date">Expected Graduation: May 2026</p>
-                        <p>Bachelor of Science in Computer Engineering with Advanced Topics concentration. Maintaining a perfect 4.0 GPA and President's List status.</p>
-                        <div class="professional-badges">
-                            <span class="professional-badge">Computer Engineering</span>
-                            <span class="professional-badge">4.0 GPA</span>
-                            <span class="professional-badge">President's List</span>
-                        </div>
-                    </div>
-                    
-                    <div class="professional-card">
-                        <h3>Current Role</h3>
-                        <p class="company">City of Winter Haven Technology Services</p>
-                        <p class="date">July 2024 - Present</p>
-                        <p>Smart City Student Intern developing full-stack applications and implementing security solutions for 650+ city employees across 11 departments.</p>
-                        <div class="professional-badges">
-                            <span class="professional-badge">Full-Stack Development</span>
-                            <span class="professional-badge">PostgreSQL</span>
-                            <span class="professional-badge">Python</span>
-                            <span class="professional-badge">Docker</span>
-                        </div>
-                    </div>
-                    
-                    <div class="professional-card">
-                        <h3>Research Experience</h3>
-                        <p class="company">Florida Polytechnic University</p>
-                        <p class="date">July 2024 - December 2024</p>
-                        <p>Automotive & Applied Math Research Assistant leading fuel efficiency studies using OBD-II interfacing and polynomial optimization with NumPy.</p>
-                        <div class="professional-badges">
-                            <span class="professional-badge">Research</span>
-                            <span class="professional-badge">OBD-II</span>
-                            <span class="professional-badge">NumPy</span>
-                            <span class="professional-badge">Data Analysis</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="professional-section">
-                <h2>Technical Skills</h2>
-                <div class="professional-cards">
-                    <div class="professional-card">
-                        <h3>Programming Languages</h3>
-                        <div class="professional-badges">
-                            <span class="professional-badge">SystemVerilog</span>
-                            <span class="professional-badge">Verilog</span>
-                            <span class="professional-badge">C/C++</span>
-                            <span class="professional-badge">Python</span>
-                            <span class="professional-badge">JavaScript</span>
-                            <span class="professional-badge">HTML/CSS</span>
-                        </div>
-                    </div>
-                    
-                    <div class="professional-card">
-                        <h3>Frameworks & Tools</h3>
-                        <div class="professional-badges">
-                            <span class="professional-badge">FastAPI</span>
-                            <span class="professional-badge">Docker</span>
-                            <span class="professional-badge">PostgreSQL</span>
-                            <span class="professional-badge">GitLab CI/CD</span>
-                            <span class="professional-badge">Kubernetes</span>
-                            <span class="professional-badge">LangChain</span>
-                        </div>
-                    </div>
-                    
-                    <div class="professional-card">
-                        <h3>Hardware & Embedded</h3>
-                        <div class="professional-badges">
-                            <span class="professional-badge">FPGA</span>
-                            <span class="professional-badge">Arduino</span>
-                            <span class="professional-badge">Raspberry Pi</span>
-                            <span class="professional-badge">STM32</span>
-                            <span class="professional-badge">3D Printing</span>
-                            <span class="professional-badge">Circuit Design</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer class="professional-footer">
-            <div class="professional-social">
-                <a href="https://github.com/dannyjtaylor" target="_blank" rel="noopener noreferrer">
-                    <i data-lucide="github" class="lucide-icon"></i>
-                </a>
-                <a href="https://www.linkedin.com/in/dannyjtaylor/" target="_blank" rel="noopener noreferrer">
-                    <i data-lucide="linkedin" class="lucide-icon"></i>
-                </a>
-                <a href="mailto:dannyengineers@outlook.com">
-                    <i data-lucide="mail" class="lucide-icon"></i>
-                </a>
-            </div>
-            <p>&copy; 2025 Daniel J. Taylor. All rights reserved.</p>
-        </footer>
-    </div>
-
-    <!-- Discord Layout Container -->
-    <div class="discord-container">
-        <!-- Discord Server List (Left Sidebar) -->
-        <div class="discord-server-list">
-            <div class="discord-server-icon active">
-                <span class="discord-server-initials">DT</span>
-            </div>
-        </div>
-        
-        <!-- Discord Main Interface -->
-        <div class="discord-main-interface">
-            <div class="discord-sidebar">
-                <div class="discord-server-header">
-                    Daniel's Portfolio
-                </div>
-                <div class="discord-channels">
-                    <div class="discord-channel-category">Portfolio</div>
-                    <div class="discord-channel active" data-channel="home">
-                        <span class="discord-channel-icon">#</span>
-                        home
-                    </div>
-                    <div class="discord-channel" data-channel="experience">
-                        <span class="discord-channel-icon">#</span>
-                        experience
-                    </div>
-                    <div class="discord-channel" data-channel="projects">
-                        <span class="discord-channel-icon">#</span>
-                        projects
-                    </div>
-                    <div class="discord-channel" data-channel="leadership">
-                        <span class="discord-channel-icon">#</span>
-                        leadership
-                    </div>
-                    <div class="discord-channel" data-channel="contact">
-                        <span class="discord-channel-icon">#</span>
-                        contact
-                    </div>
-                </div>
-            </div>
-        
-        <div class="discord-main">
-            <div class="discord-header">
-                <span id="discord-channel-name"># home</span>
+<body>
+    <!-- Theme Selector Overlay -->
+    <div class="layout-overlay" id="layout-overlay">
+        <div class="layout-overlay-content">
+            <div class="layout-overlay-header">
+                <h1>Welcome to Daniel J. Taylor's Portfolio</h1>
+                <p>Choose your preferred viewing experience</p>
             </div>
             
-            <div class="discord-messages" id="discord-messages">
-                <div class="discord-welcome-message">
-                    <h2>Welcome to Daniel's Portfolio!</h2>
-                    <p>Select a channel from the sidebar to explore my work and experience.</p>
+            <div class="layout-options">
+                <div class="layout-option" data-layout="professional">
+                    <div class="layout-preview professional-preview">
+                        <div class="preview-header professional-header">
+                            <div class="preview-title">Professional</div>
+                        </div>
+                        <div class="preview-content professional-content">
+                            <div class="preview-section professional-section">Clean Design</div>
+                            <div class="preview-section professional-section">Modern Layout</div>
+                            <div class="preview-section professional-section">Business Ready</div>
+                        </div>
+                    </div>
+                    <h3>Professional Theme</h3>
+                    <p>Clean, modern design perfect for recruiters and professional networking</p>
+                    <button class="layout-select-btn" data-layout="professional">Select Professional</button>
+                </div>
+                
+                <div class="layout-option" data-layout="vscode">
+                    <div class="layout-preview vscode-preview">
+                        <div class="preview-header vscode-header">
+                            <div class="preview-title">VSCode</div>
+                        </div>
+                        <div class="preview-content vscode-content">
+                            <div class="preview-section vscode-section">Developer Tools</div>
+                            <div class="preview-section vscode-section">Code Interface</div>
+                            <div class="preview-section vscode-section">Interactive Terminal</div>
+                        </div>
+                    </div>
+                    <h3>VSCode Theme</h3>
+                    <p>Developer-focused interface with interactive terminal and file explorer</p>
+                    <button class="layout-select-btn" data-layout="vscode">Select VSCode</button>
+                </div>
+                
+                <div class="layout-option" data-layout="discord">
+                    <div class="layout-preview discord-preview">
+                        <div class="preview-header discord-header">
+                            <div class="preview-title">Discord</div>
+                        </div>
+                        <div class="preview-content discord-content">
+                            <div class="preview-section discord-section">Gaming Community</div>
+                            <div class="preview-section discord-section">Interactive Chat</div>
+                            <div class="preview-section discord-section">Social Features</div>
+                        </div>
+                    </div>
+                    <h3>Discord Theme</h3>
+                    <p>Gaming-inspired interface with channels and interactive messaging</p>
+                    <button class="layout-select-btn" data-layout="discord">Select Discord</button>
+                </div>
+                
+                <div class="layout-option" data-layout="steam">
+                    <div class="layout-preview steam-preview">
+                        <div class="preview-header steam-header">
+                            <div class="preview-title">Steam</div>
+                        </div>
+                        <div class="preview-content steam-content">
+                            <div class="preview-section steam-section">Game Library</div>
+                            <div class="preview-section steam-section">Social Features</div>
+                            <div class="preview-section steam-section">Gaming UI</div>
+                        </div>
+                    </div>
+                    <h3>Steam Theme</h3>
+                    <p>Gaming platform interface with library navigation and social integration</p>
+                    <button class="layout-select-btn" data-layout="steam">Select Steam</button>
+                </div>
+                
+                <div class="layout-option" data-layout="valorant">
+                    <div class="layout-preview valorant-preview">
+                        <div class="preview-header valorant-header">
+                            <div class="preview-title">Valorant</div>
+                        </div>
+                        <div class="preview-content valorant-content">
+                            <div class="preview-section valorant-section">Tactical FPS</div>
+                            <div class="preview-section valorant-section">Game Modes</div>
+                            <div class="preview-section valorant-section">Competitive</div>
+                        </div>
+                    </div>
+                    <h3>Valorant Theme</h3>
+                    <p>Tactical shooter interface with game mode selection and competitive styling</p>
+                    <button class="layout-select-btn" data-layout="valorant">Select Valorant</button>
+                </div>
+                
+                <div class="layout-option" data-layout="undertale">
+                    <div class="layout-preview undertale-preview">
+                        <div class="preview-header undertale-header">
+                            <div class="preview-title">Undertale</div>
+                        </div>
+                        <div class="preview-content undertale-content">
+                            <div class="preview-section undertale-section">Battle Menu</div>
+                            <div class="preview-section undertale-section">Retro Style</div>
+                            <div class="preview-section undertale-section">Pixel Art</div>
+                        </div>
+                    </div>
+                    <h3>Undertale Theme</h3>
+                    <p>Retro RPG battle interface with pixel art styling and nostalgic charm</p>
+                    <button class="layout-select-btn" data-layout="undertale">Select Undertale</button>
+                </div>
+                
+                <div class="layout-option" data-layout="persona3">
+                    <div class="layout-preview persona3-preview">
+                        <div class="preview-header persona3-header">
+                            <div class="preview-title">Persona 3</div>
+                        </div>
+                        <div class="preview-content persona3-content">
+                            <div class="preview-section persona3-section">Modern UI</div>
+                            <div class="preview-section persona3-section">Stylish Design</div>
+                            <div class="preview-section persona3-section">Anime Style</div>
+                        </div>
+                    </div>
+                    <h3>Persona 3 Theme</h3>
+                    <p>Modern anime-inspired interface with sleek design and smooth animations</p>
+                    <button class="layout-select-btn" data-layout="persona3">Select Persona 3</button>
                 </div>
             </div>
             
-            <div class="discord-input-container">
-                <div class="discord-input-wrapper">
-                    <textarea class="discord-input" placeholder="Message #home" id="discord-input"></textarea>
-                </div>
-            </div>
-        </div>
-        
-            <div class="discord-user-info">
-                <div class="discord-user-avatar" id="discord-user-avatar">R</div>
-                <span id="discord-username">Recruiter</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- VSCode Layout Container -->
-    <div class="vscode-container">
-        <!-- VSCode Top Bar -->
-        <div class="vscode-top-bar">
-            <div class="vscode-title">Daniel Taylor - Portfolio</div>
-            <div class="vscode-controls">
-                <button class="vscode-button icon-button">
-                    <i data-lucide="x" class="lucide-icon"></i>
-                </button>
-            </div>
-        </div>
-        
-        
-        <!-- VSCode Main Content -->
-        <div class="vscode-main">
-            <!-- Sidebar Icons -->
-            <div class="vscode-sidebar-icons">
-                <a href="index.html" class="vscode-icon-button active">
-                    <i data-lucide="home" class="lucide-icon"></i>
-                </a>
-                <a href="experience.html" class="vscode-icon-button">
-                    <i data-lucide="briefcase" class="lucide-icon"></i>
-                </a>
-                <a href="projects.html" class="vscode-icon-button">
-                    <i data-lucide="folder-kanban" class="lucide-icon"></i>
-                </a>
-                <a href="extracurriculars.html" class="vscode-icon-button">
-                    <i data-lucide="users" class="lucide-icon"></i>
-                </a>
-                <a href="contact.html" class="vscode-icon-button">
-                    <i data-lucide="mail" class="lucide-icon"></i>
-                </a>
-                
-                <div class="vscode-sidebar-spacer"></div>
-                
-                <a href="https://github.com/dannyjtaylor" target="_blank" rel="noopener noreferrer" class="vscode-icon-button">
-                    <i data-lucide="github" class="lucide-icon"></i>
-                </a>
-                <a href="https://www.linkedin.com/in/dannyjtaylor/" target="_blank" rel="noopener noreferrer" class="vscode-icon-button">
-                    <i data-lucide="linkedin" class="lucide-icon"></i>
-                </a>
-                <a href="https://www.twitch.tv/fierylights" target="_blank" rel="noopener noreferrer" class="vscode-icon-button">
-                    <i data-lucide="twitch" class="lucide-icon"></i>
-                </a>
-                <a href="https://linktr.ee/dtaylor6456" target="_blank" rel="noopener noreferrer" class="vscode-icon-button">
-                    <i data-lucide="link-2" class="lucide-icon"></i>
-                </a>
-            </div>
-            
-            <!-- File Explorer -->
-            <div class="vscode-explorer">
-                <div class="vscode-explorer-header">EXPLORER</div>
-                <div class="vscode-explorer-content">
-                    <!-- Pages Folder -->
-                    <div class="vscode-folder">
-                        <div class="vscode-folder-header" data-folder="pages">
-                            <i data-lucide="chevron-down" class="lucide-icon folder-icon"></i>
-                            <span>pages</span>
-                        </div>
-                        <div class="vscode-folder-content" id="pages-folder">
-                            <a href="index.html" class="vscode-file active">
-                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                                <span>home.html</span>
-                            </a>
-                            <a href="experience.html" class="vscode-file">
-                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                                <span>experience.html</span>
-                            </a>
-                            <a href="projects.html" class="vscode-file">
-                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                                <span>projects.html</span>
-                            </a>
-                            <a href="extracurriculars.html" class="vscode-file">
-                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                                <span>extracurriculars.html</span>
-                            </a>
-                            <a href="contact.html" class="vscode-file">
-                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                                <span>contact.html</span>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Components Folder -->
-                    <div class="vscode-folder">
-                        <div class="vscode-folder-header" data-folder="components">
-                            <i data-lucide="chevron-right" class="lucide-icon folder-icon"></i>
-                            <span>components</span>
-                        </div>
-                        <div class="vscode-folder-content" id="components-folder" style="display: none;">
-                            <div class="vscode-file">
-                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                                <span>vscode-layout.css</span>
-                            </div>
-                            <div class="vscode-file">
-                                <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                                <span>home-page.js</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Assets Folder -->
-                    <div class="vscode-folder">
-                        <div class="vscode-folder-header" data-folder="assets">
-                            <i data-lucide="chevron-right" class="lucide-icon folder-icon"></i>
-                            <span>assets</span>
-                        </div>
-                        <div class="vscode-folder-content" id="assets-folder" style="display: none;"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Main Content -->
-            <div class="vscode-content-container">
-                <!-- Tabs -->
-                <div class="vscode-tabs">
-                    <div class="vscode-tab active">
-                        <i data-lucide="file-code-2" class="lucide-icon file-icon"></i>
-                        <span>home.html</span>
-                    </div>
-                </div>
-                
-                
-                <!-- Content -->
-                <div class="vscode-content">
-                    <div class="home-page">
-                        <div class="code-comment">// Hey there! Welcome to my portfolio!</div>
-                        <h1 class="code-function">Daniel J. Taylor</h1>
-                        <!-- <div class="code-comment">// Personal Info String Dictionary </div> -->
-                        
-                        <div class="vscode-card">
-                            <div class="card-content">
-                                <div class="code-line">
-                                            <span class="code-type">std::map</span> <span class="code-property">aboutMe</span> <span class="code-operator">=</span> <span class="code-string">{</span>
-                                        </div>
-                            
-
-                                <div class="code-line indented">
-                                    <span class="code-property">summary</span><span class="code-operator">:</span> <span class="code-string">"Computer Engineering Senior at Florida Polytechnic University, Smart City Student Intern for City of Winter Haven Technology Services"</span><span class="code-operator">,</span>
-                                </div>
-                                
-                                
-                                <div class="code-line indented">
-                                    <span class="code-property">skills</span><span class="code-operator">:</span> <span class="code-string">[</span>
-                                </div>
-                                <div class="code-line double-indented">
-                                    <div class="badge-container">
-                                        <span class="code-badge">Verilog</span>
-                                        <span class="code-badge">Python</span>
-                                        <span class="code-badge">C++</span>
-                                        <span class="code-badge">C</span>
-                                        <span class="code-badge">AVR C</span>
-                                        <span class="code-badge">Arduino IDE</span>
-                                        <span class="code-badge">Git</span>
-                                        <span class="code-badge">GitHub</span>
-                                        <span class="code-badge">NumPy</span>
-                                        <span class="code-badge">AWS</span>
-                                        <span class="code-badge">HTML</span>
-                                        <span class="code-badge">CSS</span>
-                                        <span class="code-badge">JavaScript</span>
-                                        <span class="code-badge">React</span>
-                                        <span class="code-badge">Next.js</span>
-                                        <span class="code-badge">Markdown</span>
-                                    </div>
-                                </div>
-                                <div class="code-line indented">
-                                    <span class="code-string">]</span><span class="code-operator">,</span>
-                                </div>
-                                
-                                <div class="code-line indented">
-                                    <span class="code-property">interests</span><span class="code-operator">:</span> <span class="code-string">[</span>
-                                </div>
-                                <div class="code-line double-indented">
-                                    <div class="badge-container">
-                                        <span class="code-badge">Firmware Development</span>
-                                        <span class="code-badge">3D Printing</span>
-                                        <span class="code-badge">Game Development</span>
-                                        <span class="code-badge">Gaming</span>
-                                        <span class="code-badge">Streaming</span>
-                                    </div>
-                                </div>
-                                <div class="code-line indented">
-                                    <span class="code-string">]</span>
-                                </div>
-                                
-                                <div class="code-line">
-                                    <span class="code-string">}</span><span class="code-operator">;</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="code-comment">// Navigate through the sidebar to explore more sections</div>
-                        
-                        <div class="code-type">std::string <span class="code-keyword"> <span class="code-function">getInTouch</span><span class="code-punctuation">()</span> <span class="code-punctuation">{</span></div>
-                        <div class="code-line indented">
-                            <span class="code-return">return</span> <span class="code-string">"Feel free to connect with me on LinkedIn or GitHub!"</span>;
-                        </div>
-                        <div class="code-keyword"><span class="code-punctuation">}</span></div>
-                    </div>
-                </div>
-                
-                <!-- Status Bar -->
-                <div class="vscode-status-bar">
-                    <div class="status-item">main</div>
-                    <div class="status-right">
-                        <div class="status-item">HTML</div>
-                        <div class="status-item">UTF-8</div>
-                        <div class="status-item">LF</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- VSCode Terminal (Bottom Panel) -->
-            <div class="vscode-terminal-panel" id="terminal-panel">
-                <div class="vscode-terminal-header">
-                    <i data-lucide="terminal" class="lucide-icon"></i>
-                    <span>Terminal</span>
-                </div>
-                <div class="vscode-terminal-content" id="terminal-content">
-                    <div class="terminal-line">
-                        <span class="terminal-prompt">danny@portfolio:~$</span>
-                        <span class="terminal-cursor">█</span>
-                    </div>
-                </div>
-                <div class="vscode-terminal-blue-line"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Steam Layout Container -->
-    <div class="steam-container">
-        <!-- Steam Header -->
-        <div class="steam-header">
-            <div class="steam-logo">
-                <i data-lucide="gamepad-2" class="lucide-icon"></i>
-                <span>Steam</span>
-            </div>
-            <div class="steam-user-info">
-                <div class="steam-avatar">DT</div>
-                <span>Daniel Taylor</span>
-            </div>
-        </div>
-        
-        <!-- Steam Main Content -->
-        <div class="steam-main">
-            <!-- Steam Sidebar - Game Library -->
-            <div class="steam-sidebar">
-                <div class="steam-library-header">
-                    <h3>Library</h3>
-                    <div class="steam-library-filters">
-                        <span class="steam-filter active">All Games</span>
-                    </div>
-                </div>
-                
-                <div class="steam-games">
-                    <div class="steam-game active" data-game="portfolio">
-                        <div class="steam-game-icon">👨‍💻</div>
-                        <div class="steam-game-info">
-                            <span class="steam-game-name">Daniel J Taylor Portfolio</span>
-                            <span class="steam-game-status">Ready to Play</span>
-                        </div>
-                    </div>
-                    <div class="steam-game" data-game="hollow-knight">
-                        <div class="steam-game-icon">🦗</div>
-                        <div class="steam-game-info">
-                            <span class="steam-game-name">Hollow Knight</span>
-                            <span class="steam-game-status">Ready to Play</span>
-                        </div>
-                    </div>
-                    <div class="steam-game" data-game="silksong">
-                        <div class="steam-game-icon">🕷️</div>
-                        <div class="steam-game-info">
-                            <span class="steam-game-name">Hollow Knight: Silksong</span>
-                            <span class="steam-game-status">Coming Soon</span>
-                        </div>
-                    </div>
-                    <div class="steam-game" data-game="undertale">
-                        <div class="steam-game-icon">💀</div>
-                        <div class="steam-game-info">
-                            <span class="steam-game-name">Undertale</span>
-                            <span class="steam-game-status">Ready to Play</span>
-                        </div>
-                    </div>
-                    <div class="steam-game" data-game="persona3">
-                        <div class="steam-game-icon">🎭</div>
-                        <div class="steam-game-info">
-                            <span class="steam-game-name">Persona 3 Reload</span>
-                            <span class="steam-game-status">Ready to Play</span>
-                        </div>
-                    </div>
-                    <div class="steam-game" data-game="portal2">
-                        <div class="steam-game-icon">🔵</div>
-                        <div class="steam-game-info">
-                            <span class="steam-game-name">Portal 2</span>
-                            <span class="steam-game-status">Ready to Play</span>
-                        </div>
-                    </div>
-                    <div class="steam-game" data-game="gungeon">
-                        <div class="steam-game-icon">🔫</div>
-                        <div class="steam-game-info">
-                            <span class="steam-game-name">Enter the Gungeon</span>
-                            <span class="steam-game-status">Ready to Play</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Steam Content Area -->
-            <div class="steam-content">
-                <div class="steam-game-header">
-                    <div class="steam-game-banner">
-                        <div class="steam-game-title">
-                            <h1 id="steam-page-title">Daniel J Taylor Portfolio</h1>
-                            <p id="steam-page-subtitle">Computer Engineering Student & Developer</p>
-                        </div>
-                    </div>
-                    
-                    <div class="steam-game-actions">
-                        <div class="steam-play-button" id="steam-play-button">
-                            <i data-lucide="linkedin" class="lucide-icon"></i>
-                            <span>LinkedIn</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="steam-game-stats">
-                    <div class="steam-stat">
-                        <span class="steam-stat-label">CLOUD STATUS</span>
-                        <span class="steam-stat-value">Up to date</span>
-                    </div>
-                    <div class="steam-stat">
-                        <span class="steam-stat-label">LAST PLAYED</span>
-                        <span class="steam-stat-value">Today</span>
-                    </div>
-                    <div class="steam-stat">
-                        <span class="steam-stat-label">PLAY TIME</span>
-                        <span class="steam-stat-value">∞ hours</span>
-                    </div>
-                    <div class="steam-stat">
-                        <span class="steam-stat-label">ACHIEVEMENTS</span>
-                        <span class="steam-stat-value">1/1</span>
-                    </div>
-                </div>
-                
-                <div class="steam-tabs">
-                    <div class="steam-tab active" data-tab="home">Home</div>
-                    <div class="steam-tab" data-tab="experience">Experience</div>
-                    <div class="steam-tab" data-tab="projects">Projects</div>
-                    <div class="steam-tab" data-tab="extracurriculars">Leadership</div>
-                    <div class="steam-tab" data-tab="contact">Contact</div>
-                </div>
-                
-                <div class="steam-page-content" id="steam-page-content">
-                    <!-- Content will be loaded dynamically -->
-                </div>
+            <div class="layout-overlay-footer">
+                <p>You can change this anytime using the layout switcher in the top-right corner</p>
             </div>
         </div>
     </div>
@@ -582,6 +143,11 @@
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
+        
+        // Initialize layout system
+        document.addEventListener('DOMContentLoaded', function() {
+            initLayoutSystem();
+        });
     </script>
 </body>
 </html>

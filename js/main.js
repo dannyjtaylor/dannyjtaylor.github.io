@@ -210,6 +210,54 @@ function showLayoutOverlay() {
                     <p>Gaming platform interface with library navigation and social integration</p>
                     <button class="layout-select-btn" data-layout="steam">Select Steam</button>
                 </div>
+                
+                <div class="layout-option" data-layout="valorant">
+                    <div class="layout-preview valorant-preview">
+                        <div class="preview-header valorant-header">
+                            <div class="preview-title">Valorant</div>
+                        </div>
+                        <div class="preview-content valorant-content">
+                            <div class="preview-section valorant-section">Tactical FPS</div>
+                            <div class="preview-section valorant-section">Game Modes</div>
+                            <div class="preview-section valorant-section">Competitive</div>
+                        </div>
+                    </div>
+                    <h3>Valorant Theme</h3>
+                    <p>Tactical shooter interface with game mode selection and competitive styling</p>
+                    <button class="layout-select-btn" data-layout="valorant">Select Valorant</button>
+                </div>
+                
+                <div class="layout-option" data-layout="undertale">
+                    <div class="layout-preview undertale-preview">
+                        <div class="preview-header undertale-header">
+                            <div class="preview-title">Undertale</div>
+                        </div>
+                        <div class="preview-content undertale-content">
+                            <div class="preview-section undertale-section">Battle Menu</div>
+                            <div class="preview-section undertale-section">Retro Style</div>
+                            <div class="preview-section undertale-section">Pixel Art</div>
+                        </div>
+                    </div>
+                    <h3>Undertale Theme</h3>
+                    <p>Retro RPG battle interface with pixel art styling and nostalgic charm</p>
+                    <button class="layout-select-btn" data-layout="undertale">Select Undertale</button>
+                </div>
+                
+                <div class="layout-option" data-layout="persona3">
+                    <div class="layout-preview persona3-preview">
+                        <div class="preview-header persona3-header">
+                            <div class="preview-title">Persona 3</div>
+                        </div>
+                        <div class="preview-content persona3-content">
+                            <div class="preview-section persona3-section">Modern UI</div>
+                            <div class="preview-section persona3-section">Stylish Design</div>
+                            <div class="preview-section persona3-section">Anime Style</div>
+                        </div>
+                    </div>
+                    <h3>Persona 3 Theme</h3>
+                    <p>Modern anime-inspired interface with sleek design and smooth animations</p>
+                    <button class="layout-select-btn" data-layout="persona3">Select Persona 3</button>
+                </div>
             </div>
             
             <div class="layout-overlay-footer">
@@ -268,6 +316,12 @@ function applyLayout(layout) {
         showDiscordLayout();
     } else if (layout === 'steam') {
         showSteamLayout();
+    } else if (layout === 'valorant') {
+        showValorantLayout();
+    } else if (layout === 'undertale') {
+        showUndertaleLayout();
+    } else if (layout === 'persona3') {
+        showPersona3Layout();
     }
     
     // Update layout switcher
@@ -673,6 +727,18 @@ function initLayoutSwitcher() {
                 <button class="layout-switch-option" data-layout="steam">
                     <i data-lucide="gamepad-2" class="lucide-icon"></i>
                     Steam
+                </button>
+                <button class="layout-switch-option" data-layout="valorant">
+                    <i data-lucide="target" class="lucide-icon"></i>
+                    Valorant
+                </button>
+                <button class="layout-switch-option" data-layout="undertale">
+                    <i data-lucide="heart" class="lucide-icon"></i>
+                    Undertale
+                </button>
+                <button class="layout-switch-option" data-layout="persona3">
+                    <i data-lucide="sparkles" class="lucide-icon"></i>
+                    Persona 3
                 </button>
             </div>
         `;
@@ -1119,4 +1185,53 @@ function initSteamFunctionality() {
     if (portfolioGame) {
         portfolioGame.click();
     }
+}
+
+/**
+ * Show Professional layout
+ */
+function showProfessionalLayout() {
+    window.location.href = 'themes/professional/index.html';
+}
+
+/**
+ * Show VSCode layout
+ */
+function showVSCodeLayout() {
+    window.location.href = 'themes/vscode/index.html';
+}
+
+/**
+ * Show Discord layout
+ */
+function showDiscordLayout() {
+    window.location.href = 'themes/discord/index.html';
+}
+
+/**
+ * Show Steam layout
+ */
+function showSteamLayout() {
+    window.location.href = 'themes/steam/index.html';
+}
+
+/**
+ * Show Valorant layout
+ */
+function showValorantLayout() {
+    window.location.href = 'themes/valorant/index.html';
+}
+
+/**
+ * Show Undertale layout
+ */
+function showUndertaleLayout() {
+    window.location.href = 'themes/undertale/index.html';
+}
+
+/**
+ * Show Persona 3 layout
+ */
+function showPersona3Layout() {
+    window.location.href = 'themes/persona3/index.html';
 }

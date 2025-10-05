@@ -2028,3 +2028,97 @@ body:not(.home-page) .vscode-terminal-panel {
         border-radius: 4px;
     }
 }
+
+/* Valorant Preview */
+.valorant-preview {
+    background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+    border: 2px solid #ff4655;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.valorant-preview .valorant-header {
+    background: rgba(15, 20, 25, 0.9);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.valorant-preview .valorant-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.valorant-preview .valorant-section {
+    background: rgba(255, 70, 85, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #b8c5d1;
+    font-size: 12px;
+}
+
+/* Undertale Preview */
+.undertale-preview {
+    background: #000000;
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.undertale-preview .undertale-header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.undertale-preview .undertale-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.undertale-preview .undertale-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Persona 3 Preview */
+.persona3-preview {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #7877c6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.persona3-preview .persona3-header {
+    background: rgba(26, 26, 46, 0.9);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.persona3-preview .persona3-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.persona3-preview .persona3-section {
+    background: rgba(120, 119, 198, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #b8c5d1;
+    font-size: 12px;
+}

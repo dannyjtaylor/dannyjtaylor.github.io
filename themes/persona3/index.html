@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel J. Taylor | Portfolio - Persona 3 Theme</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="persona3.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="persona3-layout">
+    <!-- Persona 3 Layout Container -->
+    <div class="persona3-container">
+        <!-- Persona 3 Header -->
+        <div class="persona3-header">
+            <div class="persona3-logo">
+                <div class="persona3-logo-icon">P3</div>
+                <span>PERSONA 3 RELOAD</span>
+            </div>
+            <div class="persona3-date">
+                <span class="persona3-day">MON</span>
+                <span class="persona3-date-number">4/10</span>
+            </div>
+        </div>
+        
+        <!-- Persona 3 Main Content -->
+        <div class="persona3-main">
+            <!-- Persona 3 Menu -->
+            <div class="persona3-menu">
+                <div class="persona3-menu-item active" data-menu="home">
+                    <div class="persona3-menu-icon">🏠</div>
+                    <span>Home</span>
+                </div>
+                <div class="persona3-menu-item" data-menu="experience">
+                    <div class="persona3-menu-icon">💼</div>
+                    <span>Experience</span>
+                </div>
+                <div class="persona3-menu-item" data-menu="projects">
+                    <div class="persona3-menu-icon">🚀</div>
+                    <span>Projects</span>
+                </div>
+                <div class="persona3-menu-item" data-menu="extracurriculars">
+                    <div class="persona3-menu-icon">👥</div>
+                    <span>Leadership</span>
+                </div>
+                <div class="persona3-menu-item" data-menu="contact">
+                    <div class="persona3-menu-icon">📧</div>
+                    <span>Contact</span>
+                </div>
+            </div>
+            
+            <!-- Persona 3 Content Area -->
+            <div class="persona3-content">
+                <div class="persona3-character-info">
+                    <div class="persona3-character-avatar">
+                        <div class="persona3-avatar">DT</div>
+                    </div>
+                    <div class="persona3-character-details">
+                        <h1 id="persona3-page-title">Daniel J. Taylor</h1>
+                        <p id="persona3-page-subtitle">Computer Engineering Student & Developer</p>
+                        <div class="persona3-stats">
+                            <div class="persona3-stat">
+                                <span class="persona3-stat-label">Level</span>
+                                <span class="persona3-stat-value">20</span>
+                            </div>
+                            <div class="persona3-stat">
+                                <span class="persona3-stat-label">HP</span>
+                                <span class="persona3-stat-value">100/100</span>
+                            </div>
+                            <div class="persona3-stat">
+                                <span class="persona3-stat-label">SP</span>
+                                <span class="persona3-stat-value">50/50</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="persona3-action-area">
+                    <div class="persona3-action-button" id="persona3-action-button">
+                        <i data-lucide="linkedin" class="lucide-icon"></i>
+                        <span>LinkedIn</span>
+                    </div>
+                </div>
+                
+                <div class="persona3-page-content" id="persona3-page-content">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script src="persona3.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

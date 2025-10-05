@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel J. Taylor | Portfolio - Valorant Theme</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="valorant.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="valorant-layout">
+    <!-- Valorant Layout Container -->
+    <div class="valorant-container">
+        <!-- Valorant Header -->
+        <div class="valorant-header">
+            <div class="valorant-logo">
+                <div class="valorant-logo-icon">V</div>
+                <span>VALORANT</span>
+            </div>
+            <div class="valorant-user-info">
+                <div class="valorant-rank">Diamond</div>
+                <div class="valorant-avatar">DT</div>
+            </div>
+        </div>
+        
+        <!-- Valorant Main Content -->
+        <div class="valorant-main">
+            <!-- Game Mode Selection -->
+            <div class="valorant-gamemodes">
+                <div class="valorant-gamemode active" data-mode="home">
+                    <div class="valorant-gamemode-icon">🏠</div>
+                    <span>Home</span>
+                </div>
+                <div class="valorant-gamemode" data-mode="experience">
+                    <div class="valorant-gamemode-icon">💼</div>
+                    <span>Experience</span>
+                </div>
+                <div class="valorant-gamemode" data-mode="projects">
+                    <div class="valorant-gamemode-icon">🚀</div>
+                    <span>Projects</span>
+                </div>
+                <div class="valorant-gamemode" data-mode="extracurriculars">
+                    <div class="valorant-gamemode-icon">👥</div>
+                    <span>Leadership</span>
+                </div>
+                <div class="valorant-gamemode" data-mode="contact">
+                    <div class="valorant-gamemode-icon">📧</div>
+                    <span>Contact</span>
+                </div>
+            </div>
+            
+            <!-- Valorant Content Area -->
+            <div class="valorant-content">
+                <div class="valorant-play-area">
+                    <div class="valorant-agent-select">
+                        <div class="valorant-agent-info">
+                            <h1 id="valorant-page-title">Daniel J. Taylor</h1>
+                            <p id="valorant-page-subtitle">Computer Engineering Student & Developer</p>
+                        </div>
+                        <div class="valorant-play-button" id="valorant-play-button">
+                            <i data-lucide="linkedin" class="lucide-icon"></i>
+                            <span>LinkedIn</span>
+                        </div>
+                    </div>
+                    
+                    <div class="valorant-stats">
+                        <div class="valorant-stat">
+                            <span class="valorant-stat-label">LEVEL</span>
+                            <span class="valorant-stat-value">Senior</span>
+                        </div>
+                        <div class="valorant-stat">
+                            <span class="valorant-stat-label">RANK</span>
+                            <span class="valorant-stat-value">Diamond</span>
+                        </div>
+                        <div class="valorant-stat">
+                            <span class="valorant-stat-label">WINS</span>
+                            <span class="valorant-stat-value">∞</span>
+                        </div>
+                        <div class="valorant-stat">
+                            <span class="valorant-stat-label">K/D</span>
+                            <span class="valorant-stat-value">1.0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="valorant-page-content" id="valorant-page-content">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script src="valorant.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

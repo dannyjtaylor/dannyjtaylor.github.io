@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Daniel J. Taylor - Valorant Theme</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="valorant.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="valorant-layout">
+    <!-- Valorant Layout Container -->
+    <div class="valorant-container">
+        <!-- Valorant Header -->
+        <div class="valorant-header">
+            <div class="valorant-logo">
+                <div class="valorant-logo-icon">V</div>
+                <span>VALORANT</span>
+            </div>
+            <div class="valorant-user-info">
+                <div class="valorant-rank">Diamond</div>
+                <div class="valorant-avatar">DT</div>
+            </div>
+        </div>
+        
+        <!-- Valorant Main Content -->
+        <div class="valorant-main">
+            <!-- Game Mode Selection -->
+            <div class="valorant-gamemodes">
+                <div class="valorant-gamemode" data-mode="home">
+                    <div class="valorant-gamemode-icon">🏠</div>
+                    <span>Home</span>
+                </div>
+                <div class="valorant-gamemode" data-mode="experience">
+                    <div class="valorant-gamemode-icon">💼</div>
+                    <span>Experience</span>
+                </div>
+                <div class="valorant-gamemode active" data-mode="projects">
+                    <div class="valorant-gamemode-icon">🚀</div>
+                    <span>Projects</span>
+                </div>
+                <div class="valorant-gamemode" data-mode="extracurriculars">
+                    <div class="valorant-gamemode-icon">👥</div>
+                    <span>Leadership</span>
+                </div>
+                <div class="valorant-gamemode" data-mode="contact">
+                    <div class="valorant-gamemode-icon">📧</div>
+                    <span>Contact</span>
+                </div>
+            </div>
+            
+            <!-- Valorant Content Area -->
+            <div class="valorant-content">
+                <div class="valorant-play-area">
+                    <div class="valorant-agent-select">
+                        <div class="valorant-agent-info">
+                            <h1>Portfolio Projects</h1>
+                            <p>Technical Projects & Development</p>
+                        </div>
+                        <div class="valorant-play-button" id="valorant-play-button">
+                            <i data-lucide="linkedin" class="lucide-icon"></i>
+                            <span>LinkedIn</span>
+                        </div>
+                    </div>
+                    
+                    <div class="valorant-stats">
+                        <div class="valorant-stat">
+                            <span class="valorant-stat-label">LEVEL</span>
+                            <span class="valorant-stat-value">Senior</span>
+                        </div>
+                        <div class="valorant-stat">
+                            <span class="valorant-stat-label">RANK</span>
+                            <span class="valorant-stat-value">Diamond</span>
+                        </div>
+                        <div class="valorant-stat">
+                            <span class="valorant-stat-label">WINS</span>
+                            <span class="valorant-stat-value">∞</span>
+                        </div>
+                        <div class="valorant-stat">
+                            <span class="valorant-stat-label">K/D</span>
+                            <span class="valorant-stat-value">1.0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="valorant-page-content">
+                    <h2>Technical Projects</h2>
+                    <p>Discover my technical projects ranging from web development to embedded systems and research applications. Each project showcases my skills in programming, problem-solving, and innovation, demonstrating my passion for technology.</p>
+                    
+                    <div class="valorant-projects-grid">
+                        <div class="valorant-project-item">
+                            <h3>Smart City Dashboard</h3>
+                            <p>Real-time data visualization platform for urban analytics</p>
+                            <div class="valorant-project-skills">
+                                <span>React</span>
+                                <span>Python</span>
+                                <span>IoT</span>
+                            </div>
+                        </div>
+                        <div class="valorant-project-item">
+                            <h3>Portfolio Website</h3>
+                            <p>Multi-theme responsive portfolio with interactive layouts</p>
+                            <div class="valorant-project-skills">
+                                <span>HTML/CSS</span>
+                                <span>JavaScript</span>
+                                <span>Responsive</span>
+                            </div>
+                        </div>
+                        <div class="valorant-project-item">
+                            <h3>Research Assistant Tool</h3>
+                            <p>Data analysis application for academic research</p>
+                            <div class="valorant-project-skills">
+                                <span>Python</span>
+                                <span>Machine Learning</span>
+                                <span>Data Science</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script src="valorant.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

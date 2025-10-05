@@ -1,0 +1,484 @@
+/* Valorant Layout */
+.valorant-container {
+    display: none;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #0f1419 100%);
+    font-family: 'Inter', sans-serif;
+    color: #ffffff;
+}
+
+.valorant-layout .valorant-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Valorant Header */
+.valorant-header {
+    background: rgba(15, 20, 25, 0.95);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #ff4655;
+    backdrop-filter: blur(10px);
+}
+
+.valorant-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: 2px;
+}
+
+.valorant-logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ff4655 0%, #ff6b7a 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(255, 70, 85, 0.3);
+}
+
+.valorant-user-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.valorant-rank {
+    background: linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.valorant-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ff4655 0%, #ff6b7a 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+/* Valorant Main Content */
+.valorant-main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+/* Game Mode Selection */
+.valorant-gamemodes {
+    background: rgba(15, 20, 25, 0.8);
+    padding: 20px 32px;
+    display: flex;
+    gap: 24px;
+    border-bottom: 1px solid rgba(255, 70, 85, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.valorant-gamemode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.valorant-gamemode:hover {
+    background: rgba(255, 70, 85, 0.1);
+    border-color: rgba(255, 70, 85, 0.3);
+    transform: translateY(-2px);
+}
+
+.valorant-gamemode.active {
+    background: linear-gradient(135deg, rgba(255, 70, 85, 0.2) 0%, rgba(255, 107, 122, 0.2) 100%);
+    border-color: #ff4655;
+    box-shadow: 0 8px 24px rgba(255, 70, 85, 0.2);
+}
+
+.valorant-gamemode-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.valorant-gamemode span {
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Valorant Content Area */
+.valorant-content {
+    flex: 1;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Play Area */
+.valorant-play-area {
+    background: rgba(15, 20, 25, 0.6);
+    border: 2px solid rgba(255, 70, 85, 0.2);
+    border-radius: 16px;
+    padding: 32px;
+    backdrop-filter: blur(10px);
+}
+
+.valorant-agent-select {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.valorant-agent-info h1 {
+    color: #ffffff;
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.valorant-agent-info p {
+    color: #b8c5d1;
+    font-size: 18px;
+    margin: 0;
+}
+
+/* Valorant Play Button */
+.valorant-play-button {
+    background: linear-gradient(135deg, #ff4655 0%, #ff6b7a 100%);
+    color: #ffffff;
+    padding: 16px 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border: none;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(255, 70, 85, 0.3);
+}
+
+.valorant-play-button:hover {
+    background: linear-gradient(135deg, #ff6b7a 0%, #ff8a95 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 70, 85, 0.4);
+}
+
+.valorant-play-button .lucide-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Valorant Stats */
+.valorant-stats {
+    display: flex;
+    gap: 32px;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 70, 85, 0.2);
+}
+
+.valorant-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.valorant-stat-label {
+    color: #8a9ba8;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.valorant-stat-value {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Valorant Page Content */
+.valorant-page-content {
+    background: rgba(15, 20, 25, 0.4);
+    border: 1px solid rgba(255, 70, 85, 0.1);
+    border-radius: 12px;
+    padding: 24px;
+    color: #b8c5d1;
+    line-height: 1.6;
+    backdrop-filter: blur(5px);
+}
+
+/* Valorant Preview */
+.valorant-preview {
+    background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+    border: 2px solid #ff4655;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.valorant-preview .valorant-header {
+    background: rgba(15, 20, 25, 0.9);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.valorant-preview .valorant-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.valorant-preview .valorant-section {
+    background: rgba(255, 70, 85, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #b8c5d1;
+    font-size: 12px;
+}
+
+/* Experience Grid */
+.valorant-experience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+/* Projects Grid */
+.valorant-projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.valorant-project-item {
+    background: rgba(255, 70, 85, 0.1);
+    border: 2px solid rgba(255, 70, 85, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.valorant-project-item:hover {
+    background: rgba(255, 70, 85, 0.15);
+    border-color: rgba(255, 70, 85, 0.4);
+    transform: translateY(-2px);
+}
+
+.valorant-project-item h3 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.valorant-project-item p {
+    color: #b8c5d1;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+}
+
+.valorant-project-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.valorant-project-skills span {
+    background: rgba(255, 70, 85, 0.2);
+    color: #ff4655;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Leadership Grid */
+.valorant-leadership-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.valorant-leadership-item {
+    background: rgba(255, 70, 85, 0.1);
+    border: 2px solid rgba(255, 70, 85, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.valorant-leadership-item:hover {
+    background: rgba(255, 70, 85, 0.15);
+    border-color: rgba(255, 70, 85, 0.4);
+    transform: translateY(-2px);
+}
+
+.valorant-leadership-item h3 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.valorant-leadership-item p {
+    color: #b8c5d1;
+    font-size: 14px;
+    margin: 0 0 8px 0;
+}
+
+.valorant-leadership-item span {
+    color: #ff4655;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Contact Grid */
+.valorant-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.valorant-contact-item {
+    background: rgba(255, 70, 85, 0.1);
+    border: 2px solid rgba(255, 70, 85, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.valorant-contact-item:hover {
+    background: rgba(255, 70, 85, 0.15);
+    border-color: rgba(255, 70, 85, 0.4);
+    transform: translateY(-2px);
+}
+
+.valorant-contact-item h3 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.valorant-contact-item p {
+    color: #b8c5d1;
+    font-size: 14px;
+    margin: 0;
+}
+
+.valorant-experience-item {
+    background: rgba(255, 70, 85, 0.1);
+    border: 2px solid rgba(255, 70, 85, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.valorant-experience-item:hover {
+    background: rgba(255, 70, 85, 0.15);
+    border-color: rgba(255, 70, 85, 0.4);
+    transform: translateY(-2px);
+}
+
+.valorant-experience-item h3 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.valorant-experience-item p {
+    color: #b8c5d1;
+    font-size: 14px;
+    margin: 0 0 8px 0;
+}
+
+.valorant-experience-item span {
+    color: #ff4655;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .valorant-gamemodes {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 16px;
+    }
+    
+    .valorant-gamemode {
+        min-width: 100px;
+        padding: 12px 16px;
+    }
+    
+    .valorant-content {
+        padding: 16px;
+    }
+    
+    .valorant-play-area {
+        padding: 20px;
+    }
+    
+    .valorant-agent-info h1 {
+        font-size: 24px;
+    }
+    
+    .valorant-stats {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    
+    .valorant-experience-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}

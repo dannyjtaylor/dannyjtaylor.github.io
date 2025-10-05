@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel J. Taylor | Portfolio - Undertale Theme</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="undertale.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="undertale-layout">
+    <!-- Undertale Layout Container -->
+    <div class="undertale-container">
+        <!-- Undertale Battle UI -->
+        <div class="undertale-battle-ui">
+            <!-- Character Info -->
+            <div class="undertale-character-info">
+                <div class="undertale-heart">
+                    <div class="undertale-heart-icon">♥</div>
+                </div>
+                <div class="undertale-character-stats">
+                    <div class="undertale-name">Daniel J. Taylor</div>
+                    <div class="undertale-level">LV 20</div>
+                    <div class="undertale-hp">
+                        <span class="undertale-hp-label">HP</span>
+                        <div class="undertale-hp-bar">
+                            <div class="undertale-hp-fill"></div>
+                        </div>
+                        <span class="undertale-hp-value">20/20</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Battle Menu -->
+            <div class="undertale-battle-menu">
+                <div class="undertale-menu-options">
+                    <div class="undertale-menu-option active" data-option="home">
+                        <span class="undertale-menu-text">FIGHT</span>
+                    </div>
+                    <div class="undertale-menu-option" data-option="experience">
+                        <span class="undertale-menu-text">ACT</span>
+                    </div>
+                    <div class="undertale-menu-option" data-option="projects">
+                        <span class="undertale-menu-text">ITEM</span>
+                    </div>
+                    <div class="undertale-menu-option" data-option="contact">
+                        <span class="undertale-menu-text">MERCY</span>
+                    </div>
+                </div>
+                
+                <!-- Action Button -->
+                <div class="undertale-action-button" id="undertale-action-button">
+                    <i data-lucide="linkedin" class="lucide-icon"></i>
+                    <span>LinkedIn</span>
+                </div>
+            </div>
+            
+            <!-- Battle Text -->
+            <div class="undertale-battle-text">
+                <div class="undertale-text-box">
+                    <div class="undertale-text-content" id="undertale-text-content">
+                        * Daniel J. Taylor appears!
+                        <br>
+                        * Computer Engineering Student & Developer
+                        <br>
+                        * Ready to make an impact in the tech world!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Soul (Cursor) -->
+            <div class="undertale-soul" id="undertale-soul"></div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script src="undertale.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

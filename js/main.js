@@ -982,7 +982,7 @@ function initTerminal() {
  * Initialize Steam functionality
  */
 function initSteamFunctionality() {
-    const navItems = document.querySelectorAll('.steam-nav-item');
+    const games = document.querySelectorAll('.steam-game');
     const tabs = document.querySelectorAll('.steam-tab');
     const playButton = document.getElementById('steam-play-button');
     const pageTitle = document.getElementById('steam-page-title');
@@ -992,7 +992,7 @@ function initSteamFunctionality() {
     // Page configurations with alternating social media buttons
     const pageConfigs = {
         'home': {
-            title: 'Daniel J. Taylor',
+            title: 'Daniel J Taylor Portfolio',
             subtitle: 'Computer Engineering Student & Developer',
             button: { icon: 'linkedin', text: 'LinkedIn', url: 'https://www.linkedin.com/in/dannyjtaylor/' },
             content: 'Welcome to my portfolio! I\'m a Computer Engineering student at Florida Polytechnic University with experience in software development, research, and smart city technologies.'
@@ -1023,11 +1023,36 @@ function initSteamFunctionality() {
         }
     };
     
-    // Handle navigation clicks
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const page = this.getAttribute('data-page');
-            switchToPage(page);
+    // Handle game clicks (only portfolio game is functional)
+    games.forEach(game => {
+        game.addEventListener('click', function() {
+            const gameType = this.getAttribute('data-game');
+            
+            // Update active states
+            games.forEach(g => g.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Only portfolio game shows content
+            if (gameType === 'portfolio') {
+                switchToPage('home');
+            } else {
+                // Show "Coming Soon" or game info for other games
+                if (pageTitle) pageTitle.textContent = this.querySelector('.steam-game-name').textContent;
+                if (pageSubtitle) pageSubtitle.textContent = 'Game Information';
+                if (pageContent) pageContent.textContent = 'This game is not available in this portfolio demo.';
+                
+                // Update play button for games
+                if (playButton) {
+                    const icon = playButton.querySelector('.lucide-icon');
+                    const text = playButton.querySelector('span');
+                    
+                    if (icon) {
+                        icon.setAttribute('data-lucide', 'play');
+                        lucide.createIcons();
+                    }
+                    if (text) text.textContent = 'Play';
+                }
+            }
         });
     });
     
@@ -1055,10 +1080,6 @@ function initSteamFunctionality() {
         if (!config) return;
         
         // Update active states
-        navItems.forEach(item => {
-            item.classList.toggle('active', item.getAttribute('data-page') === page);
-        });
-        
         tabs.forEach(tab => {
             tab.classList.toggle('active', tab.getAttribute('data-tab') === page);
         });
@@ -1089,10 +1110,13 @@ function initSteamFunctionality() {
     }
     
     function getCurrentPage() {
-        const activeNav = document.querySelector('.steam-nav-item.active');
-        return activeNav ? activeNav.getAttribute('data-page') : 'home';
+        const activeTab = document.querySelector('.steam-tab.active');
+        return activeTab ? activeTab.getAttribute('data-tab') : 'home';
     }
     
-    // Initialize with home page
-    switchToPage('home');
+    // Initialize with portfolio game selected
+    const portfolioGame = document.querySelector('.steam-game[data-game="portfolio"]');
+    if (portfolioGame) {
+        portfolioGame.click();
+    }
 }

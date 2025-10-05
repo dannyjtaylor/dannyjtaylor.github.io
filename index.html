@@ -464,58 +464,63 @@
         
         <!-- Steam Main Content -->
         <div class="steam-main">
-            <!-- Steam Sidebar -->
+            <!-- Steam Sidebar - Game Library -->
             <div class="steam-sidebar">
-                <div class="steam-nav">
-                    <div class="steam-nav-item active" data-page="home">
-                        <i data-lucide="home" class="lucide-icon"></i>
-                        <span>Home</span>
-                    </div>
-                    <div class="steam-nav-item" data-page="experience">
-                        <i data-lucide="briefcase" class="lucide-icon"></i>
-                        <span>Experience</span>
-                    </div>
-                    <div class="steam-nav-item" data-page="projects">
-                        <i data-lucide="folder-open" class="lucide-icon"></i>
-                        <span>Projects</span>
-                    </div>
-                    <div class="steam-nav-item" data-page="extracurriculars">
-                        <i data-lucide="users" class="lucide-icon"></i>
-                        <span>Leadership</span>
-                    </div>
-                    <div class="steam-nav-item" data-page="contact">
-                        <i data-lucide="mail" class="lucide-icon"></i>
-                        <span>Contact</span>
+                <div class="steam-library-header">
+                    <h3>Library</h3>
+                    <div class="steam-library-filters">
+                        <span class="steam-filter active">All Games</span>
                     </div>
                 </div>
                 
-                <!-- Game Library -->
-                <div class="steam-library">
-                    <h3>Game Library</h3>
-                    <div class="steam-games">
-                        <div class="steam-game">
-                            <div class="steam-game-icon">🦗</div>
-                            <span>Hollow Knight</span>
+                <div class="steam-games">
+                    <div class="steam-game active" data-game="portfolio">
+                        <div class="steam-game-icon">👨‍💻</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Daniel J Taylor Portfolio</span>
+                            <span class="steam-game-status">Ready to Play</span>
                         </div>
-                        <div class="steam-game">
-                            <div class="steam-game-icon">🕷️</div>
-                            <span>Hollow Knight: Silksong</span>
+                    </div>
+                    <div class="steam-game" data-game="hollow-knight">
+                        <div class="steam-game-icon">🦗</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Hollow Knight</span>
+                            <span class="steam-game-status">Ready to Play</span>
                         </div>
-                        <div class="steam-game">
-                            <div class="steam-game-icon">💀</div>
-                            <span>Undertale</span>
+                    </div>
+                    <div class="steam-game" data-game="silksong">
+                        <div class="steam-game-icon">🕷️</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Hollow Knight: Silksong</span>
+                            <span class="steam-game-status">Coming Soon</span>
                         </div>
-                        <div class="steam-game">
-                            <div class="steam-game-icon">🎭</div>
-                            <span>Persona 3 Reload</span>
+                    </div>
+                    <div class="steam-game" data-game="undertale">
+                        <div class="steam-game-icon">💀</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Undertale</span>
+                            <span class="steam-game-status">Ready to Play</span>
                         </div>
-                        <div class="steam-game">
-                            <div class="steam-game-icon">🔵</div>
-                            <span>Portal 2</span>
+                    </div>
+                    <div class="steam-game" data-game="persona3">
+                        <div class="steam-game-icon">🎭</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Persona 3 Reload</span>
+                            <span class="steam-game-status">Ready to Play</span>
                         </div>
-                        <div class="steam-game">
-                            <div class="steam-game-icon">🔫</div>
-                            <span>Enter the Gungeon</span>
+                    </div>
+                    <div class="steam-game" data-game="portal2">
+                        <div class="steam-game-icon">🔵</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Portal 2</span>
+                            <span class="steam-game-status">Ready to Play</span>
+                        </div>
+                    </div>
+                    <div class="steam-game" data-game="gungeon">
+                        <div class="steam-game-icon">🔫</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Enter the Gungeon</span>
+                            <span class="steam-game-status">Ready to Play</span>
                         </div>
                     </div>
                 </div>
@@ -524,13 +529,37 @@
             <!-- Steam Content Area -->
             <div class="steam-content">
                 <div class="steam-game-header">
-                    <div class="steam-game-info">
-                        <h1 id="steam-page-title">Daniel J. Taylor</h1>
-                        <p id="steam-page-subtitle">Computer Engineering Student & Developer</p>
+                    <div class="steam-game-banner">
+                        <div class="steam-game-title">
+                            <h1 id="steam-page-title">Daniel J Taylor Portfolio</h1>
+                            <p id="steam-page-subtitle">Computer Engineering Student & Developer</p>
+                        </div>
                     </div>
-                    <div class="steam-play-button" id="steam-play-button">
-                        <i data-lucide="linkedin" class="lucide-icon"></i>
-                        <span>LinkedIn</span>
+                    
+                    <div class="steam-game-actions">
+                        <div class="steam-play-button" id="steam-play-button">
+                            <i data-lucide="linkedin" class="lucide-icon"></i>
+                            <span>LinkedIn</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="steam-game-stats">
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">CLOUD STATUS</span>
+                        <span class="steam-stat-value">Up to date</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">LAST PLAYED</span>
+                        <span class="steam-stat-value">Today</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">PLAY TIME</span>
+                        <span class="steam-stat-value">∞ hours</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">ACHIEVEMENTS</span>
+                        <span class="steam-stat-value">1/1</span>
                     </div>
                 </div>
                 

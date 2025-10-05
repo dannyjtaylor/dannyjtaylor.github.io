@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danny Taylor | Portfolio</title>
+    <title>Daniel J. Taylor | Portfolio</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body class="home-page">
     <!-- Professional Layout Container -->
     <div class="professional-container">
         <header class="professional-header">
@@ -428,6 +428,122 @@
                         <div class="status-item">UTF-8</div>
                         <div class="status-item">LF</div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- VSCode Terminal (Bottom Panel) -->
+            <div class="vscode-terminal-panel" id="terminal-panel">
+                <div class="vscode-terminal-header">
+                    <i data-lucide="terminal" class="lucide-icon"></i>
+                    <span>Terminal</span>
+                </div>
+                <div class="vscode-terminal-content" id="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">danny@portfolio:~$</span>
+                        <span class="terminal-cursor">█</span>
+                    </div>
+                </div>
+                <div class="vscode-terminal-blue-line"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Steam Layout Container -->
+    <div class="steam-container">
+        <!-- Steam Header -->
+        <div class="steam-header">
+            <div class="steam-logo">
+                <i data-lucide="gamepad-2" class="lucide-icon"></i>
+                <span>Steam</span>
+            </div>
+            <div class="steam-user-info">
+                <div class="steam-avatar">DT</div>
+                <span>Daniel Taylor</span>
+            </div>
+        </div>
+        
+        <!-- Steam Main Content -->
+        <div class="steam-main">
+            <!-- Steam Sidebar -->
+            <div class="steam-sidebar">
+                <div class="steam-nav">
+                    <div class="steam-nav-item active" data-page="home">
+                        <i data-lucide="home" class="lucide-icon"></i>
+                        <span>Home</span>
+                    </div>
+                    <div class="steam-nav-item" data-page="experience">
+                        <i data-lucide="briefcase" class="lucide-icon"></i>
+                        <span>Experience</span>
+                    </div>
+                    <div class="steam-nav-item" data-page="projects">
+                        <i data-lucide="folder-open" class="lucide-icon"></i>
+                        <span>Projects</span>
+                    </div>
+                    <div class="steam-nav-item" data-page="extracurriculars">
+                        <i data-lucide="users" class="lucide-icon"></i>
+                        <span>Leadership</span>
+                    </div>
+                    <div class="steam-nav-item" data-page="contact">
+                        <i data-lucide="mail" class="lucide-icon"></i>
+                        <span>Contact</span>
+                    </div>
+                </div>
+                
+                <!-- Game Library -->
+                <div class="steam-library">
+                    <h3>Game Library</h3>
+                    <div class="steam-games">
+                        <div class="steam-game">
+                            <div class="steam-game-icon">🦗</div>
+                            <span>Hollow Knight</span>
+                        </div>
+                        <div class="steam-game">
+                            <div class="steam-game-icon">🕷️</div>
+                            <span>Hollow Knight: Silksong</span>
+                        </div>
+                        <div class="steam-game">
+                            <div class="steam-game-icon">💀</div>
+                            <span>Undertale</span>
+                        </div>
+                        <div class="steam-game">
+                            <div class="steam-game-icon">🎭</div>
+                            <span>Persona 3 Reload</span>
+                        </div>
+                        <div class="steam-game">
+                            <div class="steam-game-icon">🔵</div>
+                            <span>Portal 2</span>
+                        </div>
+                        <div class="steam-game">
+                            <div class="steam-game-icon">🔫</div>
+                            <span>Enter the Gungeon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Steam Content Area -->
+            <div class="steam-content">
+                <div class="steam-game-header">
+                    <div class="steam-game-info">
+                        <h1 id="steam-page-title">Daniel J. Taylor</h1>
+                        <p id="steam-page-subtitle">Computer Engineering Student & Developer</p>
+                    </div>
+                    <div class="steam-play-button" id="steam-play-button">
+                        <i data-lucide="linkedin" class="lucide-icon"></i>
+                        <span>LinkedIn</span>
+                    </div>
+                </div>
+                
+                <div class="steam-tabs">
+                    <div class="steam-tab active" data-tab="home">Home</div>
+                    <div class="steam-tab" data-tab="experience">Experience</div>
+                    <div class="steam-tab" data-tab="projects">Projects</div>
+                    <div class="steam-tab" data-tab="extracurriculars">Leadership</div>
+                    <div class="steam-tab" data-tab="contact">Contact</div>
+                </div>
+                
+                <div class="steam-page-content" id="steam-page-content">
+                    <!-- Content will be loaded dynamically -->
                 </div>
             </div>
         </div>

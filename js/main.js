@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle form submission
     initContactForm();
+    
+    // Initialize terminal functionality
+    initTerminal();
 });
 
 /**
@@ -119,7 +122,7 @@ function initLayoutSystem() {
     // Check if user has a saved layout preference
     const savedLayout = localStorage.getItem('portfolioLayout');
     
-    // Show overlay if no layout is saved
+    // Show overlay if no layout is saved, otherwise default to VSCode
     if (!savedLayout) {
         showLayoutOverlay();
     } else {
@@ -191,6 +194,22 @@ function showLayoutOverlay() {
                     <p>Gaming-inspired interface with channels and interactive messaging</p>
                     <button class="layout-select-btn" data-layout="discord">Select Discord</button>
                 </div>
+                
+                <div class="layout-option" data-layout="steam">
+                    <div class="layout-preview steam-preview">
+                        <div class="preview-header steam-header">
+                            <div class="preview-title">Steam</div>
+                        </div>
+                        <div class="preview-content steam-content">
+                            <div class="preview-section steam-section">Game Library</div>
+                            <div class="preview-section steam-section">Social Features</div>
+                            <div class="preview-section steam-section">Gaming UI</div>
+                        </div>
+                    </div>
+                    <h3>Steam Theme</h3>
+                    <p>Gaming platform interface with library navigation and social integration</p>
+                    <button class="layout-select-btn" data-layout="steam">Select Steam</button>
+                </div>
             </div>
             
             <div class="layout-overlay-footer">
@@ -247,6 +266,8 @@ function applyLayout(layout) {
         showVSCodeLayout();
     } else if (layout === 'discord') {
         showDiscordLayout();
+    } else if (layout === 'steam') {
+        showSteamLayout();
     }
     
     // Update layout switcher
@@ -258,7 +279,7 @@ function applyLayout(layout) {
  */
 function showProfessionalLayout() {
     // Hide VSCode elements
-    const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar');
+    const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar, .vscode-terminal-panel');
     vscodeElements.forEach(el => el.style.display = 'none');
     
     // Show professional elements
@@ -273,7 +294,7 @@ function showProfessionalLayout() {
  */
 function showVSCodeLayout() {
     // Show VSCode elements
-    const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar');
+    const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar, .vscode-terminal-panel');
     vscodeElements.forEach(el => el.style.display = '');
     
     // Hide professional and discord elements
@@ -281,6 +302,12 @@ function showVSCodeLayout() {
     const discordContainer = document.querySelector('.discord-container');
     if (professionalContainer) professionalContainer.style.display = 'none';
     if (discordContainer) discordContainer.style.display = 'none';
+    
+    // Re-initialize terminal when switching to VSCode layout
+    setTimeout(() => {
+        console.log('Re-initializing terminal for VSCode layout');
+        initTerminal();
+    }, 100);
 }
 
 /**
@@ -288,7 +315,7 @@ function showVSCodeLayout() {
  */
 function showDiscordLayout() {
     // Hide VSCode and professional elements
-    const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar');
+    const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar, .vscode-terminal-panel');
     vscodeElements.forEach(el => el.style.display = 'none');
     
     const professionalContainer = document.querySelector('.professional-container');
@@ -299,6 +326,27 @@ function showDiscordLayout() {
     if (discordContainer) {
         discordContainer.style.display = 'flex';
         initDiscordFunctionality();
+    }
+}
+
+/**
+ * Show Steam layout
+ */
+function showSteamLayout() {
+    // Hide other layout elements
+    const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar, .vscode-terminal-panel');
+    vscodeElements.forEach(el => el.style.display = 'none');
+    
+    const professionalContainer = document.querySelector('.professional-container');
+    const discordContainer = document.querySelector('.discord-container');
+    if (professionalContainer) professionalContainer.style.display = 'none';
+    if (discordContainer) discordContainer.style.display = 'none';
+    
+    // Show Steam elements
+    const steamContainer = document.querySelector('.steam-container');
+    if (steamContainer) {
+        steamContainer.style.display = 'flex';
+        initSteamFunctionality();
     }
 }
 
@@ -622,6 +670,10 @@ function initLayoutSwitcher() {
                     <i data-lucide="message-circle" class="lucide-icon"></i>
                     Discord
                 </button>
+                <button class="layout-switch-option" data-layout="steam">
+                    <i data-lucide="gamepad-2" class="lucide-icon"></i>
+                    Steam
+                </button>
             </div>
         `;
         document.body.appendChild(switcher);
@@ -670,3 +722,377 @@ function updateLayoutSwitcher(currentLayout) {
 
 // Declare lucide variable. Assuming it's globally available after including lucide-static.js
 const lucide = window.lucide;
+
+/**
+ * Initialize terminal functionality (only on home page)
+ */
+function initTerminal() {
+    // Only initialize terminal on home page
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    if (currentPage !== 'index.html' && currentPage !== '') {
+        console.log('Terminal only available on home page');
+        return;
+    }
+    
+    const terminalContent = document.getElementById('terminal-content');
+    
+    if (!terminalContent) {
+        console.log('Terminal content not found');
+        return;
+    }
+    
+    console.log('Initializing terminal on home page...');
+    
+    // Terminal state
+    let currentPath = '~';
+    let commandHistory = [];
+    let historyIndex = -1;
+    let currentInput = '';
+    let isProcessing = false;
+    
+    // Available commands and directories
+    const commands = {
+        'help': {
+            description: 'Show available commands',
+            usage: '/help'
+        },
+        'ls': {
+            description: 'List directory contents',
+            usage: 'ls [directory]'
+        },
+        'cd': {
+            description: 'Change directory',
+            usage: 'cd <directory>'
+        },
+        'clear': {
+            description: 'Clear terminal screen',
+            usage: 'clear'
+        }
+    };
+    
+    const directories = {
+        '~': ['home', 'experience', 'projects', 'extracurriculars', 'contact'],
+        'home': [],
+        'experience': [],
+        'projects': [],
+        'extracurriculars': [],
+        'contact': []
+    };
+    
+    const pageMapping = {
+        'home': 'index.html',
+        'experience': 'experience.html',
+        'projects': 'projects.html',
+        'extracurriculars': 'extracurriculars.html',
+        'contact': 'contact.html'
+    };
+    
+    // Clear any existing content and show welcome message
+    terminalContent.innerHTML = '';
+    addTerminalOutput('Welcome to Daniel\'s Portfolio Terminal!');
+    addTerminalOutput('Type /help to see available commands.');
+    addNewPrompt();
+    
+    // Handle keyboard input on terminal content
+    terminalContent.addEventListener('keydown', handleKeyDown);
+    terminalContent.addEventListener('click', function() {
+        terminalContent.focus();
+    });
+    
+    // Make terminal content focusable
+    terminalContent.setAttribute('tabindex', '0');
+    terminalContent.style.outline = 'none';
+    
+    // Focus the terminal
+    setTimeout(() => {
+        terminalContent.focus();
+        console.log('Terminal focused');
+    }, 100);
+    
+    function handleKeyDown(e) {
+        console.log('Key pressed:', e.key);
+        if (isProcessing) return;
+        
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentInput.trim()) {
+                // Add command to history
+                commandHistory.push(currentInput.trim());
+                historyIndex = commandHistory.length;
+                
+                // Display the command
+                addCommandLine(currentInput.trim());
+                
+                // Process the command
+                processCommand(currentInput.trim());
+                
+                // Clear input
+                currentInput = '';
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (historyIndex > 0) {
+                historyIndex--;
+                currentInput = commandHistory[historyIndex];
+                updateCurrentPrompt();
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (historyIndex < commandHistory.length - 1) {
+                historyIndex++;
+                currentInput = commandHistory[historyIndex];
+                updateCurrentPrompt();
+            } else {
+                historyIndex = commandHistory.length;
+                currentInput = '';
+                updateCurrentPrompt();
+            }
+        } else if (e.key === 'Backspace') {
+            e.preventDefault();
+            if (currentInput.length > 0) {
+                currentInput = currentInput.slice(0, -1);
+                updateCurrentPrompt();
+            }
+        } else if (e.key.length === 1) {
+            e.preventDefault();
+            currentInput += e.key;
+            updateCurrentPrompt();
+        }
+    }
+    
+    function addCommandLine(command) {
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        line.innerHTML = `<span class="terminal-prompt">danny@portfolio:${currentPath}$</span> ${command}`;
+        terminalContent.appendChild(line);
+        scrollToBottom();
+    }
+    
+    function addTerminalOutput(text, type = 'output') {
+        const line = document.createElement('div');
+        line.className = `terminal-${type}`;
+        line.textContent = text;
+        terminalContent.appendChild(line);
+        scrollToBottom();
+    }
+    
+    function addNewPrompt() {
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        line.id = 'current-prompt';
+        line.innerHTML = `<span class="terminal-prompt">danny@portfolio:${currentPath}$</span> <span class="terminal-cursor">█</span>`;
+        terminalContent.appendChild(line);
+        scrollToBottom();
+    }
+    
+    function updateCurrentPrompt() {
+        const currentPrompt = document.getElementById('current-prompt');
+        if (currentPrompt) {
+            currentPrompt.innerHTML = `<span class="terminal-prompt">danny@portfolio:${currentPath}$</span> ${currentInput}<span class="terminal-cursor">█</span>`;
+        }
+    }
+    
+    function scrollToBottom() {
+        terminalContent.scrollTop = terminalContent.scrollHeight;
+    }
+    
+    function processCommand(command) {
+        isProcessing = true;
+        const parts = command.split(' ');
+        const cmd = parts[0].toLowerCase();
+        const args = parts.slice(1);
+        
+        switch (cmd) {
+            case '/help':
+            case 'help':
+                showHelp();
+                break;
+            case 'ls':
+                listDirectory(args[0]);
+                break;
+            case 'cd':
+                changeDirectory(args[0]);
+                break;
+            case 'clear':
+                clearTerminal();
+                break;
+            default:
+                addTerminalOutput(`Unknown command. Try /help to see the list of commands!`, 'error');
+                addNewPrompt();
+        }
+        isProcessing = false;
+    }
+    
+    function showHelp() {
+        addTerminalOutput('Available commands:');
+        Object.entries(commands).forEach(([cmd, info]) => {
+            addTerminalOutput(`  ${info.usage.padEnd(20)} - ${info.description}`);
+        });
+        addNewPrompt();
+    }
+    
+    function listDirectory(dir = null) {
+        const targetDir = dir || currentPath;
+        const contents = directories[targetDir];
+        
+        if (contents === undefined) {
+            addTerminalOutput(`ls: cannot access '${targetDir}': No such file or directory`, 'error');
+        } else {
+            if (contents.length === 0) {
+                addTerminalOutput('(empty)');
+            } else {
+                contents.forEach(item => {
+                    addTerminalOutput(item);
+                });
+            }
+        }
+        addNewPrompt();
+    }
+    
+    function changeDirectory(dir) {
+        if (!dir) {
+            currentPath = '~';
+            addNewPrompt();
+        } else if (directories[dir] !== undefined) {
+            currentPath = dir;
+            addNewPrompt();
+            
+            // Navigate to the corresponding page if it's not the home directory
+            if (dir !== '~' && pageMapping[dir]) {
+                addTerminalOutput(`Navigating to ${dir}...`, 'success');
+                setTimeout(() => {
+                    window.location.href = pageMapping[dir];
+                }, 1000);
+            }
+        } else {
+            addTerminalOutput(`cd: ${dir}: No such file or directory`, 'error');
+            addNewPrompt();
+        }
+    }
+    
+    function clearTerminal() {
+        terminalContent.innerHTML = '';
+        addTerminalOutput('Welcome to Daniel\'s Portfolio Terminal!');
+        addTerminalOutput('Type /help to see available commands.');
+        addNewPrompt();
+    }
+}
+
+/**
+ * Initialize Steam functionality
+ */
+function initSteamFunctionality() {
+    const navItems = document.querySelectorAll('.steam-nav-item');
+    const tabs = document.querySelectorAll('.steam-tab');
+    const playButton = document.getElementById('steam-play-button');
+    const pageTitle = document.getElementById('steam-page-title');
+    const pageSubtitle = document.getElementById('steam-page-subtitle');
+    const pageContent = document.getElementById('steam-page-content');
+    
+    // Page configurations with alternating social media buttons
+    const pageConfigs = {
+        'home': {
+            title: 'Daniel J. Taylor',
+            subtitle: 'Computer Engineering Student & Developer',
+            button: { icon: 'linkedin', text: 'LinkedIn', url: 'https://www.linkedin.com/in/dannyjtaylor/' },
+            content: 'Welcome to my portfolio! I\'m a Computer Engineering student at Florida Polytechnic University with experience in software development, research, and smart city technologies.'
+        },
+        'experience': {
+            title: 'Professional Experience',
+            subtitle: 'Work History & Achievements',
+            button: { icon: 'github', text: 'GitHub', url: 'https://github.com/dannyjtaylor' },
+            content: 'Explore my professional journey including internships, research positions, and academic achievements.'
+        },
+        'projects': {
+            title: 'Portfolio Projects',
+            subtitle: 'Technical Projects & Development',
+            button: { icon: 'linkedin', text: 'LinkedIn', url: 'https://www.linkedin.com/in/dannyjtaylor/' },
+            content: 'Discover my technical projects ranging from web development to embedded systems and research applications.'
+        },
+        'extracurriculars': {
+            title: 'Leadership & Activities',
+            subtitle: 'Student Organizations & Leadership',
+            button: { icon: 'github', text: 'GitHub', url: 'https://github.com/dannyjtaylor' },
+            content: 'Learn about my involvement in student organizations, leadership roles, and extracurricular activities.'
+        },
+        'contact': {
+            title: 'Get In Touch',
+            subtitle: 'Connect & Collaborate',
+            button: { icon: 'linkedin', text: 'LinkedIn', url: 'https://www.linkedin.com/in/dannyjtaylor/' },
+            content: 'Ready to connect? Reach out for opportunities, collaborations, or just to say hello!'
+        }
+    };
+    
+    // Handle navigation clicks
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const page = this.getAttribute('data-page');
+            switchToPage(page);
+        });
+    });
+    
+    // Handle tab clicks
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const page = this.getAttribute('data-tab');
+            switchToPage(page);
+        });
+    });
+    
+    // Handle play button click
+    if (playButton) {
+        playButton.addEventListener('click', function() {
+            const currentPage = getCurrentPage();
+            const config = pageConfigs[currentPage];
+            if (config && config.button.url) {
+                window.open(config.button.url, '_blank');
+            }
+        });
+    }
+    
+    function switchToPage(page) {
+        const config = pageConfigs[page];
+        if (!config) return;
+        
+        // Update active states
+        navItems.forEach(item => {
+            item.classList.toggle('active', item.getAttribute('data-page') === page);
+        });
+        
+        tabs.forEach(tab => {
+            tab.classList.toggle('active', tab.getAttribute('data-tab') === page);
+        });
+        
+        // Update page content
+        if (pageTitle) pageTitle.textContent = config.title;
+        if (pageSubtitle) pageSubtitle.textContent = config.subtitle;
+        if (pageContent) pageContent.textContent = config.content;
+        
+        // Update play button
+        if (playButton) {
+            const icon = playButton.querySelector('.lucide-icon');
+            const text = playButton.querySelector('span');
+            
+            if (icon) {
+                icon.setAttribute('data-lucide', config.button.icon);
+                lucide.createIcons();
+            }
+            if (text) text.textContent = config.button.text;
+        }
+        
+        // Navigate to the actual page
+        if (page !== 'home') {
+            setTimeout(() => {
+                window.location.href = `${page}.html`;
+            }, 500);
+        }
+    }
+    
+    function getCurrentPage() {
+        const activeNav = document.querySelector('.steam-nav-item.active');
+        return activeNav ? activeNav.getAttribute('data-page') : 'home';
+    }
+    
+    // Initialize with home page
+    switchToPage('home');
+}

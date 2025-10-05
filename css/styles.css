@@ -203,6 +203,406 @@ a:hover {
     color: #519aba;
 }
 
+/* VSCode Terminal Panel (Bottom) */
+.vscode-terminal-panel {
+    background: #1e1e1e;
+    border-top: 1px solid #1e1e1e;
+    display: flex !important;
+    flex-direction: column;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Terminal blue line at bottom */
+.vscode-terminal-blue-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #007acc;
+    z-index: 10;
+}
+
+/* Show terminal panel in VSCode layout on home page only */
+.vscode-layout .vscode-terminal-panel {
+    display: flex !important;
+}
+
+/* Hide terminal in other layouts */
+.professional-layout .vscode-terminal-panel,
+.discord-layout .vscode-terminal-panel {
+    display: none !important;
+}
+
+/* Hide terminal on non-home pages */
+body:not(.home-page) .vscode-terminal-panel {
+    display: none !important;
+}
+
+/* Steam Layout */
+.steam-container {
+    display: none;
+    min-height: 100vh;
+    background: #1b2838;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.steam-layout .steam-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Steam Header */
+.steam-header {
+    background: #171a21;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #2a475e;
+}
+
+.steam-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #c7d5e0;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.steam-logo .lucide-icon {
+    color: #66c0f4;
+}
+
+.steam-user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #c7d5e0;
+}
+
+.steam-avatar {
+    width: 32px;
+    height: 32px;
+    background: #66c0f4;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1b2838;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Steam Main Content */
+.steam-main {
+    display: flex;
+    flex: 1;
+}
+
+/* Steam Sidebar */
+.steam-sidebar {
+    width: 240px;
+    background: #2a475e;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.steam-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.steam-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #c7d5e0;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.steam-nav-item:hover {
+    background: #3c5a78;
+    color: #ffffff;
+}
+
+.steam-nav-item.active {
+    background: #66c0f4;
+    color: #1b2838;
+}
+
+.steam-nav-item .lucide-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Steam Library */
+.steam-library h3 {
+    color: #c7d5e0;
+    font-size: 16px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.steam-games {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.steam-game {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    color: #c7d5e0;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.steam-game:hover {
+    background: #3c5a78;
+    color: #ffffff;
+}
+
+.steam-game-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* Steam Content Area */
+.steam-content {
+    flex: 1;
+    background: #1b2838;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Steam Game Header */
+.steam-game-header {
+    background: #2a475e;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3c5a78;
+}
+
+.steam-game-info h1 {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.steam-game-info p {
+    color: #c7d5e0;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Steam Play Button */
+.steam-play-button {
+    background: linear-gradient(135deg, #5ba3f5 0%, #4a90e2 100%);
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    border: none;
+    text-decoration: none;
+}
+
+.steam-play-button:hover {
+    background: linear-gradient(135deg, #4a90e2 0%, #3a7bd5 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(75, 144, 226, 0.3);
+}
+
+.steam-play-button .lucide-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Steam Tabs */
+.steam-tabs {
+    display: flex;
+    background: #2a475e;
+    border-bottom: 1px solid #3c5a78;
+}
+
+.steam-tab {
+    padding: 16px 24px;
+    color: #c7d5e0;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.steam-tab:hover {
+    color: #ffffff;
+    background: #3c5a78;
+}
+
+.steam-tab.active {
+    color: #66c0f4;
+    border-bottom-color: #66c0f4;
+    background: #1b2838;
+}
+
+/* Steam Page Content */
+.steam-page-content {
+    flex: 1;
+    padding: 24px;
+    color: #c7d5e0;
+    overflow-y: auto;
+}
+
+/* Steam Preview */
+.steam-preview {
+    background: #1b2838;
+    border: 1px solid #2a475e;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.steam-preview .steam-header {
+    background: #2a475e;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.steam-preview .steam-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.steam-preview .steam-section {
+    background: #2a475e;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #c7d5e0;
+    font-size: 12px;
+}
+
+.vscode-terminal-header {
+    background: #2d2d30;
+    padding: 8px 12px;
+    border-bottom: 1px solid #1e1e1e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #cccccc;
+    font-weight: 500;
+}
+
+.vscode-terminal-header .lucide-icon {
+    width: 14px;
+    height: 14px;
+    color: #cccccc;
+}
+
+.vscode-terminal-content {
+    flex: 1;
+    padding: 8px 12px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+    color: #cccccc;
+    background: #1e1e1e;
+    overflow-y: auto;
+    cursor: text;
+}
+
+.terminal-line {
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    white-space: pre-wrap;
+}
+
+.terminal-prompt {
+    color: #4ec9b0;
+    margin-right: 4px;
+}
+
+.terminal-cursor {
+    color: #cccccc;
+    animation: blink 1s infinite;
+}
+
+.terminal-output {
+    color: #cccccc;
+    margin-left: 0;
+}
+
+.terminal-error {
+    color: #f44747;
+    margin-left: 0;
+}
+
+.terminal-success {
+    color: #4ec9b0;
+    margin-left: 0;
+}
+
+/* Terminal input line styling */
+.terminal-input-line {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.terminal-input-line .terminal-prompt {
+    color: #4ec9b0;
+    margin-right: 4px;
+}
+
+.terminal-input-line .terminal-cursor {
+    color: #cccccc;
+    animation: blink 1s infinite;
+}
+
+.terminal-input-line input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #cccccc;
+    font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+    flex: 1;
+    margin-left: 4px;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
 /* Content Area */
 .vscode-content-container {
     flex: 1;
@@ -588,6 +988,31 @@ a:hover {
 @media (max-width: 768px) {
     .vscode-explorer {
         display: none;
+    }
+    
+    .vscode-terminal-panel {
+        display: none;
+    }
+    
+    .steam-sidebar {
+        width: 200px;
+    }
+    
+    .steam-game-header {
+        padding: 16px;
+    }
+    
+    .steam-game-info h1 {
+        font-size: 24px;
+    }
+    
+    .steam-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .steam-tab {
+        padding: 12px 16px;
+        font-size: 14px;
     }
     
     .projects-grid, .contact-grid {

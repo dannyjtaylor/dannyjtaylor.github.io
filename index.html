@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
@@ -95,7 +95,7 @@
                             <div class="preview-section valorant-section">Competitive</div>
                         </div>
                     </div>
-                    <h3>Valorant Theme</h3>
+                    <h3 class="valorant-title">VALORANT Theme</h3>
                     <p>Tactical shooter interface with game mode selection and competitive styling</p>
                     <button class="layout-select-btn" data-layout="valorant">Select Valorant</button>
                 </div>
@@ -111,7 +111,7 @@
                             <div class="preview-section undertale-section">Pixel Art</div>
                         </div>
                     </div>
-                    <h3>Undertale Theme</h3>
+                    <h3 class="undertale-title">Undertale Theme</h3>
                     <p>Retro RPG battle interface with pixel art styling and nostalgic charm</p>
                     <button class="layout-select-btn" data-layout="undertale">Select Undertale</button>
                 </div>
@@ -127,7 +127,9 @@
                             <div class="preview-section persona3-section">Anime Style</div>
                         </div>
                     </div>
-                    <h3>Persona 3 Theme</h3>
+                    <h3 class="persona3-title">
+                        <span class="persona3-logo">P3</span> Persona 3 Reload Theme
+                    </h3>
                     <p>Modern anime-inspired interface with sleek design and smooth animations</p>
                     <button class="layout-select-btn" data-layout="persona3">Select Persona 3</button>
                 </div>
@@ -144,9 +146,9 @@
         // Initialize Lucide icons
         lucide.createIcons();
         
-        // Initialize layout system
+        // Initialize theme selector
         document.addEventListener('DOMContentLoaded', function() {
-            initLayoutSystem();
+            initThemeSelector();
         });
     </script>
 </body>

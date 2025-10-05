@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel J. Taylor | Portfolio - Steam Theme</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="steam.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="steam-layout">
+    <!-- Steam Layout Container -->
+    <div class="steam-container">
+        <!-- Steam Header -->
+        <div class="steam-header">
+            <div class="steam-logo">
+                <i data-lucide="gamepad-2" class="lucide-icon"></i>
+                <span>Steam</span>
+            </div>
+            <div class="steam-user-info">
+                <div class="steam-avatar">DT</div>
+                <span>Daniel Taylor</span>
+            </div>
+        </div>
+        
+        <!-- Steam Main Content -->
+        <div class="steam-main">
+            <!-- Steam Sidebar - Game Library -->
+            <div class="steam-sidebar">
+                <div class="steam-library-header">
+                    <h3>Library</h3>
+                    <div class="steam-library-filters">
+                        <span class="steam-filter active">All Games</span>
+                    </div>
+                </div>
+                
+                <div class="steam-games">
+                    <div class="steam-game active" data-game="portfolio">
+                        <div class="steam-game-icon">👨‍💻</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Daniel J Taylor Portfolio</span>
+                            <span class="steam-game-status">Ready to Play</span>
+                        </div>
+                    </div>
+                    <div class="steam-game" data-game="hollow-knight">
+                        <div class="steam-game-icon">🦗</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Hollow Knight</span>
+                            <span class="steam-game-status">Ready to Play</span>
+                        </div>
+                    </div>
+                    <div class="steam-game" data-game="silksong">
+                        <div class="steam-game-icon">🕷️</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Hollow Knight: Silksong</span>
+                            <span class="steam-game-status">Coming Soon</span>
+                        </div>
+                    </div>
+                    <div class="steam-game" data-game="undertale">
+                        <div class="steam-game-icon">💀</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Undertale</span>
+                            <span class="steam-game-status">Ready to Play</span>
+                        </div>
+                    </div>
+                    <div class="steam-game" data-game="persona3">
+                        <div class="steam-game-icon">🎭</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Persona 3 Reload</span>
+                            <span class="steam-game-status">Ready to Play</span>
+                        </div>
+                    </div>
+                    <div class="steam-game" data-game="portal2">
+                        <div class="steam-game-icon">🔵</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Portal 2</span>
+                            <span class="steam-game-status">Ready to Play</span>
+                        </div>
+                    </div>
+                    <div class="steam-game" data-game="gungeon">
+                        <div class="steam-game-icon">🔫</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Enter the Gungeon</span>
+                            <span class="steam-game-status">Ready to Play</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Steam Content Area -->
+            <div class="steam-content">
+                <div class="steam-game-header">
+                    <div class="steam-game-banner">
+                        <div class="steam-game-title">
+                            <h1 id="steam-page-title">Daniel J Taylor Portfolio</h1>
+                            <p id="steam-page-subtitle">Computer Engineering Student & Developer</p>
+                        </div>
+                    </div>
+                    
+                    <div class="steam-game-actions">
+                        <div class="steam-play-button" id="steam-play-button">
+                            <i data-lucide="linkedin" class="lucide-icon"></i>
+                            <span>LinkedIn</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="steam-game-stats">
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">CLOUD STATUS</span>
+                        <span class="steam-stat-value">Up to date</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">LAST PLAYED</span>
+                        <span class="steam-stat-value">Today</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">PLAY TIME</span>
+                        <span class="steam-stat-value">∞ hours</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">ACHIEVEMENTS</span>
+                        <span class="steam-stat-value">1/1</span>
+                    </div>
+                </div>
+                
+                <div class="steam-tabs">
+                    <div class="steam-tab active" data-tab="home">Home</div>
+                    <div class="steam-tab" data-tab="experience">Experience</div>
+                    <div class="steam-tab" data-tab="projects">Projects</div>
+                    <div class="steam-tab" data-tab="extracurriculars">Leadership</div>
+                    <div class="steam-tab" data-tab="contact">Contact</div>
+                </div>
+                
+                <div class="steam-page-content" id="steam-page-content">
+                    Welcome to my portfolio! I'm a Computer Engineering student at Florida Polytechnic University with experience in software development, research, and smart city technologies. Ready to make an impact in the tech world!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script src="steam.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

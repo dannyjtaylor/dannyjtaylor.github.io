@@ -1235,3 +1235,52 @@ function showUndertaleLayout() {
 function showPersona3Layout() {
     window.location.href = 'themes/persona3/index.html';
 }
+
+/**
+ * Initialize theme selector functionality
+ */
+function initThemeSelector() {
+    const layoutButtons = document.querySelectorAll('.layout-select-btn');
+    
+    layoutButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const layout = this.getAttribute('data-layout');
+            selectLayout(layout);
+        });
+    });
+}
+
+/**
+ * Select and navigate to a layout
+ */
+function selectLayout(layout) {
+    // Save layout preference
+    localStorage.setItem('selectedLayout', layout);
+    
+    // Navigate to the selected theme
+    switch(layout) {
+        case 'professional':
+            showProfessionalLayout();
+            break;
+        case 'vscode':
+            showVSCodeLayout();
+            break;
+        case 'discord':
+            showDiscordLayout();
+            break;
+        case 'steam':
+            showSteamLayout();
+            break;
+        case 'valorant':
+            showValorantLayout();
+            break;
+        case 'undertale':
+            showUndertaleLayout();
+            break;
+        case 'persona3':
+            showPersona3Layout();
+            break;
+        default:
+            console.error('Unknown layout:', layout);
+    }
+}

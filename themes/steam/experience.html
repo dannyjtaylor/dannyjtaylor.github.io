@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience | Daniel J. Taylor - Steam Theme</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="steam.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="steam-layout">
+    <!-- Steam Layout Container -->
+    <div class="steam-container">
+        <!-- Steam Header -->
+        <div class="steam-header">
+            <div class="steam-logo">
+                <i data-lucide="gamepad-2" class="lucide-icon"></i>
+                <span>Steam</span>
+            </div>
+            <div class="steam-user-info">
+                <div class="steam-avatar">DT</div>
+                <span>Daniel Taylor</span>
+            </div>
+        </div>
+        
+        <!-- Steam Main Content -->
+        <div class="steam-main">
+            <!-- Steam Sidebar - Game Library -->
+            <div class="steam-sidebar">
+                <div class="steam-library-header">
+                    <h3>Library</h3>
+                    <div class="steam-library-filters">
+                        <span class="steam-filter active">All Games</span>
+                    </div>
+                </div>
+                
+                <div class="steam-games">
+                    <div class="steam-game" data-game="portfolio">
+                        <div class="steam-game-icon">👨‍💻</div>
+                        <div class="steam-game-info">
+                            <span class="steam-game-name">Daniel J Taylor Portfolio</span>
+                            <span class="steam-game-status">Ready to Play</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Steam Content Area -->
+            <div class="steam-content">
+                <div class="steam-game-header">
+                    <div class="steam-game-banner">
+                        <div class="steam-game-title">
+                            <h1>Professional Experience</h1>
+                            <p>Work History & Achievements</p>
+                        </div>
+                    </div>
+                    
+                    <div class="steam-game-actions">
+                        <div class="steam-play-button" id="steam-play-button">
+                            <i data-lucide="github" class="lucide-icon"></i>
+                            <span>GitHub</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="steam-game-stats">
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">CLOUD STATUS</span>
+                        <span class="steam-stat-value">Up to date</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">LAST PLAYED</span>
+                        <span class="steam-stat-value">Today</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">PLAY TIME</span>
+                        <span class="steam-stat-value">∞ hours</span>
+                    </div>
+                    <div class="steam-stat">
+                        <span class="steam-stat-label">ACHIEVEMENTS</span>
+                        <span class="steam-stat-value">1/1</span>
+                    </div>
+                </div>
+                
+                <div class="steam-tabs">
+                    <div class="steam-tab" data-tab="home">Home</div>
+                    <div class="steam-tab active" data-tab="experience">Experience</div>
+                    <div class="steam-tab" data-tab="projects">Projects</div>
+                    <div class="steam-tab" data-tab="extracurriculars">Leadership</div>
+                    <div class="steam-tab" data-tab="contact">Contact</div>
+                </div>
+                
+                <div class="steam-page-content">
+                    <h2>Professional Journey</h2>
+                    <p>Explore my professional journey including internships, research positions, and academic achievements. From Smart City internships to research assistant roles, I've gained valuable experience in technology and engineering that has shaped my career path.</p>
+                    
+                    <h3>Current Experience</h3>
+                    <ul>
+                        <li><strong>Smart City Student Intern</strong> - City of Winter Haven Technology Services (July 2024 - Present)</li>
+                        <li><strong>Research Assistant</strong> - Florida Polytechnic University (July 2024 - December 2024)</li>
+                        <li><strong>Student Education Assistant/TA</strong> - Florida Polytechnic University (July 2024 - December 2024)</li>
+                    </ul>
+                    
+                    <h3>Education</h3>
+                    <p><strong>Bachelor of Science in Computer Engineering</strong><br>
+                    Florida Polytechnic University<br>
+                    Expected Graduation: May 2026<br>
+                    Advanced Topics concentration with 4.0 GPA</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script src="steam.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

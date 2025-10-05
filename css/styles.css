@@ -1140,26 +1140,33 @@ body:not(.home-page) .vscode-terminal-panel {
     backdrop-filter: blur(10px);
 }
 
+/* Ensure overlay is visible by default */
+body:not(.vscode-layout):not(.discord-layout):not(.steam-layout):not(.valorant-layout):not(.undertale-layout):not(.persona3-layout) .layout-overlay {
+    display: flex !important;
+}
+
 .layout-overlay-content {
-    background: var(--vscode-bg-light);
-    border: 1px solid var(--vscode-border);
+    background: #1e1e1e;
+    border: 1px solid #3c3c3c;
     border-radius: 12px;
     padding: 2rem;
-    max-width: 800px;
+    max-width: 1200px;
     width: 90%;
     text-align: center;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .layout-overlay-header h1 {
-    color: var(--vscode-text);
+    color: #ffffff;
     font-size: 2rem;
     margin-bottom: 0.5rem;
     font-weight: 600;
 }
 
 .layout-overlay-header p {
-    color: var(--vscode-text-muted);
+    color: #cccccc;
     font-size: 1.1rem;
     margin-bottom: 2rem;
 }
@@ -1172,18 +1179,29 @@ body:not(.home-page) .vscode-terminal-panel {
 }
 
 .layout-option {
-    background: var(--vscode-bg);
-    border: 2px solid var(--vscode-border);
+    background: #2d2d2d;
+    border: 2px solid #3c3c3c;
     border-radius: 8px;
     padding: 1.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    color: #ffffff;
 }
 
 .layout-option:hover {
-    border-color: var(--vscode-accent);
+    border-color: #007acc;
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(0, 122, 204, 0.2);
+}
+
+.layout-option h3 {
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.layout-option p {
+    color: #cccccc;
+    margin-bottom: 1rem;
 }
 
 .layout-preview {
@@ -1263,7 +1281,7 @@ body:not(.home-page) .vscode-terminal-panel {
 }
 
 .layout-select-btn {
-    background: var(--vscode-accent);
+    background: #007acc;
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -1275,11 +1293,11 @@ body:not(.home-page) .vscode-terminal-panel {
 }
 
 .layout-select-btn:hover {
-    background: var(--vscode-accent-hover);
+    background: #005a9e;
 }
 
 .layout-overlay-footer {
-    color: var(--vscode-text-muted);
+    color: #cccccc;
     font-size: 0.9rem;
 }
 
@@ -2121,4 +2139,68 @@ body:not(.home-page) .vscode-terminal-panel {
     border-radius: 4px;
     color: #b8c5d1;
     font-size: 12px;
+}
+
+/* Theme Title Styling */
+.valorant-title {
+    font-family: 'Orbitron', monospace !important;
+    font-weight: 800 !important;
+    letter-spacing: 2px !important;
+    background: linear-gradient(135deg, #ff4655 0%, #ff6b7a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(255, 70, 85, 0.3);
+}
+
+.undertale-title {
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 14px !important;
+    color: #ffffff !important;
+    text-shadow: 2px 2px 0px #000000;
+    letter-spacing: 1px;
+}
+
+.persona3-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+}
+
+.persona3-logo {
+    background: linear-gradient(135deg, #7877c6 0%, #ff77c6 100%);
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(120, 119, 198, 0.4);
+}
+
+/* Responsive Design for Theme Selector */
+@media (max-width: 768px) {
+    .layout-options {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .layout-overlay-content {
+        padding: 1rem;
+        max-width: 95%;
+    }
+    
+    .layout-overlay-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .valorant-title {
+        font-size: 16px !important;
+    }
+    
+    .undertale-title {
+        font-size: 12px !important;
+    }
 }

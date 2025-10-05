@@ -11,6 +11,136 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+    <!-- Professional Layout Container -->
+    <div class="professional-container">
+        <header class="professional-header">
+            <nav class="professional-nav">
+                <div class="professional-logo">Daniel J. Taylor</div>
+                <ul class="professional-nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="experience.html">Experience</a></li>
+                    <li><a href="projects.html" class="active">Projects</a></li>
+                    <li><a href="extracurriculars.html">Leadership</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="professional-main">
+            <section class="professional-hero">
+                <h1>My Projects</h1>
+                <p class="subtitle">A showcase of my technical work and achievements</p>
+                <p class="description">
+                    From AI-powered assistants to FPGA processors, these projects demonstrate my passion for technology and problem-solving across multiple domains.
+                </p>
+            </section>
+
+            <section class="professional-section">
+                <h2>Featured Projects</h2>
+                <div class="professional-cards">
+                    <div class="professional-card">
+                        <h3>Q&Apes AI Assistant</h3>
+                        <p class="company">AI-powered assistant for city employees</p>
+                        <p>I developed an internal AI assistant serving 650+ city employees across 11 departments. Built with GPT-4o, LangChain, and ChromaDB, it provides natural language access to guides and employee data with speech-to-text and text-to-speech capabilities.</p>
+                        <div class="professional-badges">
+                            <span class="professional-badge">GPT-4o</span>
+                            <span class="professional-badge">LangChain</span>
+                            <span class="professional-badge">ChromaDB</span>
+                            <span class="professional-badge">FastAPI</span>
+                            <span class="professional-badge">Docker</span>
+                            <span class="professional-badge">PostgreSQL</span>
+                        </div>
+                    </div>
+                    
+                    <div class="professional-card">
+                        <h3>32-bit RISC-V Processor</h3>
+                        <p class="company">FPGA-based custom processor design</p>
+                        <p>I collaborated on designing a 32-bit RISC-V processor using SystemVerilog and Verilog. We implemented RAM, ROM, ALU, and control logic, then prototyped it on an Intel FPGA DE10-Lite board with VGA output displaying a live Fibonacci sequence.</p>
+                        <div class="professional-badges">
+                            <span class="professional-badge">SystemVerilog</span>
+                            <span class="professional-badge">Verilog</span>
+                            <span class="professional-badge">FPGA</span>
+                            <span class="professional-badge">Intel DE10-Lite</span>
+                            <span class="professional-badge">Assembly Logic</span>
+                        </div>
+                    </div>
+                    
+                    <div class="professional-card">
+                        <h3>CRUD Employee Management App</h3>
+                        <p class="company">Full-stack internal HR web application</p>
+                        <p>I built a full-stack CRUD application for the City of Winter Haven serving 650+ employees across 11 departments. Created with PostgreSQL, Python, FastAPI, and Docker, it features an Excel-like interface for intuitive data management and seamless import/export functionality.</p>
+                        <div class="professional-badges">
+                            <span class="professional-badge">PostgreSQL</span>
+                            <span class="professional-badge">Python</span>
+                            <span class="professional-badge">FastAPI</span>
+                            <span class="professional-badge">Docker</span>
+                            <span class="professional-badge">JavaScript</span>
+                            <span class="professional-badge">REST APIs</span>
+                        </div>
+                    </div>
+                    
+                    <div class="professional-card">
+                        <h3>Autonomous Vehicle Simulation</h3>
+                        <p class="company">Simulink-based AV controller and dynamics model</p>
+                        <p>I designed a full-scale autonomous vehicle simulation using Simulink, modeling longitudinal and lateral controllers with realistic driving dynamics. I incorporated aerodynamic drag, friction, and tuned a PID controller for optimal stability, successfully executing lane changes and highway exits.</p>
+                        <div class="professional-badges">
+                            <span class="professional-badge">Simulink</span>
+                            <span class="professional-badge">PID</span>
+                            <span class="professional-badge">Stanley</span>
+                            <span class="professional-badge">Pure Pursuit</span>
+                            <span class="professional-badge">Control Theory</span>
+                            <span class="professional-badge">Vehicle Dynamics</span>
+                        </div>
+                    </div>
+                    
+                    <div class="professional-card">
+                        <h3>CI/CD Pipeline for Municipal Web Infrastructure</h3>
+                        <p class="company">Enterprise-grade CI/CD pipeline from scratch</p>
+                        <p>I built a robust CI/CD pipeline for the City of Winter Haven using GitLab Runner, Docker, Kubernetes, and Prometheus. The pipeline includes security scanning, automated testing, and staged deployment with post-deployment monitoring via Ubuntu shell scripting.</p>
+                        <div class="professional-badges">
+                            <span class="professional-badge">GitLab Runner</span>
+                            <span class="professional-badge">Docker</span>
+                            <span class="professional-badge">Kubernetes</span>
+                            <span class="professional-badge">Prometheus</span>
+                            <span class="professional-badge">YAML</span>
+                            <span class="professional-badge">CI/CD</span>
+                        </div>
+                    </div>
+                    
+                    <div class="professional-card">
+                        <h3>Hybrid Fuel Efficiency Research</h3>
+                        <p class="company">OBD-II interfacing and polynomial optimization</p>
+                        <p>I led a hybrid vehicle fuel efficiency study analyzing passive vs. aggressive driving over 100 km. I used FORScan to interface with a Ford Maverick's OBD-II port, collecting real-time data and automating generation of 100,000+ constrained polynomials using NumPy for optimization modeling.</p>
+                        <div class="professional-badges">
+                            <span class="professional-badge">FORScan</span>
+                            <span class="professional-badge">OBD-II</span>
+                            <span class="professional-badge">NumPy</span>
+                            <span class="professional-badge">Python</span>
+                            <span class="professional-badge">Anaconda</span>
+                            <span class="professional-badge">Automotive Diagnostics</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="professional-footer">
+            <div class="professional-social">
+                <a href="https://github.com/dannyjtaylor" target="_blank" rel="noopener noreferrer">
+                    <i data-lucide="github" class="lucide-icon"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/dannyjtaylor/" target="_blank" rel="noopener noreferrer">
+                    <i data-lucide="linkedin" class="lucide-icon"></i>
+                </a>
+                <a href="mailto:dannyengineers@outlook.com">
+                    <i data-lucide="mail" class="lucide-icon"></i>
+                </a>
+            </div>
+            <p>&copy; 2025 Daniel J. Taylor. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- VSCode Layout Container -->
     <div class="vscode-container">
         <!-- VSCode Top Bar -->
         <div class="vscode-top-bar">

@@ -31,6 +31,36 @@
     height: 4rem;
 }
 
+/* Theme Switcher */
+.theme-switcher {
+    margin-left: 2rem;
+}
+
+.theme-switch-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #007acc;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.theme-switch-btn:hover {
+    background: #005a9e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 122, 204, 0.3);
+}
+
+.theme-switch-btn .lucide-icon {
+    width: 16px;
+    height: 16px;
+}
+
 .professional-logo {
     font-size: 1.5rem;
     font-weight: 700;

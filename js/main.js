@@ -318,13 +318,13 @@ function applyLayout(layout) {
     
     // Show/hide appropriate content
     if (layout === 'professional') {
-        showProfessionalLayout();
+        showProfessionalLayoutElements();
     } else if (layout === 'vscode') {
-        showVSCodeLayout();
+        showVSCodeLayoutElements();
     } else if (layout === 'discord') {
-        showDiscordLayout();
+        showDiscordLayoutElements();
     } else if (layout === 'steam') {
-        showSteamLayout();
+        showSteamLayoutElements();
     } else if (layout === 'valorant') {
         showValorantLayout();
     } else if (layout === 'undertale') {
@@ -340,7 +340,7 @@ function applyLayout(layout) {
 /**
  * Show professional layout
  */
-function showProfessionalLayout() {
+function showProfessionalLayoutElements() {
     // Hide VSCode elements
     const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar, .vscode-terminal-panel');
     vscodeElements.forEach(el => el.style.display = 'none');
@@ -355,7 +355,7 @@ function showProfessionalLayout() {
 /**
  * Show VSCode layout
  */
-function showVSCodeLayout() {
+function showVSCodeLayoutElements() {
     // Show VSCode elements
     const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar, .vscode-terminal-panel');
     vscodeElements.forEach(el => el.style.display = '');
@@ -376,7 +376,7 @@ function showVSCodeLayout() {
 /**
  * Show Discord layout
  */
-function showDiscordLayout() {
+function showDiscordLayoutElements() {
     // Hide VSCode and professional elements
     const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar, .vscode-terminal-panel');
     vscodeElements.forEach(el => el.style.display = 'none');
@@ -395,7 +395,7 @@ function showDiscordLayout() {
 /**
  * Show Steam layout
  */
-function showSteamLayout() {
+function showSteamLayoutElements() {
     // Hide other layout elements
     const vscodeElements = document.querySelectorAll('.vscode-container, .vscode-top-bar, .vscode-sidebar-icons, .vscode-explorer, .vscode-tabs, .vscode-status-bar, .vscode-terminal-panel');
     vscodeElements.forEach(el => el.style.display = 'none');

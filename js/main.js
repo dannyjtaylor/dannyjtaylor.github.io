@@ -1200,51 +1200,51 @@ function initSteamFunctionality() {
  * Show Professional layout
  */
 function showProfessionalLayout() {
-    window.location.href = 'themes/professional/index.html';
+    window.location.href = 'themes/professional/professional-theme.html';
 }
 
 /**
  * Show VSCode layout
  */
 function showVSCodeLayout() {
-    console.log('showVSCodeLayout called, navigating to: themes/vscode/index.html');
-    window.location.href = 'themes/vscode/index.html';
+    console.log('showVSCodeLayout called, navigating to: themes/vscode/vscode-theme.html');
+    window.location.href = 'themes/vscode/vscode-theme.html';
 }
 
 /**
  * Show Discord layout
  */
 function showDiscordLayout() {
-    console.log('showDiscordLayout called, navigating to: themes/discord/index.html');
-    window.location.href = 'themes/discord/index.html';
+    console.log('showDiscordLayout called, navigating to: themes/discord/discord-theme.html');
+    window.location.href = 'themes/discord/discord-theme.html';
 }
 
 /**
  * Show Steam layout
  */
 function showSteamLayout() {
-    window.location.href = 'themes/steam/index.html';
+    window.location.href = 'themes/steam/steam-theme.html';
 }
 
 /**
  * Show Valorant layout
  */
 function showValorantLayout() {
-    window.location.href = 'themes/valorant/index.html';
+    window.location.href = 'themes/valorant/valorant-theme.html';
 }
 
 /**
  * Show Undertale layout
  */
 function showUndertaleLayout() {
-    window.location.href = 'themes/undertale/index.html';
+    window.location.href = 'themes/undertale/undertale-theme.html';
 }
 
 /**
  * Show Persona 3 layout
  */
 function showPersona3Layout() {
-    window.location.href = 'themes/persona3/index.html';
+    window.location.href = 'themes/persona3/persona3-theme.html';
 }
 
 /**

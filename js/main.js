@@ -1200,7 +1200,7 @@ function initSteamFunctionality() {
  * Show Professional layout
  */
 function showProfessionalLayout() {
-    window.location.href = '/themes/professional/professional-theme.html';
+    window.location.href = '/themes/professional/index.html';
 }
 
 /**

@@ -1141,7 +1141,7 @@ body:not(.home-page) .vscode-terminal-panel {
 }
 
 /* Ensure overlay is visible by default */
-body:not(.vscode-layout):not(.discord-layout):not(.steam-layout):not(.valorant-layout):not(.undertale-layout):not(.persona3-layout) .layout-overlay {
+body:not(.professional-layout):not(.vscode-layout):not(.discord-layout):not(.steam-layout):not(.valorant-layout):not(.undertale-layout):not(.persona3-layout) .layout-overlay {
     display: flex !important;
 }
 

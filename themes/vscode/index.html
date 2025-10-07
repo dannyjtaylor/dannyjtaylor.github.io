@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel J. Taylor | Portfolio - VSCode Theme</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="vscode.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="vscode-layout">
+    <!-- VSCode Layout Container -->
+    <div class="vscode-container">
+        <!-- VSCode Top Bar -->
+        <div class="vscode-top-bar">
+            <div class="vscode-title-bar">
+                <div class="vscode-window-controls">
+                    <div class="vscode-control close"></div>
+                    <div class="vscode-control minimize"></div>
+                    <div class="vscode-control maximize"></div>
+                </div>
+                <div class="vscode-title">Portfolio - Visual Studio Code</div>
+            </div>
+            
+            <!-- VSCode Menu Bar -->
+            <div class="vscode-menu-bar">
+                <div class="vscode-menu-item">File</div>
+                <div class="vscode-menu-item">Edit</div>
+                <div class="vscode-menu-item">View</div>
+                <div class="vscode-menu-item">Go</div>
+                <div class="vscode-menu-item">Run</div>
+                <div class="vscode-menu-item">Terminal</div>
+                <div class="vscode-menu-item">Help</div>
+            </div>
+        </div>
+        
+        <!-- VSCode Main Content -->
+        <div class="vscode-main">
+            <!-- VSCode Sidebar -->
+            <div class="vscode-sidebar">
+                <!-- Sidebar Icons -->
+                <div class="vscode-sidebar-icons">
+                    <div class="vscode-sidebar-icon active" data-icon="explorer">
+                        <i data-lucide="folder" class="lucide-icon"></i>
+                    </div>
+                    <div class="vscode-sidebar-icon" data-icon="search">
+                        <i data-lucide="search" class="lucide-icon"></i>
+                    </div>
+                    <div class="vscode-sidebar-icon" data-icon="git">
+                        <i data-lucide="git-branch" class="lucide-icon"></i>
+                    </div>
+                    <div class="vscode-sidebar-icon" data-icon="extensions">
+                        <i data-lucide="puzzle" class="lucide-icon"></i>
+                    </div>
+                </div>
+                
+                <!-- Explorer Panel -->
+                <div class="vscode-explorer" id="explorer-panel">
+                    <div class="vscode-explorer-header">
+                        <span>EXPLORER</span>
+                        <i data-lucide="ellipsis" class="lucide-icon"></i>
+                    </div>
+                    
+                    <div class="vscode-folder">
+                        <div class="vscode-folder-header" data-folder="portfolio">
+                            <i data-lucide="chevron-right" class="folder-icon"></i>
+                            <i data-lucide="folder" class="lucide-icon"></i>
+                            <span>portfolio</span>
+                        </div>
+                        <div class="vscode-folder-content" id="portfolio-folder" style="display: none;">
+                            <div class="vscode-file" data-file="index.html">
+                                <i data-lucide="file-text" class="lucide-icon"></i>
+                                <span>index.html</span>
+                            </div>
+                            <div class="vscode-file" data-file="experience.html">
+                                <i data-lucide="briefcase" class="lucide-icon"></i>
+                                <span>experience.html</span>
+                            </div>
+                            <div class="vscode-file" data-file="projects.html">
+                                <i data-lucide="code" class="lucide-icon"></i>
+                                <span>projects.html</span>
+                            </div>
+                            <div class="vscode-file" data-file="extracurriculars.html">
+                                <i data-lucide="users" class="lucide-icon"></i>
+                                <span>extracurriculars.html</span>
+                            </div>
+                            <div class="vscode-file" data-file="contact.html">
+                                <i data-lucide="mail" class="lucide-icon"></i>
+                                <span>contact.html</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VSCode Editor Area -->
+            <div class="vscode-editor">
+                <!-- Editor Tabs -->
+                <div class="vscode-tabs">
+                    <div class="vscode-tab active" data-tab="index.html">
+                        <i data-lucide="file-text" class="lucide-icon"></i>
+                        <span>index.html</span>
+                        <i data-lucide="x" class="lucide-icon close-tab"></i>
+                    </div>
+                </div>
+                
+                <!-- Editor Content -->
+                <div class="vscode-editor-content">
+                    <div class="vscode-line-numbers">
+                        <div class="vscode-line-number">1</div>
+                        <div class="vscode-line-number">2</div>
+                        <div class="vscode-line-number">3</div>
+                        <div class="vscode-line-number">4</div>
+                        <div class="vscode-line-number">5</div>
+                        <div class="vscode-line-number">6</div>
+                        <div class="vscode-line-number">7</div>
+                        <div class="vscode-line-number">8</div>
+                        <div class="vscode-line-number">9</div>
+                        <div class="vscode-line-number">10</div>
+                    </div>
+                    
+                    <div class="vscode-code-content">
+                        <div class="vscode-code-line">
+                            <span class="vscode-comment">&lt;!-- Daniel J. Taylor Portfolio --&gt;</span>
+                        </div>
+                        <div class="vscode-code-line">
+                            <span class="vscode-tag">&lt;h1&gt;</span>
+                            <span class="vscode-text">Welcome to my Portfolio</span>
+                            <span class="vscode-tag">&lt;/h1&gt;</span>
+                        </div>
+                        <div class="vscode-code-line">
+                            <span class="vscode-tag">&lt;p&gt;</span>
+                            <span class="vscode-text">Computer Engineering Student & Developer</span>
+                            <span class="vscode-tag">&lt;/p&gt;</span>
+                        </div>
+                        <div class="vscode-code-line"></div>
+                        <div class="vscode-code-line">
+                            <span class="vscode-comment">&lt;!-- Experience --&gt;</span>
+                        </div>
+                        <div class="vscode-code-line">
+                            <span class="vscode-tag">&lt;section&gt;</span>
+                        </div>
+                        <div class="vscode-code-line">
+                            <span class="vscode-indent">  </span>
+                            <span class="vscode-tag">&lt;h2&gt;</span>
+                            <span class="vscode-text">Professional Experience</span>
+                            <span class="vscode-tag">&lt;/h2&gt;</span>
+                        </div>
+                        <div class="vscode-code-line">
+                            <span class="vscode-indent">  </span>
+                            <span class="vscode-tag">&lt;p&gt;</span>
+                            <span class="vscode-text">Smart City Student Intern at City of Winter Haven</span>
+                            <span class="vscode-tag">&lt;/p&gt;</span>
+                        </div>
+                        <div class="vscode-code-line">
+                            <span class="vscode-tag">&lt;/section&gt;</span>
+                        </div>
+                        <div class="vscode-code-line"></div>
+                        <div class="vscode-code-line">
+                            <span class="vscode-comment">&lt;!-- End of Portfolio --&gt;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- VSCode Status Bar -->
+        <div class="vscode-status-bar">
+            <div class="vscode-status-left">
+                <span class="vscode-status-item">
+                    <i data-lucide="git-branch" class="lucide-icon"></i>
+                    main
+                </span>
+                <span class="vscode-status-item">
+                    <i data-lucide="circle" class="lucide-icon"></i>
+                    HTML
+                </span>
+            </div>
+            <div class="vscode-status-right">
+                <span class="vscode-status-item">Ln 10, Col 1</span>
+                <span class="vscode-status-item">UTF-8</span>
+                <span class="vscode-status-item">LF</span>
+            </div>
+        </div>
+        
+        <!-- Terminal Panel -->
+        <div class="vscode-terminal-panel" id="terminal-panel" style="display: none;">
+            <div class="vscode-terminal-header">
+                <span>TERMINAL</span>
+                <i data-lucide="x" class="lucide-icon close-terminal"></i>
+            </div>
+            <div class="vscode-terminal-content" id="terminal-content">
+                <div class="vscode-terminal-line">
+                    <span class="vscode-terminal-prompt">danny@portfolio:~$</span> welcome to my portfolio terminal
+                </div>
+                <div class="vscode-terminal-line">
+                    <span class="vscode-terminal-prompt">danny@portfolio:~$</span> <span class="vscode-terminal-cursor">█</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script src="vscode.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Initialize VSCode functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            initVSCodeFunctionality();
+        });
+    </script>
+</body>
+</html>

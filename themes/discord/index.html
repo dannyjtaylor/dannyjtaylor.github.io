@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel J. Taylor | Portfolio - Discord Theme</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="discord.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="discord-layout">
+    <!-- Discord Layout Container -->
+    <div class="discord-container">
+        <!-- Discord Sidebar -->
+        <div class="discord-sidebar">
+            <!-- Server List -->
+            <div class="discord-server-list">
+                <div class="discord-server active">
+                    <div class="discord-server-icon">DT</div>
+                </div>
+            </div>
+            
+            <!-- Channel List -->
+            <div class="discord-channel-list">
+                <div class="discord-server-header">
+                    <h3>Daniel J. Taylor</h3>
+                    <i data-lucide="chevron-down" class="lucide-icon"></i>
+                </div>
+                
+                <div class="discord-category">
+                    <div class="discord-category-header">
+                        <i data-lucide="chevron-right" class="lucide-icon"></i>
+                        <span>PORTFOLIO</span>
+                    </div>
+                    <div class="discord-channels">
+                        <div class="discord-channel active" data-channel="home">
+                            <i data-lucide="hashtag" class="lucide-icon"></i>
+                            <span>home</span>
+                        </div>
+                        <div class="discord-channel" data-channel="experience">
+                            <i data-lucide="hashtag" class="lucide-icon"></i>
+                            <span>experience</span>
+                        </div>
+                        <div class="discord-channel" data-channel="projects">
+                            <i data-lucide="hashtag" class="lucide-icon"></i>
+                            <span>projects</span>
+                        </div>
+                        <div class="discord-channel" data-channel="extracurriculars">
+                            <i data-lucide="hashtag" class="lucide-icon"></i>
+                            <span>extracurriculars</span>
+                        </div>
+                        <div class="discord-channel" data-channel="contact">
+                            <i data-lucide="hashtag" class="lucide-icon"></i>
+                            <span>contact</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Info -->
+            <div class="discord-user-info">
+                <div class="discord-user-avatar">D</div>
+                <div class="discord-user-details">
+                    <div class="discord-username">danny</div>
+                    <div class="discord-user-status">Online</div>
+                </div>
+                <div class="discord-user-controls">
+                    <i data-lucide="mic" class="lucide-icon"></i>
+                    <i data-lucide="headphones" class="lucide-icon"></i>
+                    <i data-lucide="settings" class="lucide-icon"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Discord Main Content -->
+        <div class="discord-main">
+            <!-- Channel Header -->
+            <div class="discord-channel-header">
+                <div class="discord-channel-info">
+                    <i data-lucide="hashtag" class="lucide-icon"></i>
+                    <span id="discord-channel-name">home</span>
+                    <span class="discord-channel-topic">Welcome to Daniel's Portfolio!</span>
+                </div>
+                <div class="discord-channel-controls">
+                    <i data-lucide="search" class="lucide-icon"></i>
+                    <i data-lucide="inbox" class="lucide-icon"></i>
+                    <i data-lucide="help-circle" class="lucide-icon"></i>
+                </div>
+            </div>
+            
+            <!-- Messages Container -->
+            <div class="discord-messages" id="discord-messages">
+                <div class="discord-message">
+                    <div class="discord-avatar">D</div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-header">
+                            <span class="discord-username">danny</span>
+                            <span class="discord-timestamp">Today at 12:00 PM</span>
+                        </div>
+                        <div class="discord-message-text">
+                            Hey there! 👋 Welcome to my portfolio! I'm Daniel J. Taylor, a Computer Engineering student at Florida Polytechnic University with a 4.0 GPA. I'm passionate about embedded systems, AI, and full-stack development. Currently working as a Smart City Student Intern for the City of Winter Haven, developing applications for 650+ employees across 11 departments.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="discord-message">
+                    <div class="discord-avatar">D</div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-header">
+                            <span class="discord-username">danny</span>
+                            <span class="discord-timestamp">Today at 12:01 PM</span>
+                        </div>
+                        <div class="discord-message-text">
+                            I'm pursuing both a BS in Computer Engineering (Advanced Topics) and an MS in Electrical Engineering. I love working on projects that combine hardware and software, from FPGA processors to AI assistants. Check out my other channels to see my work! 🚀
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Message Input -->
+            <div class="discord-input-container">
+                <div class="discord-input">
+                    <i data-lucide="plus" class="lucide-icon"></i>
+                    <textarea id="discord-input" placeholder="Message #home" rows="1"></textarea>
+                    <div class="discord-input-controls">
+                        <i data-lucide="smile" class="lucide-icon"></i>
+                        <i data-lucide="gift" class="lucide-icon"></i>
+                        <i data-lucide="gif" class="lucide-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Discord Members Sidebar -->
+        <div class="discord-members">
+            <div class="discord-members-header">
+                <span>ONLINE — 1</span>
+            </div>
+            <div class="discord-members-list">
+                <div class="discord-member">
+                    <div class="discord-member-avatar">
+                        <div class="discord-avatar">D</div>
+                        <div class="discord-status-indicator online"></div>
+                    </div>
+                    <div class="discord-member-info">
+                        <span class="discord-member-name">danny</span>
+                        <span class="discord-member-status">Computer Engineering Student</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script src="discord.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Initialize Discord functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            initDiscordFunctionality();
+        });
+    </script>
+</body>
+</html>

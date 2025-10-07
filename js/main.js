@@ -1,15 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize layout system
-    initLayoutSystem();
+    // Only initialize layout system if we're not on the theme-selector page
+    const currentPage = window.location.pathname.split('/').pop();
+    console.log('Current page:', currentPage);
     
-    // Initialize folder toggles
-    initFolderToggles();
-    
-    // Handle form submission
-    initContactForm();
-    
-    // Initialize terminal functionality
-    initTerminal();
+    if (currentPage !== 'theme-selector.html') {
+        console.log('Initializing layout system for portfolio page');
+        // Initialize layout system
+        initLayoutSystem();
+        
+        // Initialize folder toggles
+        initFolderToggles();
+        
+        // Handle form submission
+        initContactForm();
+        
+        // Initialize terminal functionality
+        initTerminal();
+    } else {
+        console.log('On theme-selector page, skipping layout system initialization');
+    }
 });
 
 /**

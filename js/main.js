@@ -1198,6 +1198,7 @@ function showProfessionalLayout() {
  * Show VSCode layout
  */
 function showVSCodeLayout() {
+    console.log('showVSCodeLayout called, navigating to: themes/vscode/index.html');
     window.location.href = 'themes/vscode/index.html';
 }
 
@@ -1205,6 +1206,7 @@ function showVSCodeLayout() {
  * Show Discord layout
  */
 function showDiscordLayout() {
+    console.log('showDiscordLayout called, navigating to: themes/discord/index.html');
     window.location.href = 'themes/discord/index.html';
 }
 
@@ -1254,30 +1256,39 @@ function initThemeSelector() {
  * Select and navigate to a layout
  */
 function selectLayout(layout) {
+    console.log('selectLayout called with layout:', layout);
+    
     // Save layout preference
     localStorage.setItem('selectedLayout', layout);
     
     // Navigate to the selected theme
     switch(layout) {
         case 'professional':
+            console.log('Navigating to professional theme');
             showProfessionalLayout();
             break;
         case 'vscode':
+            console.log('Navigating to vscode theme');
             showVSCodeLayout();
             break;
         case 'discord':
+            console.log('Navigating to discord theme');
             showDiscordLayout();
             break;
         case 'steam':
+            console.log('Navigating to steam theme');
             showSteamLayout();
             break;
         case 'valorant':
+            console.log('Navigating to valorant theme');
             showValorantLayout();
             break;
         case 'undertale':
+            console.log('Navigating to undertale theme');
             showUndertaleLayout();
             break;
         case 'persona3':
+            console.log('Navigating to persona3 theme');
             showPersona3Layout();
             break;
         default:

@@ -1,0 +1,24 @@
+# Ignore AI-generated portfolio files
+StuffFromOKComputer/
+
+# Common files to ignore
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp

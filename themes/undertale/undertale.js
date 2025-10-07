@@ -95,7 +95,7 @@ function initUndertaleFunctionality() {
         // Navigate to the actual page
         if (option !== 'home') {
             setTimeout(() => {
-                window.location.href = `../${option}/index.html`;
+                window.location.href = `/themes/professional/${option}.html`;
             }, 2000);
         }
     }

@@ -124,7 +124,7 @@ function initSteamFunctionality() {
         // Navigate to the actual page
         if (page !== 'home') {
             setTimeout(() => {
-                window.location.href = `${page}.html`;
+                window.location.href = `/themes/steam/${page}.html`;
             }, 500);
         }
     }

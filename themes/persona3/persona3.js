@@ -107,7 +107,7 @@ function initPersona3Functionality() {
         // Navigate to the actual page
         if (menu !== 'home') {
             setTimeout(() => {
-                window.location.href = `../${menu}/index.html`;
+                window.location.href = `/themes/professional/${menu}.html`;
             }, 1000);
         }
     }

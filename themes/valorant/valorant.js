@@ -90,7 +90,7 @@ function initValorantFunctionality() {
         // Navigate to the actual page
         if (mode !== 'home') {
             setTimeout(() => {
-                window.location.href = `../${mode}/index.html`;
+                window.location.href = `/themes/valorant/${mode}.html`;
             }, 500);
         }
     }

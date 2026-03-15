@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { MenuCallbackContext } from '../components/Window/Window';
 import { useDesktopStore } from '../stores/desktopStore';
-import { saveAsFile } from '../utils/saveFile';
 import styles from './windows.module.css';
 
 const DEFAULT_TEXT = `Hey, I'm Danny J. Taylor.
@@ -14,11 +13,17 @@ Double-click the icons on the desktop to explore, or use the Start menu.
 
 — Danny`;
 
+const FILE_ID = 'about';
+
 export function AboutMe() {
-  const [text, setText] = useState(DEFAULT_TEXT);
+  const savedContent = useDesktopStore((s) => s.fileSystem[FILE_ID]);
+  const saveFile = useDesktopStore((s) => s.saveFile);
+  const showContextMenu = useDesktopStore((s) => s.showContextMenu);
+  const [text, setText] = useState(savedContent ?? DEFAULT_TEXT);
+  const [wordWrap, setWordWrap] = useState(false);
+  const [statusBar, setStatusBar] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const registerCallback = useContext(MenuCallbackContext);
-  const showContextMenu = useDesktopStore((s) => s.showContextMenu);
 
   useEffect(() => {
     return registerCallback((action: string) => {
@@ -30,8 +35,13 @@ export function AboutMe() {
           setText('');
           break;
         case 'file-save':
+          saveFile(FILE_ID, text);
+          break;
         case 'file-save-as':
-          saveAsFile('about_me.txt', text);
+          saveFile(FILE_ID, text);
+          break;
+        case 'edit-undo':
+          document.execCommand('undo');
           break;
         case 'edit-select-all':
           ta.select();
@@ -60,12 +70,23 @@ export function AboutMe() {
         case 'edit-time-date':
           document.execCommand('insertText', false, new Date().toLocaleString());
           break;
+        case 'format-word-wrap':
+          setWordWrap((w) => !w);
+          break;
+        case 'view-status-bar':
+          setStatusBar((s) => !s);
+          break;
         case 'help-about':
-          alert('Notepad\nDJTech Industries\nVersion 4.0');
+          useDesktopStore.getState().showProperties('About Notepad', {
+            'Application': 'Notepad',
+            'Version': '4.0',
+            'Publisher': 'DJTech Industries',
+            'System': 'DannyOS 95',
+          });
           break;
       }
     });
-  }, [registerCallback, text]);
+  }, [registerCallback, text, saveFile]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -85,7 +106,13 @@ export function AboutMe() {
         onChange={(e) => setText(e.target.value)}
         onContextMenu={handleContextMenu}
         spellCheck={false}
+        style={{ whiteSpace: wordWrap ? 'pre-wrap' : 'pre' }}
       />
+      {statusBar && (
+        <div className={styles.statusBar}>
+          {text.split('\n').length} lines | {text.length} characters
+        </div>
+      )}
     </div>
   );
 }

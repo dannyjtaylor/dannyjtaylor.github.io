@@ -1,0 +1,154 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 98000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog {
+  width: 340px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+  font-family: var(--font-system);
+  font-size: 11px;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 4px 3px 6px;
+  background: linear-gradient(90deg, var(--win-navy), #1084d0);
+  color: var(--win-white);
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.closeBtn {
+  width: 16px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  padding: 0;
+  cursor: default;
+}
+
+.closeBtn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+.tabs {
+  display: flex;
+  padding: 6px 6px 0 6px;
+  gap: 0;
+}
+
+.tabActive {
+  padding: 3px 12px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: none;
+  font-size: 11px;
+  position: relative;
+  top: 2px;
+  z-index: 1;
+}
+
+.content {
+  margin: 0 6px;
+  padding: 12px;
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  background: var(--win-gray);
+}
+
+.iconRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.bigIcon {
+  flex-shrink: 0;
+}
+
+.nameField {
+  font-weight: bold;
+  font-size: 12px;
+  color: var(--win-black);
+}
+
+.separator {
+  height: 2px;
+  margin: 8px 0;
+  border-top: 1px solid var(--win-dark);
+  border-bottom: 1px solid var(--win-btn-hilight);
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoRow {
+  display: flex;
+  gap: 8px;
+}
+
+.infoLabel {
+  min-width: 80px;
+  color: var(--win-black);
+}
+
+.infoValue {
+  color: var(--win-black);
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 6px;
+}
+
+.btn {
+  min-width: 70px;
+  padding: 3px 8px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  cursor: default;
+  color: var(--win-black);
+}
+
+.btn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}

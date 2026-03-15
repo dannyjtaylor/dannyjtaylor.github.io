@@ -7,13 +7,23 @@
 }
 
 .icons {
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
   align-content: flex-start;
-  gap: 8px;
-  padding: 16px;
-  padding-bottom: 44px;
+  gap: 2px;
+  padding: 4px;
   position: relative;
+  overflow: hidden;
+}
+
+/* Rubber band selection box */
+.selectionBox {
+  position: absolute;
+  border: 1px dotted #fff;
+  background: rgba(0, 0, 128, 0.2);
+  pointer-events: none;
+  z-index: 50;
 }

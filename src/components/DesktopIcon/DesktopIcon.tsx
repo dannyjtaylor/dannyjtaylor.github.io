@@ -11,8 +11,9 @@ interface DesktopIconProps {
 }
 
 export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
-  const selectedIcon = useDesktopStore((s) => s.selectedIcon);
+  const selectedIcons = useDesktopStore((s) => s.selectedIcons);
   const selectIcon = useDesktopStore((s) => s.selectIcon);
+  const toggleSelectIcon = useDesktopStore((s) => s.toggleSelectIcon);
   const openWindow = useDesktopStore((s) => s.openWindow);
   const iconPosition = useDesktopStore((s) => s.iconPositions[id]);
   const updateIconPosition = useDesktopStore((s) => s.updateIconPosition);
@@ -28,12 +29,22 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
     hasMoved: boolean;
   } | null>(null);
 
-  const isSelected = selectedIcon === id;
+  const isSelected = selectedIcons.has(id);
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation();
-      selectIcon(id);
+
+      // Ctrl+click for multi-select
+      if (e.ctrlKey) {
+        toggleSelectIcon(id);
+        return;
+      }
+
+      // If not already selected, select just this one
+      if (!isSelected) {
+        selectIcon(id);
+      }
 
       const pos = iconPosition ?? { x: 0, y: 0 };
 
@@ -82,17 +93,17 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
       window.addEventListener('mousemove', onMove);
       window.addEventListener('mouseup', onUp);
     },
-    [id, windowId, selectIcon, openWindow, iconPosition, updateIconPosition],
+    [id, windowId, isSelected, selectIcon, toggleSelectIcon, openWindow, iconPosition, updateIconPosition],
   );
 
   const handleContextMenu = useCallback(
     (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      selectIcon(id);
+      if (!isSelected) selectIcon(id);
       showContextMenu(e.clientX, e.clientY, 'icon', windowId);
     },
-    [id, windowId, selectIcon, showContextMenu],
+    [id, windowId, isSelected, selectIcon, showContextMenu],
   );
 
   const posStyle = iconPosition
@@ -108,6 +119,7 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
       tabIndex={0}
       role="button"
       aria-label={label}
+      data-icon-id={id}
     >
       <div className={styles.iconImg}>
         <DynamicIcon name={icon} size={32} />

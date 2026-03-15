@@ -2,6 +2,16 @@
    DannyOS — Global Styles & Design System
    ============================================ */
 
+/* W95FA — pixel-perfect Windows 95 bitmap font */
+@font-face {
+  font-family: 'W95FA';
+  src: url('/fonts/w95fa.woff2') format('woff2'),
+       url('/fonts/W95FA.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Win95 color palette */
   --win-bg:          #008080;
@@ -20,8 +30,8 @@
   --win-btn-dk-shadow: #000000;
 
   /* Typography — authentic Win95 */
-  --font-system:   'MS Sans Serif', 'Microsoft Sans Serif', 'Tahoma', 'Arial', sans-serif;
-  --font-terminal: 'Fixedsys', 'VT323', 'Consolas', 'Courier New', monospace;
+  --font-system:   'W95FA', 'MS Sans Serif', 'Microsoft Sans Serif', 'Tahoma', 'Arial', sans-serif;
+  --font-terminal: 'W95FA', 'Fixedsys', 'VT323', 'Consolas', 'Courier New', monospace;
 }
 
 /* --- Win95 Cursor --- */
@@ -56,8 +66,8 @@ html, body, #root {
   background: #000;
   font-family: var(--font-system);
   font-size: 11px;
-  -webkit-font-smoothing: auto;
-  -moz-osx-font-smoothing: auto;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
   user-select: none;
 }
 

@@ -25,6 +25,8 @@ const PNG_ICONS: Record<string, string> = {
   windows: '/icons/windows.png',
   valorant: '/icons/valorant.png',
   undertale: '/icons/undertale.png',
+  discord: '/icons/discord.png',
+  cavestory: '/icons/cavestory.png',
 };
 
 /* ── Canvas Pixel Art Component ── */

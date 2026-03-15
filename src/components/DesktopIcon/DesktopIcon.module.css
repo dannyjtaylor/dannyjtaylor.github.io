@@ -2,11 +2,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   width: 75px;
-  padding: 4px 4px;
+  height: 70px;
+  padding: 4px 2px 2px;
   border: 1px solid transparent;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .icon:hover {
@@ -25,6 +28,7 @@
   width: 32px;
   height: 32px;
   pointer-events: none;
+  flex-shrink: 0;
 }
 
 .label {
@@ -38,10 +42,14 @@
     -1px -1px 0 #000,
     1px -1px 0 #000,
     -1px 1px 0 #000;
-  line-height: 1.3;
+  line-height: 1.2;
   word-break: break-word;
   max-width: 72px;
   pointer-events: none;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .labelSelected {

@@ -1,0 +1,123 @@
+/* ============================================
+   DannyOS — Global Styles & Design System
+   ============================================ */
+
+:root {
+  /* Win95 color palette */
+  --win-bg:          #008080;
+  --win-gray:        #c0c0c0;
+  --win-dark:        #808080;
+  --win-light:       #dfdfdf;
+  --win-white:       #ffffff;
+  --win-black:       #000000;
+  --win-navy:        #000080;
+  --win-blue:        #1034a6;
+  --win-shadow-dk:   #404040;
+  --win-shadow-lt:   #e0e0e0;
+  --win-btn-face:    #c0c0c0;
+  --win-btn-hilight: #ffffff;
+  --win-btn-shadow:  #808080;
+  --win-btn-dk-shadow: #000000;
+
+  /* Typography — authentic Win95 */
+  --font-system:   'MS Sans Serif', 'Microsoft Sans Serif', 'Tahoma', 'Arial', sans-serif;
+  --font-terminal: 'Fixedsys', 'VT323', 'Consolas', 'Courier New', monospace;
+}
+
+/* --- Win95 Cursor --- */
+/* Default arrow cursor */
+html, body, #root {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='white' stroke='black' stroke-width='.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0, default;
+}
+
+/* Pointer cursor for clickable elements */
+a, button, [role="button"], .clickable,
+input[type="submit"], input[type="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='20' viewBox='0 0 15 20'%3E%3Cpath d='M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z' fill='white' stroke='black' stroke-width='.6'/%3E%3C/svg%3E") 5 0, pointer;
+}
+
+/* Text cursor for editable areas */
+textarea, input[type="text"], input[type="email"], input[type="password"],
+[contenteditable="true"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") 3 8, text;
+}
+
+/* --- Hard reset --- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: var(--font-system);
+  font-size: 11px;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  user-select: none;
+}
+
+/* --- Win95 3D border utility classes --- */
+.win-border-outset {
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+}
+
+.win-border-inset {
+  border-top: 2px solid var(--win-btn-shadow);
+  border-left: 2px solid var(--win-btn-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+/* --- Scrollbars (Win95 style) --- */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background:
+    repeating-conic-gradient(
+      var(--win-gray) 0% 25%,
+      var(--win-white) 0% 50%
+    ) 50% / 2px 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+}
+
+::-webkit-scrollbar-button {
+  display: block;
+  height: 16px;
+  width: 16px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--win-gray);
+}
+
+/* Links in windows */
+a {
+  color: var(--win-navy);
+  text-decoration: underline;
+}
+a:hover {
+  color: var(--win-blue);
+}

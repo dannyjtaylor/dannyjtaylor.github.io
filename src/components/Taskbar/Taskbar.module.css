@@ -1,0 +1,109 @@
+.taskbar {
+  height: 28px;
+  min-height: 28px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  display: flex;
+  align-items: center;
+  padding: 2px 2px;
+  z-index: 9000;
+  gap: 2px;
+}
+
+/* ── Start Button ── */
+.startButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  height: 22px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  font-weight: bold;
+  background: var(--win-gray);
+  color: var(--win-black);
+  cursor: pointer;
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  flex-shrink: 0;
+}
+
+.startButton:active,
+.startActive {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+  padding: 2px 5px 0px 7px;
+}
+
+/* ── Divider ── */
+.divider {
+  width: 2px;
+  height: 20px;
+  border-left: 1px solid var(--win-dark);
+  border-right: 1px solid var(--win-btn-hilight);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+/* ── Window buttons ── */
+.windowButtons {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.windowBtn {
+  display: flex;
+  align-items: center;
+  padding: 1px 6px;
+  height: 22px;
+  min-width: 100px;
+  max-width: 160px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  background: var(--win-gray);
+  color: var(--win-black);
+  border: none;
+  cursor: pointer;
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.windowBtnActive {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+  background: #b0b0b0;
+  font-weight: bold;
+}
+
+/* ── System Tray ── */
+.tray {
+  display: flex;
+  align-items: center;
+  padding: 1px 8px;
+  height: 22px;
+  border-top: 2px solid var(--win-btn-shadow);
+  border-left: 2px solid var(--win-btn-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+  flex-shrink: 0;
+}
+
+.clock {
+  font-family: var(--font-system);
+  font-size: 11px;
+  color: var(--win-black);
+}

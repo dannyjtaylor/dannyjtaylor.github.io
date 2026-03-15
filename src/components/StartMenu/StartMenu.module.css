@@ -1,0 +1,61 @@
+.menu {
+  position: fixed;
+  bottom: 28px;
+  left: 2px;
+  width: 200px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  z-index: 9500;
+  display: flex;
+  font-family: var(--font-system);
+  font-size: 11px;
+}
+
+.sidebar {
+  width: 24px;
+  background: var(--win-navy);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.sidebarText {
+  font-family: var(--font-system);
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--win-gray);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 1px;
+}
+
+.items {
+  flex: 1;
+  padding: 2px 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--win-black);
+}
+
+.item:hover {
+  background: var(--win-navy);
+  color: var(--win-white);
+}
+
+.separator {
+  height: 2px;
+  margin: 2px 4px;
+  border-top: 1px solid var(--win-dark);
+  border-bottom: 1px solid var(--win-btn-hilight);
+}

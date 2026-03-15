@@ -1,0 +1,78 @@
+.bootScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  z-index: 10000;
+  overflow: hidden;
+  transition: opacity 0.5s ease;
+}
+
+.fadeOut {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* CRT scanlines + vignette */
+.crtOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10001;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.crtOverlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.45) 100%
+  );
+}
+
+.terminal {
+  padding: 28px 36px;
+  width: 100%;
+  z-index: 10000;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+.text {
+  font-family: var(--font-terminal);
+  font-size: 20px;
+  line-height: 1.35;
+  color: #aaa;
+  white-space: pre;
+  overflow: hidden;
+}
+
+/* Color classes applied via data-cls attribute */
+.text [data-cls="white"] { color: #fff; }
+.text [data-cls="green"] { color: #33ff33; }
+.text [data-cls="dim"]   { color: #555; }
+.text [data-cls="yellow"]{ color: #ffff33; }
+
+.cursor {
+  display: inline;
+  font-family: var(--font-terminal);
+  font-size: 20px;
+  color: #aaa;
+  animation: blinkCursor 0.6s step-end infinite;
+}
+
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}

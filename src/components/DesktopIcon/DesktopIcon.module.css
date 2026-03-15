@@ -1,0 +1,51 @@
+.icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 75px;
+  padding: 4px 4px;
+  border: 1px solid transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.icon:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.selected {
+  background: rgba(0, 0, 128, 0.45);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.iconImg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+}
+
+.label {
+  font-family: var(--font-system);
+  font-size: 11px;
+  color: #fff;
+  text-align: center;
+  margin-top: 2px;
+  text-shadow:
+    1px 1px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+  line-height: 1.3;
+  word-break: break-word;
+  max-width: 72px;
+  pointer-events: none;
+}
+
+.labelSelected {
+  background: var(--win-navy);
+  color: #fff;
+  text-shadow: none;
+}

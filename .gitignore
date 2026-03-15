@@ -19,6 +19,9 @@ node_modules/
 *.swo
 *~
 
+# Build output
+dist/
+
 # Temporary files
 *.tmp
 *.temp

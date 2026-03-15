@@ -1,0 +1,203 @@
+.window {
+  position: absolute;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  min-height: 100px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+  font-family: var(--font-system);
+  font-size: 11px;
+}
+
+.inactive .titlebar {
+  background: var(--win-dark) !important;
+}
+
+/* ── Resize Handles ── */
+.resizeN  { position: absolute; top: -3px; left: 4px; right: 4px; height: 6px; cursor: n-resize; z-index: 1; }
+.resizeS  { position: absolute; bottom: -3px; left: 4px; right: 4px; height: 6px; cursor: s-resize; z-index: 1; }
+.resizeE  { position: absolute; right: -3px; top: 4px; bottom: 4px; width: 6px; cursor: e-resize; z-index: 1; }
+.resizeW  { position: absolute; left: -3px; top: 4px; bottom: 4px; width: 6px; cursor: w-resize; z-index: 1; }
+.resizeNE { position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; cursor: ne-resize; z-index: 2; }
+.resizeSE { position: absolute; bottom: -3px; right: -3px; width: 10px; height: 10px; cursor: nwse-resize; z-index: 2; }
+.resizeSW { position: absolute; bottom: -3px; left: -3px; width: 10px; height: 10px; cursor: nesw-resize; z-index: 2; }
+.resizeNW { position: absolute; top: -3px; left: -3px; width: 10px; height: 10px; cursor: nw-resize; z-index: 2; }
+
+/* ── Titlebar ── */
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 3px;
+  background: var(--win-dark);
+  min-height: 18px;
+  cursor: grab;
+  gap: 4px;
+}
+
+.titlebar:active {
+  cursor: grabbing;
+}
+
+.titlebarActive {
+  background: var(--win-navy) !important;
+}
+
+.titleLeft {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.titleText {
+  font-family: var(--font-system);
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--win-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Window buttons ── */
+.winBtn {
+  width: 16px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--win-gray);
+  border: none;
+  padding: 0;
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+}
+
+.winBtn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+.closeBtn {
+  margin-left: 2px;
+}
+
+/* ── Menu Bar ── */
+.menubar {
+  display: flex;
+  padding: 0 2px;
+  border-bottom: 1px solid var(--win-dark);
+  background: var(--win-gray);
+}
+
+.menuWrapper {
+  position: relative;
+}
+
+.menuLabel {
+  font-family: var(--font-system);
+  font-size: 11px;
+  padding: 2px 6px;
+  color: var(--win-black);
+  cursor: default;
+  display: inline-block;
+}
+
+.menuLabel:hover,
+.menuLabelOpen {
+  background: var(--win-navy);
+  color: var(--win-white);
+}
+
+/* ── Dropdown ── */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  z-index: 10000;
+  padding: 2px 0;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  cursor: default;
+  color: var(--win-black);
+  white-space: nowrap;
+}
+
+.dropdownItem:hover {
+  background: var(--win-navy);
+  color: var(--win-white);
+}
+
+.dropdownItemDisabled {
+  color: var(--win-dark) !important;
+}
+
+.dropdownItemDisabled:hover {
+  background: transparent !important;
+  color: var(--win-dark) !important;
+}
+
+.dropdownSep {
+  height: 2px;
+  margin: 2px 3px;
+  border-top: 1px solid var(--win-dark);
+  border-bottom: 1px solid var(--win-btn-hilight);
+}
+
+.dropdownCheck {
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.dropdownItemLabel {
+  flex: 1;
+}
+
+.dropdownShortcut {
+  margin-left: 24px;
+  color: var(--win-dark);
+  font-size: 11px;
+}
+
+/* ── Body ── */
+.body {
+  flex: 1;
+  overflow: auto;
+  background: var(--win-white);
+  border-top: 2px solid var(--win-btn-shadow);
+  border-left: 2px solid var(--win-btn-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+  margin: 2px;
+}

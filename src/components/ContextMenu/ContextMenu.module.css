@@ -1,0 +1,64 @@
+.menu {
+  position: fixed;
+  z-index: 99000;
+  min-width: 180px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  padding: 3px 0;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+  font-family: var(--font-system);
+  font-size: 11px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 24px 4px 24px;
+  color: var(--win-black);
+  cursor: default;
+  white-space: nowrap;
+}
+
+.item:hover {
+  background: var(--win-navy);
+  color: var(--win-white);
+}
+
+.itemBold {
+  font-weight: bold;
+}
+
+.itemDisabled {
+  composes: item;
+  color: var(--win-dark);
+}
+
+.itemDisabled:hover {
+  background: transparent;
+  color: var(--win-dark);
+}
+
+.itemSub {
+  composes: item;
+}
+
+.itemSub:hover {
+  background: var(--win-navy);
+  color: var(--win-white);
+}
+
+.arrow {
+  font-size: 8px;
+  margin-left: 16px;
+}
+
+.separator {
+  height: 2px;
+  margin: 2px 3px;
+  border-top: 1px solid var(--win-dark);
+  border-bottom: 1px solid var(--win-btn-hilight);
+}

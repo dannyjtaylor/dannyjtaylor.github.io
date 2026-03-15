@@ -1,0 +1,147 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.dialog {
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  width: 330px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+  font-family: var(--font-system);
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 3px;
+  background: var(--win-navy);
+  color: var(--win-white);
+  font-family: var(--font-system);
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.closeBtn {
+  width: 16px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--win-gray);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+}
+
+.closeBtn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+.body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 16px;
+}
+
+.warningIcon {
+  font-size: 32px;
+  color: #cc9900;
+  flex-shrink: 0;
+}
+
+.text p {
+  font-family: var(--font-system);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--win-black);
+}
+
+.subtext {
+  color: var(--win-dark) !important;
+  margin-top: 4px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 16px 16px;
+}
+
+.btn {
+  font-family: var(--font-system);
+  font-size: 11px;
+  padding: 4px 24px;
+  cursor: pointer;
+  background: var(--win-gray);
+  color: var(--win-black);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+}
+
+.btn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+.btn:focus {
+  outline: 1px dotted var(--win-black);
+  outline-offset: -4px;
+}
+
+/* ── Shutdown "safe to turn off" screen ── */
+.shutdownScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+.shutdownMessage {
+  text-align: center;
+  color: #ff9900;
+  font-family: var(--font-system);
+  font-size: 16px;
+  line-height: 2;
+}
+
+.rebootBtn {
+  margin-top: 24px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  padding: 6px 20px;
+  cursor: pointer;
+  background: #333;
+  color: #ff9900;
+  border: 2px solid #ff9900;
+}
+
+.rebootBtn:hover {
+  background: #ff9900;
+  color: #000;
+}

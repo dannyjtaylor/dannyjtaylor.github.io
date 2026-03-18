@@ -19,7 +19,6 @@ import {
   remove,
   query,
   limitToLast,
-  serverTimestamp,
   type Unsubscribe,
 } from 'firebase/database';
 import { db } from '../lib/firebase';

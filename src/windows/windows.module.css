@@ -224,6 +224,41 @@
   text-decoration: underline;
 }
 
+/* ── Resume Tabs ── */
+.resumeTabs {
+  display: flex;
+  padding: 0 4px;
+  padding-top: 4px;
+  background: var(--win-gray);
+  border-bottom: 1px solid var(--win-black);
+  flex-shrink: 0;
+}
+
+.resumeTab {
+  padding: 3px 12px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  background: var(--win-gray);
+  border: 1px solid var(--win-dark);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  margin-right: 2px;
+  cursor: pointer;
+  position: relative;
+  top: 1px;
+  color: var(--win-black);
+}
+
+.resumeTab:hover {
+  background: var(--win-btn-hilight);
+}
+
+.resumeTabActive {
+  background: var(--win-white);
+  border-bottom: 1px solid var(--win-white);
+  font-weight: bold;
+}
+
 /* ── Terminal (MS-DOS Prompt) ── */
 .terminal {
   height: 100%;

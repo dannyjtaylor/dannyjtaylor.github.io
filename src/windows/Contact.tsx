@@ -6,7 +6,7 @@ export function Contact() {
       <div className={styles.mailHeader}>
         <div className={styles.mailRow}>
           <label>To:</label>
-          <span>danny@dannyos.com</span>
+          <span>dannyengineers@outlook.com</span>
         </div>
         <div className={styles.mailRow}>
           <label>Subject:</label>
@@ -15,6 +15,13 @@ export function Contact() {
       </div>
       <div className={styles.mailBody}>
         <p>Reach me through any of these channels:</p>
+        <br />
+        <p>
+          <strong>Email:</strong>{' '}
+          <a href="mailto:dannyengineers@outlook.com">
+            dannyengineers@outlook.com
+          </a>
+        </p>
         <br />
         <p>
           <strong>GitHub:</strong>{' '}
@@ -29,8 +36,6 @@ export function Contact() {
             linkedin.com/in/dannyjtaylor
           </a>
         </p>
-        <br />
-        <p>More links coming soon...</p>
       </div>
     </div>
   );

@@ -24,9 +24,11 @@ const PNG_ICONS: Record<string, string> = {
   document: '/icons/document.png',
   windows: '/icons/windows.png',
   valorant: '/icons/valorant.png',
-  undertale: '/icons/undertale.png',
+  undertale: '/icons/froggit.png',
   discord: '/icons/discord.png',
-  cavestory: '/icons/cavestory.png',
+  cavestory: '/icons/quote.gif',
+  froggit: '/icons/froggit.png',
+  minesweeper: '/icons/minesweeper.png',
 };
 
 /* ── Canvas Pixel Art Component ── */
@@ -186,6 +188,28 @@ function drawVoltbox(ctx: CanvasRenderingContext2D) {
   }
 }
 
+function drawMinesweeper(ctx: CanvasRenderingContext2D) {
+  // Gray square background
+  ctx.fillStyle = '#C0C0C0';
+  ctx.fillRect(0, 0, 16, 16);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, 16, 1); ctx.fillRect(0, 0, 1, 16);
+  ctx.fillRect(15, 0, 1, 16); ctx.fillRect(0, 15, 16, 1);
+  // Mine body (dark circle)
+  ctx.fillStyle = '#000';
+  ctx.fillRect(5, 5, 6, 6);
+  ctx.fillRect(4, 6, 8, 4);
+  ctx.fillRect(6, 4, 4, 8);
+  // Spikes
+  ctx.fillRect(7, 2, 2, 2);
+  ctx.fillRect(7, 12, 2, 2);
+  ctx.fillRect(2, 7, 2, 2);
+  ctx.fillRect(12, 7, 2, 2);
+  // Shine
+  ctx.fillStyle = '#FFF';
+  ctx.fillRect(6, 6, 2, 2);
+}
+
 function drawShutdown(ctx: CanvasRenderingContext2D) {
   const cx = 7.5, cy = 7.5;
   for (let y = 0; y < 16; y++) {
@@ -222,6 +246,7 @@ const DRAW_MAP: Record<string, DrawFn> = {
   floppy: drawFloppy,
   cd: drawCD,
   voltbox: drawVoltbox,
+  minesweeper: drawMinesweeper,
   shutdown: drawShutdown,
 };
 

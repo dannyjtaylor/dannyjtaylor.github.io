@@ -20,8 +20,7 @@ import { Valorant } from '../../windows/Valorant';
 import { Undertale } from '../../windows/Undertale';
 import { Portfolio } from '../../windows/Portfolio';
 import { Transcript } from '../../windows/Transcript';
-import { SoftwareResume } from '../../windows/SoftwareResume';
-import { EmbeddedResume } from '../../windows/EmbeddedResume';
+import { Minesweeper } from '../../windows/Minesweeper';
 import { DiscordBot } from '../../windows/DiscordBot';
 import { CaveStory } from '../../windows/CaveStory';
 import { Interests } from '../../windows/Interests';
@@ -166,6 +165,7 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-about',      label: 'About Me',       icon: 'document',  windowId: 'about' },
   { id: 'icon-projects',   label: 'Projects',       icon: 'file',      windowId: 'projects' },
   { id: 'icon-resume',     label: 'Resume',         icon: 'notepad',   windowId: 'resume' },
+  { id: 'icon-minesweeper',label: 'Minesweeper',    icon: 'minesweeper', windowId: 'minesweeper' },
   { id: 'icon-contact',    label: 'Contact',        icon: 'mail',      windowId: 'contact' },
   { id: 'icon-mycomputer', label: 'My Computer',    icon: 'computer',  windowId: 'mycomputer' },
   { id: 'icon-recycle',    label: 'Recycle Bin',    icon: 'recycle',   windowId: 'recycle' },
@@ -174,8 +174,6 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-undertale',  label: 'UNDERTALE',      icon: 'undertale', windowId: 'undertale' },
   { id: 'icon-portfolio',  label: 'Portfolio',      icon: 'document',  windowId: 'portfolio' },
   { id: 'icon-transcript', label: 'Transcript',     icon: 'notepad',   windowId: 'transcript' },
-  { id: 'icon-swresume',   label: 'SW Resume',      icon: 'document',  windowId: 'swresume' },
-  { id: 'icon-ewresume',   label: 'EW Resume',      icon: 'document',  windowId: 'ewresume' },
   { id: 'icon-discord',    label: '/gather Bot',    icon: 'discord',   windowId: 'discord' },
   { id: 'icon-cavestory',  label: 'Cave Story',     icon: 'cavestory', windowId: 'cavestory' },
   { id: 'icon-interests',  label: 'Interests',      icon: 'document',  windowId: 'interests' },
@@ -195,8 +193,7 @@ const WINDOWS: WindowConfig[] = [
   { id: 'undertale',  title: 'UNDERTALE',               icon: 'undertale', defaultWidth: 320, defaultHeight: 380, defaultX: 150, defaultY: 30 },
   { id: 'portfolio',  title: 'Portfolio.txt - Notepad', icon: 'document',  defaultWidth: 520, defaultHeight: 440, defaultX: 110, defaultY: 35,  menus: NOTEPAD_MENUS },
   { id: 'transcript', title: 'Transcript.txt - Notepad',icon: 'notepad',   defaultWidth: 500, defaultHeight: 460, defaultX: 130, defaultY: 25,  menus: NOTEPAD_MENUS },
-  { id: 'swresume',   title: 'SW_Resume.txt - Notepad', icon: 'document',  defaultWidth: 500, defaultHeight: 420, defaultX: 100, defaultY: 45,  menus: NOTEPAD_MENUS },
-  { id: 'ewresume',   title: 'EW_Resume.txt - Notepad', icon: 'document',  defaultWidth: 500, defaultHeight: 420, defaultX: 140, defaultY: 55,  menus: NOTEPAD_MENUS },
+  { id: 'minesweeper',title: 'Minesweeper',              icon: 'minesweeper', defaultWidth: 200, defaultHeight: 260, defaultX: 200, defaultY: 60 },
   { id: 'discord',    title: '/gather Discord Bot',     icon: 'discord',   defaultWidth: 360, defaultHeight: 260, defaultX: 180, defaultY: 70 },
   { id: 'cavestory',  title: 'Cave Story',              icon: 'cavestory', defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
   { id: 'interests',  title: 'Interests',               icon: 'document',  defaultWidth: 440, defaultHeight: 460, defaultX: 120, defaultY: 30 },
@@ -216,8 +213,7 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   undertale: Undertale,
   portfolio: Portfolio,
   transcript: Transcript,
-  swresume: SoftwareResume,
-  ewresume: EmbeddedResume,
+  minesweeper: Minesweeper,
   discord: DiscordBot,
   cavestory: CaveStory,
   interests: Interests,

@@ -116,7 +116,7 @@ export function ContextMenu() {
           hideContextMenu();
           openWindow('settings');
         }}>
-          Properties...
+          Settings
         </div>
         <div className={styles.item} onClick={() => {
           hideContextMenu();
@@ -141,9 +141,10 @@ export function ContextMenu() {
       mycomputer: 'My Computer', recycle: 'Recycle Bin', terminal: 'MS-DOS Prompt',
       valorant: 'VALORANT', undertale: 'UNDERTALE', portfolio: 'Portfolio',
       transcript: 'Transcript', swresume: 'SW Resume', ewresume: 'EW Resume',
-      discord: '/gather Bot', cavestory: 'Cave Story', interests: 'Interests', dotcard: 'dot.card',
+      discord: '/gather Bot', cavestory: 'Cave Story', interests: 'Interests',
       voltbox: 'Voltbox', aol: 'AOL Messenger', paint: 'Paint',
-      settings: 'Settings', datetime: 'Date/Time',
+      settings: 'Display Properties', datetime: 'Date/Time Properties',
+      steam: 'Steam',
     };
 
     return (

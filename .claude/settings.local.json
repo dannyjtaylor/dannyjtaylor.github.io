@@ -5,7 +5,8 @@
       "WebSearch",
       "Bash(python:*)",
       "WebFetch(domain:github.com)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(grep:*)"
     ]
   }
 }

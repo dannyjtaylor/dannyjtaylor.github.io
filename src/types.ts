@@ -32,6 +32,7 @@ export interface WindowState {
   y: number;
   width: number;
   height: number;
+  title?: string;
 }
 
 export type AppPhase = 'boot' | 'desktop' | 'shutdown-prompt' | 'shutdown';

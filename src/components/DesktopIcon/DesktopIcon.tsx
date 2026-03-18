@@ -122,7 +122,7 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
       data-icon-id={id}
     >
       <div className={styles.iconImg}>
-        <DynamicIcon name={icon} size={32} />
+        <DynamicIcon name={icon} size={0} className={styles.dynamicIconSize} />
       </div>
       <span className={`${styles.label} ${isSelected ? styles.labelSelected : ''}`}>
         {label}

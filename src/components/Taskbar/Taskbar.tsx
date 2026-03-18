@@ -64,7 +64,7 @@ export function Taskbar() {
                 }
               }}
             >
-              {id}
+              {w.title || id}
             </button>
           );
         })}

@@ -1,0 +1,611 @@
+import { useState } from 'react';
+import { useDesktopStore } from '../stores/desktopStore';
+
+/* ─── Game data ─── */
+interface SteamGame {
+  id: string;
+  title: string;
+  developer: string;
+  size: string;
+  installed: boolean;
+  lastPlayed?: string;
+  hours: number;
+  description: string;
+  windowId?: string;
+  tags: string[];
+}
+
+const GAMES: SteamGame[] = [
+  {
+    id: 'valorant',
+    title: 'VALORANT',
+    developer: 'Riot Games',
+    size: '22.5 GB',
+    installed: true,
+    lastPlayed: 'Today',
+    hours: 1337,
+    description: 'A 5v5 character-based tactical FPS where precise gunplay meets unique agent abilities.',
+    windowId: 'valorant',
+    tags: ['FPS', 'Competitive', 'Multiplayer'],
+  },
+  {
+    id: 'undertale',
+    title: 'UNDERTALE',
+    developer: 'Toby Fox',
+    size: '200 MB',
+    installed: true,
+    lastPlayed: 'Yesterday',
+    hours: 42,
+    description: 'A friendly RPG where nobody has to die. Explore the underground and meet a cast of unforgettable characters.',
+    windowId: 'undertale',
+    tags: ['RPG', 'Indie', 'Story Rich'],
+  },
+  {
+    id: 'cavestory',
+    title: 'Cave Story+',
+    developer: 'Studio Pixel',
+    size: '85 MB',
+    installed: true,
+    lastPlayed: 'Last week',
+    hours: 28,
+    description: 'A freeware side-scrolling platformer. Explore a vast cave system, fight monsters and uncover the mysteries within.',
+    windowId: 'cavestory',
+    tags: ['Platformer', 'Indie', 'Action'],
+  },
+  {
+    id: 'minesweeper',
+    title: 'Minesweeper',
+    developer: 'DJTech Industries',
+    size: '4 KB',
+    installed: true,
+    lastPlayed: '3 days ago',
+    hours: 99,
+    description: 'The classic puzzle game. Click to reveal squares, flag the mines, and clear the board.',
+    windowId: 'minesweeper',
+    tags: ['Puzzle', 'Casual', 'Classic'],
+  },
+  {
+    id: 'halflife3',
+    title: 'Half-Life 3',
+    developer: 'Valve',
+    size: '??? GB',
+    installed: false,
+    hours: 0,
+    description: 'Coming soon... probably... maybe... one day...',
+    tags: ['FPS', 'Sci-Fi', 'Wishlist'],
+  },
+  {
+    id: 'dannyquest',
+    title: 'DannyQuest',
+    developer: 'DJTech Studios',
+    size: '1.3 MB',
+    installed: false,
+    hours: 0,
+    description: 'An epic quest through the world of computer engineering. Debug your way to graduation!',
+    tags: ['Adventure', 'Indie', 'Educational'],
+  },
+];
+
+type SteamTab = 'Library' | 'Store' | 'Community' | 'Profile';
+
+/* ─── Inline style helpers ─── */
+const steamDark = '#1b2838';
+const steamDarker = '#171a21';
+const steamBlue = '#1a9fff';
+const steamGreen = '#4c6b22';
+const steamGreenLight = '#a4d007';
+const steamGray = '#2a475e';
+const steamText = '#c7d5e0';
+const steamTextDim = '#8f98a0';
+const steamBorder = '#0e1a26';
+
+export function Steam() {
+  const openWindow = useDesktopStore((s) => s.openWindow);
+  const [activeTab, setActiveTab] = useState<SteamTab>('Library');
+  const [selectedGame, setSelectedGame] = useState<SteamGame>(GAMES[0]!);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterInstalled, setFilterInstalled] = useState(false);
+
+  const filteredGames = GAMES.filter((g) => {
+    if (filterInstalled && !g.installed) return false;
+    if (searchQuery && !g.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
+
+  const handlePlay = (game: SteamGame) => {
+    if (game.windowId) {
+      openWindow(game.windowId);
+    }
+  };
+
+  return (
+    <div style={{
+      width: '100%',
+      height: '100%',
+      background: steamDark,
+      display: 'flex',
+      flexDirection: 'column',
+      fontFamily: 'var(--font-system)',
+      fontSize: 11,
+      color: steamText,
+      overflow: 'hidden',
+    }}>
+      {/* ─── Top Navigation Bar ─── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: steamDarker,
+        padding: '0 8px',
+        height: 28,
+        gap: 0,
+        borderBottom: `1px solid ${steamBorder}`,
+        flexShrink: 0,
+      }}>
+        <span style={{
+          fontWeight: 'bold',
+          fontSize: 12,
+          color: steamText,
+          marginRight: 16,
+          letterSpacing: 1,
+        }}>
+          STEAM
+        </span>
+        {(['Library', 'Store', 'Community', 'Profile'] as SteamTab[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: activeTab === tab ? '#fff' : steamTextDim,
+              fontFamily: 'var(--font-system)',
+              fontSize: 11,
+              padding: '4px 12px',
+              borderBottom: activeTab === tab ? `2px solid ${steamBlue}` : '2px solid transparent',
+              marginBottom: -1,
+            }}
+          >
+            {tab}
+          </button>
+        ))}
+        <div style={{ flex: 1 }} />
+        <span style={{ color: steamTextDim, fontSize: 10 }}>
+          Danny
+        </span>
+      </div>
+
+      {/* ─── Library View ─── */}
+      {activeTab === 'Library' && (
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {/* ─── Left Sidebar: Game List ─── */}
+          <div style={{
+            width: 200,
+            background: steamGray,
+            borderRight: `1px solid ${steamBorder}`,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}>
+            {/* Search bar */}
+            <div style={{ padding: 6 }}>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: steamDarker,
+                  border: `1px solid ${steamBorder}`,
+                  color: steamText,
+                  fontFamily: 'var(--font-system)',
+                  fontSize: 11,
+                  padding: '3px 6px',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            {/* Filter */}
+            <div style={{
+              padding: '2px 8px 6px',
+              borderBottom: `1px solid ${steamBorder}`,
+            }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: steamTextDim }}>
+                <input
+                  type="checkbox"
+                  checked={filterInstalled}
+                  onChange={(e) => setFilterInstalled(e.target.checked)}
+                  style={{ accentColor: steamBlue }}
+                />
+                Installed only
+              </label>
+            </div>
+
+            {/* Game list */}
+            <div style={{ flex: 1, overflow: 'auto' }}>
+              {filteredGames.map((game) => (
+                <div
+                  key={game.id}
+                  onClick={() => setSelectedGame(game)}
+                  style={{
+                    padding: '6px 10px',
+                    background: selectedGame?.id === game.id ? 'rgba(255,255,255,0.08)' : 'transparent',
+                    borderLeft: selectedGame?.id === game.id ? `3px solid ${steamBlue}` : '3px solid transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <div style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: game.installed ? steamGreenLight : steamTextDim,
+                    flexShrink: 0,
+                  }} />
+                  <div style={{ overflow: 'hidden' }}>
+                    <div style={{
+                      fontSize: 11,
+                      color: selectedGame?.id === game.id ? '#fff' : steamText,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}>
+                      {game.title}
+                    </div>
+                    {game.hours > 0 && (
+                      <div style={{ fontSize: 9, color: steamTextDim }}>
+                        {game.hours} hrs on record
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats footer */}
+            <div style={{
+              padding: '6px 10px',
+              borderTop: `1px solid ${steamBorder}`,
+              fontSize: 10,
+              color: steamTextDim,
+            }}>
+              {GAMES.filter((g) => g.installed).length} installed / {GAMES.length} games
+            </div>
+          </div>
+
+          {/* ─── Right Panel: Game Detail ─── */}
+          {selectedGame && (
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'auto',
+              background: steamDark,
+            }}>
+              {/* Hero banner area */}
+              <div style={{
+                background: `linear-gradient(135deg, ${steamGray} 0%, ${steamDark} 100%)`,
+                padding: 20,
+                borderBottom: `1px solid ${steamBorder}`,
+              }}>
+                <div style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
+                  {selectedGame.title}
+                </div>
+                <div style={{ fontSize: 10, color: steamTextDim, marginBottom: 12 }}>
+                  {selectedGame.developer}
+                </div>
+
+                {/* Tags */}
+                <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
+                  {selectedGame.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        padding: '2px 8px',
+                        borderRadius: 2,
+                        fontSize: 9,
+                        color: steamBlue,
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Play/Install button */}
+                {selectedGame.installed ? (
+                  <button
+                    onClick={() => handlePlay(selectedGame)}
+                    style={{
+                      background: `linear-gradient(to right, ${steamGreen}, ${steamGreenLight})`,
+                      border: 'none',
+                      color: '#fff',
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 14,
+                      fontWeight: 'bold',
+                      padding: '8px 32px',
+                      letterSpacing: 1,
+                    }}
+                  >
+                    {selectedGame.windowId ? 'Play' : 'Launch'}
+                  </button>
+                ) : (
+                  <button
+                    style={{
+                      background: steamBlue,
+                      border: 'none',
+                      color: '#fff',
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                      padding: '8px 24px',
+                      opacity: 0.6,
+                    }}
+                    disabled
+                  >
+                    Install
+                  </button>
+                )}
+              </div>
+
+              {/* Game Info Section */}
+              <div style={{ padding: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+                  About This Game
+                </div>
+                <p style={{ color: steamText, lineHeight: 1.6, marginBottom: 16 }}>
+                  {selectedGame.description}
+                </p>
+
+                {/* Info grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '8px 16px',
+                  background: 'rgba(0,0,0,0.2)',
+                  padding: 12,
+                  borderRadius: 2,
+                }}>
+                  <div>
+                    <div style={{ fontSize: 9, color: steamTextDim, marginBottom: 2 }}>Developer</div>
+                    <div style={{ color: steamBlue }}>{selectedGame.developer}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 9, color: steamTextDim, marginBottom: 2 }}>Size</div>
+                    <div>{selectedGame.size}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 9, color: steamTextDim, marginBottom: 2 }}>Play Time</div>
+                    <div>{selectedGame.hours > 0 ? `${selectedGame.hours} hours` : 'Not played yet'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 9, color: steamTextDim, marginBottom: 2 }}>Last Played</div>
+                    <div>{selectedGame.lastPlayed ?? 'Never'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 9, color: steamTextDim, marginBottom: 2 }}>Status</div>
+                    <div style={{ color: selectedGame.installed ? steamGreenLight : '#f44' }}>
+                      {selectedGame.installed ? 'Installed' : 'Not installed'}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 9, color: steamTextDim, marginBottom: 2 }}>Tags</div>
+                    <div>{selectedGame.tags.join(', ')}</div>
+                  </div>
+                </div>
+
+                {/* Achievements section */}
+                {selectedGame.installed && selectedGame.hours > 0 && (
+                  <div style={{ marginTop: 16 }}>
+                    <div style={{ fontSize: 12, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+                      Achievements
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      gap: 8,
+                      flexWrap: 'wrap',
+                    }}>
+                      {['First Steps', 'Getting Good', 'Veteran'].map((ach, i) => (
+                        <div
+                          key={ach}
+                          style={{
+                            background: i < 2 ? 'rgba(164,208,7,0.15)' : 'rgba(255,255,255,0.05)',
+                            border: `1px solid ${i < 2 ? steamGreenLight : steamBorder}`,
+                            padding: '6px 10px',
+                            borderRadius: 2,
+                            fontSize: 10,
+                            color: i < 2 ? steamGreenLight : steamTextDim,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                          }}
+                        >
+                          <span style={{ fontSize: 14 }}>{i < 2 ? '\u2605' : '\u2606'}</span>
+                          {ach}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── Store View ─── */}
+      {activeTab === 'Store' && (
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+          <div style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>Featured & Recommended</div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', padding: 16 }}>
+            {GAMES.slice(0, 4).map((game) => (
+              <div
+                key={game.id}
+                onClick={() => { setSelectedGame(game); setActiveTab('Library'); }}
+                style={{
+                  width: 140,
+                  background: steamGray,
+                  border: `1px solid ${steamBorder}`,
+                  padding: 8,
+                }}
+              >
+                <div style={{
+                  width: '100%',
+                  height: 60,
+                  background: `linear-gradient(135deg, ${steamDarker}, ${steamGray})`,
+                  marginBottom: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 14,
+                  fontWeight: 'bold',
+                  color: steamBlue,
+                }}>
+                  {game.title.charAt(0)}
+                </div>
+                <div style={{ fontSize: 11, color: '#fff', marginBottom: 2 }}>{game.title}</div>
+                <div style={{ fontSize: 9, color: steamTextDim }}>{game.developer}</div>
+                <div style={{
+                  marginTop: 6,
+                  fontSize: 10,
+                  color: game.installed ? steamGreenLight : steamBlue,
+                }}>
+                  {game.installed ? 'In Library' : 'Free to Play'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ─── Community View ─── */}
+      {activeTab === 'Community' && (
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>Community Hub</div>
+          <div style={{ color: steamTextDim, textAlign: 'center', maxWidth: 300 }}>
+            Discussions, screenshots, guides, and workshop content from the DannyOS gaming community.
+          </div>
+          <div style={{
+            marginTop: 12,
+            padding: '8px 16px',
+            background: steamGray,
+            border: `1px solid ${steamBorder}`,
+            color: steamTextDim,
+            fontSize: 10,
+          }}>
+            No community content available yet. Check back later!
+          </div>
+        </div>
+      )}
+
+      {/* ─── Profile View ─── */}
+      {activeTab === 'Profile' && (
+        <div style={{ flex: 1, padding: 20, overflow: 'auto' }}>
+          <div style={{
+            display: 'flex',
+            gap: 16,
+            marginBottom: 20,
+            alignItems: 'flex-start',
+          }}>
+            {/* Avatar */}
+            <div style={{
+              width: 64,
+              height: 64,
+              background: steamGray,
+              border: `2px solid ${steamBlue}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 24,
+              fontWeight: 'bold',
+              color: steamBlue,
+              flexShrink: 0,
+            }}>
+              D
+            </div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>Danny</div>
+              <div style={{ fontSize: 10, color: steamGreenLight, marginTop: 2 }}>Online</div>
+              <div style={{ fontSize: 10, color: steamTextDim, marginTop: 4 }}>
+                Level 42 | {GAMES.length} games owned
+              </div>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gap: 12,
+            marginBottom: 20,
+          }}>
+            {[
+              { label: 'Games Owned', value: String(GAMES.length) },
+              { label: 'Hours Played', value: String(GAMES.reduce((sum, g) => sum + g.hours, 0)) },
+              { label: 'Achievements', value: '87' },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                style={{
+                  background: steamGray,
+                  padding: 12,
+                  textAlign: 'center',
+                  border: `1px solid ${steamBorder}`,
+                }}
+              >
+                <div style={{ fontSize: 18, fontWeight: 'bold', color: steamBlue }}>{stat.value}</div>
+                <div style={{ fontSize: 9, color: steamTextDim, marginTop: 4 }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Recent Activity */}
+          <div style={{ fontSize: 12, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+            Recent Activity
+          </div>
+          {GAMES.filter((g) => g.lastPlayed).slice(0, 3).map((game) => (
+            <div
+              key={game.id}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '8px 12px',
+                background: 'rgba(0,0,0,0.2)',
+                marginBottom: 4,
+                borderRadius: 2,
+              }}
+            >
+              <div>
+                <div style={{ color: '#fff' }}>{game.title}</div>
+                <div style={{ fontSize: 9, color: steamTextDim }}>{game.hours} hrs total</div>
+              </div>
+              <div style={{ fontSize: 10, color: steamTextDim }}>{game.lastPlayed}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ─── Bottom Status Bar ─── */}
+      <div style={{
+        height: 20,
+        background: steamDarker,
+        borderTop: `1px solid ${steamBorder}`,
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 8px',
+        fontSize: 10,
+        color: steamTextDim,
+        flexShrink: 0,
+        justifyContent: 'space-between',
+      }}>
+        <span>Steam Client v1.0 - DannyOS Edition</span>
+        <span>{GAMES.filter((g) => g.installed).length} games installed</span>
+      </div>
+    </div>
+  );
+}

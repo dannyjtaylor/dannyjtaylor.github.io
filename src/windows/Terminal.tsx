@@ -17,79 +17,79 @@ interface FSNode {
 const FS: FSNode = {
   type: 'dir',
   children: {
-    'WINDOWS': {
+    'Windows': {
       type: 'dir',
       children: {
-        'SYSTEM': {
+        'System': {
           type: 'dir',
           children: {
-            'WIN95.SYS': { type: 'file', content: '[Binary data — Windows 95 kernel]', size: 1024000 },
-            'KERNEL32.DLL': { type: 'file', content: '[Binary data]', size: 512000 },
-            'GDI32.DLL': { type: 'file', content: '[Binary data]', size: 256000 },
+            'Win95.sys': { type: 'file', content: '[Binary data — Windows 95 kernel]', size: 1024000 },
+            'Kernel32.dll': { type: 'file', content: '[Binary data]', size: 512000 },
+            'Gdi32.dll': { type: 'file', content: '[Binary data]', size: 256000 },
           },
         },
-        'FONTS': {
+        'Fonts': {
           type: 'dir',
           children: {
-            'W95FA.OTF': { type: 'file', content: '[Font file]', size: 48000 },
-            'ARIAL.TTF': { type: 'file', content: '[Font file]', size: 72000 },
-            'COUR.TTF': { type: 'file', content: '[Font file]', size: 58000 },
+            'W95FA.otf': { type: 'file', content: '[Font file]', size: 48000 },
+            'Arial.ttf': { type: 'file', content: '[Font file]', size: 72000 },
+            'Cour.ttf': { type: 'file', content: '[Font file]', size: 58000 },
           },
         },
-        'DESKTOP': {
+        'Desktop': {
           type: 'dir',
           children: {
-            'ABOUT.TXT': { type: 'program', windowId: 'about', size: 420 },
-            'PROJECTS': { type: 'program', windowId: 'projects', size: 0 },
-            'RESUME.TXT': { type: 'program', windowId: 'resume', size: 842 },
-            'CONTACT.EML': { type: 'program', windowId: 'contact', size: 256 },
-            'PORTFOLIO.TXT': { type: 'program', windowId: 'portfolio', size: 1024 },
-            'TRANSCRIPT.TXT': { type: 'program', windowId: 'transcript', size: 2048 },
-            'INTERESTS.TXT': { type: 'program', windowId: 'interests', size: 512 },
-            'DOTCARD.LNK': { type: 'program', windowId: 'dotcard', size: 128 },
+            'About.txt': { type: 'program', windowId: 'about', size: 420 },
+            'Projects': { type: 'program', windowId: 'projects', size: 0 },
+            'Resume.txt': { type: 'program', windowId: 'resume', size: 842 },
+            'Contact.eml': { type: 'program', windowId: 'contact', size: 256 },
+            'Portfolio.txt': { type: 'program', windowId: 'portfolio', size: 1024 },
+            'Transcript.txt': { type: 'program', windowId: 'transcript', size: 2048 },
+            'Interests.txt': { type: 'program', windowId: 'interests', size: 512 },
           },
         },
       },
     },
-    'PROGRAMS': {
+    'Programs': {
       type: 'dir',
       children: {
-        'VALORANT.EXE': { type: 'program', windowId: 'valorant', size: 13370 },
-        'UNDERTALE.EXE': { type: 'program', windowId: 'undertale', size: 9999 },
-        'CAVESTORY.EXE': { type: 'program', windowId: 'cavestory', size: 8080 },
-        'MINESWEEPER.EXE': { type: 'program', windowId: 'minesweeper', size: 4096 },
-        'VOLTBOX.EXE': { type: 'program', windowId: 'voltbox', size: 16384 },
-        'GATHER.EXE': { type: 'program', windowId: 'discord', size: 2048 },
-        'AOL.EXE': { type: 'program', windowId: 'aol', size: 3072 },
-        'PAINT.EXE': { type: 'program', windowId: 'paint', size: 5120 },
-        'SETTINGS.EXE': { type: 'program', windowId: 'settings', size: 1536 },
-        'DATETIME.EXE': { type: 'program', windowId: 'datetime', size: 1024 },
+        'Valorant.exe': { type: 'program', windowId: 'valorant', size: 13370 },
+        'Undertale.exe': { type: 'program', windowId: 'undertale', size: 9999 },
+        'CaveStory.exe': { type: 'program', windowId: 'cavestory', size: 8080 },
+        'Minesweeper.exe': { type: 'program', windowId: 'minesweeper', size: 4096 },
+        'Voltbox.exe': { type: 'program', windowId: 'voltbox', size: 16384 },
+        'Gather.exe': { type: 'program', windowId: 'discord', size: 2048 },
+        'AOL.exe': { type: 'program', windowId: 'aol', size: 3072 },
+        'Paint.exe': { type: 'program', windowId: 'paint', size: 5120 },
+        'Settings.exe': { type: 'program', windowId: 'settings', size: 1536 },
+        'DateTime.exe': { type: 'program', windowId: 'datetime', size: 1024 },
+        'Steam.exe': { type: 'program', windowId: 'steam', size: 24576 },
       },
     },
-    'USERS': {
+    'Users': {
       type: 'dir',
       children: {
-        'DANNY': {
+        'Danny': {
           type: 'dir',
           children: {
-            'MY DOCUMENTS': {
+            'My Documents': {
               type: 'dir',
               children: {
-                'SECRET.TXT': { type: 'file', content: "Congratulations! You found the secret file.\nDanny's favorite number is 42.\n\n...or is it?", size: 128 },
-                'TODO.TXT': { type: 'file', content: '[ ] Graduate\n[ ] Get a job\n[x] Build DannyOS\n[x] Have fun', size: 64 },
+                'Secret.txt': { type: 'file', content: "Nice job, you found the secret! Now I'll tell you what DJT really stands for...", size: 128 },
+                'Todo.txt': { type: 'file', content: '[ ] Graduate\n[ ] Get a job\n[x] Build DannyOS\n[x] Have fun', size: 64 },
               },
             },
-            'DESKTOP.INI': { type: 'file', content: '[.ShellClassInfo]\nIconResource=explorer.exe,0', size: 42 },
+            'Desktop.ini': { type: 'file', content: '[.ShellClassInfo]\nIconResource=explorer.exe,0', size: 42 },
           },
         },
       },
     },
-    'MY COMPUTER': { type: 'program', windowId: 'mycomputer', size: 0 },
-    'RECYCLE BIN': { type: 'program', windowId: 'recycle', size: 0 },
-    'DANNY.EXE': { type: 'file', content: 'MZ\x90\x00... [Binary data — That\'s me!]', size: 1337 },
-    'ABOUT.TXT': { type: 'file', content: "Hey, I'm Danny J. Taylor.\nComputer Engineering student.\nWelcome to DannyOS.", size: 420 },
-    'AUTOEXEC.BAT': { type: 'file', content: '@echo off\nSET PATH=C:\\WINDOWS;C:\\PROGRAMS\nSET PROMPT=$P$G\necho Welcome to DannyOS!', size: 96 },
-    'CONFIG.SYS': { type: 'file', content: 'DEVICE=C:\\WINDOWS\\SYSTEM\\HIMEM.SYS\nDOS=HIGH,UMB\nFILES=40\nBUFFERS=20', size: 84 },
+    'My Computer': { type: 'program', windowId: 'mycomputer', size: 0 },
+    'Recycle Bin': { type: 'program', windowId: 'recycle', size: 0 },
+    'Danny.exe': { type: 'file', content: 'MZ\x90\x00... [Binary data — That\'s me!]', size: 1337 },
+    'About.txt': { type: 'file', content: "Hey, I'm Danny! I'm a Computer Engineering senior at Florida Polytechnic University! I hope you enjoy DannyOS!!", size: 420 },
+    'Autoexec.bat': { type: 'file', content: '@echo off\nSET PATH=C:\\Windows;C:\\Programs\nSET PROMPT=$P$G\necho Welcome to DannyOS!', size: 96 },
+    'Config.sys': { type: 'file', content: 'DEVICE=C:\\Windows\\System\\Himem.sys\nDOS=HIGH,UMB\nFILES=40\nBUFFERS=20', size: 84 },
   },
 };
 
@@ -101,7 +101,16 @@ function resolvePath(cwd: string[], relPath: string): string[] {
     if (part === '..') {
       if (result.length > 0) result.pop();
     } else {
-      result.push(part.toUpperCase());
+      // Case-insensitive lookup against current node
+      const node = getNode(result);
+      if (node?.type === 'dir' && node.children) {
+        const match = Object.keys(node.children).find(
+          (k) => k.toLowerCase() === part.toLowerCase()
+        );
+        result.push(match ?? part);
+      } else {
+        result.push(part);
+      }
     }
   }
   return result;
@@ -111,9 +120,12 @@ function getNode(path: string[]): FSNode | null {
   let node: FSNode = FS;
   for (const part of path) {
     if (node.type !== 'dir' || !node.children) return null;
-    const child = node.children[part];
-    if (!child) return null;
-    node = child;
+    // Case-insensitive child lookup
+    const key = Object.keys(node.children).find(
+      (k) => k.toLowerCase() === part.toLowerCase()
+    );
+    if (!key) return null;
+    node = node.children[key]!;
   }
   return node;
 }
@@ -132,9 +144,9 @@ export function Terminal() {
 
   const [history, setHistory] = useState<string[]>([
     'DannyOS [Version 1.0.2004]',
-    'Copyright (C) 2004 DJTech.',
+    'Copyright (c) 2004 DJTech.',
     '',
-    'Type HELP for a list of commands.',
+    'Type help for a list of commands.',
     '',
   ]);
   const [input, setInput] = useState('');
@@ -177,69 +189,69 @@ export function Terminal() {
           if (!topic) {
             output = [
               '',
-              'DANNYDOS Command Reference',
-              '=========================',
+              'DOS Command Reference',
+              '=====================',
               '',
-              'NAVIGATION',
-              '  CD [path]       Change directory         CD ..  CD PROGRAMS',
-              '  DIR [path]      List directory contents   DIR  DIR WINDOWS',
-              '  LS [path]       Same as DIR, clean view   LS  LS USERS',
-              '  TREE [path]     Show directory tree       TREE  TREE PROGRAMS',
-              '  PWD             Print working directory',
+              'Navigation',
+              '  cd [path]       Change directory',
+              '  dir [path]      List directory contents',
+              '  ls [path]       Same as dir, clean view',
+              '  tree [path]     Show directory tree',
+              '  pwd             Print working directory',
               '',
-              'FILES',
-              '  TYPE [file]     Display file contents     TYPE ABOUT.TXT',
-              '  CAT [file]      Same as TYPE              CAT CONFIG.SYS',
+              'Files',
+              '  type [file]     Display file contents',
+              '  cat [file]      Same as type',
               '',
-              'PROGRAMS',
-              '  START [name]    Launch a program           START minesweeper',
-              '  [name].EXE      Run directly               MINESWEEPER.EXE',
+              'Programs',
+              '  start [name]    Launch a program',
+              '  [name].exe      Run directly',
               '',
-              'SYSTEM',
-              '  CLS / CLEAR     Clear the screen',
-              '  VER             Show OS version',
-              '  WHOAMI          Current user',
-              '  DATE            Current date',
-              '  TIME            Current time',
-              '  ECHO [text]     Print text',
-              '  PING [host]     Ping a host',
-              '  EXIT            Close the terminal',
+              'System',
+              '  cls / clear     Clear the screen',
+              '  ver             Show OS version',
+              '  whoami          Current user',
+              '  date            Current date',
+              '  time            Current time',
+              '  echo [text]     Print text',
+              '  ping [host]     Ping a host',
+              '  exit            Close the terminal',
               '',
-              'EASTER EGGS',
-              '  NEOFETCH        System info',
-              '  COWSAY [text]   Moo!',
-              '  MATRIX          Take the red pill',
+              'Easter Eggs',
+              '  neofetch        System info',
+              '  cowsay [text]   Moo!',
+              '  matrix          Take the red pill',
               '',
-              'Type HELP START for more detail on a specific command.',
+              'Type help start for more detail on a specific command.',
               'Use Tab for filename autocomplete, Up/Down for command history.',
               '',
             ];
           } else if (topic === 'cd') {
-            output = ['', 'CD [path]  -  Change the current directory.', '', '  CD            Show current directory', '  CD ..         Go up one level', '  CD \\          Go to root (C:\\)', '  CD PROGRAMS   Enter the PROGRAMS folder', ''];
+            output = ['', 'cd [path]  -  Change the current directory.', '', '  cd            Show current directory', '  cd ..         Go up one level', '  cd \\          Go to root (C:\\)', '  cd Programs   Enter the Programs folder', ''];
           } else if (topic === 'dir' || topic === 'ls') {
-            output = ['', 'DIR [path]  /  LS [path]  -  List directory contents.', '', '  DIR           List current directory', '  LS            Same as DIR (clean output)', '  DIR WINDOWS   List a specific directory', ''];
+            output = ['', 'dir [path]  /  ls [path]  -  List directory contents.', '', '  dir           List current directory', '  ls            Same as dir (clean output)', '  dir Windows   List a specific directory', ''];
           } else if (topic === 'start') {
             output = [
-              '', 'START [program]  -  Launch a program by name.', '',
+              '', 'start [program]  -  Launch a program by name.', '',
               '  Available programs:',
               '    about        About Me          minesweeper  Minesweeper',
               '    projects     Projects          voltbox      Voltbox',
-              '    resume       Resume            valorant     VALORANT',
-              '    contact      Contact           undertale    UNDERTALE',
+              '    resume       Resume            valorant     Valorant',
+              '    contact      Contact           undertale    Undertale',
               '    portfolio    Portfolio          cavestory    Cave Story',
               '    transcript   Transcript        discord      /gather Bot',
               '    interests    Interests         aol          AOL Messenger',
-              '    dotcard      dot.card          mycomputer   My Computer',
+              '    mycomputer   My Computer       steam        Steam',
               '    terminal     MS-DOS Prompt     recycle      Recycle Bin',
               '    paint        Paint             settings     Settings',
               '    datetime     Date/Time',
               '',
-              '  You can also run .EXE files directly from the PROGRAMS folder.', '',
+              '  You can also run .exe files directly from the Programs folder.', '',
             ];
           } else if (topic === 'type' || topic === 'cat') {
-            output = ['', 'TYPE [file]  /  CAT [file]  -  Display file contents.', '', '  TYPE ABOUT.TXT           View a text file', '  CAT CONFIG.SYS           Same thing', '  TYPE USERS\\DANNY\\MY DOCUMENTS\\SECRET.TXT', ''];
+            output = ['', 'type [file]  /  cat [file]  -  Display file contents.', '', '  type About.txt           View a text file', '  cat Config.sys           Same thing', ''];
           } else if (topic === 'tree') {
-            output = ['', 'TREE [path]  -  Display a directory tree.', '', '  TREE            Tree of current directory', '  TREE PROGRAMS   Tree of a specific directory', ''];
+            output = ['', 'tree [path]  -  Display a directory tree.', '', '  tree            Tree of current directory', '  tree Programs   Tree of a specific directory', ''];
           } else {
             output = [`No help available for '${topic}'.`];
           }
@@ -254,7 +266,7 @@ export function Terminal() {
           } else {
             const dirPath = pathString(targetPath);
             output = [
-              ` Volume in drive C is DANNYOS`,
+              ` Volume in drive C is DannyOS`,
               ` Volume Serial Number is D4N-NY04`,
               '',
               ` Directory of ${dirPath}`,
@@ -300,12 +312,10 @@ export function Terminal() {
                 files.push(name);
               }
             }
-            // Show dirs first, then files, in columns
             const all = [...dirs, ...files];
             if (all.length === 0) {
               output = ['  (empty directory)'];
             } else {
-              // Simple column layout
               const maxLen = Math.max(...all.map((s) => s.length));
               const colWidth = maxLen + 3;
               const cols = Math.max(1, Math.floor(60 / colWidth));
@@ -354,7 +364,7 @@ export function Terminal() {
             } else if (node.content) {
               output = node.content.split('\n');
             } else if (node.windowId) {
-              output = [`[Program file — use START ${args.join(' ')} to run it]`];
+              output = [`[Program file — use start ${args.join(' ')} to run it]`];
             } else {
               output = [`[Empty file]`];
             }
@@ -397,7 +407,7 @@ export function Terminal() {
         }
 
         case 'ver': {
-          output = ['', 'DannyOS [Version 1.0.2004]', 'Copyright (C) 2004 DJTech.', ''];
+          output = ['', 'DannyOS [Version 1.0.2004]', 'Copyright (c) 2004 DJTech.', ''];
           break;
         }
 
@@ -417,7 +427,7 @@ export function Terminal() {
         }
 
         case 'whoami': {
-          output = ['DANNY'];
+          output = ['Danny'];
           break;
         }
 
@@ -428,7 +438,7 @@ export function Terminal() {
 
         case 'ping': {
           if (args.length === 0) {
-            output = ['Usage: PING <hostname>'];
+            output = ['Usage: ping <hostname>'];
           } else {
             const host = args[0];
             output = [
@@ -459,7 +469,7 @@ export function Terminal() {
 
         case 'start': {
           if (args.length === 0) {
-            output = ['Usage: START <program>', 'Type HELP START for available programs.'];
+            output = ['Usage: start <program>', 'Type help start for available programs.'];
           } else {
             const name = args[0]!.toLowerCase().replace('.exe', '');
             try {
@@ -496,7 +506,7 @@ export function Terminal() {
             '      |            |     Shell: DannyDOS v1.0',
             '       \\__________/      Resolution: whatever fits',
             '         ||||||||         CPU: Danny\'s Brain',
-            '         ||||||||         Memory: Lots of coffee',
+            '         ||||||||         Memory: DDR7.-2',
             '',
           ];
           break;
@@ -559,7 +569,8 @@ export function Terminal() {
             output = node.content ? node.content.split('\n') : ['[Empty file]'];
           } else {
             // Try as bare program name
-            const bareNode = getNode(['PROGRAMS', cmd.toUpperCase() + '.EXE']);
+            const progPath = resolvePath([], 'Programs/' + cmd + '.exe');
+            const bareNode = getNode(progPath);
             if (bareNode?.type === 'program' && bareNode.windowId) {
               openWindow(bareNode.windowId);
               output = [`Starting ${cmd}...`];
@@ -610,18 +621,17 @@ export function Terminal() {
       }
     } else if (e.key === 'Tab') {
       e.preventDefault();
-      // Tab completion
-      const partial = input.trim().split(/\s+/).pop()?.toUpperCase() ?? '';
+      const partial = input.trim().split(/\s+/).pop() ?? '';
       if (partial) {
         const node = getNode(cwd);
         if (node?.type === 'dir' && node.children) {
           const matches = Object.keys(node.children).filter((name) =>
-            name.startsWith(partial),
+            name.toLowerCase().startsWith(partial.toLowerCase()),
           );
           if (matches.length === 1) {
-            const parts = input.trim().split(/\s+/);
-            parts[parts.length - 1] = matches[0]!;
-            setInput(parts.join(' '));
+            const inputParts = input.trim().split(/\s+/);
+            inputParts[inputParts.length - 1] = matches[0]!;
+            setInput(inputParts.join(' '));
           } else if (matches.length > 1) {
             pushOutput([`${prompt}${input}`, matches.join('  ')]);
           }

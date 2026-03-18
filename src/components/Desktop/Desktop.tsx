@@ -24,7 +24,7 @@ import { Minesweeper } from '../../windows/Minesweeper';
 import { DiscordBot } from '../../windows/DiscordBot';
 import { CaveStory } from '../../windows/CaveStory';
 import { Interests } from '../../windows/Interests';
-import { DotCard } from '../../windows/DotCard';
+import { Steam } from '../../windows/Steam';
 import { Voltbox } from '../../windows/Voltbox';
 import { AOLChat } from '../../windows/AOLChat';
 import { Paint, PAINT_MENUS } from '../../windows/Paint';
@@ -181,8 +181,8 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-discord',    label: '/gather Bot',    icon: 'discord',   windowId: 'discord' },
   { id: 'icon-cavestory',  label: 'Cave Story',     icon: 'cavestory', windowId: 'cavestory' },
   { id: 'icon-interests',  label: 'Interests',      icon: 'document',  windowId: 'interests' },
-  { id: 'icon-dotcard',    label: 'dot.card',       icon: 'document',  windowId: 'dotcard' },
   { id: 'icon-voltbox',   label: 'Voltbox',        icon: 'voltbox',   windowId: 'voltbox' },
+  { id: 'icon-steam',     label: 'Steam',          icon: 'steam',     windowId: 'steam' },
   { id: 'icon-aol',       label: 'AOL Messenger',  icon: 'aol',       windowId: 'aol' },
   { id: 'icon-paint',     label: 'Paint',          icon: 'paint',     windowId: 'paint' },
   { id: 'icon-datetime',  label: 'Date/Time',      icon: 'datetime',  windowId: 'datetime' },
@@ -205,8 +205,8 @@ const WINDOWS: WindowConfig[] = [
   { id: 'discord',    title: '/gather Discord Bot',     icon: 'discord',   defaultWidth: 360, defaultHeight: 260, defaultX: 180, defaultY: 70 },
   { id: 'cavestory',  title: 'Cave Story',              icon: 'cavestory', defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
   { id: 'interests',  title: 'Interests',               icon: 'document',  defaultWidth: 440, defaultHeight: 460, defaultX: 120, defaultY: 30 },
-  { id: 'dotcard',    title: 'dot.card - Daniel Taylor',icon: 'document',  defaultWidth: 360, defaultHeight: 260, defaultX: 170, defaultY: 60 },
   { id: 'voltbox',   title: 'Voltbox.exe',              icon: 'voltbox',   defaultWidth: 900, defaultHeight: 640, defaultX: 40,  defaultY: 15 },
+  { id: 'steam',     title: 'Steam',                    icon: 'steam',     defaultWidth: 680, defaultHeight: 500, defaultX: 80,  defaultY: 25 },
   { id: 'aol',       title: 'AOL Instant Messenger',    icon: 'aol',       defaultWidth: 380, defaultHeight: 420, defaultX: 160, defaultY: 50 },
   { id: 'paint',    title: 'untitled - Paint',          icon: 'paint',     defaultWidth: 640, defaultHeight: 480, defaultX: 60,  defaultY: 20, menus: PAINT_MENUS },
   { id: 'datetime', title: 'Date/Time Properties',      icon: 'datetime',  defaultWidth: 410, defaultHeight: 460, defaultX: 140, defaultY: 40 },
@@ -229,8 +229,8 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   discord: DiscordBot,
   cavestory: CaveStory,
   interests: Interests,
-  dotcard: DotCard,
   voltbox: Voltbox,
+  steam: Steam,
   aol: AOLChat,
   paint: Paint,
   datetime: DateTime,
@@ -252,8 +252,61 @@ export function Desktop() {
   const wallpaperStyle = useDesktopStore((s) => s.wallpaperStyle);
   const brightness = useDesktopStore((s) => s.brightness);
   const contrast = useDesktopStore((s) => s.contrast);
+  const colorScheme = useDesktopStore((s) => s.colorScheme);
+  const fontSize = useDesktopStore((s) => s.fontSize);
+  const iconSize = useDesktopStore((s) => s.iconSize);
 
   const iconsRef = useRef<HTMLDivElement>(null);
+
+  /* ── Apply color scheme to CSS variables ── */
+  useEffect(() => {
+    const root = document.documentElement;
+    const schemes: Record<string, { bg: string; navy: string; dark: string; gray: string; btnFace: string; white: string; black: string }> = {
+      'Windows Standard': { bg: '#008080', navy: '#000080', dark: '#808080', gray: '#c0c0c0', btnFace: '#c0c0c0', white: '#ffffff', black: '#000000' },
+      'High Contrast':    { bg: '#000000', navy: '#000000', dark: '#404040', gray: '#000000', btnFace: '#000000', white: '#ffffff', black: '#00ff00' },
+      'Rainy Day':        { bg: '#808898', navy: '#354b5e', dark: '#6a7080', gray: '#b8bcc0', btnFace: '#b8bcc0', white: '#ffffff', black: '#000000' },
+      'Desert':           { bg: '#d2b48c', navy: '#a08040', dark: '#8a7050', gray: '#d2c0a0', btnFace: '#d2c0a0', white: '#fffde0', black: '#000000' },
+      'Rose':             { bg: '#e8b0c0', navy: '#c06080', dark: '#a07080', gray: '#d8b0b8', btnFace: '#d8b0b8', white: '#fff0f4', black: '#000000' },
+      'Slate':            { bg: '#708090', navy: '#405060', dark: '#506070', gray: '#a0a8b0', btnFace: '#a0a8b0', white: '#f0f4f8', black: '#000000' },
+      'Spruce':           { bg: '#2f4f4f', navy: '#1a3030', dark: '#405050', gray: '#90a8a0', btnFace: '#90a8a0', white: '#f0f8f0', black: '#000000' },
+      'Storm':            { bg: '#4a5568', navy: '#303050', dark: '#404858', gray: '#98a0b0', btnFace: '#98a0b0', white: '#f0f0f8', black: '#000000' },
+      'Wheat':            { bg: '#f5deb3', navy: '#8b7355', dark: '#a09070', gray: '#e0d0b0', btnFace: '#e0d0b0', white: '#fffff0', black: '#000000' },
+    };
+    const s = schemes[colorScheme] ?? schemes['Windows Standard']!;
+    root.style.setProperty('--win-bg', s.bg);
+    root.style.setProperty('--win-navy', s.navy);
+    root.style.setProperty('--win-dark', s.dark);
+    root.style.setProperty('--win-gray', s.gray);
+    root.style.setProperty('--win-btn-face', s.btnFace);
+    root.style.setProperty('--win-white', s.white);
+    root.style.setProperty('--win-black', s.black);
+  }, [colorScheme]);
+
+  /* ── Apply font size ── */
+  useEffect(() => {
+    const root = document.documentElement;
+    const sizes: Record<string, string> = {
+      'Small Fonts': '11px',
+      'Normal Fonts': '13px',
+      'Large Fonts': '15px',
+      'small': '11px',
+      'large': '15px',
+    };
+    root.style.fontSize = sizes[fontSize] ?? '11px';
+  }, [fontSize]);
+
+  /* ── Apply icon size via CSS custom property ── */
+  useEffect(() => {
+    const root = document.documentElement;
+    const iconSizes: Record<string, string> = {
+      'Large Icons': '32',
+      'Standard Icons': '24',
+      'Small Icons': '16',
+      'large': '32',
+      'small': '16',
+    };
+    root.style.setProperty('--desktop-icon-size', (iconSizes[iconSize] ?? '32') + 'px');
+  }, [iconSize]);
 
   useEffect(() => {
     for (const w of WINDOWS) {
@@ -266,6 +319,7 @@ export function Desktop() {
         y: w.defaultY,
         width: w.defaultWidth,
         height: w.defaultHeight,
+        title: w.title,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -434,7 +488,7 @@ export function Desktop() {
       <AnimatePresence>
         {allWindows.map((wc) => {
           const win = windows[wc.id];
-          if (!win || !win.isOpen || win.isMinimized) return null;
+          if (!win || !win.isOpen) return null;
 
           // Check if it's a dynamic notepad/paint
           const dynItem = dynamicItems.find((d) => d.windowId === wc.id);

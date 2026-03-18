@@ -3,7 +3,7 @@ import { MenuCallbackContext } from '../components/Window/Window';
 import { useDesktopStore } from '../stores/desktopStore';
 import styles from './windows.module.css';
 
-const DEFAULT_TEXT = `Hey, I'm Danny J. Taylor.
+const DEFAULT_TEXT = `Hey, I'm Danny! I'm a Computer Engineering senior at Florida Polytechnic University! I hope you enjoy DannyOS!!
 
 Welcome to my corner of the internet — styled like it's 2004 because good design is timeless (and also because I think floppy disks were cool).
 

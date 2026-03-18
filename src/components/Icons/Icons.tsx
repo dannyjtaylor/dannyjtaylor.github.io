@@ -30,6 +30,11 @@ const PNG_ICONS: Record<string, string> = {
   minesweeper: '/icons/minesweeper.png',
   undertale: '/icons/undertale.png',
   aol: '/icons/aol.png',
+  paint: '/icons/paint.png',
+  datetime: '/icons/datetime.png',
+  settings: '/icons/settings.png',
+  steam: '/icons/steam.png',
+  folder: '/icons/file.png',
 };
 
 /* ── Canvas Pixel Art Component ── */

@@ -25,15 +25,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--desktop-icon-size, 32px);
+  height: var(--desktop-icon-size, 32px);
   pointer-events: none;
   flex-shrink: 0;
 }
 
+.dynamicIconSize {
+  width: var(--desktop-icon-size, 32px) !important;
+  height: var(--desktop-icon-size, 32px) !important;
+}
+
 .label {
   font-family: var(--font-system);
-  font-size: 11px;
+  font-size: inherit;
   color: #fff;
   text-align: center;
   margin-top: 2px;

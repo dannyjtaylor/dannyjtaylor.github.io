@@ -256,6 +256,7 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
 
     // Register the window for this item
     const { highestZ } = get();
+    const title = type === 'folder' ? label : `${label} - Notepad`;
     set((s) => ({
       dynamicItems: [...s.dynamicItems, item],
       windows: {
@@ -269,6 +270,7 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
           y: 50 + dynamicCounter * 20,
           width: type === 'folder' ? 420 : 480,
           height: type === 'folder' ? 300 : 360,
+          title,
         },
       },
     }));
@@ -341,6 +343,7 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
     const item: DynamicDesktopItem = { id, label: itemLabel, icon, windowId, type: type === 'paint' ? 'notepad' : type };
 
     const { highestZ } = get();
+    const winTitle = type === 'folder' ? itemLabel : type === 'paint' ? `${itemLabel} - Paint` : `${itemLabel} - Notepad`;
     set((s) => ({
       dynamicItems: [...s.dynamicItems, { ...item, type: type as 'folder' | 'notepad' }],
       windows: {
@@ -354,6 +357,7 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
           y: 50 + dynamicCounter * 20,
           width: type === 'folder' ? 420 : 480,
           height: type === 'folder' ? 300 : 360,
+          title: winTitle,
         },
       },
     }));

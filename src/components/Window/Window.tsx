@@ -144,14 +144,19 @@ export function Window({ id, title, icon, menus, children, className }: WindowPr
     callbacksRef.current.forEach((h) => h(action));
   };
 
-  if (!win || !win.isOpen || win.isMinimized) return null;
+  if (!win || !win.isOpen) return null;
 
   const isActive = activeWindowId === id;
   const isMaximized = win.isMaximized;
 
-  const style = isMaximized
+  const baseStyle = isMaximized
     ? { left: 0, top: 0, width: '100%', height: 'calc(100% - 28px)', zIndex: win.zIndex }
     : { left: win.x, top: win.y, width: win.width, height: win.height, zIndex: win.zIndex };
+
+  // Hide minimized windows instead of unmounting to preserve component state
+  const style = win.isMinimized
+    ? { ...baseStyle, display: 'none' as const }
+    : baseStyle;
 
   return (
     <motion.div

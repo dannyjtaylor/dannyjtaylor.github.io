@@ -36,6 +36,13 @@ export function Contact() {
             linkedin.com/in/dannyjtaylor
           </a>
         </p>
+        <br />
+        <p>
+          <strong>dot.card:</strong>{' '}
+          <a href="https://dot.cards/danieljtaylor" target="_blank" rel="noopener noreferrer">
+            dot.cards/danieljtaylor
+          </a>
+        </p>
       </div>
     </div>
   );

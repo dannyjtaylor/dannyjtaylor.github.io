@@ -6,6 +6,8 @@ interface BootLine {
   text: string;
   cls?: string;
   delay: number;
+  /** Optional: fire a sound cue when this line renders */
+  sound?: 'beep' | 'beepHigh' | 'hddSeek' | 'fddSeek' | 'chime';
 }
 
 const QUOTES = [
@@ -17,29 +19,103 @@ const QUOTES = [
   'Hello, World!',
 ];
 
+/* ── Web Audio boot sound effects ─────────────────────────── */
+
+let _audioCtx: AudioContext | null = null;
+function actx(): AudioContext {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  return _audioCtx;
+}
+
+/** Simple square-wave tone */
+function tone(freq: number, dur: number, vol = 0.06, type: OscillatorType = 'square') {
+  try {
+    const c = actx();
+    const osc = c.createOscillator();
+    const g   = c.createGain();
+    osc.connect(g); g.connect(c.destination);
+    osc.frequency.value = freq;
+    osc.type = type;
+    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    osc.start(c.currentTime);
+    osc.stop(c.currentTime + dur);
+  } catch { /* silent */ }
+}
+
+/** Filtered noise burst (HDD / FDD seek) */
+function noiseBurst(dur: number, lpFreq: number, vol = 0.05) {
+  try {
+    const c   = actx();
+    const len = Math.max(1, Math.round(c.sampleRate * dur));
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const d   = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * vol;
+
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = lpFreq;
+    const g = c.createGain();
+    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    src.connect(lp); lp.connect(g); g.connect(c.destination);
+    src.start(); src.stop(c.currentTime + dur);
+  } catch { /* silent */ }
+}
+
+const BootSounds = {
+  /** Classic POST single beep */
+  beep:     () => tone(1000, 0.18, 0.07),
+  /** Higher confirmation beep */
+  beepHigh: () => tone(1400, 0.10, 0.05),
+  /** Hard-disk seek chatter */
+  hddSeek:  () => {
+    for (let i = 0; i < 4; i++) setTimeout(() => noiseBurst(0.03, 800, 0.04), i * 40);
+  },
+  /** Floppy drive seek */
+  fddSeek:  () => {
+    for (let i = 0; i < 3; i++) setTimeout(() => noiseBurst(0.04, 600, 0.03), i * 70);
+  },
+  /** Startup chime (ascending triad) */
+  chime: () => {
+    tone(523, 0.18, 0.05, 'triangle');               // C5
+    setTimeout(() => tone(659, 0.18, 0.05, 'triangle'), 120);  // E5
+    setTimeout(() => tone(784, 0.25, 0.05, 'triangle'), 240);  // G5
+  },
+};
+
+function playBootSound(id?: BootLine['sound']) {
+  if (!id) return;
+  BootSounds[id]?.();
+}
+
+/* ── Boot sequence definition ─────────────────────────────── */
+
 function buildBootLines(quote: string): BootLine[] {
   return [
-    { text: '', delay: 300 },
+    { text: '', delay: 300, sound: 'beep' },
     { text: '  DJTech BIOS v4.20 — 2004 Edition', cls: 'white', delay: 80 },
     { text: '  (C) 2004 DJTech, Inc.', cls: 'dim', delay: 60 },
     { text: '', delay: 200 },
-    { text: '  +=====================================================+', cls: 'white', delay: 20 },
-    { text: '  |                                                     |', cls: 'white', delay: 20 },
-    { text: '  |   DDDD    AAAA   N   N  N   N  Y   Y                |', cls: 'green', delay: 20 },
-    { text: '  |   D   D  A    A  NN  N  NN  N   Y Y                 |', cls: 'green', delay: 20 },
-    { text: '  |   D   D  AAAAAA  N N N  N N N    Y                  |', cls: 'green', delay: 20 },
-    { text: '  |   D   D  A    A  N  NN  N  NN    Y                  |', cls: 'green', delay: 20 },
-    { text: '  |   DDDD   A    A  N   N  N   N    Y                  |', cls: 'green', delay: 20 },
-    { text: '  |                                                     |', cls: 'white', delay: 20 },
-    { text: '  |                 +===============+                   |', cls: 'white', delay: 20 },
-    { text: '  |                 |   O S  v1.0   |                   |', cls: 'yellow', delay: 20 },
-    { text: '  |                 +===============+                   |', cls: 'white', delay: 20 },
-    { text: '  |                                                     |', cls: 'white', delay: 20 },
-    { text: '  +=====================================================+', cls: 'white', delay: 20 },
+    { text: '  +=========================================================+', cls: 'white', delay: 20 },
+    { text: '  |                                                         |', cls: 'white', delay: 20 },
+    { text: '  |      ____                          ____  _____          |', cls: 'green', delay: 20 },
+    { text: '  |     / __ \\____ _____  ____  __  __/ __ \\/ ___/          |', cls: 'green', delay: 20 },
+    { text: '  |    / / / / __ `/ __ \\/ __ \\/ / / / / / /\\__ \\           |', cls: 'green', delay: 20 },
+    { text: '  |   / /_/ / /_/ / / / / / / / /_/ / /_/ /___/ /           |', cls: 'green', delay: 20 },
+    { text: '  |  /_____/\\__,_/_/ /_/_/ /_/\\__, /\\____//____/            |', cls: 'green', delay: 20 },
+    { text: '  |                          /____/                         |', cls: 'green', delay: 20 },
+    { text: '  |                                                         |', cls: 'white', delay: 20 },
+    { text: '  |                    +===============+                    |', cls: 'white', delay: 20 },
+    { text: '  |                    |    v 1 . 0    |                    |', cls: 'yellow', delay: 20 },
+    { text: '  |                    +===============+                    |', cls: 'white', delay: 20 },
+    { text: '  |                                                         |', cls: 'white', delay: 20 },
+    { text: '  +=========================================================+', cls: 'white', delay: 20 },
     { text: '', delay: 400 },
     { text: '  ── BIOS POST (Power-On Self Test) ──────────────────', cls: 'white', delay: 300 },
     { text: '', delay: 80 },
-    { text: '  CPU:  DJTech 486DX2-66MHz ..................... OK', delay: 100 },
+    { text: '  CPU:  DJTech 486DX2-66MHz ..................... OK', delay: 100, sound: 'beepHigh' },
     { text: '  FPU:  DJTech 487 Co-Processor ................. OK', delay: 60 },
     { text: '  RAM:  640K Conventional ...................... OK', delay: 80 },
     { text: '        8192K Extended ......................... OK', delay: 60 },
@@ -47,8 +123,8 @@ function buildBootLines(quote: string): BootLine[] {
     { text: `  │  "${quote}"`, cls: 'dim', delay: 30 },
     { text: '  └───────────────────────────────────────────────┘', cls: 'dim', delay: 200 },
     { text: '  VGA:  256 Colors @ 640×480 ................... OK', delay: 60 },
-    { text: '  HDD:  420MB IDE (C:) ......................... OK', delay: 60 },
-    { text: '  FDD:  1.44MB 3½" (A:) ....................... OK', delay: 60 },
+    { text: '  HDD:  420MB IDE (C:) ......................... OK', delay: 60, sound: 'hddSeek' },
+    { text: '  FDD:  1.44MB 3½" (A:) ....................... OK', delay: 60, sound: 'fddSeek' },
     { text: '  CD:   2× Speed ATAPI (D:) ................... OK', delay: 60 },
     { text: '  SND:  SoundBlaster 16 (IRQ 5, DMA 1) ........ OK', delay: 60 },
     { text: '  NET:  NE2000 Compatible (IRQ 10) ............. OK', delay: 60 },
@@ -56,7 +132,7 @@ function buildBootLines(quote: string): BootLine[] {
     { text: '', delay: 200 },
     { text: '  All systems nominal.', cls: 'green', delay: 200 },
     { text: '', delay: 200 },
-    { text: '  C:\\> DANNY.EXE /portfolio /load', cls: 'yellow', delay: 400 },
+    { text: '  C:\\> DANNY.EXE /portfolio /load', cls: 'yellow', delay: 400, sound: 'hddSeek' },
     { text: '', delay: 200 },
     { text: '  Initializing DannyOS v1.0 ...', cls: 'white', delay: 200 },
     { text: '', delay: 80 },
@@ -70,7 +146,7 @@ function buildBootLines(quote: string): BootLine[] {
     { text: '', delay: 200 },
     { text: '__PROGRESS__', delay: 0 },
     { text: '', delay: 100 },
-    { text: '  System ready. Welcome, visitor.', cls: 'green', delay: 500 },
+    { text: '  System ready. Welcome, visitor.', cls: 'green', delay: 500, sound: 'chime' },
     { text: '  Starting desktop ...', cls: 'green', delay: 600 },
   ];
 }
@@ -123,6 +199,9 @@ export function BootScreen() {
           await animateProgressBar(pre, () => cancelRef.current);
           continue;
         }
+
+        // Fire sound cue for this line
+        playBootSound(line.sound);
 
         const span = document.createElement('span');
         if (line.cls) span.dataset.cls = line.cls;

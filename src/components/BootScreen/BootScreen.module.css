@@ -76,3 +76,16 @@
   0%, 100% { opacity: 1; }
   50%      { opacity: 0; }
 }
+
+/* Shrink boot text on narrow viewports so ASCII art doesn't wrap */
+@media (max-width: 720px) {
+  .text   { font-size: 12px; }
+  .cursor { font-size: 12px; }
+  .terminal { padding: 16px 12px; }
+}
+
+@media (min-width: 721px) and (max-width: 960px) {
+  .text   { font-size: 15px; }
+  .cursor { font-size: 15px; }
+  .terminal { padding: 20px 24px; }
+}

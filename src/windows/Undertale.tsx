@@ -307,28 +307,36 @@ export function Undertale() {
   const renderFroggit = () => {
     const alive = froggitHp > 0 && phase !== 'win';
     return (
-      <svg width={50} height={46} style={{ opacity: alive ? 1 : 0.3, imageRendering: 'pixelated' }}>
-        {/* Body */}
-        <rect x={10} y={8} width={30} height={24} rx={6} fill="#fff" />
-        {/* Eyes (under body — Froggit's defining trait) */}
-        <circle cx={16} cy={34} r={4} fill="#fff" stroke="#000" strokeWidth={1} />
-        <circle cx={34} cy={34} r={4} fill="#fff" stroke="#000" strokeWidth={1} />
-        <circle cx={16} cy={35} r={1.5} fill="#000" />
-        <circle cx={34} cy={35} r={1.5} fill="#000" />
-        {/* Legs */}
-        <rect x={8} y={30} width={8} height={6} rx={2} fill="#fff" />
-        <rect x={34} y={30} width={8} height={6} rx={2} fill="#fff" />
-        {/* Top bumps */}
-        <circle cx={18} cy={8} r={4} fill="#fff" />
-        <circle cx={32} cy={8} r={4} fill="#fff" />
-        {/* Mouth */}
-        <ellipse cx={25} cy={24} rx={4} ry={2} fill="none" stroke="#000" strokeWidth={1} />
-        {/* Damage number */}
+      <div style={{ position: 'relative', display: 'inline-block' }}>
+        <img
+          src="/icons/froggit.png"
+          alt="Froggit"
+          width={50}
+          height={50}
+          style={{
+            opacity: alive ? 1 : 0.3,
+            imageRendering: 'pixelated',
+            objectFit: 'contain',
+            filter: alive ? 'none' : 'grayscale(1)',
+          }}
+          draggable={false}
+        />
         {phase === 'fight-result' && lastDamage > 0 && (
-          <text x={25} y={6} textAnchor="middle" fill="#FF0000" fontSize={12} fontWeight="bold"
-            fontFamily="var(--font-terminal)">{lastDamage}</text>
+          <span style={{
+            position: 'absolute',
+            top: -8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: '#FF0000',
+            fontSize: 14,
+            fontWeight: 'bold',
+            fontFamily: 'var(--font-terminal)',
+            textShadow: '1px 1px 0 #000',
+          }}>
+            {lastDamage}
+          </span>
         )}
-      </svg>
+      </div>
     );
   };
 

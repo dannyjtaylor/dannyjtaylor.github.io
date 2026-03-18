@@ -89,6 +89,86 @@ const NUMBER_COLORS: Record<number, string> = {
   8: '#808080',
 };
 
+/* ── SVG Icons ── */
+const MineSVG = ({ size = 12 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 16 16">
+    {/* Spikes */}
+    <rect x="7" y="0" width="2" height="4" fill="#000" />
+    <rect x="7" y="12" width="2" height="4" fill="#000" />
+    <rect x="0" y="7" width="4" height="2" fill="#000" />
+    <rect x="12" y="7" width="4" height="2" fill="#000" />
+    {/* Diagonal spikes */}
+    <rect x="2" y="2" width="3" height="1.5" fill="#000" transform="rotate(45 3.5 2.75)" />
+    <rect x="11" y="2" width="3" height="1.5" fill="#000" transform="rotate(-45 12.5 2.75)" />
+    <rect x="2" y="12" width="3" height="1.5" fill="#000" transform="rotate(-45 3.5 12.75)" />
+    <rect x="11" y="12" width="3" height="1.5" fill="#000" transform="rotate(45 12.5 12.75)" />
+    {/* Body */}
+    <circle cx="8" cy="8" r="5" fill="#000" />
+    {/* Shine */}
+    <circle cx="6" cy="6" r="1.5" fill="#fff" />
+  </svg>
+);
+
+const FlagSVG = ({ size = 12 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 16 16">
+    {/* Pole */}
+    <rect x="5" y="2" width="1.5" height="12" fill="#000" />
+    {/* Flag */}
+    <polygon points="7,2 14,5 7,8" fill="#FF0000" />
+    {/* Base */}
+    <rect x="3" y="13" width="7" height="1.5" rx="0.5" fill="#000" />
+  </svg>
+);
+
+const SmileyFace = ({ status, pressed }: { status: GameStatus; pressed: boolean }) => {
+  const size = 22;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24">
+      {/* Face circle */}
+      <circle cx="12" cy="12" r="11" fill="#FFD700" stroke="#000" strokeWidth="1" />
+      {status === 'lost' ? (
+        <>
+          {/* X eyes */}
+          <line x1="6" y1="7" x2="10" y2="11" stroke="#000" strokeWidth="1.5" />
+          <line x1="10" y1="7" x2="6" y2="11" stroke="#000" strokeWidth="1.5" />
+          <line x1="14" y1="7" x2="18" y2="11" stroke="#000" strokeWidth="1.5" />
+          <line x1="18" y1="7" x2="14" y2="11" stroke="#000" strokeWidth="1.5" />
+          {/* Frown */}
+          <path d="M7 18 Q12 14 17 18" fill="none" stroke="#000" strokeWidth="1.5" />
+        </>
+      ) : status === 'won' ? (
+        <>
+          {/* Sunglasses */}
+          <rect x="4" y="7" width="7" height="4" rx="1" fill="#000" />
+          <rect x="13" y="7" width="7" height="4" rx="1" fill="#000" />
+          <rect x="11" y="8" width="2" height="1.5" fill="#000" />
+          {/* Cool shine */}
+          <rect x="5" y="8" width="2" height="1" fill="#444" rx="0.5" />
+          <rect x="14" y="8" width="2" height="1" fill="#444" rx="0.5" />
+          {/* Grin */}
+          <path d="M7 16 Q12 20 17 16" fill="none" stroke="#000" strokeWidth="1.5" />
+        </>
+      ) : pressed ? (
+        <>
+          {/* Surprised eyes */}
+          <circle cx="8" cy="9" r="2" fill="#000" />
+          <circle cx="16" cy="9" r="2" fill="#000" />
+          {/* O mouth */}
+          <circle cx="12" cy="17" r="2.5" fill="#000" />
+        </>
+      ) : (
+        <>
+          {/* Normal eyes */}
+          <circle cx="8" cy="9" r="1.5" fill="#000" />
+          <circle cx="16" cy="9" r="1.5" fill="#000" />
+          {/* Smile */}
+          <path d="M7 15 Q12 19 17 15" fill="none" stroke="#000" strokeWidth="1.5" />
+        </>
+      )}
+    </svg>
+  );
+};
+
 export function Minesweeper() {
   const [board, setBoard] = useState<CellState[][]>(createBoard);
   const [status, setStatus] = useState<GameStatus>('playing');
@@ -163,8 +243,6 @@ export function Minesweeper() {
     setFlagCount((prev) => prev + (next[r]![c]!.flagged ? 1 : -1));
   };
 
-  const faceEmoji = status === 'lost' ? '😵' : status === 'won' ? '😎' : facePressed ? '😮' : '🙂';
-
   const pad3 = (n: number) => String(Math.max(0, n)).padStart(3, '0');
 
   return (
@@ -179,7 +257,7 @@ export function Minesweeper() {
           onMouseUp={() => setFacePressed(false)}
           onMouseLeave={() => setFacePressed(false)}
         >
-          {faceEmoji}
+          <SmileyFace status={status} pressed={facePressed} />
         </button>
         <div style={S.counter}>{pad3(time)}</div>
       </div>
@@ -193,7 +271,7 @@ export function Minesweeper() {
         {board.map((row, r) => (
           <div key={r} style={S.row}>
             {row.map((cell, c) => {
-              let content = '';
+              let content: React.ReactNode = '';
               let bg = '#C0C0C0';
               let color = '#000';
               let border = '2px outset #FFF';
@@ -202,14 +280,14 @@ export function Minesweeper() {
                 border = '1px solid #808080';
                 bg = '#C0C0C0';
                 if (cell.mine) {
-                  content = '💣';
+                  content = <MineSVG size={14} />;
                   bg = status === 'lost' ? '#FF0000' : '#C0C0C0';
                 } else if (cell.adjacent > 0) {
                   content = String(cell.adjacent);
                   color = NUMBER_COLORS[cell.adjacent] ?? '#000';
                 }
               } else if (cell.flagged) {
-                content = '🚩';
+                content = <FlagSVG size={14} />;
               }
 
               return (
@@ -269,16 +347,15 @@ const S: Record<string, React.CSSProperties> = {
     textAlign: 'center' as const,
   },
   faceBtn: {
-    width: 28,
-    height: 28,
-    fontSize: 16,
+    width: 30,
+    height: 30,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     background: '#C0C0C0',
     border: '2px outset #FFF',
     cursor: 'pointer',
-    padding: 0,
+    padding: 2,
   },
   board: {
     border: '3px inset #808080',
@@ -301,4 +378,3 @@ const S: Record<string, React.CSSProperties> = {
 };
 
 export default Minesweeper;
-

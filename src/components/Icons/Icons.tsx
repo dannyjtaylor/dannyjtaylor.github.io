@@ -24,7 +24,6 @@ const PNG_ICONS: Record<string, string> = {
   document: '/icons/document.png',
   windows: '/icons/windows.png',
   valorant: '/icons/valorant.png',
-  undertale: '/icons/froggit.png',
   discord: '/icons/discord.png',
   cavestory: '/icons/quote.gif',
   froggit: '/icons/froggit.png',
@@ -240,6 +239,49 @@ function drawShutdown(ctx: CanvasRenderingContext2D) {
 
 /* ── Icon Registry ── */
 
+function drawUndertaleHeart(ctx: CanvasRenderingContext2D) {
+  ctx.fillStyle = '#FF0000';
+  // Classic pixel heart shape
+  ctx.fillRect(2, 1, 4, 1);
+  ctx.fillRect(10, 1, 4, 1);
+  ctx.fillRect(1, 2, 6, 1);
+  ctx.fillRect(9, 2, 6, 1);
+  ctx.fillRect(1, 3, 14, 1);
+  ctx.fillRect(1, 4, 14, 1);
+  ctx.fillRect(1, 5, 14, 1);
+  ctx.fillRect(2, 6, 12, 1);
+  ctx.fillRect(2, 7, 12, 1);
+  ctx.fillRect(3, 8, 10, 1);
+  ctx.fillRect(3, 9, 10, 1);
+  ctx.fillRect(4, 10, 8, 1);
+  ctx.fillRect(5, 11, 6, 1);
+  ctx.fillRect(6, 12, 4, 1);
+  ctx.fillRect(7, 13, 2, 1);
+}
+
+function drawAOL(ctx: CanvasRenderingContext2D) {
+  // Blue circle background
+  ctx.fillStyle = '#0033A0';
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const dist = Math.sqrt((x - 7.5) ** 2 + (y - 7.5) ** 2);
+      if (dist <= 7) ctx.fillRect(x, y, 1, 1);
+    }
+  }
+  // White triangle
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(7, 3, 2, 1);
+  ctx.fillRect(6, 4, 4, 1);
+  ctx.fillRect(5, 5, 6, 1);
+  ctx.fillRect(5, 6, 2, 1); ctx.fillRect(9, 6, 2, 1);
+  ctx.fillRect(4, 7, 2, 1); ctx.fillRect(10, 7, 2, 1);
+  ctx.fillRect(3, 8, 2, 1); ctx.fillRect(11, 8, 2, 1);
+  ctx.fillRect(3, 9, 10, 1);
+  ctx.fillRect(3, 10, 10, 1);
+  // Eye dot
+  ctx.fillRect(11, 4, 2, 2);
+}
+
 const DRAW_MAP: Record<string, DrawFn> = {
   folder: drawFolder,
   drive: drawDrive,
@@ -248,6 +290,8 @@ const DRAW_MAP: Record<string, DrawFn> = {
   voltbox: drawVoltbox,
   minesweeper: drawMinesweeper,
   shutdown: drawShutdown,
+  undertale: drawUndertaleHeart,
+  aol: drawAOL,
 };
 
 export function DynamicIcon({ name, size = 48, className }: IconProps & { name: string }) {

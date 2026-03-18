@@ -26,6 +26,7 @@ import { CaveStory } from '../../windows/CaveStory';
 import { Interests } from '../../windows/Interests';
 import { DotCard } from '../../windows/DotCard';
 import { Voltbox } from '../../windows/Voltbox';
+import { AOLChat } from '../../windows/AOLChat';
 import { DynamicNotepad } from '../../windows/DynamicNotepad';
 import type { DesktopIconConfig, WindowConfig, MenuConfig } from '../../types';
 import styles from './Desktop.module.css';
@@ -179,6 +180,7 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-interests',  label: 'Interests',      icon: 'document',  windowId: 'interests' },
   { id: 'icon-dotcard',    label: 'dot.card',       icon: 'document',  windowId: 'dotcard' },
   { id: 'icon-voltbox',   label: 'Voltbox',        icon: 'voltbox',   windowId: 'voltbox' },
+  { id: 'icon-aol',       label: 'AOL Messenger',  icon: 'aol',       windowId: 'aol' },
 ];
 
 const WINDOWS: WindowConfig[] = [
@@ -199,6 +201,7 @@ const WINDOWS: WindowConfig[] = [
   { id: 'interests',  title: 'Interests',               icon: 'document',  defaultWidth: 440, defaultHeight: 460, defaultX: 120, defaultY: 30 },
   { id: 'dotcard',    title: 'dot.card - Daniel Taylor',icon: 'document',  defaultWidth: 360, defaultHeight: 260, defaultX: 170, defaultY: 60 },
   { id: 'voltbox',   title: 'Voltbox.exe',              icon: 'voltbox',   defaultWidth: 900, defaultHeight: 640, defaultX: 40,  defaultY: 15 },
+  { id: 'aol',       title: 'AOL Instant Messenger',    icon: 'aol',       defaultWidth: 380, defaultHeight: 420, defaultX: 160, defaultY: 50 },
 ];
 
 const WINDOW_CONTENT: Record<string, React.ComponentType> = {
@@ -219,6 +222,7 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   interests: Interests,
   dotcard: DotCard,
   voltbox: Voltbox,
+  aol: AOLChat,
 };
 
 export function Desktop() {

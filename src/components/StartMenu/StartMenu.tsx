@@ -25,9 +25,13 @@ const MENU_ITEMS: MenuItem[] = [
   { label: 'Interests', icon: 'document', windowId: 'interests' },
   { label: 'dot.card', icon: 'document', windowId: 'dotcard' },
   { label: 'Voltbox', icon: 'voltbox', windowId: 'voltbox' },
+  { label: 'Paint', icon: 'paint', windowId: 'paint' },
+  { label: 'AOL Messenger', icon: 'aol', windowId: 'aol' },
   { label: '', icon: '', separator: true },
   { label: 'My Computer', icon: 'computer', windowId: 'mycomputer' },
   { label: 'MS-DOS Prompt', icon: 'console', windowId: 'terminal' },
+  { label: 'Settings', icon: 'settings', windowId: 'settings' },
+  { label: 'Date/Time', icon: 'datetime', windowId: 'datetime' },
   { label: '', icon: '', separator: true },
   { label: 'Shut Down...', icon: 'shutdown', action: 'shutdown' },
 ];

@@ -241,6 +241,81 @@ function drawShutdown(ctx: CanvasRenderingContext2D) {
 
 /* ── Icon Registry ── */
 
+function drawPaint(ctx: CanvasRenderingContext2D) {
+  // Paint palette icon
+  ctx.fillStyle = '#F5DEB3';
+  ctx.fillRect(2, 2, 12, 12);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(2, 2, 12, 1); ctx.fillRect(2, 2, 1, 12);
+  ctx.fillRect(13, 2, 1, 12); ctx.fillRect(2, 13, 12, 1);
+  // Color blobs
+  ctx.fillStyle = '#FF0000'; ctx.fillRect(4, 4, 2, 2);
+  ctx.fillStyle = '#0000FF'; ctx.fillRect(7, 4, 2, 2);
+  ctx.fillStyle = '#00FF00'; ctx.fillRect(10, 4, 2, 2);
+  ctx.fillStyle = '#FFFF00'; ctx.fillRect(4, 7, 2, 2);
+  ctx.fillStyle = '#FF00FF'; ctx.fillRect(7, 7, 2, 2);
+  ctx.fillStyle = '#00FFFF'; ctx.fillRect(10, 7, 2, 2);
+  // Brush
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(5, 10, 1, 3); ctx.fillRect(6, 9, 1, 3);
+  ctx.fillRect(7, 8, 1, 3);
+}
+
+function drawSettings(ctx: CanvasRenderingContext2D) {
+  // Monitor/display icon
+  ctx.fillStyle = '#C0C0C0';
+  ctx.fillRect(2, 1, 12, 10);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(2, 1, 12, 1); ctx.fillRect(2, 1, 1, 10);
+  ctx.fillRect(13, 1, 1, 10); ctx.fillRect(2, 10, 12, 1);
+  // Screen
+  ctx.fillStyle = '#008080';
+  ctx.fillRect(4, 3, 8, 6);
+  // Stand
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(6, 11, 4, 1);
+  ctx.fillRect(5, 12, 6, 1);
+  // Gear on screen
+  ctx.fillStyle = '#FFF';
+  ctx.fillRect(7, 4, 2, 1);
+  ctx.fillRect(6, 5, 4, 2);
+  ctx.fillRect(7, 7, 2, 1);
+}
+
+function drawDateTime(ctx: CanvasRenderingContext2D) {
+  // Clock icon
+  const cx = 7.5, cy = 7;
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+      if (dist <= 6.5 && dist > 5.5) {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(x, y, 1, 1);
+      } else if (dist <= 5.5) {
+        ctx.fillStyle = '#FFF';
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  // Hour hand
+  ctx.fillStyle = '#000';
+  ctx.fillRect(7, 4, 2, 4);
+  // Minute hand
+  ctx.fillRect(8, 5, 3, 1);
+  // Center dot
+  ctx.fillRect(7, 7, 2, 1);
+  // Calendar at bottom
+  ctx.fillStyle = '#FF0000';
+  ctx.fillRect(10, 11, 5, 1);
+  ctx.fillStyle = '#FFF';
+  ctx.fillRect(10, 12, 5, 3);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(10, 12, 5, 1); ctx.fillRect(10, 12, 1, 3);
+  ctx.fillRect(14, 12, 1, 3); ctx.fillRect(10, 14, 5, 1);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(12, 13, 1, 1);
+}
+
 const DRAW_MAP: Record<string, DrawFn> = {
   folder: drawFolder,
   drive: drawDrive,
@@ -249,6 +324,9 @@ const DRAW_MAP: Record<string, DrawFn> = {
   voltbox: drawVoltbox,
   minesweeper: drawMinesweeper,
   shutdown: drawShutdown,
+  paint: drawPaint,
+  settings: drawSettings,
+  datetime: drawDateTime,
 };
 
 export function DynamicIcon({ name, size = 48, className }: IconProps & { name: string }) {

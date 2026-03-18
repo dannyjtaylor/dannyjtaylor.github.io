@@ -72,7 +72,13 @@ export function Taskbar() {
 
       {/* System tray */}
       <div className={styles.tray}>
-        <span className={styles.clock}>{clock}</span>
+        <span
+          className={styles.clock}
+          onDoubleClick={() => openWindow('datetime')}
+          title="Double-click to open Date/Time Properties"
+        >
+          {clock}
+        </span>
       </div>
     </div>
   );

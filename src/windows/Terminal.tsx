@@ -10,7 +10,7 @@ interface FSNode {
   type: 'dir' | 'file' | 'program';
   children?: Record<string, FSNode>;
   content?: string;
-  windowId?: string;       // for programs
+  windowId?: string;
   size?: number;
 }
 
@@ -60,6 +60,10 @@ const FS: FSNode = {
         'MINESWEEPER.EXE': { type: 'program', windowId: 'minesweeper', size: 4096 },
         'VOLTBOX.EXE': { type: 'program', windowId: 'voltbox', size: 16384 },
         'GATHER.EXE': { type: 'program', windowId: 'discord', size: 2048 },
+        'AOL.EXE': { type: 'program', windowId: 'aol', size: 3072 },
+        'PAINT.EXE': { type: 'program', windowId: 'paint', size: 5120 },
+        'SETTINGS.EXE': { type: 'program', windowId: 'settings', size: 1536 },
+        'DATETIME.EXE': { type: 'program', windowId: 'datetime', size: 1024 },
       },
     },
     'USERS': {
@@ -118,20 +122,13 @@ function pathString(path: string[]): string {
   return 'C:\\' + path.join('\\');
 }
 
-function formatDate(): string {
-  return '06/15/2004  09:30 AM';
-}
-
-function formatSize(size: number): string {
-  return size.toLocaleString().padStart(12);
-}
-
 /* ══════════════════════════════════════════════════════════
    Terminal Component
    ══════════════════════════════════════════════════════════ */
 
 export function Terminal() {
   const openWindow = useDesktopStore((s) => s.openWindow);
+  const closeWindow = useDesktopStore((s) => s.closeWindow);
 
   const [history, setHistory] = useState<string[]>([
     'DannyOS [Version 1.0.2004]',
@@ -176,43 +173,81 @@ export function Terminal() {
 
       switch (cmd) {
         case 'help': {
-          output = [
-            'Available commands:',
-            '  HELP        - Show this help message',
-            '  DIR / LS    - List directory contents',
-            '  CD          - Change directory',
-            '  TYPE / CAT  - Display file contents',
-            '  TREE        - Show directory tree',
-            '  CLS / CLEAR - Clear the screen',
-            '  VER         - Show OS version',
-            '  ECHO        - Print text',
-            '  DATE        - Show current date',
-            '  TIME        - Show current time',
-            '  WHOAMI      - Show current user',
-            '  PING        - Ping a host',
-            '  START       - Open a program',
-            '  PWD         - Print working directory',
-            '  MKDIR       - Create directory (simulated)',
-            '  COLOR       - Change terminal colors',
-            '  NEOFETCH    - System info (Easter egg)',
-            '  COWSAY      - Moo!',
-            '  MATRIX      - Enter the matrix',
-            '  EXIT        - Close terminal',
-            '',
-            'Programs you can START:',
-            '  about, projects, resume, contact, portfolio,',
-            '  transcript, interests, dotcard, valorant,',
-            '  undertale, cavestory, minesweeper, voltbox,',
-            '  discord, mycomputer, recycle, terminal',
-            '',
-            'You can also run .EXE files directly!',
-          ];
+          const topic = args[0]?.toLowerCase();
+          if (!topic) {
+            output = [
+              '',
+              'DANNYDOS Command Reference',
+              '=========================',
+              '',
+              'NAVIGATION',
+              '  CD [path]       Change directory         CD ..  CD PROGRAMS',
+              '  DIR [path]      List directory contents   DIR  DIR WINDOWS',
+              '  LS [path]       Same as DIR, clean view   LS  LS USERS',
+              '  TREE [path]     Show directory tree       TREE  TREE PROGRAMS',
+              '  PWD             Print working directory',
+              '',
+              'FILES',
+              '  TYPE [file]     Display file contents     TYPE ABOUT.TXT',
+              '  CAT [file]      Same as TYPE              CAT CONFIG.SYS',
+              '',
+              'PROGRAMS',
+              '  START [name]    Launch a program           START minesweeper',
+              '  [name].EXE      Run directly               MINESWEEPER.EXE',
+              '',
+              'SYSTEM',
+              '  CLS / CLEAR     Clear the screen',
+              '  VER             Show OS version',
+              '  WHOAMI          Current user',
+              '  DATE            Current date',
+              '  TIME            Current time',
+              '  ECHO [text]     Print text',
+              '  PING [host]     Ping a host',
+              '  EXIT            Close the terminal',
+              '',
+              'EASTER EGGS',
+              '  NEOFETCH        System info',
+              '  COWSAY [text]   Moo!',
+              '  MATRIX          Take the red pill',
+              '',
+              'Type HELP START for more detail on a specific command.',
+              'Use Tab for filename autocomplete, Up/Down for command history.',
+              '',
+            ];
+          } else if (topic === 'cd') {
+            output = ['', 'CD [path]  -  Change the current directory.', '', '  CD            Show current directory', '  CD ..         Go up one level', '  CD \\          Go to root (C:\\)', '  CD PROGRAMS   Enter the PROGRAMS folder', ''];
+          } else if (topic === 'dir' || topic === 'ls') {
+            output = ['', 'DIR [path]  /  LS [path]  -  List directory contents.', '', '  DIR           List current directory', '  LS            Same as DIR (clean output)', '  DIR WINDOWS   List a specific directory', ''];
+          } else if (topic === 'start') {
+            output = [
+              '', 'START [program]  -  Launch a program by name.', '',
+              '  Available programs:',
+              '    about        About Me          minesweeper  Minesweeper',
+              '    projects     Projects          voltbox      Voltbox',
+              '    resume       Resume            valorant     VALORANT',
+              '    contact      Contact           undertale    UNDERTALE',
+              '    portfolio    Portfolio          cavestory    Cave Story',
+              '    transcript   Transcript        discord      /gather Bot',
+              '    interests    Interests         aol          AOL Messenger',
+              '    dotcard      dot.card          mycomputer   My Computer',
+              '    terminal     MS-DOS Prompt     recycle      Recycle Bin',
+              '    paint        Paint             settings     Settings',
+              '    datetime     Date/Time',
+              '',
+              '  You can also run .EXE files directly from the PROGRAMS folder.', '',
+            ];
+          } else if (topic === 'type' || topic === 'cat') {
+            output = ['', 'TYPE [file]  /  CAT [file]  -  Display file contents.', '', '  TYPE ABOUT.TXT           View a text file', '  CAT CONFIG.SYS           Same thing', '  TYPE USERS\\DANNY\\MY DOCUMENTS\\SECRET.TXT', ''];
+          } else if (topic === 'tree') {
+            output = ['', 'TREE [path]  -  Display a directory tree.', '', '  TREE            Tree of current directory', '  TREE PROGRAMS   Tree of a specific directory', ''];
+          } else {
+            output = [`No help available for '${topic}'.`];
+          }
           break;
         }
 
-        case 'dir':
-        case 'ls': {
-          const targetPath = args.length > 0 ? resolvePath(cwd, args[0]!) : cwd;
+        case 'dir': {
+          const targetPath = args.length > 0 ? resolvePath(cwd, args.join(' ')) : cwd;
           const node = getNode(targetPath);
           if (!node || node.type !== 'dir' || !node.children) {
             output = [`The system cannot find the path specified.`];
@@ -229,25 +264,56 @@ export function Terminal() {
             let dirCount = 0;
             let totalSize = 0;
 
-            // Show . and ..
-            output.push(`${formatDate()}    <DIR>          .`);
-            output.push(`${formatDate()}    <DIR>          ..`);
-            dirCount += 2;
-
             for (const [name, child] of Object.entries(node.children).sort()) {
               if (child.type === 'dir') {
-                output.push(`${formatDate()}    <DIR>          ${name}`);
+                output.push(`  <DIR>   ${name}`);
                 dirCount++;
               } else {
                 const size = child.size ?? 0;
                 totalSize += size;
-                output.push(`${formatDate()} ${formatSize(size)} ${name}`);
+                const sizeStr = size > 0 ? size.toLocaleString().padStart(10) : '         0';
+                output.push(`  ${sizeStr}   ${name}`);
                 fileCount++;
               }
             }
 
-            output.push(`               ${fileCount} File(s)    ${totalSize.toLocaleString().padStart(10)} bytes`);
-            output.push(`               ${dirCount} Dir(s)    418,123,456 bytes free`);
+            output.push('');
+            output.push(`  ${fileCount} file(s)    ${totalSize.toLocaleString()} bytes`);
+            output.push(`  ${dirCount} dir(s)     418,123,456 bytes free`);
+          }
+          break;
+        }
+
+        case 'ls': {
+          const targetPath = args.length > 0 ? resolvePath(cwd, args.join(' ')) : cwd;
+          const node = getNode(targetPath);
+          if (!node || node.type !== 'dir' || !node.children) {
+            output = [`The system cannot find the path specified.`];
+          } else {
+            const entries = Object.entries(node.children).sort();
+            const dirs: string[] = [];
+            const files: string[] = [];
+            for (const [name, child] of entries) {
+              if (child.type === 'dir') {
+                dirs.push(name + '/');
+              } else {
+                files.push(name);
+              }
+            }
+            // Show dirs first, then files, in columns
+            const all = [...dirs, ...files];
+            if (all.length === 0) {
+              output = ['  (empty directory)'];
+            } else {
+              // Simple column layout
+              const maxLen = Math.max(...all.map((s) => s.length));
+              const colWidth = maxLen + 3;
+              const cols = Math.max(1, Math.floor(60 / colWidth));
+              for (let i = 0; i < all.length; i += cols) {
+                const row = all.slice(i, i + cols).map((s) => s.padEnd(colWidth)).join('');
+                output.push('  ' + row);
+              }
+            }
           }
           break;
         }
@@ -288,7 +354,7 @@ export function Terminal() {
             } else if (node.content) {
               output = node.content.split('\n');
             } else if (node.windowId) {
-              output = [`[Program file — use START to run it]`];
+              output = [`[Program file — use START ${args.join(' ')} to run it]`];
             } else {
               output = [`[Empty file]`];
             }
@@ -311,8 +377,7 @@ export function Terminal() {
                 const isLast = i === entries.length - 1;
                 const connector = isLast ? '└── ' : '├── ';
                 const nextPrefix = isLast ? '    ' : '│   ';
-                const indicator = child.type === 'dir' ? '' : ` (${child.size ?? 0}b)`;
-                lines.push(`${prefix}${connector}${name}${indicator}`);
+                lines.push(`${prefix}${connector}${name}`);
                 if (child.type === 'dir') {
                   lines.push(...buildTree(child, prefix + nextPrefix));
                 }
@@ -352,7 +417,7 @@ export function Terminal() {
         }
 
         case 'whoami': {
-          output = ['C:\\USERS\\DANNY'];
+          output = ['DANNY'];
           break;
         }
 
@@ -387,14 +452,14 @@ export function Terminal() {
           if (args.length === 0) {
             output = ['The syntax of the command is incorrect.'];
           } else {
-            output = [`A subdirectory or file ${args[0]} already exists. (Simulation)`];
+            output = [`A subdirectory or file ${args[0]} already exists.`];
           }
           break;
         }
 
         case 'start': {
           if (args.length === 0) {
-            output = ['Usage: START <program>'];
+            output = ['Usage: START <program>', 'Type HELP START for available programs.'];
           } else {
             const name = args[0]!.toLowerCase().replace('.exe', '');
             try {
@@ -407,14 +472,15 @@ export function Terminal() {
           break;
         }
 
-        case 'exit': {
-          pushOutput(['Goodbye.']);
+        case 'exit':
+        case 'quit': {
+          closeWindow('terminal');
           setInput('');
           return;
         }
 
         case 'color': {
-          output = ['Color commands are not supported in this terminal.', 'But nice try! 🎨'];
+          output = ['Color commands are not supported in DannyDOS.'];
           break;
         }
 
@@ -425,7 +491,7 @@ export function Terminal() {
             '      |  DannyOS   |     --------------',
             '      |  ________  |     OS: DannyOS 95',
             '      | |        | |     Host: dannyjtaylor.github.io',
-            '      | |  D95   | |     Kernel: React 18',
+            '      | |  D95   | |     Kernel: React 19',
             '      | |________| |     Uptime: since 2004',
             '      |            |     Shell: DannyDOS v1.0',
             '       \\__________/      Resolution: whatever fits',
@@ -468,14 +534,14 @@ export function Terminal() {
         case 'sudo': {
           output = [
             "Nice try. You don't have admin privileges on DannyOS.",
-            'This incident will be reported. 🚨',
+            'This incident will be reported.',
           ];
           break;
         }
 
         case 'rm': {
           if (args.includes('-rf') || args.includes('-rf /')) {
-            output = ['Nice try! 💀 No deleting the entire filesystem.'];
+            output = ['Nice try! No deleting the entire filesystem.'];
           } else {
             output = ['Access is denied.'];
           }
@@ -513,7 +579,7 @@ export function Terminal() {
       }
       setInput('');
     },
-    [cwd, prompt, pushOutput, openWindow],
+    [cwd, prompt, pushOutput, openWindow, closeWindow],
   );
 
   useEffect(() => {

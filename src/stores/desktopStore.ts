@@ -88,6 +88,23 @@ interface DesktopStore {
   displayPropsOpen: boolean;
   openDisplayProps: () => void;
   closeDisplayProps: () => void;
+
+  // Display settings (Appearance / Settings tabs)
+  brightness: number;
+  contrast: number;
+  colorScheme: string;
+  desktopArea: string;
+  fontSize: string;
+  iconSize: string;
+  setBrightness: (n: number) => void;
+  setContrast: (n: number) => void;
+  setColorScheme: (s: string) => void;
+  setDesktopArea: (s: string) => void;
+  setFontSize: (s: string) => void;
+  setIconSize: (s: string) => void;
+
+  // Dynamic desktop items - extended to support paint files
+  addDesktopItemWithType: (type: 'folder' | 'notepad' | 'paint', label?: string) => string;
 }
 
 let dynamicCounter = 0;
@@ -298,4 +315,53 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
   displayPropsOpen: false,
   openDisplayProps: () => set({ displayPropsOpen: true }),
   closeDisplayProps: () => set({ displayPropsOpen: false }),
+
+  // Display settings
+  brightness: 100,
+  contrast: 100,
+  colorScheme: 'Windows Standard',
+  desktopArea: '1024x768',
+  fontSize: 'Small Fonts',
+  iconSize: 'Large Icons',
+  setBrightness: (n) => set({ brightness: n }),
+  setContrast: (n) => set({ contrast: n }),
+  setColorScheme: (s) => set({ colorScheme: s }),
+  setDesktopArea: (s) => set({ desktopArea: s }),
+  setFontSize: (s) => set({ fontSize: s }),
+  setIconSize: (s) => set({ iconSize: s }),
+
+  // Extended dynamic item creation (supports paint files)
+  addDesktopItemWithType: (type, label) => {
+    dynamicCounter++;
+    const id = `dynamic-${type}-${dynamicCounter}`;
+    const windowId = id;
+    const defaultLabel = type === 'folder' ? 'New Folder' : type === 'paint' ? 'New Image.bmp' : 'New Text Document.txt';
+    const itemLabel = label ?? defaultLabel;
+    const icon = type === 'folder' ? 'folder' : type === 'paint' ? 'paint' : 'notepad';
+    const item: DynamicDesktopItem = { id, label: itemLabel, icon, windowId, type: type === 'paint' ? 'notepad' : type };
+
+    const { highestZ } = get();
+    set((s) => ({
+      dynamicItems: [...s.dynamicItems, { ...item, type: type as 'folder' | 'notepad' }],
+      windows: {
+        ...s.windows,
+        [windowId]: {
+          isOpen: false,
+          isMinimized: false,
+          isMaximized: false,
+          zIndex: highestZ,
+          x: 100 + dynamicCounter * 20,
+          y: 50 + dynamicCounter * 20,
+          width: type === 'folder' ? 420 : 480,
+          height: type === 'folder' ? 300 : 360,
+        },
+      },
+    }));
+
+    if (type === 'notepad' || type === 'paint') {
+      get().saveFile(windowId, '');
+    }
+
+    return id;
+  },
 }));

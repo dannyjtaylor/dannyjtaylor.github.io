@@ -7,7 +7,7 @@ import { StartMenu } from '../StartMenu/StartMenu';
 import { ShutdownDialog } from '../ShutdownDialog/ShutdownDialog';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
 import { PropertiesDialog } from '../PropertiesDialog/PropertiesDialog';
-import { DisplayProperties } from '../DisplayProperties/DisplayProperties';
+// DisplayProperties is now handled by the Settings window
 import { Window } from '../Window/Window';
 import { AboutMe } from '../../windows/AboutMe';
 import { Projects } from '../../windows/Projects';
@@ -27,6 +27,9 @@ import { Interests } from '../../windows/Interests';
 import { DotCard } from '../../windows/DotCard';
 import { Voltbox } from '../../windows/Voltbox';
 import { AOLChat } from '../../windows/AOLChat';
+import { Paint, PAINT_MENUS } from '../../windows/Paint';
+import { DateTime } from '../../windows/DateTime';
+import { Settings } from '../../windows/Settings';
 import { DynamicNotepad } from '../../windows/DynamicNotepad';
 import type { DesktopIconConfig, WindowConfig, MenuConfig } from '../../types';
 import styles from './Desktop.module.css';
@@ -181,6 +184,9 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-dotcard',    label: 'dot.card',       icon: 'document',  windowId: 'dotcard' },
   { id: 'icon-voltbox',   label: 'Voltbox',        icon: 'voltbox',   windowId: 'voltbox' },
   { id: 'icon-aol',       label: 'AOL Messenger',  icon: 'aol',       windowId: 'aol' },
+  { id: 'icon-paint',     label: 'Paint',          icon: 'paint',     windowId: 'paint' },
+  { id: 'icon-datetime',  label: 'Date/Time',      icon: 'datetime',  windowId: 'datetime' },
+  { id: 'icon-settings',  label: 'Settings',       icon: 'settings',  windowId: 'settings' },
 ];
 
 const WINDOWS: WindowConfig[] = [
@@ -202,6 +208,9 @@ const WINDOWS: WindowConfig[] = [
   { id: 'dotcard',    title: 'dot.card - Daniel Taylor',icon: 'document',  defaultWidth: 360, defaultHeight: 260, defaultX: 170, defaultY: 60 },
   { id: 'voltbox',   title: 'Voltbox.exe',              icon: 'voltbox',   defaultWidth: 900, defaultHeight: 640, defaultX: 40,  defaultY: 15 },
   { id: 'aol',       title: 'AOL Instant Messenger',    icon: 'aol',       defaultWidth: 380, defaultHeight: 420, defaultX: 160, defaultY: 50 },
+  { id: 'paint',    title: 'untitled - Paint',          icon: 'paint',     defaultWidth: 640, defaultHeight: 480, defaultX: 60,  defaultY: 20, menus: PAINT_MENUS },
+  { id: 'datetime', title: 'Date/Time Properties',      icon: 'datetime',  defaultWidth: 410, defaultHeight: 460, defaultX: 140, defaultY: 40 },
+  { id: 'settings', title: 'Display Properties',        icon: 'settings',  defaultWidth: 420, defaultHeight: 500, defaultX: 120, defaultY: 30 },
 ];
 
 const WINDOW_CONTENT: Record<string, React.ComponentType> = {
@@ -223,6 +232,9 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   dotcard: DotCard,
   voltbox: Voltbox,
   aol: AOLChat,
+  paint: Paint,
+  datetime: DateTime,
+  settings: Settings,
 };
 
 export function Desktop() {
@@ -238,6 +250,8 @@ export function Desktop() {
   const dynamicItems = useDesktopStore((s) => s.dynamicItems);
   const wallpaper = useDesktopStore((s) => s.wallpaper);
   const wallpaperStyle = useDesktopStore((s) => s.wallpaperStyle);
+  const brightness = useDesktopStore((s) => s.brightness);
+  const contrast = useDesktopStore((s) => s.contrast);
 
   const iconsRef = useRef<HTMLDivElement>(null);
 
@@ -346,16 +360,19 @@ export function Desktop() {
   // All windows (static + dynamic)
   const allWindows = [
     ...WINDOWS,
-    ...dynamicItems.map((d) => ({
-      id: d.windowId,
-      title: d.type === 'folder' ? d.label : `${d.label} - Notepad`,
-      icon: d.icon,
-      defaultWidth: d.type === 'folder' ? 420 : 480,
-      defaultHeight: d.type === 'folder' ? 300 : 360,
-      defaultX: 100,
-      defaultY: 50,
-      menus: d.type === 'notepad' ? NOTEPAD_MENUS : undefined,
-    })),
+    ...dynamicItems.map((d) => {
+      const isPaint = d.label.endsWith('.bmp');
+      return {
+        id: d.windowId,
+        title: d.type === 'folder' ? d.label : isPaint ? `${d.label} - Paint` : `${d.label} - Notepad`,
+        icon: d.icon,
+        defaultWidth: d.type === 'folder' ? 420 : isPaint ? 640 : 480,
+        defaultHeight: d.type === 'folder' ? 300 : isPaint ? 480 : 360,
+        defaultX: 100,
+        defaultY: 50,
+        menus: isPaint ? PAINT_MENUS : d.type === 'notepad' ? NOTEPAD_MENUS : undefined,
+      };
+    }),
   ];
 
   // Render rubber band rectangle
@@ -372,6 +389,9 @@ export function Desktop() {
 
   // Build wallpaper style dynamically
   const desktopStyle: React.CSSProperties = {};
+  if (brightness !== 100 || contrast !== 100) {
+    desktopStyle.filter = `brightness(${brightness / 100}) contrast(${contrast / 100})`;
+  }
   if (wallpaper) {
     desktopStyle.backgroundImage = `url(${wallpaper})`;
     if (wallpaperStyle === 'stretch') {
@@ -416,14 +436,17 @@ export function Desktop() {
           const win = windows[wc.id];
           if (!win || !win.isOpen || win.isMinimized) return null;
 
-          // Check if it's a dynamic notepad
+          // Check if it's a dynamic notepad/paint
           const dynItem = dynamicItems.find((d) => d.windowId === wc.id);
           const isStaticWindow = WINDOW_CONTENT[wc.id];
+          const isPaintFile = dynItem?.label.endsWith('.bmp');
 
           let content: React.ReactNode;
           if (isStaticWindow) {
             const Content = isStaticWindow;
             content = <Content />;
+          } else if (isPaintFile) {
+            content = <Paint />;
           } else if (dynItem?.type === 'notepad') {
             content = <DynamicNotepad fileId={wc.id} />;
           } else {
@@ -451,7 +474,6 @@ export function Desktop() {
 
       <ContextMenu />
       <PropertiesDialog />
-      <DisplayProperties />
       <StartMenu />
       <ShutdownDialog />
       <Taskbar />

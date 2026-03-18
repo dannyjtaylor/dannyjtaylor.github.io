@@ -38,7 +38,6 @@ export function ContextMenu() {
   const arrangeIcons = useDesktopStore((s) => s.arrangeIcons);
   const addDesktopItem = useDesktopStore((s) => s.addDesktopItem);
   const showProperties = useDesktopStore((s) => s.showProperties);
-  const openDisplayProps = useDesktopStore((s) => s.openDisplayProps);
 
   useEffect(() => {
     if (!contextMenu.visible) return;
@@ -110,13 +109,14 @@ export function ContextMenu() {
         <SubMenu label="New" items={[
           { label: 'Folder', onClick: () => { addDesktopItem('folder'); hideContextMenu(); } },
           { label: 'Text Document', onClick: () => { addDesktopItem('notepad'); hideContextMenu(); } },
+          { label: 'Bitmap Image', onClick: () => { useDesktopStore.getState().addDesktopItemWithType('paint'); hideContextMenu(); } },
         ]} />
         <div className={styles.separator} />
         <div className={styles.item} onClick={() => {
           hideContextMenu();
-          openDisplayProps();
+          openWindow('settings');
         }}>
-          Background...
+          Properties...
         </div>
         <div className={styles.item} onClick={() => {
           hideContextMenu();
@@ -142,7 +142,8 @@ export function ContextMenu() {
       valorant: 'VALORANT', undertale: 'UNDERTALE', portfolio: 'Portfolio',
       transcript: 'Transcript', swresume: 'SW Resume', ewresume: 'EW Resume',
       discord: '/gather Bot', cavestory: 'Cave Story', interests: 'Interests', dotcard: 'dot.card',
-      voltbox: 'Voltbox',
+      voltbox: 'Voltbox', aol: 'AOL Messenger', paint: 'Paint',
+      settings: 'Settings', datetime: 'Date/Time',
     };
 
     return (

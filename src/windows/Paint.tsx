@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext, useCallback } from 'react';
+import { useState, useRef, useEffect, useContext, useCallback, type ReactNode } from 'react';
 import { MenuCallbackContext } from '../components/Window/Window';
 import { useDesktopStore } from '../stores/desktopStore';
 import type { MenuConfig } from '../types';
@@ -74,7 +74,7 @@ export const PAINT_MENUS: MenuConfig[] = [
 ];
 
 /* ── Tool SVG icons (24x24) ── */
-const TOOL_ICONS: Record<Tool, JSX.Element> = {
+const TOOL_ICONS: Record<Tool, ReactNode> = {
   select: (
     <svg width="16" height="16" viewBox="0 0 16 16">
       <rect x="2" y="2" width="12" height="12" fill="none" stroke="black" strokeWidth="1" strokeDasharray="2,2" />

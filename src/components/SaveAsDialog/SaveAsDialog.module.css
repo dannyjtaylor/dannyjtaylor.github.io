@@ -1,0 +1,145 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog {
+  width: 360px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+  font-family: var(--font-system);
+  font-size: 11px;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 4px 3px 6px;
+  background: linear-gradient(90deg, var(--win-navy), #1084d0);
+  color: var(--win-white);
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.closeBtn {
+  width: 16px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  padding: 0;
+  cursor: default;
+}
+
+.closeBtn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+.body {
+  padding: 12px;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.fieldLabel {
+  white-space: nowrap;
+  color: var(--win-black);
+}
+
+.filenameInput {
+  flex: 1;
+  padding: 3px 4px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  background: var(--win-white);
+  color: var(--win-black);
+  border-top: 2px solid var(--win-btn-shadow);
+  border-left: 2px solid var(--win-btn-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+  outline: none;
+}
+
+.filenameInput:focus {
+  outline: none;
+}
+
+.saveTypeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.saveTypeLabel {
+  white-space: nowrap;
+  color: var(--win-black);
+}
+
+.saveTypeSelect {
+  flex: 1;
+  padding: 2px 4px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  background: var(--win-white);
+  color: var(--win-black);
+  border-top: 2px solid var(--win-btn-shadow);
+  border-left: 2px solid var(--win-btn-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.btn {
+  min-width: 70px;
+  padding: 3px 8px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  cursor: default;
+  color: var(--win-black);
+}
+
+.btn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+.btnPrimary {
+  composes: btn;
+  outline: 1px dotted var(--win-black);
+  outline-offset: -4px;
+}

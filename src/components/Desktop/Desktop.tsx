@@ -7,6 +7,7 @@ import { StartMenu } from '../StartMenu/StartMenu';
 import { ShutdownDialog } from '../ShutdownDialog/ShutdownDialog';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
 import { PropertiesDialog } from '../PropertiesDialog/PropertiesDialog';
+import { SaveAsDialog } from '../SaveAsDialog/SaveAsDialog';
 // DisplayProperties is now handled by the Settings window
 import { Window } from '../Window/Window';
 import { AboutMe } from '../../windows/AboutMe';
@@ -25,11 +26,12 @@ import { DiscordBot } from '../../windows/DiscordBot';
 import { CaveStory } from '../../windows/CaveStory';
 import { Interests } from '../../windows/Interests';
 import { Steam } from '../../windows/Steam';
-import { Voltbox } from '../../windows/Voltbox';
+import { Breadbox } from '../../windows/Voltbox';
 import { AOLChat } from '../../windows/AOLChat';
 import { Paint, PAINT_MENUS } from '../../windows/Paint';
 import { DateTime } from '../../windows/DateTime';
 import { Settings } from '../../windows/Settings';
+import { MusicPlayer } from '../../windows/MusicPlayer';
 import { DynamicNotepad } from '../../windows/DynamicNotepad';
 import type { DesktopIconConfig, WindowConfig, MenuConfig } from '../../types';
 import styles from './Desktop.module.css';
@@ -181,12 +183,13 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-discord',    label: '/gather Bot',    icon: 'discord',   windowId: 'discord' },
   { id: 'icon-cavestory',  label: 'Cave Story',     icon: 'cavestory', windowId: 'cavestory' },
   { id: 'icon-interests',  label: 'Interests',      icon: 'document',  windowId: 'interests' },
-  { id: 'icon-voltbox',   label: 'Voltbox',        icon: 'voltbox',   windowId: 'voltbox' },
+  { id: 'icon-breadbox',  label: 'Breadbox',       icon: 'breadbox',  windowId: 'breadbox' },
   { id: 'icon-steam',     label: 'Steam',          icon: 'steam',     windowId: 'steam' },
   { id: 'icon-aol',       label: 'AOL Messenger',  icon: 'aol',       windowId: 'aol' },
   { id: 'icon-paint',     label: 'Paint',          icon: 'paint',     windowId: 'paint' },
   { id: 'icon-datetime',  label: 'Date/Time',      icon: 'datetime',  windowId: 'datetime' },
   { id: 'icon-settings',  label: 'Settings',       icon: 'settings',  windowId: 'settings' },
+  { id: 'icon-musicplayer', label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
 ];
 
 const WINDOWS: WindowConfig[] = [
@@ -205,12 +208,13 @@ const WINDOWS: WindowConfig[] = [
   { id: 'discord',    title: '/gather Discord Bot',     icon: 'discord',   defaultWidth: 360, defaultHeight: 260, defaultX: 180, defaultY: 70 },
   { id: 'cavestory',  title: 'Cave Story',              icon: 'cavestory', defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
   { id: 'interests',  title: 'Interests',               icon: 'document',  defaultWidth: 440, defaultHeight: 460, defaultX: 120, defaultY: 30 },
-  { id: 'voltbox',   title: 'Voltbox.exe',              icon: 'voltbox',   defaultWidth: 900, defaultHeight: 640, defaultX: 40,  defaultY: 15 },
+  { id: 'breadbox',  title: 'Breadbox.exe',             icon: 'breadbox',  defaultWidth: 900, defaultHeight: 640, defaultX: 40,  defaultY: 15 },
   { id: 'steam',     title: 'Steam',                    icon: 'steam',     defaultWidth: 680, defaultHeight: 500, defaultX: 80,  defaultY: 25 },
   { id: 'aol',       title: 'AOL Instant Messenger',    icon: 'aol',       defaultWidth: 380, defaultHeight: 420, defaultX: 160, defaultY: 50 },
   { id: 'paint',    title: 'untitled - Paint',          icon: 'paint',     defaultWidth: 640, defaultHeight: 480, defaultX: 60,  defaultY: 20, menus: PAINT_MENUS },
   { id: 'datetime', title: 'Date/Time Properties',      icon: 'datetime',  defaultWidth: 410, defaultHeight: 460, defaultX: 140, defaultY: 40 },
   { id: 'settings', title: 'Display Properties',        icon: 'settings',  defaultWidth: 420, defaultHeight: 500, defaultX: 120, defaultY: 30 },
+  { id: 'musicplayer', title: 'Music Player',            icon: 'musicplayer', defaultWidth: 480, defaultHeight: 440, defaultX: 100, defaultY: 35 },
 ];
 
 const WINDOW_CONTENT: Record<string, React.ComponentType> = {
@@ -229,12 +233,13 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   discord: DiscordBot,
   cavestory: CaveStory,
   interests: Interests,
-  voltbox: Voltbox,
+  breadbox: Breadbox,
   steam: Steam,
   aol: AOLChat,
   paint: Paint,
   datetime: DateTime,
   settings: Settings,
+  musicplayer: MusicPlayer,
 };
 
 export function Desktop() {
@@ -248,6 +253,7 @@ export function Desktop() {
   const setSelectionBox = useDesktopStore((s) => s.setSelectionBox);
   const selectIconsInRect = useDesktopStore((s) => s.selectIconsInRect);
   const dynamicItems = useDesktopStore((s) => s.dynamicItems);
+  const iconLabelOverrides = useDesktopStore((s) => s.iconLabelOverrides);
   const wallpaper = useDesktopStore((s) => s.wallpaper);
   const wallpaperStyle = useDesktopStore((s) => s.wallpaperStyle);
   const brightness = useDesktopStore((s) => s.brightness);
@@ -400,12 +406,15 @@ export function Desktop() {
     [setSelectionBox, selectIconsInRect],
   );
 
-  // All icons (static + dynamic)
+  // All icons (static + dynamic), applying any label overrides from rename
   const allIcons = [
-    ...ICONS,
+    ...ICONS.map((ic) => ({
+      ...ic,
+      label: iconLabelOverrides[ic.id] || ic.label,
+    })),
     ...dynamicItems.map((d) => ({
       id: d.id,
-      label: d.label,
+      label: iconLabelOverrides[d.id] || d.label,
       icon: d.icon,
       windowId: d.windowId,
     })),
@@ -528,6 +537,7 @@ export function Desktop() {
 
       <ContextMenu />
       <PropertiesDialog />
+      <SaveAsDialog />
       <StartMenu />
       <ShutdownDialog />
       <Taskbar />

@@ -105,6 +105,20 @@ interface DesktopStore {
 
   // Dynamic desktop items - extended to support paint files
   addDesktopItemWithType: (type: 'folder' | 'notepad' | 'paint', label?: string) => string;
+
+  // Rename support for all icons (static + dynamic)
+  iconLabelOverrides: Record<string, string>;
+  renameIcon: (iconId: string, newLabel: string) => void;
+  renamingIconId: string | null;
+  setRenamingIconId: (id: string | null) => void;
+
+  // Save As dialog
+  saveAsDialog: { visible: boolean; content: string; sourceFileId: string } | null;
+  showSaveAsDialog: (content: string, sourceFileId: string) => void;
+  hideSaveAsDialog: () => void;
+
+  // Update window title
+  updateWindowTitle: (id: string, title: string) => void;
 }
 
 let dynamicCounter = 0;
@@ -368,4 +382,25 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
 
     return id;
   },
+
+  // Rename support for all icons (static + dynamic)
+  iconLabelOverrides: {},
+  renameIcon: (iconId, newLabel) =>
+    set((s) => ({ iconLabelOverrides: { ...s.iconLabelOverrides, [iconId]: newLabel } })),
+  renamingIconId: null,
+  setRenamingIconId: (id) => set({ renamingIconId: id }),
+
+  // Save As dialog
+  saveAsDialog: null,
+  showSaveAsDialog: (content, sourceFileId) =>
+    set({ saveAsDialog: { visible: true, content, sourceFileId } }),
+  hideSaveAsDialog: () => set({ saveAsDialog: null }),
+
+  // Update window title
+  updateWindowTitle: (id, title) =>
+    set((s) => {
+      const win = s.windows[id];
+      if (!win) return s;
+      return { windows: { ...s.windows, [id]: { ...win, title } } };
+    }),
 }));

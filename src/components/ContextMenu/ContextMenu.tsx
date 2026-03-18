@@ -38,6 +38,11 @@ export function ContextMenu() {
   const arrangeIcons = useDesktopStore((s) => s.arrangeIcons);
   const addDesktopItem = useDesktopStore((s) => s.addDesktopItem);
   const showProperties = useDesktopStore((s) => s.showProperties);
+  const showSaveAsDialog = useDesktopStore((s) => s.showSaveAsDialog);
+  const dynamicItems = useDesktopStore((s) => s.dynamicItems);
+  const fileSystem = useDesktopStore((s) => s.fileSystem);
+  const setRenamingIconId = useDesktopStore((s) => s.setRenamingIconId);
+  const selectedIcons = useDesktopStore((s) => s.selectedIcons);
 
   useEffect(() => {
     if (!contextMenu.visible) return;
@@ -142,9 +147,10 @@ export function ContextMenu() {
       valorant: 'VALORANT', undertale: 'UNDERTALE', portfolio: 'Portfolio',
       transcript: 'Transcript', swresume: 'SW Resume', ewresume: 'EW Resume',
       discord: '/gather Bot', cavestory: 'Cave Story', interests: 'Interests',
-      voltbox: 'Voltbox', aol: 'AOL Messenger', paint: 'Paint',
+      breadbox: 'Breadbox', aol: 'AOL Messenger', paint: 'Paint',
       settings: 'Display Properties', datetime: 'Date/Time Properties',
       steam: 'Steam',
+      musicplayer: 'Music Player',
     };
 
     return (
@@ -161,6 +167,22 @@ export function ContextMenu() {
         }}>
           Explore
         </div>
+        {/* Save As — only for dynamic notepad items */}
+        {(() => {
+          const dynItem = targetId ? dynamicItems.find((d) => d.windowId === targetId) : null;
+          if (dynItem && dynItem.type === 'notepad' && !dynItem.label.endsWith('.bmp')) {
+            return (
+              <div className={styles.item} onClick={() => {
+                const content = fileSystem[targetId!] ?? '';
+                showSaveAsDialog(content, targetId!);
+                hideContextMenu();
+              }}>
+                Save As...
+              </div>
+            );
+          }
+          return null;
+        })()}
         <div className={styles.separator} />
         <SubMenu label="Send To" items={[
           { label: '3\u00BD Floppy (A:)', onClick: () => {
@@ -190,10 +212,11 @@ export function ContextMenu() {
         </div>
         <div className={styles.item} onClick={() => {
           hideContextMenu();
-          showProperties('Error', {
-            'Message': 'Cannot rename system items.',
-            'Reason': 'This is a system object.',
-          });
+          // Find the icon id from selectedIcons
+          const iconId = [...selectedIcons][0] ?? null;
+          if (iconId) {
+            setRenamingIconId(iconId);
+          }
         }}>
           Rename
         </div>

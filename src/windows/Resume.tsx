@@ -196,7 +196,7 @@ export function Resume() {
   const showContextMenu = useDesktopStore((s) => s.showContextMenu);
   const [activeTab, setActiveTab] = useState('software');
   const [texts, setTexts] = useState<Record<string, string>>(RESUMES);
-  const [wordWrap, setWordWrap] = useState(false);
+  const [wordWrap, setWordWrap] = useState(true);
   const [statusBar, setStatusBar] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const registerCallback = useContext(MenuCallbackContext);

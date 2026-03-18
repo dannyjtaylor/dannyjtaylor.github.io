@@ -33,8 +33,10 @@ const PNG_ICONS: Record<string, string> = {
   paint: '/icons/paint.png',
   datetime: '/icons/datetime.png',
   settings: '/icons/settings.png',
+  breadbox: '/icons/breadbox.png',
   steam: '/icons/steam.png',
   folder: '/icons/file.png',
+  musicplayer: '/icons/musicplayer.png',
 };
 
 /* ── Canvas Pixel Art Component ── */
@@ -326,7 +328,7 @@ const DRAW_MAP: Record<string, DrawFn> = {
   drive: drawDrive,
   floppy: drawFloppy,
   cd: drawCD,
-  voltbox: drawVoltbox,
+  breadbox: drawVoltbox,
   minesweeper: drawMinesweeper,
   shutdown: drawShutdown,
   paint: drawPaint,

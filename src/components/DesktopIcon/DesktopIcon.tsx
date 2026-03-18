@@ -1,4 +1,4 @@
-import { useRef, useCallback, type MouseEvent } from 'react';
+import { useRef, useState, useEffect, useCallback, type MouseEvent } from 'react';
 import { useDesktopStore } from '../../stores/desktopStore';
 import { DynamicIcon } from '../Icons/Icons';
 import styles from './DesktopIcon.module.css';
@@ -18,6 +18,36 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
   const iconPosition = useDesktopStore((s) => s.iconPositions[id]);
   const updateIconPosition = useDesktopStore((s) => s.updateIconPosition);
   const showContextMenu = useDesktopStore((s) => s.showContextMenu);
+  const renamingIconId = useDesktopStore((s) => s.renamingIconId);
+  const setRenamingIconId = useDesktopStore((s) => s.setRenamingIconId);
+  const renameIcon = useDesktopStore((s) => s.renameIcon);
+
+  const isRenaming = renamingIconId === id;
+  const [renameValue, setRenameValue] = useState(label);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isRenaming) {
+      setRenameValue(label);
+      // Auto-focus and select all on next tick
+      requestAnimationFrame(() => {
+        renameInputRef.current?.focus();
+        renameInputRef.current?.select();
+      });
+    }
+  }, [isRenaming, label]);
+
+  const commitRename = useCallback(() => {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== label) {
+      renameIcon(id, trimmed);
+    }
+    setRenamingIconId(null);
+  }, [renameValue, label, id, renameIcon, setRenamingIconId]);
+
+  const cancelRename = useCallback(() => {
+    setRenamingIconId(null);
+  }, [setRenamingIconId]);
 
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastClickedRef = useRef<string | null>(null);
@@ -124,9 +154,26 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
       <div className={styles.iconImg}>
         <DynamicIcon name={icon} size={0} className={styles.dynamicIconSize} />
       </div>
-      <span className={`${styles.label} ${isSelected ? styles.labelSelected : ''}`}>
-        {label}
-      </span>
+      {isRenaming ? (
+        <input
+          ref={renameInputRef}
+          className={styles.renameInput}
+          value={renameValue}
+          onChange={(e) => setRenameValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') { e.preventDefault(); commitRename(); }
+            if (e.key === 'Escape') { e.preventDefault(); cancelRename(); }
+            e.stopPropagation();
+          }}
+          onBlur={commitRename}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : (
+        <span className={`${styles.label} ${isSelected ? styles.labelSelected : ''}`}>
+          {label}
+        </span>
+      )}
     </div>
   );
 }

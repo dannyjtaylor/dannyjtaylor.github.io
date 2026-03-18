@@ -38,6 +38,7 @@ export function DynamicNotepad({ fileId }: DynamicNotepadProps) {
           break;
         case 'file-save-as':
           saveFile(fileId, text);
+          useDesktopStore.getState().showSaveAsDialog(text, fileId);
           break;
         case 'edit-undo':
           document.execCommand('undo');

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voltbox</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="crt-overlay active" id="crt-overlay">
+        <div class="desktop" id="desktop">
+
+            <!-- ======== Main Voltbox Window ======== -->
+            <div class="win95-window" id="voltbox-window">
+                <!-- Title Bar -->
+                <div class="title-bar" id="title-bar">
+                    <div class="title-bar-text">
+                        <span class="title-icon">⚡</span> Voltbox.exe
+                    </div>
+                    <div class="title-bar-controls">
+                        <button class="title-btn" id="btn-minimize" title="Minimize">_</button>
+                        <button class="title-btn" id="btn-maximize" title="Maximize">□</button>
+                        <button class="title-btn title-btn-close" id="btn-close" title="Close">✕</button>
+                    </div>
+                </div>
+
+                <!-- Menu Bar -->
+                <div class="menu-bar">
+                    <div class="menu-item" data-menu="file">
+                        <span class="menu-label"><u>F</u>ile</span>
+                        <div class="menu-dropdown" id="menu-file">
+                            <div class="menu-option" data-action="new"><u>N</u>ew&emsp;&emsp;&emsp;Ctrl+N</div>
+                            <div class="menu-option" data-action="open"><u>O</u>pen...&emsp;&emsp;Ctrl+O</div>
+                            <div class="menu-separator"></div>
+                            <div class="menu-option" data-action="save"><u>S</u>ave&emsp;&emsp;&emsp;Ctrl+S</div>
+                            <div class="menu-option" data-action="saveas">Save <u>A</u>s...</div>
+                            <div class="menu-separator"></div>
+                            <div class="menu-option" data-action="exit">E<u>x</u>it</div>
+                        </div>
+                    </div>
+                    <div class="menu-item" data-menu="edit">
+                        <span class="menu-label"><u>E</u>dit</span>
+                        <div class="menu-dropdown" id="menu-edit">
+                            <div class="menu-option" data-action="undo"><u>U</u>ndo&emsp;&emsp;&emsp;Ctrl+Z</div>
+                            <div class="menu-separator"></div>
+                            <div class="menu-option" data-action="clear">Clear <u>A</u>ll</div>
+                        </div>
+                    </div>
+                    <div class="menu-item" data-menu="view">
+                        <span class="menu-label"><u>V</u>iew</span>
+                        <div class="menu-dropdown" id="menu-view">
+                            <div class="menu-option" data-action="toggle-crt">✓ CRT Scanlines</div>
+                            <div class="menu-option" data-action="toggle-flow">&nbsp;&nbsp;Current Flow</div>
+                            <div class="menu-option" data-action="toggle-highlight">✓ Net Highlight</div>
+                        </div>
+                    </div>
+                    <div class="menu-item" data-menu="help">
+                        <span class="menu-label"><u>H</u>elp</span>
+                        <div class="menu-dropdown" id="menu-help">
+                            <div class="menu-option" data-action="howto">How to <u>P</u>lay</div>
+                            <div class="menu-separator"></div>
+                            <div class="menu-option" data-action="about"><u>A</u>bout Voltbox</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <button class="tool-btn" data-tool="select" title="Select (1)">
+                        <span class="tool-icon">🔍</span>
+                    </button>
+                    <div class="toolbar-separator"></div>
+                    <button class="tool-btn active" data-tool="wire" title="Wire (2)">
+                        <span class="tool-icon tool-wire"></span>
+                    </button>
+                    <button class="tool-btn" data-tool="resistor" title="Resistor (3)">
+                        <span class="tool-icon tool-resistor"></span>
+                    </button>
+                    <button class="tool-btn" data-tool="led" title="LED (4)">
+                        <span class="tool-icon tool-led"></span>
+                    </button>
+                    <div class="toolbar-separator"></div>
+                    <button class="tool-btn" data-tool="power" title="Power +5V (5)">
+                        <span class="tool-icon tool-power">+</span>
+                    </button>
+                    <button class="tool-btn" data-tool="ground" title="Ground (6)">
+                        <span class="tool-icon tool-ground">⏚</span>
+                    </button>
+                    <div class="toolbar-separator"></div>
+                    <button class="tool-btn" data-tool="eraser" title="Eraser (7)">
+                        <span class="tool-icon tool-eraser">✕</span>
+                    </button>
+                    <div class="toolbar-separator"></div>
+                    <button class="tool-btn" id="btn-simulate" title="Run Simulation (Space)">
+                        <span class="tool-icon tool-run">▶</span>
+                    </button>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="main-content">
+                    <!-- Component Palette (Left sidebar) -->
+                    <div class="component-palette">
+                        <div class="palette-title">Components</div>
+                        <div class="palette-section">
+                            <button class="palette-btn active" data-tool="wire">
+                                <div class="palette-icon wire-icon"></div>
+                                <span>Wire</span>
+                            </button>
+                            <button class="palette-btn" data-tool="resistor">
+                                <div class="palette-icon resistor-icon"></div>
+                                <span>Resistor</span>
+                            </button>
+                            <button class="palette-btn" data-tool="led">
+                                <div class="palette-icon led-icon"></div>
+                                <span>LED</span>
+                            </button>
+                            <button class="palette-btn" data-tool="power">
+                                <div class="palette-icon power-icon"></div>
+                                <span>Power +5V</span>
+                            </button>
+                            <button class="palette-btn" data-tool="ground">
+                                <div class="palette-icon ground-icon"></div>
+                                <span>Ground</span>
+                            </button>
+                        </div>
+
+                        <div class="palette-title">Tools</div>
+                        <div class="palette-section">
+                            <button class="palette-btn" data-tool="select">
+                                <div class="palette-icon select-icon"></div>
+                                <span>Select</span>
+                            </button>
+                            <button class="palette-btn" data-tool="eraser">
+                                <div class="palette-icon eraser-icon"></div>
+                                <span>Eraser</span>
+                            </button>
+                        </div>
+
+                        <div class="palette-title">Wire Color</div>
+                        <div class="palette-section color-section" id="wire-colors">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Breadboard Workspace (Center) -->
+                    <div class="workspace">
+                        <canvas id="breadboard-canvas" width="680" height="350"></canvas>
+                    </div>
+                </div>
+
+                <!-- Status Bar -->
+                <div class="status-bar">
+                    <div class="status-section status-main" id="status-text">READY</div>
+                    <div class="status-section status-pos" id="status-pos"></div>
+                    <div class="status-section status-tool" id="status-tool">WIRE</div>
+                </div>
+            </div>
+
+            <!-- ======== About Dialog ======== -->
+            <div class="win95-window dialog" id="about-dialog" style="display:none;">
+                <div class="title-bar">
+                    <div class="title-bar-text">About Voltbox</div>
+                    <div class="title-bar-controls">
+                        <button class="title-btn title-btn-close" id="about-close">✕</button>
+                    </div>
+                </div>
+                <div class="dialog-body about-body">
+                    <div class="about-content">
+                        <div class="about-icon-wrap">
+                            <div class="about-big-icon">⚡</div>
+                        </div>
+                        <div class="about-text">
+                            <strong>Voltbox</strong><br>
+                            Version 1.0.0<br><br>
+                            A breadboard circuit simulator<br>
+                            for Windows 95.<br><br>
+                            © 1996 VoltSoft Inc.<br>
+                            All rights reserved.<br><br>
+                            <small>640K ought to be enough for anybody.</small>
+                        </div>
+                    </div>
+                    <div class="dialog-hr"></div>
+                    <div class="dialog-buttons">
+                        <button class="dialog-btn" id="about-ok">OK</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======== How To Play Dialog ======== -->
+            <div class="win95-window dialog" id="howto-dialog" style="display:none; width:440px;">
+                <div class="title-bar">
+                    <div class="title-bar-text">How to Play — Voltbox Help</div>
+                    <div class="title-bar-controls">
+                        <button class="title-btn title-btn-close" id="howto-close">✕</button>
+                    </div>
+                </div>
+                <div class="dialog-body">
+                    <div class="howto-content">
+                        <p><strong>Welcome to Voltbox!</strong></p>
+                        <p>Build circuits on the virtual breadboard:</p>
+                        <div class="howto-box">
+                            <p><strong style="color:#DD0000">Red rails (+)</strong> = Power (5V)</p>
+                            <p><strong style="color:#0044CC">Blue rails (−)</strong> = Ground (0V)</p>
+                            <p>Each column of 5 holes (a–e, f–j) is connected internally.</p>
+                        </div>
+                        <p><strong>Building a Circuit:</strong></p>
+                        <ol>
+                            <li>Select <b>Wire</b> and click two holes to connect them</li>
+                            <li>Place a <b>Resistor</b> between two holes</li>
+                            <li>Place an <b>LED</b> (first click = anode +, second = cathode −)</li>
+                            <li>Or place <b>Power</b> / <b>Ground</b> markers on any hole</li>
+                        </ol>
+                        <p><strong>Controls:</strong></p>
+                        <ul>
+                            <li><b>Left click</b> — Place component pins</li>
+                            <li><b>Right click</b> — Delete component</li>
+                            <li><b>1–7</b> — Quick-select tools</li>
+                            <li><b>Space</b> — Run simulation</li>
+                            <li><b>Ctrl+Z</b> — Undo</li>
+                        </ul>
+                        <p><strong>Try this:</strong> Power rail → wire → resistor → LED → wire → ground rail</p>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button class="dialog-btn" id="howto-ok">OK</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======== Taskbar ======== -->
+            <div class="taskbar">
+                <button class="start-button" id="start-btn">
+                    <span class="start-flag">⊞</span> Start
+                </button>
+                <div class="taskbar-items">
+                    <div class="taskbar-item active" id="taskbar-voltbox">
+                        ⚡ Voltbox.exe
+                    </div>
+                </div>
+                <div class="taskbar-tray">
+                    <span class="tray-icon" title="Volume">🔊</span>
+                    <div class="taskbar-clock" id="taskbar-clock">3:18 PM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detect embedded mode (inside DannyOS iframe) -->
+    <script>
+      if (window.location.search.includes('embedded=true') || window !== window.top) {
+        document.body.classList.add('embedded');
+      }
+    </script>
+
+    <!-- Scripts loaded in order (global namespace VB) -->
+    <script src="js/config.js"></script>
+    <script src="js/sound.js"></script>
+    <script src="js/breadboard.js"></script>
+    <script src="js/simulation.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+

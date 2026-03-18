@@ -1,0 +1,253 @@
+/* ═══════════════════════════════════════════
+   Display Properties — Win95 tabbed dialog
+   ═══════════════════════════════════════════ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Semi-transparent backdrop */
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.dialog {
+  width: 400px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+  font-family: var(--font-system);
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Title bar ── */
+.titleBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 3px;
+  background: linear-gradient(90deg, #000080, #1084d0);
+  flex-shrink: 0;
+}
+
+.titleText {
+  color: #fff;
+  font-weight: bold;
+  font-family: var(--font-system);
+  font-size: 11px;
+  padding-left: 2px;
+}
+
+.closeBtn {
+  width: 16px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  padding: 0;
+  cursor: default;
+}
+.closeBtn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  padding: 6px 6px 0 6px;
+  gap: 0;
+}
+
+.tab {
+  padding: 3px 10px 4px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: none;
+  font-family: var(--font-system);
+  font-size: 11px;
+  color: var(--win-dark);
+  cursor: default;
+  position: relative;
+  top: 2px;
+}
+
+.tabActive {
+  color: var(--win-black);
+  font-weight: bold;
+  background: var(--win-gray);
+  border-bottom: 2px solid var(--win-gray);
+  top: 0;
+  padding-bottom: 6px;
+  z-index: 1;
+}
+
+/* ── Body ── */
+.body {
+  margin: 0 6px;
+  padding: 12px;
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  background: var(--win-gray);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Preview monitor ── */
+.monitorFrame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+}
+
+.monitorScreen {
+  width: 180px;
+  height: 120px;
+  background: #008080;
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+  box-shadow: inset 1px 1px 0 var(--win-btn-shadow);
+}
+
+.monitorStand {
+  width: 60px;
+  height: 12px;
+  background: var(--win-dark);
+  border-radius: 0 0 4px 4px;
+  border-top: 2px solid var(--win-btn-shadow);
+  border-left: 1px solid var(--win-btn-shadow);
+  border-right: 1px solid var(--win-btn-dk-shadow);
+}
+
+/* ── Controls area ── */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-family: var(--font-system);
+  font-size: 11px;
+  color: var(--win-black);
+}
+
+.listBox {
+  height: 90px;
+  overflow-y: auto;
+  background: var(--win-white);
+  border-top: 2px solid var(--win-btn-shadow);
+  border-left: 2px solid var(--win-btn-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+.listItem {
+  padding: 2px 4px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  color: var(--win-black);
+  cursor: default;
+  white-space: nowrap;
+}
+
+.listItem:hover {
+  background: var(--win-navy);
+  color: var(--win-white);
+}
+
+.listItemSelected {
+  background: var(--win-navy);
+  color: var(--win-white);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select {
+  flex: 1;
+  font-family: var(--font-system);
+  font-size: 11px;
+  padding: 2px 4px;
+  background: var(--win-white);
+  border-top: 2px solid var(--win-btn-shadow);
+  border-left: 2px solid var(--win-btn-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+  color: var(--win-black);
+}
+
+.browseBtn {
+  align-self: flex-start;
+  padding: 3px 16px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  background: var(--win-gray);
+  color: var(--win-black);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  cursor: default;
+}
+.browseBtn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+
+/* ── Footer ── */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 8px 6px;
+}
+
+.btn {
+  min-width: 72px;
+  padding: 3px 8px;
+  font-family: var(--font-system);
+  font-size: 11px;
+  background: var(--win-gray);
+  color: var(--win-black);
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
+  cursor: default;
+  text-align: center;
+}
+.btn:active {
+  border-top: 2px solid var(--win-btn-dk-shadow);
+  border-left: 2px solid var(--win-btn-dk-shadow);
+  border-right: 2px solid var(--win-btn-hilight);
+  border-bottom: 2px solid var(--win-btn-hilight);
+}
+

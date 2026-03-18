@@ -38,6 +38,7 @@ export function ContextMenu() {
   const arrangeIcons = useDesktopStore((s) => s.arrangeIcons);
   const addDesktopItem = useDesktopStore((s) => s.addDesktopItem);
   const showProperties = useDesktopStore((s) => s.showProperties);
+  const openDisplayProps = useDesktopStore((s) => s.openDisplayProps);
 
   useEffect(() => {
     if (!contextMenu.visible) return;
@@ -113,6 +114,12 @@ export function ContextMenu() {
         <div className={styles.separator} />
         <div className={styles.item} onClick={() => {
           hideContextMenu();
+          openDisplayProps();
+        }}>
+          Background...
+        </div>
+        <div className={styles.item} onClick={() => {
+          hideContextMenu();
           showProperties('Desktop Properties', {
             'System': 'DannyOS 95',
             'Version': '4.0 (Build 2004)',
@@ -135,6 +142,7 @@ export function ContextMenu() {
       valorant: 'VALORANT', undertale: 'UNDERTALE', portfolio: 'Portfolio',
       transcript: 'Transcript', swresume: 'SW Resume', ewresume: 'EW Resume',
       discord: '/gather Bot', cavestory: 'Cave Story', interests: 'Interests', dotcard: 'dot.card',
+      voltbox: 'Voltbox',
     };
 
     return (

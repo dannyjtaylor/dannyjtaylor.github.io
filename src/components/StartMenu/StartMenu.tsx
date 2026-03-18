@@ -25,6 +25,7 @@ const MENU_ITEMS: MenuItem[] = [
   { label: 'Cave Story', icon: 'cavestory', windowId: 'cavestory' },
   { label: 'Interests', icon: 'document', windowId: 'interests' },
   { label: 'dot.card', icon: 'document', windowId: 'dotcard' },
+  { label: 'Voltbox', icon: 'voltbox', windowId: 'voltbox' },
   { label: '', icon: '', separator: true },
   { label: 'My Computer', icon: 'computer', windowId: 'mycomputer' },
   { label: 'MS-DOS Prompt', icon: 'console', windowId: 'terminal' },

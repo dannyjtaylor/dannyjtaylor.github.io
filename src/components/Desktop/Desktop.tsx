@@ -7,6 +7,7 @@ import { StartMenu } from '../StartMenu/StartMenu';
 import { ShutdownDialog } from '../ShutdownDialog/ShutdownDialog';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
 import { PropertiesDialog } from '../PropertiesDialog/PropertiesDialog';
+import { DisplayProperties } from '../DisplayProperties/DisplayProperties';
 import { Window } from '../Window/Window';
 import { AboutMe } from '../../windows/AboutMe';
 import { Projects } from '../../windows/Projects';
@@ -25,6 +26,7 @@ import { DiscordBot } from '../../windows/DiscordBot';
 import { CaveStory } from '../../windows/CaveStory';
 import { Interests } from '../../windows/Interests';
 import { DotCard } from '../../windows/DotCard';
+import { Voltbox } from '../../windows/Voltbox';
 import { DynamicNotepad } from '../../windows/DynamicNotepad';
 import type { DesktopIconConfig, WindowConfig, MenuConfig } from '../../types';
 import styles from './Desktop.module.css';
@@ -178,6 +180,7 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-cavestory',  label: 'Cave Story',     icon: 'cavestory', windowId: 'cavestory' },
   { id: 'icon-interests',  label: 'Interests',      icon: 'document',  windowId: 'interests' },
   { id: 'icon-dotcard',    label: 'dot.card',       icon: 'document',  windowId: 'dotcard' },
+  { id: 'icon-voltbox',   label: 'Voltbox',        icon: 'voltbox',   windowId: 'voltbox' },
 ];
 
 const WINDOWS: WindowConfig[] = [
@@ -198,6 +201,7 @@ const WINDOWS: WindowConfig[] = [
   { id: 'cavestory',  title: 'Cave Story',              icon: 'cavestory', defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
   { id: 'interests',  title: 'Interests',               icon: 'document',  defaultWidth: 440, defaultHeight: 460, defaultX: 120, defaultY: 30 },
   { id: 'dotcard',    title: 'dot.card - Daniel Taylor',icon: 'document',  defaultWidth: 360, defaultHeight: 260, defaultX: 170, defaultY: 60 },
+  { id: 'voltbox',   title: 'Voltbox.exe',              icon: 'voltbox',   defaultWidth: 900, defaultHeight: 640, defaultX: 40,  defaultY: 15 },
 ];
 
 const WINDOW_CONTENT: Record<string, React.ComponentType> = {
@@ -218,6 +222,7 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   cavestory: CaveStory,
   interests: Interests,
   dotcard: DotCard,
+  voltbox: Voltbox,
 };
 
 export function Desktop() {
@@ -231,6 +236,8 @@ export function Desktop() {
   const setSelectionBox = useDesktopStore((s) => s.setSelectionBox);
   const selectIconsInRect = useDesktopStore((s) => s.selectIconsInRect);
   const dynamicItems = useDesktopStore((s) => s.dynamicItems);
+  const wallpaper = useDesktopStore((s) => s.wallpaper);
+  const wallpaperStyle = useDesktopStore((s) => s.wallpaperStyle);
 
   const iconsRef = useRef<HTMLDivElement>(null);
 
@@ -363,8 +370,26 @@ export function Desktop() {
     );
   };
 
+  // Build wallpaper style dynamically
+  const desktopStyle: React.CSSProperties = {};
+  if (wallpaper) {
+    desktopStyle.backgroundImage = `url(${wallpaper})`;
+    if (wallpaperStyle === 'stretch') {
+      desktopStyle.backgroundSize = 'cover';
+      desktopStyle.backgroundPosition = 'center';
+      desktopStyle.backgroundRepeat = 'no-repeat';
+    } else if (wallpaperStyle === 'center') {
+      desktopStyle.backgroundSize = 'contain';
+      desktopStyle.backgroundPosition = 'center';
+      desktopStyle.backgroundRepeat = 'no-repeat';
+    } else {
+      desktopStyle.backgroundSize = 'auto';
+      desktopStyle.backgroundRepeat = 'repeat';
+    }
+  }
+
   return (
-    <div className={styles.desktop}>
+    <div className={styles.desktop} style={desktopStyle}>
       {/* Icon grid */}
       <div
         ref={iconsRef}
@@ -426,6 +451,7 @@ export function Desktop() {
 
       <ContextMenu />
       <PropertiesDialog />
+      <DisplayProperties />
       <StartMenu />
       <ShutdownDialog />
       <Taskbar />

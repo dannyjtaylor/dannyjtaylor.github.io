@@ -156,6 +156,36 @@ function drawCD(ctx: CanvasRenderingContext2D) {
   ctx.globalAlpha = 1;
 }
 
+function drawVoltbox(ctx: CanvasRenderingContext2D) {
+  // Chip / breadboard icon with a lightning bolt
+  ctx.fillStyle = '#C0C0C0';
+  ctx.fillRect(1, 1, 14, 14);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(1, 1, 14, 1); ctx.fillRect(1, 1, 1, 14);
+  ctx.fillRect(14, 1, 1, 14); ctx.fillRect(1, 14, 14, 1);
+  // Inner board color
+  ctx.fillStyle = '#E8D5A3';
+  ctx.fillRect(2, 2, 12, 12);
+  // Lightning bolt (yellow)
+  ctx.fillStyle = '#FFCC00';
+  ctx.fillRect(8, 2, 3, 1);
+  ctx.fillRect(7, 3, 3, 1);
+  ctx.fillRect(6, 4, 3, 1);
+  ctx.fillRect(5, 5, 5, 1);
+  ctx.fillRect(7, 6, 3, 1);
+  ctx.fillRect(8, 7, 3, 1);
+  ctx.fillRect(7, 8, 3, 1);
+  ctx.fillRect(6, 9, 3, 1);
+  ctx.fillRect(5, 10, 3, 1);
+  ctx.fillRect(4, 11, 3, 1);
+  // DIP pins (left/right edges)
+  ctx.fillStyle = '#808080';
+  for (let y = 3; y <= 12; y += 2) {
+    ctx.fillRect(0, y, 2, 1);
+    ctx.fillRect(14, y, 2, 1);
+  }
+}
+
 function drawShutdown(ctx: CanvasRenderingContext2D) {
   const cx = 7.5, cy = 7.5;
   for (let y = 0; y < 16; y++) {
@@ -191,6 +221,7 @@ const DRAW_MAP: Record<string, DrawFn> = {
   drive: drawDrive,
   floppy: drawFloppy,
   cd: drawCD,
+  voltbox: drawVoltbox,
   shutdown: drawShutdown,
 };
 

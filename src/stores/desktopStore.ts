@@ -77,6 +77,17 @@ interface DesktopStore {
   // Track all icon IDs for arrange
   allIconIds: string[];
   setAllIconIds: (ids: string[]) => void;
+
+  // Desktop wallpaper
+  wallpaper: string | null; // URL or null for default teal
+  wallpaperStyle: 'tile' | 'center' | 'stretch';
+  setWallpaper: (url: string | null) => void;
+  setWallpaperStyle: (style: 'tile' | 'center' | 'stretch') => void;
+
+  // Display Properties dialog
+  displayPropsOpen: boolean;
+  openDisplayProps: () => void;
+  closeDisplayProps: () => void;
 }
 
 let dynamicCounter = 0;
@@ -276,4 +287,15 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
 
   allIconIds: [],
   setAllIconIds: (ids) => set({ allIconIds: ids }),
+
+  // Desktop wallpaper
+  wallpaper: null,
+  wallpaperStyle: 'stretch',
+  setWallpaper: (url) => set({ wallpaper: url }),
+  setWallpaperStyle: (style) => set({ wallpaperStyle: style }),
+
+  // Display Properties dialog
+  displayPropsOpen: false,
+  openDisplayProps: () => set({ displayPropsOpen: true }),
+  closeDisplayProps: () => set({ displayPropsOpen: false }),
 }));

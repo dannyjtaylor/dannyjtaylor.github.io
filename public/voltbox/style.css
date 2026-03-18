@@ -1,0 +1,826 @@
+/* ============================================================
+   VOLTBOX — Windows 95 Aesthetic Stylesheet
+   "A lost Windows 95 educational electronics program"
+   ============================================================ */
+
+@font-face {
+    font-family: 'W95FA';
+    src: url('../fonts/W95FA.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* ==================== RESET & BASE ==================== */
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'W95FA', 'MS Sans Serif', 'Microsoft Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    background: #000;
+}
+
+/* ==================== DESKTOP ==================== */
+
+.desktop {
+    width: 100vw;
+    height: 100vh;
+    background-color: #008080;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ==================== CRT OVERLAY ==================== */
+
+.crt-overlay {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.crt-overlay.active::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.02) 0px,
+        rgba(0, 0, 0, 0.02) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+    z-index: 10000;
+}
+
+/* ==================== WIN95 WINDOW ==================== */
+
+.win95-window {
+    background: #C0C0C0;
+    border: 2px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    box-shadow: inset 1px 1px 0 #DFDFDF, inset -1px -1px 0 #0A0A0A,
+                3px 3px 0 rgba(0,0,0,0.2);
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+}
+
+#voltbox-window {
+    width: 860px;
+    height: 580px;
+    z-index: 100;
+}
+
+/* ==================== TITLE BAR ==================== */
+
+.title-bar {
+    background: linear-gradient(90deg, #000080, #1084D0);
+    color: #FFFFFF;
+    padding: 2px 3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 20px;
+    min-height: 20px;
+    cursor: default;
+    font-weight: bold;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+}
+
+.title-bar-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+
+.title-icon {
+    font-size: 12px;
+}
+
+.title-bar-controls {
+    display: flex;
+    gap: 2px;
+}
+
+.title-btn {
+    width: 16px;
+    height: 14px;
+    background: #C0C0C0;
+    border: 1px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    box-shadow: inset 1px 1px 0 #DFDFDF, inset -1px -1px 0 #0A0A0A;
+    font-size: 9px;
+    font-family: inherit;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #000;
+    padding: 0;
+}
+
+.title-btn:active {
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    box-shadow: inset 1px 1px 0 #0A0A0A, inset -1px -1px 0 #DFDFDF;
+    padding-top: 1px;
+    padding-left: 1px;
+}
+
+.title-btn-close {
+    margin-left: 2px;
+}
+
+/* ==================== MENU BAR ==================== */
+
+.menu-bar {
+    background: #C0C0C0;
+    display: flex;
+    border-bottom: 1px solid #808080;
+    height: 20px;
+    min-height: 20px;
+}
+
+.menu-item {
+    position: relative;
+    padding: 2px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.menu-item:hover,
+.menu-item.open {
+    background: #000080;
+    color: #FFFFFF;
+}
+
+.menu-label {
+    font-size: 11px;
+}
+
+.menu-label u {
+    text-decoration: underline;
+}
+
+.menu-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    background: #C0C0C0;
+    border: 2px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.25);
+    min-width: 180px;
+    z-index: 2000;
+    padding: 2px;
+    color: #000;
+}
+
+.menu-item.open .menu-dropdown {
+    display: block;
+}
+
+.menu-option {
+    padding: 3px 24px 3px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+.menu-option:hover {
+    background: #000080;
+    color: #FFFFFF;
+}
+
+.menu-separator {
+    height: 0;
+    border-top: 1px solid #808080;
+    border-bottom: 1px solid #FFFFFF;
+    margin: 3px 2px;
+}
+
+/* ==================== TOOLBAR ==================== */
+
+.toolbar {
+    background: #C0C0C0;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 1px;
+    border-bottom: 1px solid #808080;
+    min-height: 30px;
+}
+
+.tool-btn {
+    width: 26px;
+    height: 26px;
+    background: #C0C0C0;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    padding: 0;
+    font-family: inherit;
+    color: #000;
+    position: relative;
+}
+
+.tool-btn:hover {
+    border: 1px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+}
+
+.tool-btn:active,
+.tool-btn.active {
+    border: 1px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    background: #B0B0B0;
+}
+
+.tool-btn.active {
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.15);
+}
+
+/* Toolbar icon sprites (CSS-drawn) */
+.tool-wire {
+    display: block;
+    width: 16px;
+    height: 2px;
+    background: #DD0000;
+    border-radius: 1px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+}
+
+.tool-resistor {
+    display: block;
+    width: 14px;
+    height: 6px;
+    background: #D4A76A;
+    border: 1px solid #8B6914;
+}
+
+.tool-resistor::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 3px; right: 3px;
+    height: 1px;
+    background: #888;
+}
+
+.tool-led {
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle at 40% 40%, #FF6666, #CC0000);
+    border-radius: 50%;
+    border: 1px solid #990000;
+}
+
+.tool-power {
+    color: #DD0000;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.tool-ground {
+    color: #0044CC;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.tool-eraser {
+    color: #CC0000;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.tool-run {
+    color: #008800;
+    font-size: 14px;
+}
+
+.toolbar-separator {
+    width: 2px;
+    height: 22px;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #FFFFFF;
+    margin: 0 3px;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ==================== COMPONENT PALETTE ==================== */
+
+.component-palette {
+    width: 115px;
+    min-width: 115px;
+    background: #C0C0C0;
+    border-right: 1px solid #808080;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+}
+
+.palette-title {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 4px 1px;
+    border-bottom: 1px solid #808080;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    color: #000;
+    letter-spacing: 0.3px;
+}
+
+.palette-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 2px;
+}
+
+.palette-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 5px;
+    background: #C0C0C0;
+    border: 1px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    text-align: left;
+    min-height: 24px;
+    color: #000;
+}
+
+.palette-btn:hover {
+    background: #D0D0D0;
+}
+
+.palette-btn:active,
+.palette-btn.active {
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    background: #B0B0B0;
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Palette icons */
+.palette-icon {
+    width: 18px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
+.wire-icon {
+    background: linear-gradient(0deg, transparent 40%, #DD0000 40%, #DD0000 60%, transparent 60%);
+}
+
+.resistor-icon {
+    background: #D4A76A;
+    border: 1px solid #8B6914;
+    height: 10px;
+}
+
+.led-icon {
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at 40% 40%, #FF5555, #CC0000);
+    border-radius: 50%;
+    border: 1px solid #990000;
+}
+
+.power-icon {
+    background: #DD0000;
+    border: 1px solid #990000;
+    position: relative;
+}
+
+.power-icon::after {
+    content: '+';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    text-align: center;
+    color: #FFF;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 12px;
+}
+
+.ground-icon {
+    background: #0044CC;
+    border: 1px solid #002288;
+    position: relative;
+}
+
+.ground-icon::after {
+    content: '−';
+    position: absolute;
+    top: -2px; left: 0; right: 0;
+    text-align: center;
+    color: #FFF;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 12px;
+}
+
+.select-icon {
+    border: 1px dashed #666;
+    background: transparent;
+}
+
+.eraser-icon {
+    background: #FFB0B0;
+    border: 1px solid #CC8888;
+}
+
+/* Wire color swatches */
+.color-section {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 3px !important;
+    padding: 2px;
+}
+
+.color-swatch {
+    width: 16px;
+    height: 16px;
+    border: 1px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    cursor: pointer;
+}
+
+.color-swatch:hover {
+    border-color: #000 #000 #000 #000;
+}
+
+.color-swatch.active {
+    border: 2px solid #000000;
+    box-shadow: inset 0 0 0 1px #FFF;
+}
+
+/* ==================== WORKSPACE ==================== */
+
+.workspace {
+    flex: 1;
+    background: #808080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    box-shadow: inset 1px 1px 0 #0A0A0A, inset -1px -1px 0 #DFDFDF;
+    overflow: auto;
+    padding: 6px;
+}
+
+#breadboard-canvas {
+    cursor: crosshair;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor;
+}
+
+/* ==================== STATUS BAR ==================== */
+
+.status-bar {
+    background: #C0C0C0;
+    display: flex;
+    border-top: 1px solid #FFFFFF;
+    min-height: 20px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.status-section {
+    padding: 1px 6px;
+    border: 1px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.status-main {
+    flex: 1;
+}
+
+.status-pos {
+    width: 80px;
+    justify-content: center;
+    text-align: center;
+}
+
+.status-tool {
+    width: 75px;
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* ==================== DIALOGS ==================== */
+
+.dialog {
+    z-index: 5000;
+    width: 340px;
+}
+
+.dialog-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.about-body {
+    align-items: stretch;
+}
+
+.about-content {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.about-icon-wrap {
+    flex-shrink: 0;
+}
+
+.about-big-icon {
+    font-size: 48px;
+    line-height: 1;
+    filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.2));
+}
+
+.about-text {
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.about-text small {
+    color: #666;
+    font-style: italic;
+}
+
+.dialog-hr {
+    height: 0;
+    border-top: 1px solid #808080;
+    border-bottom: 1px solid #FFFFFF;
+    margin: 4px 0;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.dialog-btn {
+    padding: 4px 24px;
+    background: #C0C0C0;
+    border: 2px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    box-shadow: inset 1px 1px 0 #DFDFDF, inset -1px -1px 0 #0A0A0A;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    min-width: 80px;
+    color: #000;
+}
+
+.dialog-btn:active {
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    box-shadow: inset 1px 1px 0 #0A0A0A, inset -1px -1px 0 #DFDFDF;
+    padding-top: 5px;
+    padding-left: 25px;
+}
+
+.dialog-btn:focus {
+    outline: 1px dotted #000;
+    outline-offset: -4px;
+}
+
+/* How-to dialog */
+.howto-content {
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.howto-content p {
+    margin-bottom: 6px;
+}
+
+.howto-content ul,
+.howto-content ol {
+    margin-left: 18px;
+    margin-bottom: 8px;
+}
+
+.howto-content li {
+    margin-bottom: 2px;
+}
+
+.howto-box {
+    background: #FFFFFF;
+    border: 1px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    padding: 6px 10px;
+    margin: 6px 0 8px;
+}
+
+.howto-box p {
+    margin-bottom: 2px !important;
+}
+
+/* ==================== TASKBAR ==================== */
+
+.taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: #C0C0C0;
+    border-top: 2px solid #FFFFFF;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 4px;
+    z-index: 9000;
+}
+
+.start-button {
+    padding: 2px 6px;
+    background: #C0C0C0;
+    border: 2px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    box-shadow: inset 1px 1px 0 #DFDFDF, inset -1px -1px 0 #0A0A0A;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 24px;
+    color: #000;
+}
+
+.start-button:active {
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    box-shadow: inset 1px 1px 0 #0A0A0A, inset -1px -1px 0 #DFDFDF;
+}
+
+.start-flag {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.taskbar-items {
+    flex: 1;
+    display: flex;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.taskbar-item {
+    padding: 2px 8px;
+    background: #C0C0C0;
+    border: 1px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    font-size: 11px;
+    min-width: 140px;
+    max-width: 200px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.taskbar-item.active {
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    background: #B0B0B0;
+    font-weight: bold;
+}
+
+.taskbar-tray {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    padding: 2px 8px;
+    height: 24px;
+}
+
+.tray-icon {
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.taskbar-clock {
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* ==================== SCROLLBAR STYLING ==================== */
+
+::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+}
+
+::-webkit-scrollbar-track {
+    background: repeating-comb;
+    background-color: #C0C0C0;
+    border: 1px solid #808080;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #C0C0C0;
+    border: 1px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+}
+
+::-webkit-scrollbar-button {
+    background: #C0C0C0;
+    border: 1px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    display: block;
+    width: 16px;
+    height: 16px;
+}
+
+/* ==================== UTILITY ==================== */
+
+.hidden { display: none !important; }
+
+/* ==================== EMBEDDED MODE ==================== */
+/* When loaded inside DannyOS as an iframe, hide redundant chrome */
+
+body.embedded {
+    overflow: hidden;
+}
+
+body.embedded .desktop {
+    background: transparent !important;
+}
+
+body.embedded .taskbar {
+    display: none !important;
+}
+
+body.embedded #voltbox-window {
+    position: static;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body.embedded #voltbox-window > .title-bar {
+    display: none !important;
+}
+
+body.embedded .win95-window {
+    border: none;
+    box-shadow: none;
+}
+
+body.embedded .crt-overlay.active::after {
+    display: none;
+}
+

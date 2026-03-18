@@ -1,8 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { isFirebaseReady } from '../lib/firebase';
+import { useRoomCounts, useMultiplayerChat } from '../hooks/useMultiplayerChat';
 
-/* ── Character definitions ── */
+/* ════════════════════════════════════════════════════════════
+   NPC Character Definitions (Frieren & Edward Elric)
+   ════════════════════════════════════════════════════════════ */
 
-interface Message {
+interface NPCMessage {
   from: 'user' | 'buddy';
   text: string;
 }
@@ -85,158 +89,273 @@ const EDWARD: BuddyProfile = {
   ],
 };
 
-const BUDDIES = [FRIEREN, EDWARD];
+const NPC_BUDDIES = [FRIEREN, EDWARD];
 
-function getResponse(buddy: BuddyProfile, input: string): string {
+function getNPCResponse(buddy: BuddyProfile, input: string): string {
   const lower = input.toLowerCase();
   for (const r of buddy.responses) {
-    if (r.keywords.some((kw) => lower.includes(kw))) {
-      return r.reply;
-    }
+    if (r.keywords.some((kw) => lower.includes(kw))) return r.reply;
   }
   return buddy.fallbacks[Math.floor(Math.random() * buddy.fallbacks.length)]!;
 }
 
-/* ── AOL Triangle Logo SVG ── */
-const AOLLogo = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="11" fill="#0033A0" stroke="#fff" strokeWidth="1" />
-    <path d="M12 4 L20 18 H4 Z" fill="none" stroke="#fff" strokeWidth="2" strokeLinejoin="round" />
-    <circle cx="17" cy="9" r="2" fill="#fff" />
-  </svg>
-);
+/* ════════════════════════════════════════════════════════════
+   Constants & Helpers
+   ════════════════════════════════════════════════════════════ */
 
-/* ── Buddy Icon SVGs ── */
-const FrierenIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28">
-    {/* Hair */}
-    <ellipse cx="14" cy="10" rx="10" ry="9" fill="#C8D8E8" />
-    <rect x="4" y="10" width="20" height="16" rx="2" fill="#C8D8E8" />
-    {/* Face */}
-    <ellipse cx="14" cy="12" rx="7" ry="7" fill="#FDEBD0" />
-    {/* Eyes */}
-    <ellipse cx="11" cy="11" rx="1.2" ry="1.5" fill="#6B5B95" />
-    <ellipse cx="17" cy="11" rx="1.2" ry="1.5" fill="#6B5B95" />
-    {/* Mouth */}
-    <path d="M12 15 Q14 16.5 16 15" fill="none" stroke="#B5651D" strokeWidth="0.7" />
-    {/* Hair detail */}
-    <path d="M6 8 Q8 3 14 2 Q20 3 22 8" fill="none" stroke="#A0B8CC" strokeWidth="1" />
-    {/* Ears */}
-    <path d="M4 10 L1 7 L5 9" fill="#FDEBD0" stroke="#FDEBD0" strokeWidth="0.5" />
-    <path d="M24 10 L27 7 L23 9" fill="#FDEBD0" stroke="#FDEBD0" strokeWidth="0.5" />
-  </svg>
-);
+const ROOM_IDS = ['room-a', 'room-b', 'room-c', 'room-d'];
+const ROOM_LABELS: Record<string, string> = {
+  'room-a': 'Room A',
+  'room-b': 'Room B',
+  'room-c': 'Room C',
+  'room-d': 'Room D',
+};
 
-const EdwardIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28">
-    {/* Hair */}
-    <ellipse cx="14" cy="9" rx="9" ry="8" fill="#FFD700" />
-    {/* Antenna hair */}
-    <path d="M14 1 L12 5 L16 5 Z" fill="#FFD700" />
-    {/* Braid */}
-    <rect x="12" y="16" width="4" height="10" rx="1.5" fill="#DAA520" />
-    {/* Face */}
-    <ellipse cx="14" cy="12" rx="7" ry="7" fill="#FDEBD0" />
-    {/* Eyes */}
-    <ellipse cx="11" cy="11" rx="1.2" ry="1.5" fill="#B8860B" />
-    <ellipse cx="17" cy="11" rx="1.2" ry="1.5" fill="#B8860B" />
-    {/* Determined eyebrows */}
-    <line x1="9" y1="8.5" x2="12.5" y2="9.5" stroke="#DAA520" strokeWidth="1" />
-    <line x1="15.5" y1="9.5" x2="19" y2="8.5" stroke="#DAA520" strokeWidth="1" />
-    {/* Grin */}
-    <path d="M11 15 Q14 17.5 17 15" fill="none" stroke="#B5651D" strokeWidth="0.8" />
-  </svg>
-);
+const USER_COLORS = [
+  '#CC0000', '#0000CC', '#008800', '#CC6600',
+  '#880088', '#008888', '#CC0088', '#4444CC',
+  '#888800', '#CC4400', '#0066CC', '#00CC44',
+];
 
-/* ── Running Man / Buddy Icon ── */
+function pickColor(): string {
+  return USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)]!;
+}
+
+/* ── Small SVG icons ── */
 const BuddyStatusIcon = ({ online }: { online: boolean }) => (
   <svg width="12" height="12" viewBox="0 0 12 12">
-    {/* Person shape */}
     <circle cx="6" cy="3" r="2" fill={online ? '#FFD700' : '#808080'} />
     <path d="M3 6 L6 5 L9 6 L8 10 L7 10 L6 8 L5 10 L4 10 Z" fill={online ? '#FFD700' : '#808080'} />
   </svg>
 );
 
+const OnlineDot = () => (
+  <svg width="8" height="8" viewBox="0 0 8 8">
+    <circle cx="4" cy="4" r="3" fill="#00CC00" />
+  </svg>
+);
+
+/* ════════════════════════════════════════════════════════════
+   View type
+   ════════════════════════════════════════════════════════════ */
+
+type View =
+  | { kind: 'profile' }
+  | { kind: 'lobby' }
+  | { kind: 'room'; roomId: string }
+  | { kind: 'npc'; buddyIdx: number };
+
+/* ════════════════════════════════════════════════════════════
+   Main Component
+   ════════════════════════════════════════════════════════════ */
+
 export function AOLChat() {
-  const [selectedBuddy, setSelectedBuddy] = useState<number | null>(null);
-  const [chats, setChats] = useState<Record<number, Message[]>>({ 0: [], 1: [] });
-  const [input, setInput] = useState('');
-  const [typing, setTyping] = useState(false);
+  const [view, setView] = useState<View>({ kind: 'profile' });
+  const [screenName, setScreenName] = useState('');
+  const [userColor] = useState(pickColor);
+  const firebaseOk = useMemo(() => isFirebaseReady(), []);
+
+  /* ── NPC chat state ── */
+  const [npcChats, setNpcChats] = useState<Record<number, NPCMessage[]>>({ 0: [], 1: [] });
+  const [npcInput, setNpcInput] = useState('');
+  const [npcTyping, setNpcTyping] = useState(false);
+
+  /* ── Multiplayer chat state ── */
+  const currentRoom = view.kind === 'room' ? view.roomId : null;
+  const roomCounts = useRoomCounts(firebaseOk ? ROOM_IDS : []);
+  const { messages: mpMessages, users: mpUsers, sendMessage: mpSend } =
+    useMultiplayerChat(currentRoom, screenName, userColor);
+  const [mpInput, setMpInput] = useState('');
+
+  /* ── Refs ── */
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
+  // Auto-scroll
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chats, typing]);
+  }, [mpMessages, npcChats, npcTyping]);
 
-  const sendMessage = () => {
-    if (!input.trim() || selectedBuddy === null || typing) return;
-    const buddy = BUDDIES[selectedBuddy]!;
-    const trimmed = input.trim();
+  // Auto-focus name input
+  useEffect(() => {
+    if (view.kind === 'profile') {
+      setTimeout(() => nameInputRef.current?.focus(), 50);
+    }
+  }, [view.kind]);
 
-    setChats((prev) => ({
-      ...prev,
-      [selectedBuddy]: [...(prev[selectedBuddy] ?? []), { from: 'user', text: trimmed }],
-    }));
-    setInput('');
-    setTyping(true);
+  // Auto-focus chat input
+  useEffect(() => {
+    if (view.kind === 'room' || view.kind === 'npc') {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [view.kind]);
 
-    // Simulate typing delay
-    const delay = 600 + Math.random() * 1200;
-    setTimeout(() => {
-      const reply = getResponse(buddy, trimmed);
-      setChats((prev) => ({
-        ...prev,
-        [selectedBuddy]: [...(prev[selectedBuddy] ?? []), { from: 'buddy', text: reply }],
-      }));
-      setTyping(false);
-    }, delay);
+  /* ── Profile creation ── */
+  const createProfile = () => {
+    if (!screenName.trim()) return;
+    setView({ kind: 'lobby' });
   };
 
-  const startChat = (idx: number) => {
-    setSelectedBuddy(idx);
-    const buddy = BUDDIES[idx]!;
-    if (!chats[idx] || chats[idx]!.length === 0) {
-      setChats((prev) => ({
+  /* ── NPC chat helpers ── */
+  const startNPC = (idx: number) => {
+    setView({ kind: 'npc', buddyIdx: idx });
+    const buddy = NPC_BUDDIES[idx]!;
+    if (!npcChats[idx] || npcChats[idx]!.length === 0) {
+      setNpcChats((prev) => ({
         ...prev,
         [idx]: [{ from: 'buddy', text: buddy.greeting }],
       }));
     }
-    setTimeout(() => inputRef.current?.focus(), 50);
   };
 
-  const messages = selectedBuddy !== null ? (chats[selectedBuddy] ?? []) : [];
-  const buddy = selectedBuddy !== null ? BUDDIES[selectedBuddy]! : null;
+  const sendNPC = () => {
+    if (view.kind !== 'npc' || !npcInput.trim() || npcTyping) return;
+    const buddy = NPC_BUDDIES[view.buddyIdx]!;
+    const text = npcInput.trim();
+    const idx = view.buddyIdx;
+    setNpcChats((prev) => ({
+      ...prev,
+      [idx]: [...(prev[idx] ?? []), { from: 'user', text }],
+    }));
+    setNpcInput('');
+    setNpcTyping(true);
+    setTimeout(() => {
+      const reply = getNPCResponse(buddy, text);
+      setNpcChats((prev) => ({
+        ...prev,
+        [idx]: [...(prev[idx] ?? []), { from: 'buddy', text: reply }],
+      }));
+      setNpcTyping(false);
+    }, 600 + Math.random() * 1200);
+  };
 
-  /* ── Buddy List View ── */
-  if (selectedBuddy === null) {
+  /* ── Multiplayer send ── */
+  const sendMP = () => {
+    if (!mpInput.trim()) return;
+    mpSend(mpInput);
+    setMpInput('');
+  };
+
+  /* ════════════════════════════════════════════════════════
+     RENDER: Profile Screen
+     ════════════════════════════════════════════════════════ */
+  if (view.kind === 'profile') {
     return (
       <div style={S.root}>
-        {/* AOL Header */}
-        <div style={S.aolHeader}>
-          <AOLLogo size={20} />
-          <span style={{ marginLeft: 6, fontWeight: 'bold', fontSize: 13 }}>AOL Instant Messenger</span>
+        <div style={S.profileScreen}>
+          <img
+            src="/icons/aol.png"
+            alt="AOL"
+            width={64}
+            height={64}
+            style={{ imageRendering: 'pixelated', objectFit: 'contain', marginBottom: 12 }}
+            draggable={false}
+          />
+          <div style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Welcome!</div>
+          <div style={{ fontSize: 11, color: '#666', marginBottom: 16, textAlign: 'center' }}>
+            Create a screen name to start chatting.
+          </div>
+          <div style={{ fontSize: 11, marginBottom: 4, alignSelf: 'flex-start' }}>Screen Name:</div>
+          <input
+            ref={nameInputRef}
+            style={S.profileInput}
+            value={screenName}
+            onChange={(e) => setScreenName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') createProfile(); }}
+            placeholder="Enter a screen name..."
+            maxLength={20}
+          />
+          <button
+            style={{
+              ...S.winBtn,
+              width: '100%',
+              marginTop: 12,
+              padding: '4px 12px',
+              opacity: screenName.trim() ? 1 : 0.5,
+            }}
+            onClick={createProfile}
+            disabled={!screenName.trim()}
+          >
+            Sign On
+          </button>
         </div>
+      </div>
+    );
+  }
 
-        {/* Screen name bar */}
-        <div style={S.screenNameBar}>
+  /* ════════════════════════════════════════════════════════
+     RENDER: Lobby (Room selection + NPC buddies)
+     ════════════════════════════════════════════════════════ */
+  if (view.kind === 'lobby') {
+    return (
+      <div style={S.root}>
+        {/* User bar */}
+        <div style={S.topBar}>
           <BuddyStatusIcon online={true} />
-          <span style={{ marginLeft: 4, fontSize: 11 }}>DannyT95</span>
+          <span style={{ marginLeft: 4, fontSize: 11, fontWeight: 'bold' }}>{screenName}</span>
+          <span style={{ marginLeft: 'auto', fontSize: 9, color: '#666' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: userColor, display: 'inline-block', marginRight: 3 }} />
+            your color
+          </span>
         </div>
 
-        {/* Buddy list */}
-        <div style={S.buddyList}>
-          <div style={S.buddyCategory}>
+        <div style={S.lobbyBody}>
+          {/* ── Chat Rooms ── */}
+          {firebaseOk && (
+            <>
+              <div style={S.sectionHeader}>
+                <svg width="10" height="10" viewBox="0 0 10 10" style={{ marginRight: 4 }}>
+                  <path d="M2 3 L8 3 L5 7 Z" fill="#000" />
+                </svg>
+                Chat Rooms
+              </div>
+              <div style={S.roomGrid}>
+                {ROOM_IDS.map((id) => {
+                  const count = roomCounts[id] ?? 0;
+                  return (
+                    <button
+                      key={id}
+                      style={S.roomCard}
+                      onClick={() => setView({ kind: 'room', roomId: id })}
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24">
+                        <rect x="2" y="4" width="20" height="14" rx="2" fill="#D4D0C8" stroke="#808080" strokeWidth="1" />
+                        <rect x="4" y="6" width="16" height="10" fill="#fff" />
+                        <rect x="8" y="19" width="8" height="2" fill="#808080" />
+                        <rect x="6" y="21" width="12" height="1" fill="#808080" />
+                      </svg>
+                      <div style={{ fontSize: 11, fontWeight: 'bold', marginTop: 2 }}>
+                        {ROOM_LABELS[id]}
+                      </div>
+                      <div style={{ fontSize: 9, color: count > 0 ? '#008800' : '#888' }}>
+                        {count} online
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {!firebaseOk && (
+            <div style={{ padding: '8px 12px', fontSize: 10, color: '#888', textAlign: 'center', border: '1px solid #D4D0C8', margin: '4px 0 8px' }}>
+              Multiplayer chat rooms are offline. Chat with the NPC buddies below!
+            </div>
+          )}
+
+          {/* ── NPC Buddies ── */}
+          <div style={S.sectionHeader}>
             <svg width="10" height="10" viewBox="0 0 10 10" style={{ marginRight: 4 }}>
               <path d="M2 3 L8 3 L5 7 Z" fill="#000" />
             </svg>
-            <span style={{ fontWeight: 'bold', fontSize: 11 }}>Buddies (2/2)</span>
+            NPC Buddies ({NPC_BUDDIES.length}/{NPC_BUDDIES.length})
           </div>
-          {BUDDIES.map((b, i) => (
+          {NPC_BUDDIES.map((b, i) => (
             <div
               key={b.screenName}
               style={S.buddyItem}
-              onDoubleClick={() => startChat(i)}
+              onDoubleClick={() => startNPC(i)}
             >
               <BuddyStatusIcon online={true} />
               <span style={{ marginLeft: 6, fontSize: 11 }}>{b.screenName}</span>
@@ -244,90 +363,167 @@ export function AOLChat() {
           ))}
         </div>
 
-        <div style={S.buddyFooter}>
-          <span style={{ fontSize: 9, color: '#666' }}>Double-click a buddy to chat</span>
+        <div style={S.footer}>
+          <span style={{ fontSize: 9, color: '#666' }}>
+            {firebaseOk ? 'Click a room or double-click a buddy' : 'Double-click a buddy to chat'}
+          </span>
         </div>
       </div>
     );
   }
 
-  /* ── Chat View ── */
+  /* ════════════════════════════════════════════════════════
+     RENDER: Multiplayer Room
+     ════════════════════════════════════════════════════════ */
+  if (view.kind === 'room') {
+    return (
+      <div style={S.root}>
+        {/* Toolbar */}
+        <div style={S.toolbar}>
+          <button style={S.toolBtn} onClick={() => setView({ kind: 'lobby' })}>
+            <svg width="14" height="14" viewBox="0 0 14 14">
+              <path d="M10 2 L4 7 L10 12" fill="none" stroke="#000" strokeWidth="2" />
+            </svg>
+          </button>
+          <div style={S.toolDivider} />
+          <span style={{ fontSize: 11, fontWeight: 'bold', marginLeft: 4 }}>
+            {ROOM_LABELS[view.roomId] ?? view.roomId}
+          </span>
+          <span style={{ marginLeft: 'auto', fontSize: 9, color: '#666' }}>
+            {mpUsers.length} online
+          </span>
+        </div>
+
+        {/* Main body: chat + user list side-by-side */}
+        <div style={S.roomBody}>
+          {/* Chat area */}
+          <div style={S.chatArea}>
+            {mpMessages.length === 0 && (
+              <div style={{ color: '#aaa', fontSize: 11, fontStyle: 'italic', padding: 4 }}>
+                No messages yet. Say hi!
+              </div>
+            )}
+            {mpMessages.map((msg) => (
+              <div key={msg.id} style={{ marginBottom: 3 }}>
+                <span style={{ fontWeight: 'bold', color: msg.color, fontSize: 12 }}>
+                  {msg.from}:
+                </span>{' '}
+                <span style={{ fontSize: 12 }}>{msg.text}</span>
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* User list sidebar */}
+          <div style={S.userList}>
+            <div style={{ fontSize: 9, fontWeight: 'bold', padding: '2px 4px', borderBottom: '1px solid #808080', background: '#D4D0C8' }}>
+              Online
+            </div>
+            {mpUsers.map((u) => (
+              <div key={u.sessionId} style={{ padding: '1px 4px', fontSize: 10, display: 'flex', alignItems: 'center', gap: 3 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: u.color, display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Input */}
+        <div style={S.inputArea}>
+          <div style={S.inputRow}>
+            <input
+              ref={inputRef}
+              style={S.input}
+              value={mpInput}
+              onChange={(e) => setMpInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') sendMP(); }}
+              placeholder="Type a message..."
+            />
+            <button style={S.winBtn} onClick={sendMP}>Send</button>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div style={S.statusBar}>
+          <OnlineDot />
+          <span style={{ marginLeft: 4, fontSize: 9, color: '#666' }}>
+            Connected as {screenName}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  /* ════════════════════════════════════════════════════════
+     RENDER: NPC Chat
+     ════════════════════════════════════════════════════════ */
+  const buddy = NPC_BUDDIES[view.buddyIdx]!;
+  const npcMsgs = npcChats[view.buddyIdx] ?? [];
+
   return (
     <div style={S.root}>
-      {/* Chat header */}
-      <div style={S.aolHeader}>
-        <AOLLogo size={18} />
-        <span style={{ marginLeft: 6, fontWeight: 'bold', fontSize: 12 }}>
-          {buddy!.screenName} - Instant Message
-        </span>
-      </div>
-
       {/* Toolbar */}
       <div style={S.toolbar}>
-        <button style={S.toolBtn} onClick={() => setSelectedBuddy(null)}>
+        <button style={S.toolBtn} onClick={() => setView({ kind: 'lobby' })}>
           <svg width="14" height="14" viewBox="0 0 14 14">
             <path d="M10 2 L4 7 L10 12" fill="none" stroke="#000" strokeWidth="2" />
           </svg>
         </button>
         <div style={S.toolDivider} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}>
-          {selectedBuddy === 0 ? <FrierenIcon /> : <EdwardIcon />}
-          <span style={{ fontSize: 11, fontWeight: 'bold' }}>{buddy!.name}</span>
-        </div>
+        <span style={{ fontSize: 11, fontWeight: 'bold', marginLeft: 4 }}>{buddy.name}</span>
       </div>
 
-      {/* Chat area */}
-      <div style={S.chatArea}>
-        {messages.map((msg, i) => (
+      {/* Chat */}
+      <div style={{ ...S.chatArea, flex: 1, margin: '2px 4px' }}>
+        {npcMsgs.map((msg, i) => (
           <div key={i} style={{ marginBottom: 4 }}>
             <span style={{
               fontWeight: 'bold',
               color: msg.from === 'user' ? '#0000CC' : '#CC0000',
               fontSize: 12,
             }}>
-              {msg.from === 'user' ? 'DannyT95' : buddy!.screenName}:
+              {msg.from === 'user' ? screenName : buddy.screenName}:
             </span>{' '}
             <span style={{ fontSize: 12 }}>{msg.text}</span>
           </div>
         ))}
-        {typing && (
+        {npcTyping && (
           <div style={{ color: '#888', fontSize: 11, fontStyle: 'italic' }}>
-            {buddy!.screenName} is typing...
+            {buddy.screenName} is typing...
           </div>
         )}
         <div ref={chatEndRef} />
       </div>
 
-      {/* Input area */}
+      {/* Input */}
       <div style={S.inputArea}>
         <div style={S.inputRow}>
           <input
             ref={inputRef}
             style={S.input}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
+            value={npcInput}
+            onChange={(e) => setNpcInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') sendNPC(); }}
             placeholder="Type a message..."
-            disabled={typing}
+            disabled={npcTyping}
           />
-          <button style={S.sendBtn} onClick={sendMessage} disabled={typing}>
-            Send
-          </button>
+          <button style={S.winBtn} onClick={sendNPC} disabled={npcTyping}>Send</button>
         </div>
       </div>
 
-      {/* Status bar */}
       <div style={S.statusBar}>
-        <svg width="8" height="8" viewBox="0 0 8 8">
-          <circle cx="4" cy="4" r="3" fill="#00CC00" />
-        </svg>
+        <OnlineDot />
         <span style={{ marginLeft: 4, fontSize: 9, color: '#666' }}>
-          {buddy!.screenName} is online
+          {buddy.screenName} is online
         </span>
       </div>
     </div>
   );
 }
+
+/* ════════════════════════════════════════════════════════════
+   Styles
+   ════════════════════════════════════════════════════════════ */
 
 const S: Record<string, React.CSSProperties> = {
   root: {
@@ -340,33 +536,59 @@ const S: Record<string, React.CSSProperties> = {
     fontSize: 11,
     overflow: 'hidden',
   },
-  aolHeader: {
+
+  /* Profile */
+  profileScreen: {
+    flex: 1,
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
-    padding: '4px 8px',
-    background: 'linear-gradient(180deg, #0055CC 0%, #003399 100%)',
-    color: '#fff',
-    fontSize: 12,
+    justifyContent: 'center',
+    padding: '24px 32px',
   },
-  screenNameBar: {
+  profileInput: {
+    width: '100%',
+    padding: '4px 6px',
+    border: '2px inset #808080',
+    fontFamily: '"MS Sans Serif", Arial, sans-serif',
+    fontSize: 12,
+    outline: 'none',
+  },
+
+  /* Lobby */
+  topBar: {
     display: 'flex',
     alignItems: 'center',
     padding: '3px 8px',
     background: '#D4D0C8',
     borderBottom: '1px solid #808080',
   },
-  buddyList: {
+  lobbyBody: {
     flex: 1,
-    background: '#fff',
-    padding: '4px 0',
     overflowY: 'auto',
-    border: '1px inset #808080',
-    margin: '0 4px',
+    padding: '4px',
   },
-  buddyCategory: {
+  sectionHeader: {
     display: 'flex',
     alignItems: 'center',
-    padding: '3px 8px',
+    padding: '4px 4px 2px',
+    fontWeight: 'bold',
+    fontSize: 11,
+  },
+  roomGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 4,
+    padding: '4px 0 8px',
+  },
+  roomCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '8px 4px',
+    background: '#fff',
+    border: '2px outset #fff',
+    cursor: 'pointer',
     fontFamily: '"MS Sans Serif", Arial, sans-serif',
   },
   buddyItem: {
@@ -375,12 +597,14 @@ const S: Record<string, React.CSSProperties> = {
     padding: '2px 8px 2px 20px',
     cursor: 'pointer',
   },
-  buddyFooter: {
+  footer: {
     padding: '4px 8px',
     borderTop: '1px solid #808080',
     background: '#D4D0C8',
     textAlign: 'center',
   },
+
+  /* Shared toolbar */
   toolbar: {
     display: 'flex',
     alignItems: 'center',
@@ -405,23 +629,35 @@ const S: Record<string, React.CSSProperties> = {
     background: '#808080',
     margin: '0 4px',
   },
+
+  /* Room view */
+  roomBody: {
+    flex: 1,
+    display: 'flex',
+    overflow: 'hidden',
+    margin: '2px 4px',
+    gap: 2,
+  },
   chatArea: {
     flex: 1,
     padding: '6px 8px',
     overflowY: 'auto',
     background: '#fff',
     border: '2px inset #808080',
-    margin: '2px 4px',
     fontFamily: '"MS Sans Serif", Arial, sans-serif',
     lineHeight: 1.4,
   },
-  inputArea: {
-    padding: '4px',
+  userList: {
+    width: 90,
+    background: '#fff',
+    border: '2px inset #808080',
+    overflowY: 'auto',
+    flexShrink: 0,
   },
-  inputRow: {
-    display: 'flex',
-    gap: 4,
-  },
+
+  /* Input */
+  inputArea: { padding: '4px' },
+  inputRow: { display: 'flex', gap: 4 },
   input: {
     flex: 1,
     padding: '3px 4px',
@@ -430,7 +666,7 @@ const S: Record<string, React.CSSProperties> = {
     fontSize: 11,
     outline: 'none',
   },
-  sendBtn: {
+  winBtn: {
     padding: '2px 12px',
     background: '#D4D0C8',
     border: '2px outset #fff',
@@ -439,6 +675,8 @@ const S: Record<string, React.CSSProperties> = {
     fontWeight: 'bold',
     cursor: 'pointer',
   },
+
+  /* Status bar */
   statusBar: {
     display: 'flex',
     alignItems: 'center',

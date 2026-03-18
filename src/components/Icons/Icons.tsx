@@ -28,6 +28,8 @@ const PNG_ICONS: Record<string, string> = {
   cavestory: '/icons/quote.gif',
   froggit: '/icons/froggit.png',
   minesweeper: '/icons/minesweeper.png',
+  undertale: '/icons/undertale.png',
+  aol: '/icons/aol.png',
 };
 
 /* ── Canvas Pixel Art Component ── */
@@ -290,8 +292,6 @@ const DRAW_MAP: Record<string, DrawFn> = {
   voltbox: drawVoltbox,
   minesweeper: drawMinesweeper,
   shutdown: drawShutdown,
-  undertale: drawUndertaleHeart,
-  aol: drawAOL,
 };
 
 export function DynamicIcon({ name, size = 48, className }: IconProps & { name: string }) {

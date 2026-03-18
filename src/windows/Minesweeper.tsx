@@ -89,6 +89,66 @@ const NUMBER_COLORS: Record<number, string> = {
   8: '#808080',
 };
 
+/* ── 7-Segment Display ── */
+// Segment map: [A, B, C, D, E, F, G] — true = lit
+const SEGMENTS: Record<string, boolean[]> = {
+  '0': [true,  true,  true,  true,  true,  true,  false],
+  '1': [false, true,  true,  false, false, false, false],
+  '2': [true,  true,  false, true,  true,  false, true],
+  '3': [true,  true,  true,  true,  false, false, true],
+  '4': [false, true,  true,  false, false, true,  true],
+  '5': [true,  false, true,  true,  false, true,  true],
+  '6': [true,  false, true,  true,  true,  true,  true],
+  '7': [true,  true,  true,  false, false, false, false],
+  '8': [true,  true,  true,  true,  true,  true,  true],
+  '9': [true,  true,  true,  true,  false, true,  true],
+  '-': [false, false, false, false, false, false, true],
+};
+
+const SevenSegDigit = ({ char }: { char: string }) => {
+  const segs = SEGMENTS[char] ?? SEGMENTS['8']!;
+  const on = '#FF0000';
+  const off = '#300000';
+  // Each segment as a polygon in a 13x23 viewBox
+  //   AAA
+  //  F   B
+  //   GGG
+  //  E   C
+  //   DDD
+  return (
+    <svg width={13} height={23} viewBox="0 0 13 23">
+      {/* A - top horizontal */}
+      <polygon points="2,1 11,1 10,3 3,3" fill={segs[0] ? on : off} />
+      {/* B - top-right vertical */}
+      <polygon points="11,2 12,3 12,10 11,11 10,10 10,3" fill={segs[1] ? on : off} />
+      {/* C - bottom-right vertical */}
+      <polygon points="11,12 12,13 12,20 11,21 10,20 10,13" fill={segs[2] ? on : off} />
+      {/* D - bottom horizontal */}
+      <polygon points="2,22 11,22 10,20 3,20" fill={segs[3] ? on : off} />
+      {/* E - bottom-left vertical */}
+      <polygon points="2,12 3,13 3,20 2,21 1,20 1,13" fill={segs[4] ? on : off} />
+      {/* F - top-left vertical */}
+      <polygon points="2,2 3,3 3,10 2,11 1,10 1,3" fill={segs[5] ? on : off} />
+      {/* G - middle horizontal */}
+      <polygon points="3,11 10,11 11,11.5 10,12 3,12 2,11.5" fill={segs[6] ? on : off} />
+    </svg>
+  );
+};
+
+const SevenSegDisplay = ({ value }: { value: string }) => (
+  <div style={{
+    display: 'flex',
+    gap: 1,
+    background: '#000',
+    padding: '2px 3px',
+    border: '1px inset #808080',
+  }}>
+    {value.split('').map((ch, i) => (
+      <SevenSegDigit key={i} char={ch} />
+    ))}
+  </div>
+);
+
 /* ── SVG Icons ── */
 const MineSVG = ({ size = 12 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 16 16">
@@ -249,7 +309,7 @@ export function Minesweeper() {
     <div style={S.root}>
       {/* Header with counters and face */}
       <div style={S.header}>
-        <div style={S.counter}>{pad3(MINES - flagCount)}</div>
+        <SevenSegDisplay value={pad3(MINES - flagCount)} />
         <button
           style={S.faceBtn}
           onClick={resetGame}
@@ -259,7 +319,7 @@ export function Minesweeper() {
         >
           <SmileyFace status={status} pressed={facePressed} />
         </button>
-        <div style={S.counter}>{pad3(time)}</div>
+        <SevenSegDisplay value={pad3(time)} />
       </div>
 
       {/* Board */}
@@ -334,17 +394,6 @@ const S: Record<string, React.CSSProperties> = {
     background: '#C0C0C0',
     border: '2px inset #808080',
     marginBottom: 4,
-  },
-  counter: {
-    background: '#000',
-    color: '#FF0000',
-    fontFamily: '"Courier New", monospace',
-    fontSize: 20,
-    fontWeight: 'bold',
-    padding: '2px 4px',
-    letterSpacing: 2,
-    minWidth: 42,
-    textAlign: 'center' as const,
   },
   faceBtn: {
     width: 30,

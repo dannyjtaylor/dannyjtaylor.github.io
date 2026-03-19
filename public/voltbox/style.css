@@ -788,6 +788,144 @@ body {
 
 .hidden { display: none !important; }
 
+/* ==================== 7-SEGMENT ICONS ==================== */
+
+.tool-seg7, .tool-seg7a {
+    font-size: 11px;
+    font-weight: bold;
+    font-family: monospace;
+    line-height: 1;
+}
+
+.tool-seg7 { color: #CC0000; }
+.tool-seg7a { color: #0066DD; }
+
+.seg7-cc-icon {
+    width: 14px;
+    height: 12px;
+    background: #333;
+    border: 1px solid #000;
+    position: relative;
+}
+
+.seg7-cc-icon::after {
+    content: '8';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    text-align: center;
+    color: #CC0000;
+    font-size: 9px;
+    font-weight: bold;
+    line-height: 12px;
+}
+
+.seg7-ca-icon {
+    width: 14px;
+    height: 12px;
+    background: #333;
+    border: 1px solid #000;
+    position: relative;
+}
+
+.seg7-ca-icon::after {
+    content: '8';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    text-align: center;
+    color: #3366FF;
+    font-size: 9px;
+    font-weight: bold;
+    line-height: 12px;
+}
+
+/* ==================== RESISTOR CONFIG ==================== */
+
+.resistor-config {
+    padding: 4px;
+}
+
+.resistor-value-row {
+    margin-bottom: 4px;
+}
+
+.win95-select {
+    width: 100%;
+    padding: 2px 4px;
+    font-family: inherit;
+    font-size: 11px;
+    background: #FFFFFF;
+    border: 2px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    box-shadow: inset 1px 1px 0 #0A0A0A;
+    color: #000;
+    cursor: pointer;
+}
+
+.resistor-bands-row {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+    padding: 4px;
+    background: #D4A76A;
+    border: 1px solid #8B6914;
+    border-radius: 2px;
+    margin-bottom: 4px;
+}
+
+.band-block {
+    width: 16px;
+    height: 22px;
+    border: 1px solid rgba(0,0,0,0.4);
+    cursor: pointer;
+}
+
+.band-block:hover {
+    outline: 2px solid #FFFF00;
+    outline-offset: -1px;
+}
+
+.resistor-value-label {
+    text-align: center;
+    font-size: 10px;
+    color: #000;
+    font-weight: bold;
+}
+
+/* ==================== BAND PICKER DIALOG ==================== */
+
+.band-picker-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px;
+    background: #FFFFFF;
+    border: 2px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+}
+
+.band-picker-option {
+    width: 28px;
+    height: 24px;
+    border: 2px solid;
+    border-color: #FFFFFF #808080 #808080 #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #FFF;
+    text-shadow: 0 0 2px #000;
+}
+
+.band-picker-option:hover {
+    border-color: #000 #000 #000 #000;
+}
+
+.band-picker-option.selected {
+    border: 2px solid #000;
+    box-shadow: inset 0 0 0 1px #FFF;
+}
+
 /* ==================== EMBEDDED MODE ==================== */
 /* When loaded inside DannyOS as an iframe, hide redundant chrome */
 

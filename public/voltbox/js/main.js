@@ -112,6 +112,36 @@
             return;
         }
 
+        /* --- 7-Segment display placement --- */
+        if (tool === 'seg7-cc' || tool === 'seg7-ca') {
+            var startCol = hole.col;
+            // Check bounds: need 5 columns
+            if (startCol + 4 >= CFG.COLS) {
+                VB.UI.setStatus('Not enough space \u2014 need 5 columns from here');
+                VB.Sound.error();
+                return;
+            }
+            // Check that rows 6 and 7 for these columns aren't occupied
+            var blocked = false;
+            for (var sc = startCol; sc <= startCol + 4; sc++) {
+                if (VB.Breadboard.getComponentAt(sc, CFG.SEG7_TOP_ROW) >= 0 ||
+                    VB.Breadboard.getComponentAt(sc, CFG.SEG7_BOT_ROW) >= 0) {
+                    blocked = true;
+                    break;
+                }
+            }
+            if (blocked) {
+                VB.UI.setStatus('Holes occupied \u2014 cannot place 7-segment here');
+                VB.Sound.error();
+                return;
+            }
+            VB.state.components.push({ type: tool, col: startCol });
+            VB.Sound.place();
+            VB.UI.setStatus(tool.toUpperCase() + ' placed at column ' + (startCol + 1));
+            VB.UI.runSimulation();
+            return;
+        }
+
         /* --- Single-pin components (power, ground) --- */
         if (tool === 'power' || tool === 'ground') {
             VB.state.components.push({
@@ -145,6 +175,10 @@
             var comp = { type: tool, pin1: p1, pin2: p2 };
             if (tool === 'wire') {
                 comp.color = CFG.WIRE_COLORS[VB.state.wireColor];
+            }
+            if (tool === 'resistor') {
+                comp.bands = VB.state.resistorBands.slice();
+                comp.value = VB.state.resistorValue;
             }
 
             VB.state.components.push(comp);

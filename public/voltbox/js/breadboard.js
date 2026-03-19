@@ -73,7 +73,11 @@
         getComponentAt: function (col, row) {
             for (var i = VB.state.components.length - 1; i >= 0; i--) {
                 var c = VB.state.components[i];
-                if (c.pin) { // single-pin (power / ground)
+                if (c.type === 'seg7-cc' || c.type === 'seg7-ca') {
+                    // 7-seg occupies rows 6–7, columns [col..col+4]
+                    if (row >= CFG.SEG7_TOP_ROW && row <= CFG.SEG7_BOT_ROW &&
+                        col >= c.col && col <= c.col + CFG.SEG7_WIDTH - 1) return i;
+                } else if (c.pin) { // single-pin (power / ground)
                     if (c.pin.col === col && c.pin.row === row) return i;
                 } else {     // two-pin
                     if ((c.pin1.col === col && c.pin1.row === row) ||
@@ -217,7 +221,11 @@
 
             for (var i = 0; i < comps.length; i++) {
                 var comp = comps[i];
-                if (comp.pin) {
+                if (comp.type === 'seg7-cc' || comp.type === 'seg7-ca') {
+                    // 7-segment display
+                    var segStatus = (sim.seg7Status && sim.seg7Status[i]) || null;
+                    this._drawSeg7(comp, segStatus);
+                } else if (comp.pin) {
                     // single-pin (power / ground marker)
                     var pp = this.gridToPixel(comp.pin.col, comp.pin.row);
                     this._drawMarker(pp, comp.type);
@@ -229,7 +237,7 @@
                             this._drawWire(p1, p2, comp.color);
                             break;
                         case 'resistor':
-                            this._drawResistor(p1, p2);
+                            this._drawResistor(p1, p2, comp);
                             break;
                         case 'led':
                             var active = sim.activeLEDs && sim.activeLEDs.indexOf(i) !== -1;
@@ -285,7 +293,7 @@
         },
 
         /* -- Resistor -- */
-        _drawResistor: function (p1, p2) {
+        _drawResistor: function (p1, p2, comp) {
             var dx = p2.x - p1.x, dy = p2.y - p1.y;
             var len = Math.sqrt(dx * dx + dy * dy);
             var ang = Math.atan2(dy, dx);
@@ -309,11 +317,20 @@
             ctx.lineWidth = 1;
             ctx.strokeRect(-bLen / 2, -bH / 2, bLen, bH);
 
-            // Colour bands
-            var bands = CFG.RESISTOR_BANDS;
-            var bw = 2, spacing = bLen / (bands.length + 1);
-            for (var i = 0; i < bands.length; i++) {
-                ctx.fillStyle = bands[i];
+            // Colour bands — use component-specific bands if available
+            var bandNames = (comp && comp.bands) ? comp.bands : null;
+            var bandColors;
+            if (bandNames) {
+                bandColors = [];
+                for (var b = 0; b < bandNames.length; b++) {
+                    bandColors.push(VB.getBandHex(bandNames[b]));
+                }
+            } else {
+                bandColors = CFG.RESISTOR_BANDS;
+            }
+            var bw = 2, spacing = bLen / (bandColors.length + 1);
+            for (var i = 0; i < bandColors.length; i++) {
+                ctx.fillStyle = bandColors[i];
                 ctx.fillRect(-bLen / 2 + spacing * (i + 1) - bw / 2, -bH / 2 + 1, bw, bH - 2);
             }
             ctx.restore();
@@ -373,6 +390,137 @@
 
             ctx.restore();
             ctx.lineWidth = 1;
+        },
+
+        /* -- 7-Segment Display -- */
+        _drawSeg7: function (comp, segStatus) {
+            var startCol = comp.col;
+            var isCA = (comp.type === 'seg7-ca');
+
+            // Pixel positions for the DIP body corners
+            var topLeft  = this.gridToPixel(startCol, CFG.SEG7_TOP_ROW);
+            var topRight = this.gridToPixel(startCol + CFG.SEG7_WIDTH - 1, CFG.SEG7_TOP_ROW);
+            var botLeft  = this.gridToPixel(startCol, CFG.SEG7_BOT_ROW);
+            var botRight = this.gridToPixel(startCol + CFG.SEG7_WIDTH - 1, CFG.SEG7_BOT_ROW);
+
+            var bodyX = topLeft.x - 8;
+            var bodyY = topLeft.y - 10;
+            var bodyW = (topRight.x - topLeft.x) + 16;
+            var bodyH = (botLeft.y - topLeft.y) + 20;
+
+            // Draw pin legs extending from body into holes
+            ctx.strokeStyle = '#AAA';
+            ctx.lineWidth = 1.5;
+            for (var p = 1; p <= 10; p++) {
+                var pin = VB.SEG7_PINS[p];
+                var pinPos = this.gridToPixel(startCol + pin.colOff, pin.row);
+                var legEndY = (pin.row === CFG.SEG7_TOP_ROW) ? bodyY : bodyY + bodyH;
+                ctx.beginPath();
+                ctx.moveTo(pinPos.x, pinPos.y);
+                ctx.lineTo(pinPos.x, legEndY);
+                ctx.stroke();
+            }
+
+            // DIP body — dark package
+            ctx.fillStyle = '#333';
+            ctx.fillRect(bodyX, bodyY, bodyW, bodyH);
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(bodyX, bodyY, bodyW, bodyH);
+
+            // Notch/dot at pin 1 end (top-left corner)
+            ctx.fillStyle = '#555';
+            ctx.beginPath();
+            ctx.arc(bodyX + 6, bodyY + 6, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Type label ("CC" or "CA")
+            ctx.fillStyle = '#888';
+            ctx.font = '7px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(isCA ? 'CA' : 'CC', bodyX + bodyW / 2, bodyY + bodyH - 2);
+
+            // Pin number labels
+            ctx.fillStyle = '#666';
+            ctx.font = '6px monospace';
+            ctx.textAlign = 'center';
+            for (var p = 1; p <= 10; p++) {
+                var pin = VB.SEG7_PINS[p];
+                var pinPos = this.gridToPixel(startCol + pin.colOff, pin.row);
+                if (pin.row === CFG.SEG7_TOP_ROW) {
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(String(p), pinPos.x, bodyY - 1);
+                } else {
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(String(p), pinPos.x, bodyY + bodyH + 1);
+                }
+            }
+
+            // 7-segment digit display area
+            var dispCx = bodyX + bodyW / 2;
+            var dispCy = bodyY + bodyH / 2 - 1;
+            var sw = bodyW * 0.45;  // segment area width
+            var sh = bodyH * 0.55;  // segment area height
+            var segW = sw * 0.7;    // horizontal segment length
+            var segH = sh * 0.4;    // vertical segment length
+            var segT = 2.5;         // segment thickness
+
+            // Display background
+            ctx.fillStyle = '#1A1A1A';
+            var dispX = dispCx - sw / 2 - 4;
+            var dispY = dispCy - sh / 2 - 4;
+            ctx.fillRect(dispX, dispY, sw + 8, sh + 8);
+
+            // Helper: draw a segment rectangle at given position
+            var self = this;
+            function drawSeg(name, x, y, w, h) {
+                var lit = segStatus && segStatus[name];
+                if (lit) {
+                    // Glow effect
+                    ctx.shadowColor = '#FF3333';
+                    ctx.shadowBlur = 6;
+                    ctx.fillStyle = '#FF3333';
+                } else {
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#444';
+                }
+                ctx.fillRect(x, y, w, h);
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+            }
+
+            // Segment positions relative to display center
+            var hLeft  = dispCx - segW / 2;
+            var hRight = dispCx + segW / 2;
+            var vTop   = dispCy - sh / 2;
+            var vMid   = dispCy;
+            var vBot   = dispCy + sh / 2;
+
+            // a: top horizontal
+            drawSeg('a', hLeft, vTop - segT / 2, segW, segT);
+            // b: top-right vertical
+            drawSeg('b', hRight - segT, vTop, segT, segH);
+            // c: bottom-right vertical
+            drawSeg('c', hRight - segT, vMid, segT, segH);
+            // d: bottom horizontal
+            drawSeg('d', hLeft, vBot - segT / 2, segW, segT);
+            // e: bottom-left vertical
+            drawSeg('e', hLeft, vMid, segT, segH);
+            // f: top-left vertical
+            drawSeg('f', hLeft, vTop, segT, segH);
+            // g: middle horizontal
+            drawSeg('g', hLeft, vMid - segT / 2, segW, segT);
+            // dp: decimal point (small dot bottom-right)
+            var dpLit = segStatus && segStatus.dp;
+            ctx.fillStyle = dpLit ? '#FF3333' : '#444';
+            if (dpLit) { ctx.shadowColor = '#FF3333'; ctx.shadowBlur = 6; }
+            ctx.beginPath();
+            ctx.arc(hRight + 5, vBot, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
         },
 
         /* -- Short-circuit warning overlay -- */

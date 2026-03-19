@@ -42,9 +42,18 @@
         }
     }
 
-    /** Add a component's pin connections into a UF (skip index `skipIdx`) */
+    /** Add a component's pin connections into a UF */
     function addComponent(uf, comp) {
-        if (comp.pin) {
+        if (comp.type === 'seg7-cc' || comp.type === 'seg7-ca') {
+            // 7-segment display: only union the two common pins (internally connected)
+            var pins = VB.getSeg7Pins(comp.col);
+            if (pins.com.length >= 2) {
+                var comNet0 = VB.Breadboard.getNetId(pins.com[0].col, pins.com[0].row);
+                var comNet1 = VB.Breadboard.getNetId(pins.com[1].col, pins.com[1].row);
+                if (comNet0 && comNet1) uf.union(comNet0, comNet1);
+            }
+            // Segment pins are NOT unioned to common — each is an independent LED path
+        } else if (comp.pin) {
             // single-pin: power or ground marker
             var net = VB.Breadboard.getNetId(comp.pin.col, comp.pin.row);
             if (!net) return;
@@ -76,13 +85,22 @@
                 return results;
             }
 
-            /* --- Step 1: short-circuit check (wires + markers only, no resistors/LEDs) --- */
+            /* --- Step 1: short-circuit check (wires + markers + seg7 common pins, no resistors/LEDs) --- */
             var wireUF = new UF();
             seedNets(wireUF);
             for (var i = 0; i < comps.length; i++) {
                 var c = comps[i];
                 if (c.type === 'wire' || c.type === 'power' || c.type === 'ground') {
                     addComponent(wireUF, c);
+                }
+                // Include seg7 common pin union in short-circuit check
+                if (c.type === 'seg7-cc' || c.type === 'seg7-ca') {
+                    var seg7Pins = VB.getSeg7Pins(c.col);
+                    if (seg7Pins.com.length >= 2) {
+                        var cn0 = VB.Breadboard.getNetId(seg7Pins.com[0].col, seg7Pins.com[0].row);
+                        var cn1 = VB.Breadboard.getNetId(seg7Pins.com[1].col, seg7Pins.com[1].row);
+                        if (cn0 && cn1) wireUF.union(cn0, cn1);
+                    }
                 }
             }
             if (wireUF.connected('POWER', 'GROUND')) {
@@ -120,6 +138,64 @@
                     if (!aPower)  parts.push('anode (+) not connected to power');
                     if (!cGround) parts.push('cathode (\u2212) not connected to ground');
                     results.messages.push('LED ' + (li + 1) + ': Open circuit \u2014 ' + parts.join(', '));
+                }
+            }
+
+            /* --- Step 3: per-segment activation check for 7-segment displays --- */
+            results.seg7Status = {};
+            for (var si = 0; si < comps.length; si++) {
+                var seg7 = comps[si];
+                if (seg7.type !== 'seg7-cc' && seg7.type !== 'seg7-ca') continue;
+
+                var isCA = (seg7.type === 'seg7-ca');
+                var s7pins = VB.getSeg7Pins(seg7.col);
+                var segResult = {};
+                var litCount = 0;
+
+                // Get the net for one of the common pins
+                var comNet = VB.Breadboard.getNetId(s7pins.com[0].col, s7pins.com[0].row);
+
+                // Check each segment independently
+                var segments = VB.SEG7_SEGMENTS;
+                for (var sg = 0; sg < segments.length; sg++) {
+                    var segName = segments[sg];
+                    var segPinArr = s7pins[segName];
+                    if (!segPinArr || segPinArr.length === 0) { segResult[segName] = false; continue; }
+
+                    var segNet = VB.Breadboard.getNetId(segPinArr[0].col, segPinArr[0].row);
+                    if (!segNet || !comNet) { segResult[segName] = false; continue; }
+
+                    // Build UF with everything EXCEPT this seg7 component
+                    var suf = new UF();
+                    seedNets(suf);
+                    for (var sj = 0; sj < comps.length; sj++) {
+                        if (sj === si) continue;
+                        addComponent(suf, comps[sj]);
+                    }
+                    // Add the common pin internal union (they're connected inside the package)
+                    if (s7pins.com.length >= 2) {
+                        var cn0 = VB.Breadboard.getNetId(s7pins.com[0].col, s7pins.com[0].row);
+                        var cn1 = VB.Breadboard.getNetId(s7pins.com[1].col, s7pins.com[1].row);
+                        if (cn0 && cn1) suf.union(cn0, cn1);
+                    }
+
+                    if (isCA) {
+                        // Common Anode: common→POWER, segment→GROUND to light
+                        segResult[segName] = suf.connected(comNet, 'POWER') && suf.connected(segNet, 'GROUND');
+                    } else {
+                        // Common Cathode: segment→POWER, common→GROUND to light
+                        segResult[segName] = suf.connected(segNet, 'POWER') && suf.connected(comNet, 'GROUND');
+                    }
+
+                    if (segResult[segName]) litCount++;
+                }
+
+                results.seg7Status[si] = segResult;
+
+                if (litCount > 0) {
+                    results.messages.push('7-Seg display ' + (si + 1) + ': ' + litCount + ' segment(s) lit');
+                } else {
+                    results.messages.push('7-Seg display ' + (si + 1) + ': No segments lit');
                 }
             }
 

@@ -79,6 +79,12 @@
                     <button class="tool-btn" data-tool="led" title="LED (4)">
                         <span class="tool-icon tool-led"></span>
                     </button>
+                    <button class="tool-btn" data-tool="seg7-cc" title="7-Seg CC (8)">
+                        <span class="tool-icon tool-seg7">7</span>
+                    </button>
+                    <button class="tool-btn" data-tool="seg7-ca" title="7-Seg CA (9)">
+                        <span class="tool-icon tool-seg7a">7</span>
+                    </button>
                     <div class="toolbar-separator"></div>
                     <button class="tool-btn" data-tool="power" title="Power +5V (5)">
                         <span class="tool-icon tool-power">+</span>
@@ -114,6 +120,14 @@
                                 <div class="palette-icon led-icon"></div>
                                 <span>LED</span>
                             </button>
+                            <button class="palette-btn" data-tool="seg7-cc">
+                                <div class="palette-icon seg7-cc-icon"></div>
+                                <span>7-Seg CC</span>
+                            </button>
+                            <button class="palette-btn" data-tool="seg7-ca">
+                                <div class="palette-icon seg7-ca-icon"></div>
+                                <span>7-Seg CA</span>
+                            </button>
                             <button class="palette-btn" data-tool="power">
                                 <div class="palette-icon power-icon"></div>
                                 <span>Power +5V</span>
@@ -139,6 +153,22 @@
                         <div class="palette-title">Wire Color</div>
                         <div class="palette-section color-section" id="wire-colors">
                             <!-- Populated by JS -->
+                        </div>
+
+                        <div class="palette-title">Resistor</div>
+                        <div class="palette-section resistor-config" id="resistor-config">
+                            <div class="resistor-value-row">
+                                <select id="resistor-value-select" class="win95-select">
+                                    <!-- Options populated by JS -->
+                                </select>
+                            </div>
+                            <div class="resistor-bands-row" id="resistor-bands-display">
+                                <div class="band-block" id="band-0" title="1st digit - click to cycle"></div>
+                                <div class="band-block" id="band-1" title="2nd digit - click to cycle"></div>
+                                <div class="band-block" id="band-2" title="Multiplier - click to cycle"></div>
+                                <div class="band-block" id="band-3" title="Tolerance - click to cycle"></div>
+                            </div>
+                            <div class="resistor-value-label" id="resistor-value-label">220&#937; &#177;5%</div>
                         </div>
                     </div>
 
@@ -219,9 +249,39 @@
                             <li><b>Ctrl+Z</b> — Undo</li>
                         </ul>
                         <p><strong>Try this:</strong> Power rail → wire → resistor → LED → wire → ground rail</p>
+                        <p><strong>7-Segment Displays:</strong></p>
+                        <ul>
+                            <li><b>CC (Common Cathode)</b> &#8212; connect common to Ground, segment pins to Power through resistors</li>
+                            <li><b>CA (Common Anode)</b> &#8212; connect common to Power, segment pins to Ground through resistors</li>
+                            <li>Pins: e,d,COM,c,dp (top) &#183; a,f,COM,g,b (bottom)</li>
+                        </ul>
+                        <p><strong>Resistors:</strong></p>
+                        <ul>
+                            <li>Set value and band colors in the left palette</li>
+                            <li>Click each band to change its color</li>
+                        </ul>
                     </div>
                     <div class="dialog-buttons">
                         <button class="dialog-btn" id="howto-ok">OK</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======== Band Picker Dialog ======== -->
+            <div class="win95-window dialog" id="band-picker-dialog" style="display:none; width:280px;">
+                <div class="title-bar">
+                    <div class="title-bar-text">Select Band Color</div>
+                    <div class="title-bar-controls">
+                        <button class="title-btn title-btn-close" id="band-picker-close">&#10005;</button>
+                    </div>
+                </div>
+                <div class="dialog-body">
+                    <p style="font-size:11px; margin-bottom:8px;" id="band-picker-label">Band 1 &#8212; 1st Digit</p>
+                    <div class="band-picker-grid" id="band-picker-grid">
+                        <!-- Color options populated by JS -->
+                    </div>
+                    <div class="dialog-buttons" style="margin-top:12px;">
+                        <button class="dialog-btn" id="band-picker-ok">OK</button>
                     </div>
                 </div>
             </div>

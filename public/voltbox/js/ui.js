@@ -22,6 +22,8 @@
             this._setupWindowDrag();
             this._setupWindowButtons();
             this._setupWireColors();
+            this._setupResistorConfig();
+            this._setupBandPicker();
             this._setupClock();
             this._setupKeyboard();
             this.updateCRT();
@@ -315,6 +317,155 @@
             });
         },
 
+        /* ==================== Resistor Config ==================== */
+
+        _setupResistorConfig: function () {
+            var self = this;
+            var sel = document.getElementById('resistor-value-select');
+
+            // Populate dropdown with common values
+            VB.COMMON_VALUES.forEach(function (v) {
+                var opt = document.createElement('option');
+                opt.value = v;
+                opt.textContent = VB.formatOhms(v);
+                sel.appendChild(opt);
+            });
+            sel.value = VB.state.resistorValue;
+
+            // On dropdown change
+            sel.addEventListener('change', function () {
+                var val = parseInt(sel.value, 10);
+                VB.state.resistorValue = val;
+                VB.state.resistorBands = VB.valueToBands(val);
+                self.updateResistorDisplay();
+                VB.Sound.click();
+            });
+
+            // Click handlers on each band block
+            for (var i = 0; i < 4; i++) {
+                (function (bandIdx) {
+                    document.getElementById('band-' + bandIdx).addEventListener('click', function () {
+                        self._openBandPicker(bandIdx);
+                        VB.Sound.click();
+                    });
+                })(i);
+            }
+
+            // Initial display
+            this.updateResistorDisplay();
+        },
+
+        /* ==================== Band Picker ==================== */
+
+        _setupBandPicker: function () {
+            var self = this;
+            document.getElementById('band-picker-close').addEventListener('click', function () {
+                self.hideDialog('band-picker-dialog');
+                VB.Sound.click();
+            });
+            document.getElementById('band-picker-ok').addEventListener('click', function () {
+                self.hideDialog('band-picker-dialog');
+                VB.Sound.click();
+            });
+        },
+
+        _openBandPicker: function (bandIdx) {
+            var self = this;
+            var label = document.getElementById('band-picker-label');
+            var grid  = document.getElementById('band-picker-grid');
+            var names, labelText;
+
+            if (bandIdx === 0) {
+                names = VB.RESISTOR_DIGIT_NAMES;
+                labelText = 'Band 1 \u2014 1st Digit';
+            } else if (bandIdx === 1) {
+                names = VB.RESISTOR_DIGIT_NAMES;
+                labelText = 'Band 2 \u2014 2nd Digit';
+            } else if (bandIdx === 2) {
+                names = VB.RESISTOR_MULT_NAMES;
+                labelText = 'Band 3 \u2014 Multiplier';
+            } else {
+                names = VB.RESISTOR_TOL_NAMES;
+                labelText = 'Band 4 \u2014 Tolerance';
+            }
+
+            label.textContent = labelText;
+            grid.innerHTML = '';
+
+            var currentBand = VB.state.resistorBands[bandIdx];
+
+            names.forEach(function (name) {
+                var div = document.createElement('div');
+                div.className = 'band-picker-option' + (name === currentBand ? ' selected' : '');
+                div.style.backgroundColor = VB.getBandHex(name);
+
+                // Label: digit for bands 0-1, multiplier for band 2, tolerance for band 3
+                var txt;
+                if (bandIdx <= 1) {
+                    txt = '' + VB.RESISTOR_COLORS[name].digit;
+                } else if (bandIdx === 2) {
+                    var m = VB.RESISTOR_COLORS[name].mult;
+                    if (m >= 1000000) txt = (m / 1000000) + 'M';
+                    else if (m >= 1000) txt = (m / 1000) + 'K';
+                    else txt = '\u00D7' + m;
+                } else {
+                    txt = '\u00B1' + VB.TOLERANCE_COLORS[name].tolerance + '%';
+                }
+                div.textContent = txt;
+
+                // White text looks bad on white/yellow backgrounds
+                if (name === 'white' || name === 'yellow' || name === 'gold') {
+                    div.style.color = '#000';
+                    div.style.textShadow = 'none';
+                }
+
+                div.addEventListener('click', function () {
+                    // Deselect others
+                    var opts = grid.querySelectorAll('.band-picker-option');
+                    for (var k = 0; k < opts.length; k++) opts[k].classList.remove('selected');
+                    div.classList.add('selected');
+
+                    VB.state.resistorBands[bandIdx] = name;
+                    VB.state.resistorValue = VB.bandsToValue(VB.state.resistorBands);
+                    self.updateResistorDisplay();
+                });
+
+                grid.appendChild(div);
+            });
+
+            this.showDialog('band-picker-dialog');
+        },
+
+        /* ==================== Resistor Display Update ==================== */
+
+        updateResistorDisplay: function () {
+            var bands = VB.state.resistorBands;
+
+            // Update band block colors
+            for (var i = 0; i < 4; i++) {
+                var block = document.getElementById('band-' + i);
+                if (block) block.style.backgroundColor = VB.getBandHex(bands[i]);
+            }
+
+            // Update value label
+            var valLabel = document.getElementById('resistor-value-label');
+            var tolColor = VB.TOLERANCE_COLORS[bands[3]];
+            var tolStr = tolColor ? ('\u00B1' + tolColor.tolerance + '%') : '';
+            valLabel.textContent = VB.formatOhms(VB.state.resistorValue) + ' ' + tolStr;
+
+            // Sync dropdown if it matches a common value
+            var sel = document.getElementById('resistor-value-select');
+            var found = false;
+            for (var j = 0; j < sel.options.length; j++) {
+                if (parseInt(sel.options[j].value, 10) === VB.state.resistorValue) {
+                    sel.value = VB.state.resistorValue;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) sel.selectedIndex = -1;
+        },
+
         /* ==================== Clock ==================== */
 
         _setupClock: function () {
@@ -353,6 +504,8 @@
                     case '5': VB.UI.setTool('power');    break;
                     case '6': VB.UI.setTool('ground');   break;
                     case '7': VB.UI.setTool('eraser');   break;
+                    case '8': VB.UI.setTool('seg7-cc');  break;
+                    case '9': VB.UI.setTool('seg7-ca');  break;
                     case ' ': e.preventDefault(); VB.UI.runSimulation(); break;
                     case 'Escape':
                         VB.state.firstPin = null;

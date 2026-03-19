@@ -43,7 +43,7 @@ function noiseBurst(dur: number, lpFreq: number, vol = 0.05) {
 
 // Preloaded audio cache
 const audioCache: Record<string, HTMLAudioElement> = {};
-function playMP3(path: string, volume = 0.3) {
+export function playMP3(path: string, volume = 0.3) {
   try {
     let audio = audioCache[path];
     if (!audio) {

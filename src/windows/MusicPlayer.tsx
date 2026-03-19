@@ -14,10 +14,10 @@ interface LoadedTrack {
 
 // Preset tracks - populate later with actual audio files
 const PRESET_TRACKS: PresetTrack[] = [
-  { name: 'Kasane Teto - Kasane Territory', file: '/kasane_1.mp3' },
+  { name: 'Kasane Teto - Machine Love', file: '/kasane_1.mp3' },
   { name: 'FMAB - Again (YUI)', file: '/fmab_1.mp3' },
-  { name: 'JJK - Kaikai Kitan', file: '/jjk_1.mp3' },
-  { name: 'Deltarune - Field of Hopes and Dreams', file: '/deltarune_1.mp3' },
+  { name: 'JJK - AIZO', file: '/jjk_1.mp3' },
+  { name: 'Deltarune - Paradise, Paradise', file: '/deltarune_1.mp3' },
 ];
 
 type MusicPlayerTab = 'Player' | 'Composer';

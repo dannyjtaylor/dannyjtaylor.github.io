@@ -4,20 +4,22 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 interface PresetTrack {
   name: string;
   file: string;
+  art?: string;
 }
 
 interface LoadedTrack {
   name: string;
   url: string;
   duration: number;
+  art?: string;
 }
 
 // Preset tracks - populate later with actual audio files
 const PRESET_TRACKS: PresetTrack[] = [
-  { name: 'Kasane Teto - Machine Love', file: '/kasane_1.mp3' },
-  { name: 'FMAB - Again (YUI)', file: '/fmab_1.mp3' },
-  { name: 'JJK - AIZO', file: '/jjk_1.mp3' },
-  { name: 'Deltarune - Paradise, Paradise', file: '/deltarune_1.mp3' },
+  { name: 'Kasane Teto - Machine Love', file: '/kasane_1.mp3', art: '/art/kasane.png' },
+  { name: 'FMAB - Again (YUI)', file: '/fmab_1.mp3', art: '/art/fmab.png' },
+  { name: 'JJK - AIZO', file: '/jjk_1.mp3', art: '/art/jjk.png' },
+  { name: 'Deltarune - Paradise, Paradise', file: '/deltarune_1.mp3', art: '/art/deltarune.png' },
 ];
 
 type MusicPlayerTab = 'Player' | 'Composer';
@@ -82,6 +84,16 @@ function PlayerMode() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
 
+  // Stop audio on unmount (window close)
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, []);
+
   // Load preset tracks on mount
   useEffect(() => {
     if (PRESET_TRACKS.length > 0) {
@@ -89,6 +101,7 @@ function PlayerMode() {
         name: p.name,
         url: p.file,
         duration: 0,
+        art: p.art,
       }));
       setTracks(presets);
     }
@@ -218,31 +231,57 @@ function PlayerMode() {
       <div style={{
         ...sunken,
         background: '#000',
-        color: '#00ff00',
         padding: '6px 8px',
         margin: '4px 6px',
-        fontFamily: 'var(--font-terminal, monospace)',
-        fontSize: 12,
-        minHeight: 36,
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
+        gap: 8,
+        alignItems: 'center',
+        minHeight: 56,
       }}>
+        {/* Album Art */}
         <div style={{
+          width: 48,
+          height: 48,
+          ...sunken,
+          background: '#1a1a1a',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          marginBottom: 2,
         }}>
-          {currentTrack ? currentTrack.name : 'No track loaded'}
+          {currentTrack?.art ? (
+            <img
+              src={currentTrack.art}
+              alt="Album art"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              draggable={false}
+            />
+          ) : (
+            <span style={{ color: '#333', fontSize: 20 }}>{'\u266A'}</span>
+          )}
         </div>
-        <div style={{ fontSize: 10, color: '#00cc00' }}>
-          {currentTrack
-            ? `${formatTime(currentTime)} / ${formatTime(duration)}`
-            : '--:-- / --:--'
-          }
-          {isPlaying && ' \u25B6'}
-          {!isPlaying && currentTrack && ' \u275A\u275A'}
+        {/* Track info */}
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <div style={{
+            color: '#00ff00',
+            fontFamily: 'var(--font-terminal, monospace)',
+            fontSize: 12,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            marginBottom: 2,
+          }}>
+            {currentTrack ? currentTrack.name : 'No track loaded'}
+          </div>
+          <div style={{ fontSize: 10, color: '#00cc00', fontFamily: 'var(--font-terminal, monospace)' }}>
+            {currentTrack
+              ? `${formatTime(currentTime)} / ${formatTime(duration)}`
+              : '--:-- / --:--'
+            }
+            {isPlaying && ' \u25B6'}
+            {!isPlaying && currentTrack && ' \u275A\u275A'}
+          </div>
         </div>
       </div>
 
@@ -365,12 +404,35 @@ function PlayerMode() {
                 background: currentTrackIdx === idx ? 'var(--win-navy, #000080)' : 'transparent',
                 cursor: 'default',
                 display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'space-between',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
               }}
             >
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{
+                  width: 20,
+                  height: 20,
+                  flexShrink: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  background: '#1a1a1a',
+                  borderRadius: 1,
+                }}>
+                  {track.art ? (
+                    <img
+                      src={track.art}
+                      alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      draggable={false}
+                    />
+                  ) : (
+                    <span style={{ color: '#666', fontSize: 10 }}>{'\u266A'}</span>
+                  )}
+                </span>
                 {currentTrackIdx === idx && isPlaying ? '\u25B6 ' : ''}
                 {idx + 1}. {track.name}
               </span>
@@ -587,11 +649,17 @@ function ComposerMode() {
   const timerRef = useRef<number | null>(null);
   const stepRef = useRef(0);
   const gridRef = useRef(grid);
+  const bpmRef = useRef(bpm);
 
   // Keep gridRef in sync
   useEffect(() => {
     gridRef.current = grid;
   }, [grid]);
+
+  // Keep bpmRef in sync
+  useEffect(() => {
+    bpmRef.current = bpm;
+  }, [bpm]);
 
   const toggleCell = (row: number, col: number) => {
     setGrid((prev) => {
@@ -615,9 +683,8 @@ function ComposerMode() {
     stepRef.current = 0;
     setIsPlaying(true);
 
-    const stepInterval = (60 / bpm / 4) * 1000; // 16th notes
-
     const tick = () => {
+      const stepInterval = (60 / bpmRef.current / 4) * 1000; // 16th notes
       const step = stepRef.current;
       setCurrentStep(step);
 
@@ -633,7 +700,7 @@ function ComposerMode() {
     };
 
     tick();
-  }, [bpm, instruments]);
+  }, [instruments]);
 
   const stopPlayback = useCallback(() => {
     setIsPlaying(false);
@@ -647,18 +714,14 @@ function ComposerMode() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+      }
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close().catch(() => {});
+      }
     };
   }, []);
-
-  // Restart playback when BPM changes while playing
-  useEffect(() => {
-    if (isPlaying) {
-      stopPlayback();
-      startPlayback();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bpm]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 0 }}>

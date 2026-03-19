@@ -13,7 +13,51 @@ interface SteamGame {
   description: string;
   windowId?: string;
   tags: string[];
+  boxArt?: string;
 }
+
+interface Achievement {
+  name: string;
+  description: string;
+  unlocked: boolean;
+  icon: string;
+}
+
+const GAME_ACHIEVEMENTS: Record<string, Achievement[]> = {
+  valorant: [
+    { name: 'First Blood', description: 'Get your first kill', unlocked: true, icon: '🎯' },
+    { name: 'Ace', description: 'Kill all 5 enemies in a round', unlocked: true, icon: '⭐' },
+    { name: 'Radiant', description: 'Reach Radiant rank', unlocked: false, icon: '💎' },
+    { name: 'Clutch Master', description: 'Win a 1v5 clutch', unlocked: true, icon: '🔥' },
+    { name: 'Agent Expert', description: 'Master all agents', unlocked: false, icon: '🏆' },
+  ],
+  undertale: [
+    { name: 'Pacifist', description: 'Complete True Pacifist route', unlocked: true, icon: '💛' },
+    { name: 'Determined', description: 'Die and come back 10 times', unlocked: true, icon: '❤️' },
+    { name: 'Genocide', description: 'Complete Genocide route', unlocked: false, icon: '🖤' },
+    { name: 'Date Night', description: 'Complete all dates', unlocked: true, icon: '💕' },
+    { name: 'Spare Everyone', description: 'Never kill a single monster', unlocked: true, icon: '🌟' },
+  ],
+  cavestory: [
+    { name: 'Best Ending', description: 'Get the best ending', unlocked: true, icon: '✨' },
+    { name: 'Polar Star', description: 'Keep the Polar Star to the end', unlocked: false, icon: '⚡' },
+    { name: 'Sacred Grounds', description: 'Complete Sacred Grounds', unlocked: false, icon: '💀' },
+    { name: 'Curly Story', description: 'Complete Curly Story mode', unlocked: true, icon: '🎀' },
+    { name: 'Speed Run', description: 'Beat the game in under 1 hour', unlocked: false, icon: '⏱️' },
+  ],
+  minesweeper: [
+    { name: 'Beginner', description: 'Clear a Beginner board', unlocked: true, icon: '🟢' },
+    { name: 'Intermediate', description: 'Clear an Intermediate board', unlocked: true, icon: '🟡' },
+    { name: 'Expert', description: 'Clear an Expert board', unlocked: true, icon: '🔴' },
+    { name: 'Speed Demon', description: 'Clear Expert in under 99 seconds', unlocked: false, icon: '⚡' },
+    { name: 'No Flags', description: 'Clear a board without using flags', unlocked: true, icon: '🚩' },
+  ],
+  halflife3: [
+    { name: '???', description: 'Game not released yet', unlocked: false, icon: '❓' },
+    { name: '???', description: 'Game not released yet', unlocked: false, icon: '❓' },
+    { name: '???', description: 'Game not released yet', unlocked: false, icon: '❓' },
+  ],
+};
 
 const GAMES: SteamGame[] = [
   {
@@ -27,6 +71,7 @@ const GAMES: SteamGame[] = [
     description: 'A 5v5 character-based tactical FPS where precise gunplay meets unique agent abilities.',
     windowId: 'valorant',
     tags: ['FPS', 'Competitive', 'Multiplayer'],
+    boxArt: '/art/valorant_box.png',
   },
   {
     id: 'undertale',
@@ -39,6 +84,7 @@ const GAMES: SteamGame[] = [
     description: 'A friendly RPG where nobody has to die. Explore the underground and meet a cast of unforgettable characters.',
     windowId: 'undertale',
     tags: ['RPG', 'Indie', 'Story Rich'],
+    boxArt: '/art/undertale_box.png',
   },
   {
     id: 'cavestory',
@@ -51,6 +97,7 @@ const GAMES: SteamGame[] = [
     description: 'A freeware side-scrolling platformer. Explore a vast cave system, fight monsters and uncover the mysteries within.',
     windowId: 'cavestory',
     tags: ['Platformer', 'Indie', 'Action'],
+    boxArt: '/art/cavestory_box.png',
   },
   {
     id: 'minesweeper',
@@ -63,6 +110,7 @@ const GAMES: SteamGame[] = [
     description: 'The classic puzzle game. Click to reveal squares, flag the mines, and clear the board.',
     windowId: 'minesweeper',
     tags: ['Puzzle', 'Casual', 'Classic'],
+    boxArt: '/art/minesweeper_box.png',
   },
   {
     id: 'halflife3',
@@ -73,16 +121,7 @@ const GAMES: SteamGame[] = [
     hours: 0,
     description: 'Coming soon... probably... maybe... one day...',
     tags: ['FPS', 'Sci-Fi', 'Wishlist'],
-  },
-  {
-    id: 'dannyquest',
-    title: 'DannyQuest',
-    developer: 'DJTech Studios',
-    size: '1.3 MB',
-    installed: false,
-    hours: 0,
-    description: 'An epic quest through the world of computer engineering. Debug your way to graduation!',
-    tags: ['Adventure', 'Indie', 'Educational'],
+    boxArt: '/art/halflife3_box.png',
   },
 ];
 
@@ -106,16 +145,74 @@ export function Steam() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterInstalled, setFilterInstalled] = useState(false);
 
+  const [installedGames, setInstalledGames] = useState<Set<string>>(
+    () => new Set(GAMES.filter(g => g.installed).map(g => g.id))
+  );
+
+  const isInstalled = (id: string) => installedGames.has(id);
+
+  const installGame = (id: string) => {
+    setInstalledGames(prev => new Set([...prev, id]));
+  };
+
+  const uninstallGame = (id: string) => {
+    setInstalledGames(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  };
+
   const filteredGames = GAMES.filter((g) => {
-    if (filterInstalled && !g.installed) return false;
+    if (filterInstalled && !isInstalled(g.id)) return false;
     if (searchQuery && !g.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
   const handlePlay = (game: SteamGame) => {
-    if (game.windowId) {
+    if (game.windowId && isInstalled(game.id)) {
       openWindow(game.windowId);
     }
+  };
+
+  const totalUnlocked = Object.values(GAME_ACHIEVEMENTS).reduce(
+    (sum, achs) => sum + achs.filter(a => a.unlocked).length, 0
+  );
+  const totalAchievements = Object.values(GAME_ACHIEVEMENTS).reduce(
+    (sum, achs) => sum + achs.length, 0
+  );
+
+  const playBtnStyle: React.CSSProperties = {
+    background: `linear-gradient(to right, ${steamGreen}, ${steamGreenLight})`,
+    border: 'none',
+    color: '#fff',
+    fontFamily: 'var(--font-system)',
+    fontSize: 14,
+    fontWeight: 'bold',
+    padding: '8px 32px',
+    letterSpacing: 1,
+    cursor: 'pointer',
+  };
+
+  const uninstallBtnStyle: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.08)',
+    border: `1px solid ${steamBorder}`,
+    color: steamTextDim,
+    fontFamily: 'var(--font-system)',
+    fontSize: 10,
+    padding: '6px 14px',
+    cursor: 'pointer',
+  };
+
+  const installBtnStyle: React.CSSProperties = {
+    background: steamBlue,
+    border: 'none',
+    color: '#fff',
+    fontFamily: 'var(--font-system)',
+    fontSize: 12,
+    fontWeight: 'bold',
+    padding: '8px 24px',
+    cursor: 'pointer',
   };
 
   return (
@@ -238,14 +335,28 @@ export function Steam() {
                     gap: 8,
                   }}
                 >
-                  <div style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    background: game.installed ? steamGreenLight : steamTextDim,
-                    flexShrink: 0,
-                  }} />
-                  <div style={{ overflow: 'hidden' }}>
+                  {game.boxArt ? (
+                    <img
+                      src={game.boxArt}
+                      alt=""
+                      style={{
+                        width: 24,
+                        height: 16,
+                        objectFit: 'cover',
+                        flexShrink: 0,
+                        border: `1px solid ${steamBorder}`,
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: isInstalled(game.id) ? steamGreenLight : steamTextDim,
+                      flexShrink: 0,
+                    }} />
+                  )}
+                  <div style={{ overflow: 'hidden', flex: 1 }}>
                     <div style={{
                       fontSize: 11,
                       color: selectedGame?.id === game.id ? '#fff' : steamText,
@@ -261,6 +372,13 @@ export function Steam() {
                       </div>
                     )}
                   </div>
+                  <div style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: isInstalled(game.id) ? steamGreenLight : steamTextDim,
+                    flexShrink: 0,
+                  }} />
                 </div>
               ))}
             </div>
@@ -272,7 +390,7 @@ export function Steam() {
               fontSize: 10,
               color: steamTextDim,
             }}>
-              {GAMES.filter((g) => g.installed).length} installed / {GAMES.length} games
+              {installedGames.size} installed / {GAMES.length} games
             </div>
           </div>
 
@@ -291,6 +409,16 @@ export function Steam() {
                 padding: 20,
                 borderBottom: `1px solid ${steamBorder}`,
               }}>
+                {selectedGame.boxArt && (
+                  <div style={{
+                    width: '100%',
+                    height: 100,
+                    background: `url(${selectedGame.boxArt}) center/cover`,
+                    marginBottom: 12,
+                    border: `1px solid ${steamBorder}`,
+                  }} />
+                )}
+
                 <div style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
                   {selectedGame.title}
                 </div>
@@ -316,37 +444,22 @@ export function Steam() {
                   ))}
                 </div>
 
-                {/* Play/Install button */}
-                {selectedGame.installed ? (
-                  <button
-                    onClick={() => handlePlay(selectedGame)}
-                    style={{
-                      background: `linear-gradient(to right, ${steamGreen}, ${steamGreenLight})`,
-                      border: 'none',
-                      color: '#fff',
-                      fontFamily: 'var(--font-system)',
-                      fontSize: 14,
-                      fontWeight: 'bold',
-                      padding: '8px 32px',
-                      letterSpacing: 1,
-                    }}
-                  >
-                    {selectedGame.windowId ? 'Play' : 'Launch'}
+                {/* Play/Install/Uninstall buttons */}
+                {isInstalled(selectedGame.id) ? (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button onClick={() => handlePlay(selectedGame)} style={playBtnStyle}>
+                      {'\u25B6'} Play
+                    </button>
+                    <button onClick={() => uninstallGame(selectedGame.id)} style={uninstallBtnStyle}>
+                      Uninstall
+                    </button>
+                  </div>
+                ) : selectedGame.id === 'halflife3' ? (
+                  <button style={{ ...installBtnStyle, opacity: 0.5 }} disabled>
+                    Coming Soon...
                   </button>
                 ) : (
-                  <button
-                    style={{
-                      background: steamBlue,
-                      border: 'none',
-                      color: '#fff',
-                      fontFamily: 'var(--font-system)',
-                      fontSize: 12,
-                      fontWeight: 'bold',
-                      padding: '8px 24px',
-                      opacity: 0.6,
-                    }}
-                    disabled
-                  >
+                  <button onClick={() => installGame(selectedGame.id)} style={installBtnStyle}>
                     Install
                   </button>
                 )}
@@ -388,8 +501,8 @@ export function Steam() {
                   </div>
                   <div>
                     <div style={{ fontSize: 9, color: steamTextDim, marginBottom: 2 }}>Status</div>
-                    <div style={{ color: selectedGame.installed ? steamGreenLight : '#f44' }}>
-                      {selectedGame.installed ? 'Installed' : 'Not installed'}
+                    <div style={{ color: isInstalled(selectedGame.id) ? steamGreenLight : '#f44' }}>
+                      {isInstalled(selectedGame.id) ? 'Installed' : 'Not installed'}
                     </div>
                   </div>
                   <div>
@@ -399,36 +512,72 @@ export function Steam() {
                 </div>
 
                 {/* Achievements section */}
-                {selectedGame.installed && selectedGame.hours > 0 && (
+                {GAME_ACHIEVEMENTS[selectedGame.id] && (
                   <div style={{ marginTop: 16 }}>
                     <div style={{ fontSize: 12, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
                       Achievements
                     </div>
-                    <div style={{
-                      display: 'flex',
-                      gap: 8,
-                      flexWrap: 'wrap',
-                    }}>
-                      {['First Steps', 'Getting Good', 'Veteran'].map((ach, i) => (
-                        <div
-                          key={ach}
-                          style={{
-                            background: i < 2 ? 'rgba(164,208,7,0.15)' : 'rgba(255,255,255,0.05)',
-                            border: `1px solid ${i < 2 ? steamGreenLight : steamBorder}`,
-                            padding: '6px 10px',
-                            borderRadius: 2,
-                            fontSize: 10,
-                            color: i < 2 ? steamGreenLight : steamTextDim,
+                    {(() => {
+                      const achs = GAME_ACHIEVEMENTS[selectedGame.id]!;
+                      const unlocked = achs.filter(a => a.unlocked).length;
+                      const total = achs.length;
+                      const pct = total > 0 ? (unlocked / total) * 100 : 0;
+                      return (
+                        <>
+                          <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 6,
-                          }}
-                        >
-                          <span style={{ fontSize: 14 }}>{i < 2 ? '\u2605' : '\u2606'}</span>
-                          {ach}
-                        </div>
-                      ))}
-                    </div>
+                            gap: 8,
+                            marginBottom: 10,
+                          }}>
+                            <div style={{
+                              flex: 1,
+                              height: 6,
+                              background: 'rgba(255,255,255,0.1)',
+                              borderRadius: 3,
+                              overflow: 'hidden',
+                            }}>
+                              <div style={{
+                                width: `${pct}%`,
+                                height: '100%',
+                                background: steamGreenLight,
+                                borderRadius: 3,
+                              }} />
+                            </div>
+                            <span style={{ fontSize: 10, color: steamTextDim, whiteSpace: 'nowrap' }}>
+                              {unlocked}/{total} Achievements Unlocked
+                            </span>
+                          </div>
+                          <div style={{
+                            display: 'flex',
+                            gap: 8,
+                            flexWrap: 'wrap',
+                          }}>
+                            {achs.map((ach, i) => (
+                              <div
+                                key={`${ach.name}-${i}`}
+                                title={ach.description}
+                                style={{
+                                  background: ach.unlocked ? 'rgba(164,208,7,0.15)' : 'rgba(255,255,255,0.05)',
+                                  border: `1px solid ${ach.unlocked ? steamGreenLight : steamBorder}`,
+                                  padding: '6px 10px',
+                                  borderRadius: 2,
+                                  fontSize: 10,
+                                  color: ach.unlocked ? steamGreenLight : steamTextDim,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6,
+                                  opacity: ach.unlocked ? 1 : 0.6,
+                                }}
+                              >
+                                <span style={{ fontSize: 14 }}>{ach.icon}</span>
+                                {ach.name}
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -451,30 +600,41 @@ export function Steam() {
                   background: steamGray,
                   border: `1px solid ${steamBorder}`,
                   padding: 8,
+                  cursor: 'pointer',
                 }}
               >
-                <div style={{
-                  width: '100%',
-                  height: 60,
-                  background: `linear-gradient(135deg, ${steamDarker}, ${steamGray})`,
-                  marginBottom: 6,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
-                  fontWeight: 'bold',
-                  color: steamBlue,
-                }}>
-                  {game.title.charAt(0)}
-                </div>
+                {game.boxArt ? (
+                  <div style={{
+                    width: '100%',
+                    height: 60,
+                    background: `url(${game.boxArt}) center/cover`,
+                    marginBottom: 6,
+                    border: `1px solid ${steamBorder}`,
+                  }} />
+                ) : (
+                  <div style={{
+                    width: '100%',
+                    height: 60,
+                    background: `linear-gradient(135deg, ${steamDarker}, ${steamGray})`,
+                    marginBottom: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    color: steamBlue,
+                  }}>
+                    {game.title.charAt(0)}
+                  </div>
+                )}
                 <div style={{ fontSize: 11, color: '#fff', marginBottom: 2 }}>{game.title}</div>
                 <div style={{ fontSize: 9, color: steamTextDim }}>{game.developer}</div>
                 <div style={{
                   marginTop: 6,
                   fontSize: 10,
-                  color: game.installed ? steamGreenLight : steamBlue,
+                  color: isInstalled(game.id) ? steamGreenLight : steamBlue,
                 }}>
-                  {game.installed ? 'In Library' : 'Free to Play'}
+                  {isInstalled(game.id) ? 'In Library' : 'Free to Play'}
                 </div>
               </div>
             ))}
@@ -546,7 +706,7 @@ export function Steam() {
             {[
               { label: 'Games Owned', value: String(GAMES.length) },
               { label: 'Hours Played', value: String(GAMES.reduce((sum, g) => sum + g.hours, 0)) },
-              { label: 'Achievements', value: '87' },
+              { label: 'Achievements', value: `${totalUnlocked}/${totalAchievements}` },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -604,7 +764,7 @@ export function Steam() {
         justifyContent: 'space-between',
       }}>
         <span>Steam Client v1.0 - DannyOS Edition</span>
-        <span>{GAMES.filter((g) => g.installed).length} games installed</span>
+        <span>{installedGames.size} games installed</span>
       </div>
     </div>
   );

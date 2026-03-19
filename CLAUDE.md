@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 2. **Search the web for the latest documentation before making any change.** Every time you modify code involving a library, API, or framework, look up the newest docs first. Do not rely on cached knowledge alone.
 3. **Only implement changes you are 100% confident will work.** If there is uncertainty, research further or ask the user before proceeding. Do not guess.
 4. **Use at least 3 sub-agents per task.** Parallelize work across multiple agents (e.g., research, implementation planning, code review) for every non-trivial change.
+5. **Always validate code before finishing.** After writing or modifying code, use a sub-agent to review every changed file for: unused variables/imports, TypeScript errors, missing exports, and undeclared references. The build (`tsc -b`) treats unused locals as errors. Never declare a variable, const, or import without using it. Remove dead code immediately — do not leave "for later" stubs.
 
 ## Project Overview
 

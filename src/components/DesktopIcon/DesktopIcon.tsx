@@ -24,7 +24,6 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
   const renameIcon = useDesktopStore((s) => s.renameIcon);
   const moveToRecycleBin = useDesktopStore((s) => s.moveToRecycleBin);
   const moveStaticToRecycleBin = useDesktopStore((s) => s.moveStaticToRecycleBin);
-  const isRecycleBin = id === 'icon-recycle';
 
   const isRenaming = renamingIconId === id;
   const [renameValue, setRenameValue] = useState(label);

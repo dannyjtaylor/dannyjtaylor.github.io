@@ -710,8 +710,6 @@ export function CookieClicker() {
     return bCps;
   }, [purchasedUpgrades]);
 
-  const totalBuildings = Object.values(buildings).reduce((a, b) => a + b, 0);
-
   // ─── Styles ───
   const bg = '#1e0f00';
   const panelBg = '#2a1a0a';
@@ -719,7 +717,6 @@ export function CookieClicker() {
   const cookieDark = '#7a5a2a';
   const textColor = '#fff8e7';
   const textDim = '#b09060';
-  const greenText = '#6f6';
   const borderColor = '#4a3520';
 
   return (

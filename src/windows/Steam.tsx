@@ -1,6 +1,46 @@
 import { useState } from 'react';
 import { useDesktopStore } from '../stores/desktopStore';
 
+/* ─── Game SVG Icons ─── */
+function GameIcon({ gameId }: { gameId: string }) {
+  switch (gameId) {
+    case 'valorant':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+          <circle cx="7" cy="7" r="6" stroke="#ff4655" strokeWidth="1.5" fill="none" />
+          <circle cx="7" cy="7" r="2" fill="#ff4655" />
+          <line x1="7" y1="0.5" x2="7" y2="3.5" stroke="#ff4655" strokeWidth="1" />
+          <line x1="7" y1="10.5" x2="7" y2="13.5" stroke="#ff4655" strokeWidth="1" />
+          <line x1="0.5" y1="7" x2="3.5" y2="7" stroke="#ff4655" strokeWidth="1" />
+          <line x1="10.5" y1="7" x2="13.5" y2="7" stroke="#ff4655" strokeWidth="1" />
+        </svg>
+      );
+    case 'undertale':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+          <path d="M7 12 L1.5 5.5 C0.5 3.5 1 1.5 3.5 1.5 C5.5 1.5 7 4 7 4 C7 4 8.5 1.5 10.5 1.5 C13 1.5 13.5 3.5 12.5 5.5 Z" fill="#ff4655" />
+        </svg>
+      );
+    case 'cavestory':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+          <rect x="6" y="1" width="2" height="10" fill="#4a9eff" />
+          <rect x="4" y="1" width="6" height="2" fill="#4a9eff" />
+          <rect x="5" y="11" width="4" height="2" fill="#4a9eff" />
+          <rect x="3" y="12" width="8" height="1" fill="#4a9eff" />
+        </svg>
+      );
+    case 'halflife3':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+          <text x="2" y="12" fontFamily="serif" fontSize="14" fontWeight="bold" fill="#ff9900">λ</text>
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
 /* ─── Game data ─── */
 interface SteamGame {
   id: string;
@@ -14,6 +54,7 @@ interface SteamGame {
   windowId?: string;
   tags: string[];
   boxArt?: string;
+  bgImage?: string;
 }
 
 interface Achievement {
@@ -45,13 +86,6 @@ const GAME_ACHIEVEMENTS: Record<string, Achievement[]> = {
     { name: 'Curly Story', description: 'Complete Curly Story mode', unlocked: true, icon: '🎀' },
     { name: 'Speed Run', description: 'Beat the game in under 1 hour', unlocked: false, icon: '⏱️' },
   ],
-  minesweeper: [
-    { name: 'Beginner', description: 'Clear a Beginner board', unlocked: true, icon: '🟢' },
-    { name: 'Intermediate', description: 'Clear an Intermediate board', unlocked: true, icon: '🟡' },
-    { name: 'Expert', description: 'Clear an Expert board', unlocked: true, icon: '🔴' },
-    { name: 'Speed Demon', description: 'Clear Expert in under 99 seconds', unlocked: false, icon: '⚡' },
-    { name: 'No Flags', description: 'Clear a board without using flags', unlocked: true, icon: '🚩' },
-  ],
   halflife3: [
     { name: '???', description: 'Game not released yet', unlocked: false, icon: '❓' },
     { name: '???', description: 'Game not released yet', unlocked: false, icon: '❓' },
@@ -72,6 +106,7 @@ const GAMES: SteamGame[] = [
     windowId: 'valorant',
     tags: ['FPS', 'Competitive', 'Multiplayer'],
     boxArt: '/art/valorant_box.png',
+    bgImage: '/art/valorant_bg.png',
   },
   {
     id: 'undertale',
@@ -85,6 +120,7 @@ const GAMES: SteamGame[] = [
     windowId: 'undertale',
     tags: ['RPG', 'Indie', 'Story Rich'],
     boxArt: '/art/undertale_box.png',
+    bgImage: '/art/undertale_bg.png',
   },
   {
     id: 'cavestory',
@@ -98,19 +134,7 @@ const GAMES: SteamGame[] = [
     windowId: 'cavestory',
     tags: ['Platformer', 'Indie', 'Action'],
     boxArt: '/art/cavestory_box.png',
-  },
-  {
-    id: 'minesweeper',
-    title: 'Minesweeper',
-    developer: 'DJTech Industries',
-    size: '4 KB',
-    installed: true,
-    lastPlayed: '3 days ago',
-    hours: 99,
-    description: 'The classic puzzle game. Click to reveal squares, flag the mines, and clear the board.',
-    windowId: 'minesweeper',
-    tags: ['Puzzle', 'Casual', 'Classic'],
-    boxArt: '/art/minesweeper_box.png',
+    bgImage: '/art/cavestory_bg.png',
   },
   {
     id: 'halflife3',
@@ -356,6 +380,7 @@ export function Steam() {
                       flexShrink: 0,
                     }} />
                   )}
+                  <GameIcon gameId={game.id} />
                   <div style={{ overflow: 'hidden', flex: 1 }}>
                     <div style={{
                       fontSize: 11,
@@ -405,10 +430,25 @@ export function Steam() {
             }}>
               {/* Hero banner area */}
               <div style={{
-                background: `linear-gradient(135deg, ${steamGray} 0%, ${steamDark} 100%)`,
+                background: selectedGame.bgImage
+                  ? `url(${selectedGame.bgImage}) center/cover no-repeat`
+                  : `linear-gradient(135deg, ${steamGray} 0%, ${steamDark} 100%)`,
+                backgroundSize: selectedGame.bgImage ? 'cover' : undefined,
+                backgroundPosition: selectedGame.bgImage ? 'center' : undefined,
                 padding: 20,
                 borderBottom: `1px solid ${steamBorder}`,
+                position: 'relative',
               }}>
+                {/* Dark overlay for readability when bg image is present */}
+                {selectedGame.bgImage && (
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7))',
+                    pointerEvents: 'none',
+                  }} />
+                )}
+                <div style={{ position: 'relative', zIndex: 1 }}>
                 {selectedGame.boxArt && (
                   <div style={{
                     width: '100%',
@@ -463,6 +503,7 @@ export function Steam() {
                     Install
                   </button>
                 )}
+                </div>
               </div>
 
               {/* Game Info Section */}

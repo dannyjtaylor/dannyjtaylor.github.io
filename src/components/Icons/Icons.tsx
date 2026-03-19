@@ -37,6 +37,8 @@ const PNG_ICONS: Record<string, string> = {
   steam: '/icons/steam.png',
   folder: '/icons/file.png',
   musicplayer: '/icons/musicplayer.png',
+  recyclebinfull: '/icons/recycle-full.png',
+  recyclebinempty: '/icons/recycle-empty.png',
 };
 
 /* ── Canvas Pixel Art Component ── */

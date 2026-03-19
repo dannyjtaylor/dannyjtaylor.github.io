@@ -44,6 +44,8 @@ export function ContextMenu() {
   const fileSystem = useDesktopStore((s) => s.fileSystem);
   const setRenamingIconId = useDesktopStore((s) => s.setRenamingIconId);
   const selectedIcons = useDesktopStore((s) => s.selectedIcons);
+  const moveToRecycleBin = useDesktopStore((s) => s.moveToRecycleBin);
+  const emptyRecycleBin = useDesktopStore((s) => s.emptyRecycleBin);
 
   useEffect(() => {
     if (!contextMenu.visible) return;
@@ -174,6 +176,15 @@ export function ContextMenu() {
         }}>
           Explore
         </div>
+        {/* Empty Recycle Bin — only for recycle bin icon */}
+        {targetId === 'recycle' && (
+          <div className={styles.item} onClick={() => {
+            emptyRecycleBin();
+            hideWithSound();
+          }}>
+            Empty Recycle Bin
+          </div>
+        )}
         {/* Save As — only for dynamic notepad items */}
         {(() => {
           const dynItem = targetId ? dynamicItems.find((d) => d.windowId === targetId) : null;
@@ -208,12 +219,18 @@ export function ContextMenu() {
         <div className={styles.separator} />
         <div className={styles.itemDisabled}>Create Shortcut</div>
         <div className={styles.item} onClick={() => {
-          if (targetId) closeWindow(targetId);
-          hideWithSound();
-          showProperties('Error', {
-            'Message': `Cannot delete ${iconLabels[targetId ?? ''] ?? 'this item'}.`,
-            'Reason': 'Access is denied.',
-          });
+          const dynItem = targetId ? dynamicItems.find((d) => d.id === targetId || d.windowId === targetId) : null;
+          if (dynItem) {
+            moveToRecycleBin(dynItem.id);
+            hideWithSound();
+          } else {
+            if (targetId) closeWindow(targetId);
+            hideWithSound();
+            showProperties('Error', {
+              'Message': `Cannot delete ${iconLabels[targetId ?? ''] ?? 'this item'}.`,
+              'Reason': 'Access is denied.',
+            });
+          }
         }}>
           Delete
         </div>

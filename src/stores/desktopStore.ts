@@ -65,6 +65,12 @@ interface DesktopStore {
   removeDesktopItem: (id: string) => void;
   renameDesktopItem: (id: string, newLabel: string) => void;
 
+  // Recycle Bin
+  recycleBin: { id: string; label: string; icon: string; windowId: string; type: 'folder' | 'notepad'; content?: string }[];
+  moveToRecycleBin: (id: string) => void;
+  emptyRecycleBin: () => void;
+  restoreFromRecycleBin: (id: string) => void;
+
   // Properties dialog (Win95-style, not browser alert)
   propertiesDialog: PropertiesDialog | null;
   showProperties: (title: string, info: Record<string, string>) => void;
@@ -119,6 +125,12 @@ interface DesktopStore {
 
   // Update window title
   updateWindowTitle: (id: string, title: string) => void;
+
+  // Time offset (milliseconds) and timezone for DateTime
+  timeOffset: number;
+  timeZone: string;
+  setTimeOffset: (offset: number) => void;
+  setTimeZone: (tz: string) => void;
 }
 
 let dynamicCounter = 0;
@@ -293,12 +305,86 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
     if (type === 'notepad') {
       get().saveFile(windowId, '');
     }
+
+    // Auto-open the new item's window
+    get().openWindow(windowId);
   },
 
   removeDesktopItem: (id) =>
     set((s) => ({
       dynamicItems: s.dynamicItems.filter((i) => i.id !== id),
     })),
+
+  // Recycle Bin
+  recycleBin: [],
+  moveToRecycleBin: (id) => {
+    const state = get();
+    const item = state.dynamicItems.find((i) => i.id === id);
+    if (!item) return;
+    const content = state.fileSystem[item.windowId];
+    const recycleBinEntry = {
+      id: item.id,
+      label: item.label,
+      icon: item.icon,
+      windowId: item.windowId,
+      type: item.type,
+      content,
+    };
+    // Close window, remove from dynamicItems, delete file, add to recycleBin
+    const newWindows = { ...state.windows };
+    if (newWindows[item.windowId]) {
+      newWindows[item.windowId] = { ...newWindows[item.windowId]!, isOpen: false, isMinimized: false, isMaximized: false };
+    }
+    const newFileSystem = { ...state.fileSystem };
+    delete newFileSystem[item.windowId];
+    set({
+      recycleBin: [...state.recycleBin, recycleBinEntry],
+      dynamicItems: state.dynamicItems.filter((i) => i.id !== id),
+      windows: newWindows,
+      fileSystem: newFileSystem,
+    });
+  },
+  emptyRecycleBin: () => set({ recycleBin: [] }),
+  restoreFromRecycleBin: (id) => {
+    const state = get();
+    const entry = state.recycleBin.find((i) => i.id === id);
+    if (!entry) return;
+    const restoredItem: DynamicDesktopItem = {
+      id: entry.id,
+      label: entry.label,
+      icon: entry.icon,
+      windowId: entry.windowId,
+      type: entry.type,
+    };
+    // Re-register window
+    const { highestZ } = state;
+    const winTitle = entry.type === 'folder' ? entry.label : `${entry.label} - Notepad`;
+    const newWindows = {
+      ...state.windows,
+      [entry.windowId]: {
+        isOpen: false,
+        isMinimized: false,
+        isMaximized: false,
+        zIndex: highestZ,
+        x: 100,
+        y: 50,
+        width: entry.type === 'folder' ? 420 : 480,
+        height: entry.type === 'folder' ? 300 : 360,
+        title: winTitle,
+      },
+    };
+    // Restore file content
+    const newFileSystem = { ...state.fileSystem };
+    if (entry.content !== undefined) {
+      newFileSystem[entry.windowId] = entry.content;
+    }
+    set({
+      recycleBin: state.recycleBin.filter((i) => i.id !== id),
+      dynamicItems: [...state.dynamicItems, restoredItem],
+      windows: newWindows,
+      fileSystem: newFileSystem,
+    });
+  },
 
   renameDesktopItem: (id, newLabel) =>
     set((s) => ({
@@ -380,6 +466,9 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
       get().saveFile(windowId, '');
     }
 
+    // Auto-open the new item's window
+    get().openWindow(windowId);
+
     return id;
   },
 
@@ -403,4 +492,10 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
       if (!win) return s;
       return { windows: { ...s.windows, [id]: { ...win, title } } };
     }),
+
+  // Time offset and timezone
+  timeOffset: 0,
+  timeZone: '(GMT-05:00) Eastern Time (US & Canada)',
+  setTimeOffset: (offset) => set({ timeOffset: offset }),
+  setTimeZone: (tz) => set({ timeZone: tz }),
 }));

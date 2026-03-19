@@ -89,6 +89,21 @@ export function DynamicNotepad({ fileId }: DynamicNotepadProps) {
     });
   }, [registerCallback, text, fileId, saveFile]);
 
+  // Ctrl+S quicksave
+  const [saveFlash, setSaveFlash] = useState(false);
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveFile(fileId, text);
+        setSaveFlash(true);
+        setTimeout(() => setSaveFlash(false), 1000);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [fileId, text, saveFile]);
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
@@ -112,6 +127,15 @@ export function DynamicNotepad({ fileId }: DynamicNotepadProps) {
         spellCheck={false}
         style={{ whiteSpace: wordWrap ? 'pre-wrap' : 'pre' }}
       />
+      {saveFlash && (
+        <div style={{
+          position: 'absolute', top: 4, right: 8,
+          background: 'var(--win-btn-face, #c0c0c0)', border: '1px solid var(--win-dark, #808080)',
+          padding: '2px 8px', fontFamily: 'var(--font-system)', fontSize: 11,
+        }}>
+          Saved
+        </div>
+      )}
       {statusBar && (
         <div className={styles.statusBar}>
           Ln {lines}, Col {(textareaRef.current?.selectionStart ?? 0) + 1} | {chars} characters

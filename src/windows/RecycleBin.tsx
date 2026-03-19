@@ -3,14 +3,11 @@ import { DynamicIcon } from '../components/Icons/Icons';
 import { useDesktopStore } from '../stores/desktopStore';
 import styles from './windows.module.css';
 
-const TRASH_FILES = [
-  { name: 'old_portfolio.html', icon: 'document' },
-  { name: 'boring_website.css', icon: 'document' },
-  { name: 'TODO_learn_css_grid.txt', icon: 'notepad' },
-];
-
 export function RecycleBin() {
   const showContextMenu = useDesktopStore((s) => s.showContextMenu);
+  const recycleBin = useDesktopStore((s) => s.recycleBin);
+  const restoreFromRecycleBin = useDesktopStore((s) => s.restoreFromRecycleBin);
+  const emptyRecycleBin = useDesktopStore((s) => s.emptyRecycleBin);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -23,17 +20,53 @@ export function RecycleBin() {
 
   return (
     <div className={styles.explorer} onContextMenu={handleContextMenu}>
-      <div className={styles.explorerList}>
-        {TRASH_FILES.map((f) => (
-          <div key={f.name} className={styles.explorerItem}>
-            <span className={styles.explorerIcon}>
-              <DynamicIcon name={f.icon} size={16} />
-            </span>
-            <span>{f.name}</span>
-          </div>
-        ))}
+      {/* Toolbar */}
+      <div className={styles.explorerToolbar}>
+        <button
+          className={styles.explorerUpBtn}
+          disabled={recycleBin.length === 0}
+          onClick={() => emptyRecycleBin()}
+          title="Empty Recycle Bin"
+        >
+          Empty Recycle Bin
+        </button>
       </div>
-      <div className={styles.statusBar}>3 object(s)&nbsp;&nbsp;&nbsp;&nbsp;12 KB</div>
+      <div className={styles.explorerList}>
+        {recycleBin.length === 0 ? (
+          <div className={styles.explorerEmpty}>
+            <span style={{ color: 'var(--win-dark, #808080)', fontFamily: 'var(--font-system)', fontSize: 11 }}>
+              Recycle Bin is empty.
+            </span>
+          </div>
+        ) : (
+          recycleBin.map((item) => (
+            <div key={item.id} className={styles.explorerItem} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span className={styles.explorerIcon}>
+                  <DynamicIcon name={item.icon} size={16} />
+                </span>
+                <span>{item.label}</span>
+              </div>
+              <button
+                onClick={() => restoreFromRecycleBin(item.id)}
+                style={{
+                  fontFamily: 'var(--font-system)',
+                  fontSize: 11,
+                  padding: '1px 8px',
+                  cursor: 'pointer',
+                  background: 'var(--win-btn-face, #c0c0c0)',
+                  border: '2px outset var(--win-btn-face, #c0c0c0)',
+                }}
+              >
+                Restore
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+      <div className={styles.statusBar}>
+        {recycleBin.length} object(s)
+      </div>
     </div>
   );
 }

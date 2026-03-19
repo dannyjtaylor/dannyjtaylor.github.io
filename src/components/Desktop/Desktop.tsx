@@ -180,6 +180,7 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-discord',    label: '/gather Bot',    icon: 'discord',   windowId: 'discord' },
   { id: 'icon-interests',  label: 'Interests',      icon: 'document',  windowId: 'interests' },
   { id: 'icon-breadbox',  label: 'Breadbox',       icon: 'breadbox',  windowId: 'breadbox' },
+  { id: 'icon-minesweeper', label: 'Minesweeper',  icon: 'minesweeper', windowId: 'minesweeper' },
   { id: 'icon-steam',     label: 'Steam',          icon: 'steam',     windowId: 'steam' },
   { id: 'icon-aol',       label: 'AOL Messenger',  icon: 'aol',       windowId: 'aol' },
   { id: 'icon-paint',     label: 'Paint',          icon: 'paint',     windowId: 'paint' },
@@ -189,16 +190,16 @@ const ICONS: DesktopIconConfig[] = [
 ];
 
 const WINDOWS: WindowConfig[] = [
-  { id: 'about',      title: 'About Me - Notepad',    icon: 'document',  defaultWidth: 500, defaultHeight: 380, defaultX: 80,  defaultY: 40,  menus: NOTEPAD_MENUS },
+  { id: 'about',      title: 'About Me',               icon: 'document',  defaultWidth: 500, defaultHeight: 380, defaultX: 80,  defaultY: 40 },
   { id: 'projects',   title: 'C:\\Projects',            icon: 'file',      defaultWidth: 540, defaultHeight: 400, defaultX: 140, defaultY: 60,  menus: EXPLORER_MENUS },
-  { id: 'resume',     title: 'Resume.txt - Notepad',   icon: 'notepad',   defaultWidth: 520, defaultHeight: 420, defaultX: 120, defaultY: 50,  menus: NOTEPAD_MENUS },
+  { id: 'resume',     title: 'Resume',                  icon: 'notepad',   defaultWidth: 520, defaultHeight: 420, defaultX: 120, defaultY: 50 },
   { id: 'contact',    title: 'New Message',             icon: 'mail',      defaultWidth: 460, defaultHeight: 340, defaultX: 160, defaultY: 80,  menus: MAIL_MENUS },
   { id: 'mycomputer', title: 'My Computer',             icon: 'computer',  defaultWidth: 480, defaultHeight: 360, defaultX: 100, defaultY: 40,  menus: EXPLORER_MENUS },
   { id: 'recycle',    title: 'Recycle Bin',             icon: 'recycle',   defaultWidth: 420, defaultHeight: 300, defaultX: 200, defaultY: 100, menus: EXPLORER_MENUS },
   { id: 'terminal',   title: 'MS-DOS Prompt',           icon: 'console',   defaultWidth: 560, defaultHeight: 380, defaultX: 60,  defaultY: 30 },
   { id: 'valorant',   title: 'VALORANT',                icon: 'valorant',  defaultWidth: 520, defaultHeight: 400, defaultX: 90,  defaultY: 35 },
   { id: 'undertale',  title: 'UNDERTALE',               icon: 'undertale', defaultWidth: 320, defaultHeight: 380, defaultX: 150, defaultY: 30 },
-  { id: 'portfolio',  title: 'Portfolio.txt - Notepad', icon: 'document',  defaultWidth: 520, defaultHeight: 440, defaultX: 110, defaultY: 35,  menus: NOTEPAD_MENUS },
+  { id: 'portfolio',  title: 'Portfolio',               icon: 'document',  defaultWidth: 520, defaultHeight: 440, defaultX: 110, defaultY: 35 },
   { id: 'transcript', title: 'Transcript.txt - Notepad',icon: 'notepad',   defaultWidth: 500, defaultHeight: 460, defaultX: 130, defaultY: 25,  menus: NOTEPAD_MENUS },
   { id: 'minesweeper',title: 'Minesweeper',              icon: 'minesweeper', defaultWidth: 200, defaultHeight: 260, defaultX: 200, defaultY: 60 },
   { id: 'discord',    title: '/gather Discord Bot',     icon: 'discord',   defaultWidth: 360, defaultHeight: 260, defaultX: 180, defaultY: 70 },
@@ -250,6 +251,7 @@ export function Desktop() {
   const selectIconsInRect = useDesktopStore((s) => s.selectIconsInRect);
   const dynamicItems = useDesktopStore((s) => s.dynamicItems);
   const iconLabelOverrides = useDesktopStore((s) => s.iconLabelOverrides);
+  const recycleBin = useDesktopStore((s) => s.recycleBin);
   const wallpaper = useDesktopStore((s) => s.wallpaper);
   const wallpaperStyle = useDesktopStore((s) => s.wallpaperStyle);
   const brightness = useDesktopStore((s) => s.brightness);
@@ -407,6 +409,10 @@ export function Desktop() {
     ...ICONS.map((ic) => ({
       ...ic,
       label: iconLabelOverrides[ic.id] || ic.label,
+      // Dynamically change recycle bin icon based on contents
+      icon: ic.id === 'icon-recycle'
+        ? (recycleBin.length > 0 ? 'recyclebinfull' : 'recyclebinempty')
+        : ic.icon,
     })),
     ...dynamicItems.map((d) => ({
       id: d.id,
@@ -416,7 +422,26 @@ export function Desktop() {
     })),
   ];
 
-  // All windows (static + dynamic)
+  // All windows (static + dynamic + project files)
+  const staticAndDynamicIds = new Set([
+    ...WINDOWS.map((w) => w.id),
+    ...dynamicItems.map((d) => d.windowId),
+  ]);
+
+  // Find project file windows (registered by Projects component)
+  const projectFileWindows = Object.keys(windows)
+    .filter((id) => id.startsWith('proj-') && !staticAndDynamicIds.has(id))
+    .map((id) => ({
+      id,
+      title: windows[id]!.title || id,
+      icon: 'notepad',
+      defaultWidth: 480,
+      defaultHeight: 360,
+      defaultX: 160,
+      defaultY: 60,
+      menus: NOTEPAD_MENUS,
+    }));
+
   const allWindows = [
     ...WINDOWS,
     ...dynamicItems.map((d) => {
@@ -432,6 +457,7 @@ export function Desktop() {
         menus: isPaint ? PAINT_MENUS : d.type === 'notepad' ? NOTEPAD_MENUS : undefined,
       };
     }),
+    ...projectFileWindows,
   ];
 
   // Render rubber band rectangle
@@ -507,6 +533,9 @@ export function Desktop() {
           } else if (isPaintFile) {
             content = <Paint />;
           } else if (dynItem?.type === 'notepad') {
+            content = <DynamicNotepad fileId={wc.id} />;
+          } else if (wc.id.startsWith('proj-')) {
+            // Project file opened from Projects folder
             content = <DynamicNotepad fileId={wc.id} />;
           } else {
             // Dynamic folder — show empty explorer

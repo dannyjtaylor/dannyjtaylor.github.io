@@ -1,118 +1,70 @@
-import { useState, useRef, useEffect, useContext, useCallback } from 'react';
-import { MenuCallbackContext } from '../components/Window/Window';
-import { useDesktopStore } from '../stores/desktopStore';
 import styles from './windows.module.css';
 
-const DEFAULT_TEXT = `Hey, I'm Danny! I'm a Computer Engineering senior at Florida Polytechnic University! I hope you enjoy DannyOS!!
-
-Welcome to my corner of the internet — styled like it's 2004 because good design is timeless (and also because I think floppy disks were cool).
-
-I'm a developer who loves building things, breaking things, and occasionally putting them back together. This portfolio is a living project — check back as I add more to it.
-
-Double-click the icons on the desktop to explore, or use the Start menu.
-
-— Danny`;
-
-const FILE_ID = 'about';
-
 export function AboutMe() {
-  const savedContent = useDesktopStore((s) => s.fileSystem[FILE_ID]);
-  const saveFile = useDesktopStore((s) => s.saveFile);
-  const showContextMenu = useDesktopStore((s) => s.showContextMenu);
-  const [text, setText] = useState(savedContent ?? DEFAULT_TEXT);
-  const [wordWrap, setWordWrap] = useState(false);
-  const [statusBar, setStatusBar] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const registerCallback = useContext(MenuCallbackContext);
-
-  useEffect(() => {
-    return registerCallback((action: string) => {
-      const ta = textareaRef.current;
-      if (!ta) return;
-
-      switch (action) {
-        case 'file-new':
-          setText('');
-          break;
-        case 'file-save':
-          saveFile(FILE_ID, text);
-          break;
-        case 'file-save-as':
-          saveFile(FILE_ID, text);
-          break;
-        case 'edit-undo':
-          document.execCommand('undo');
-          break;
-        case 'edit-select-all':
-          ta.select();
-          break;
-        case 'edit-cut':
-          document.execCommand('cut');
-          break;
-        case 'edit-copy':
-          document.execCommand('copy');
-          break;
-        case 'edit-paste':
-          document.execCommand('paste');
-          break;
-        case 'edit-delete': {
-          const start = ta.selectionStart;
-          const end = ta.selectionEnd;
-          if (start !== end) {
-            setText(text.slice(0, start) + text.slice(end));
-            requestAnimationFrame(() => {
-              ta.selectionStart = start;
-              ta.selectionEnd = start;
-            });
-          }
-          break;
-        }
-        case 'edit-time-date':
-          document.execCommand('insertText', false, new Date().toLocaleString());
-          break;
-        case 'format-word-wrap':
-          setWordWrap((w) => !w);
-          break;
-        case 'view-status-bar':
-          setStatusBar((s) => !s);
-          break;
-        case 'help-about':
-          useDesktopStore.getState().showProperties('About Notepad', {
-            'Application': 'Notepad',
-            'Version': '4.0',
-            'Publisher': 'DJTech Industries',
-            'System': 'DannyOS 95',
-          });
-          break;
-      }
-    });
-  }, [registerCallback, text, saveFile]);
-
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      showContextMenu(e.clientX, e.clientY, 'notepad');
-    },
-    [showContextMenu],
-  );
-
   return (
     <div className={styles.notepadEditable}>
-      <textarea
-        ref={textareaRef}
-        className={styles.notepadTextarea}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onContextMenu={handleContextMenu}
-        spellCheck={false}
-        style={{ whiteSpace: wordWrap ? 'pre-wrap' : 'pre' }}
-      />
-      {statusBar && (
-        <div className={styles.statusBar}>
-          {text.split('\n').length} lines | {text.length} characters
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '8px 12px',
+        background: 'var(--win-white)',
+        fontFamily: 'var(--font-system)',
+        fontSize: 11,
+        color: 'var(--win-black)',
+        userSelect: 'text',
+      }}>
+        <div style={{ fontWeight: 'bold', fontSize: 13, marginBottom: 8, borderBottom: '2px solid var(--win-black)', paddingBottom: 4 }}>
+          About Me
         </div>
-      )}
+
+        <div style={{ marginBottom: 12 }}>
+          <div style={{
+            fontWeight: 'bold',
+            fontSize: 12,
+            padding: '3px 6px',
+            background: 'var(--win-navy)',
+            color: 'var(--win-white)',
+            marginBottom: 4,
+          }}>
+            Welcome!
+          </div>
+          <div style={{ padding: '4px 8px', lineHeight: 1.6 }}>
+            Hey there, I'm Danny! I'm a Computer Engineering senior at Florida Polytechnic University! This is my take on a portfolio website. I hope you enjoy interacting with DannyOS!
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <div style={{
+            fontWeight: 'bold',
+            fontSize: 12,
+            padding: '3px 6px',
+            background: 'var(--win-navy)',
+            color: 'var(--win-white)',
+            marginBottom: 4,
+          }}>
+            What You Can Do
+          </div>
+          <div style={{ padding: '4px 8px', lineHeight: 1.6 }}>
+            Please navigate through the programs I created for you! I tried to make it as similar to Windows 95 as I could, plus some extra features. On this website, you can play games, read about me, read about my interests, interact with a terminal, set backgrounds, paint, have an AOL-styled instant messager (that IS actually multiplayer! Created with Google Firebase!), find my contacts, build simple breadboard projects, and listen to music!
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <div style={{
+            fontWeight: 'bold',
+            fontSize: 12,
+            padding: '3px 6px',
+            background: 'var(--win-navy)',
+            color: 'var(--win-white)',
+            marginBottom: 4,
+          }}>
+            Tips
+          </div>
+          <div style={{ padding: '4px 8px', lineHeight: 1.6 }}>
+            To play the games, open up Steam! Also, there's a few easter eggs, so feel free to poke around. I hope you enjoy! :)
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

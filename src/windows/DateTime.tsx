@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useDesktopStore } from '../stores/desktopStore';
 
-/* ── Helpers ── */
+/* -- Helpers -- */
 const MONTH_NAMES = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December',
@@ -9,6 +9,8 @@ const MONTH_NAMES = [
 const DAY_HEADERS = ['S','M','T','W','T','F','S'];
 
 const TIME_ZONES = [
+  { label: '(GMT-12:00) Intl Date Line West', offset: -12 },
+  { label: '(GMT-11:00) Midway Island, Samoa', offset: -11 },
   { label: '(GMT-10:00) Hawaii', offset: -10 },
   { label: '(GMT-09:00) Alaska', offset: -9 },
   { label: '(GMT-08:00) Pacific Time (US & Canada)', offset: -8 },
@@ -16,6 +18,23 @@ const TIME_ZONES = [
   { label: '(GMT-06:00) Central Time (US & Canada)', offset: -6 },
   { label: '(GMT-05:00) Eastern Time (US & Canada)', offset: -5 },
   { label: '(GMT-04:00) Atlantic Time (Canada)', offset: -4 },
+  { label: '(GMT-03:00) Buenos Aires, Greenland', offset: -3 },
+  { label: '(GMT-02:00) Mid-Atlantic', offset: -2 },
+  { label: '(GMT-01:00) Azores, Cape Verde Is.', offset: -1 },
+  { label: '(GMT+00:00) UTC / London, Dublin', offset: 0 },
+  { label: '(GMT+01:00) Berlin, Paris, Rome', offset: 1 },
+  { label: '(GMT+02:00) Cairo, Helsinki, Athens', offset: 2 },
+  { label: '(GMT+03:00) Moscow, Kuwait, Riyadh', offset: 3 },
+  { label: '(GMT+04:00) Abu Dhabi, Muscat, Baku', offset: 4 },
+  { label: '(GMT+05:00) Islamabad, Karachi', offset: 5 },
+  { label: '(GMT+05:30) Mumbai, Kolkata, Chennai', offset: 5.5 },
+  { label: '(GMT+06:00) Astana, Dhaka', offset: 6 },
+  { label: '(GMT+07:00) Bangkok, Hanoi, Jakarta', offset: 7 },
+  { label: '(GMT+08:00) Beijing, Singapore, Perth', offset: 8 },
+  { label: '(GMT+09:00) Tokyo, Seoul, Osaka', offset: 9 },
+  { label: '(GMT+10:00) Sydney, Melbourne, Guam', offset: 10 },
+  { label: '(GMT+11:00) Magadan, Solomon Is.', offset: 11 },
+  { label: '(GMT+12:00) Auckland, Wellington, Fiji', offset: 12 },
 ];
 
 function getDaysInMonth(year: number, month: number) {
@@ -30,7 +49,20 @@ function pad2(n: number) {
   return n.toString().padStart(2, '0');
 }
 
-/* ── Shared Win95 style fragments ── */
+/** Get the offset in hours for the user's local timezone */
+function getLocalUtcOffsetHours() {
+  return -(new Date().getTimezoneOffset() / 60);
+}
+
+/** Given a timezone offset (hours from UTC) and a time offset (ms), compute a Date */
+function getAdjustedDate(tzOffsetHours: number, timeOffsetMs: number): Date {
+  const now = new Date();
+  // Convert current time to UTC, then apply timezone offset and user time offset
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  return new Date(utcMs + tzOffsetHours * 3600000 + timeOffsetMs);
+}
+
+/* -- Shared Win95 style fragments -- */
 const sunkenBorder = {
   borderTop: '1px solid var(--win-btn-shadow)',
   borderLeft: '1px solid var(--win-btn-shadow)',
@@ -96,55 +128,78 @@ const spinBtnStyle: React.CSSProperties = {
   cursor: 'default',
 };
 
-/* ── Component ── */
+/* -- Component -- */
 export function DateTime() {
-  const now = new Date();
-  const [viewMonth, setViewMonth] = useState(now.getMonth());
-  const [viewYear, setViewYear] = useState(now.getFullYear());
-  const [selectedDay, setSelectedDay] = useState(now.getDate());
-  const [time, setTime] = useState(now);
-  const [hours, setHours] = useState(now.getHours());
-  const [minutes, setMinutes] = useState(now.getMinutes());
-  const [seconds, setSeconds] = useState(now.getSeconds());
-  const [timeZone, setTimeZone] = useState('(GMT-05:00) Eastern Time (US & Canada)');
+  const storeTimeOffset = useDesktopStore((s) => s.timeOffset);
+  const storeTimeZone = useDesktopStore((s) => s.timeZone);
+  const setStoreTimeOffset = useDesktopStore((s) => s.setTimeOffset);
+  const setStoreTimeZone = useDesktopStore((s) => s.setTimeZone);
+
+  // Find the stored timezone's offset
+  const getOffsetForTz = (tzLabel: string) => {
+    const tz = TIME_ZONES.find((t) => t.label === tzLabel);
+    return tz ? tz.offset : getLocalUtcOffsetHours();
+  };
+
+  // Local editing state (not applied until OK/Apply)
+  const [pendingTimeOffset, setPendingTimeOffset] = useState(storeTimeOffset);
+  const [pendingTimeZone, setPendingTimeZone] = useState(storeTimeZone);
+
+  // Current displayed time (ticks every second)
+  const [displayDate, setDisplayDate] = useState(() =>
+    getAdjustedDate(getOffsetForTz(storeTimeZone), storeTimeOffset)
+  );
+
+  // Editing hours/minutes/seconds (local state for spinners)
+  const [editHours, setEditHours] = useState(displayDate.getHours());
+  const [editMinutes, setEditMinutes] = useState(displayDate.getMinutes());
+  const [editSeconds, setEditSeconds] = useState(displayDate.getSeconds());
+  const userEdited = useRef(false);
+
+  const [viewMonth, setViewMonth] = useState(displayDate.getMonth());
+  const [viewYear, setViewYear] = useState(displayDate.getFullYear());
+  const [selectedDay, setSelectedDay] = useState(displayDate.getDate());
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Real-time clock tick
+  // Tick every second
   useEffect(() => {
     const id = setInterval(() => {
-      const n = new Date();
-      setTime(n);
-      setHours(n.getHours());
-      setMinutes(n.getMinutes());
-      setSeconds(n.getSeconds());
+      const tzOffset = getOffsetForTz(pendingTimeZone);
+      const adjusted = getAdjustedDate(tzOffset, pendingTimeOffset);
+      setDisplayDate(adjusted);
+
+      // Only update edit fields if user hasn't manually edited
+      if (!userEdited.current) {
+        setEditHours(adjusted.getHours());
+        setEditMinutes(adjusted.getMinutes());
+        setEditSeconds(adjusted.getSeconds());
+      }
     }, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [pendingTimeOffset, pendingTimeZone]);
 
   // Calendar grid data
+  const now = new Date();
   const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstDay = getFirstDayOfWeek(viewYear, viewMonth);
   const prevMonthDays = getDaysInMonth(viewYear, viewMonth - 1);
 
   const calendarCells: { day: number; currentMonth: boolean }[] = [];
-  // Previous month trailing days
   for (let i = firstDay - 1; i >= 0; i--) {
     calendarCells.push({ day: prevMonthDays - i, currentMonth: false });
   }
-  // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
     calendarCells.push({ day: d, currentMonth: true });
   }
-  // Next month leading days
   const remaining = 42 - calendarCells.length;
   for (let d = 1; d <= remaining; d++) {
     calendarCells.push({ day: d, currentMonth: false });
   }
 
-  // Format time display
-  const h12 = hours % 12 || 12;
-  const ampm = hours >= 12 ? 'PM' : 'AM';
+  // Format time display using edit state
+  const h12 = editHours % 12 || 12;
+  const ampm = editHours >= 12 ? 'PM' : 'AM';
 
   const changeMonth = useCallback((delta: number) => {
     setViewMonth((m) => {
@@ -159,15 +214,69 @@ export function DateTime() {
     useDesktopStore.getState().closeWindow('datetime');
   }, []);
 
+  // Compute offset from user-edited time
+  const computeOffsetFromEdit = useCallback(() => {
+    const tzOffset = getOffsetForTz(pendingTimeZone);
+    // Get what the un-offset time would be right now
+    const baseDate = getAdjustedDate(tzOffset, 0);
+    // Compute difference between what user set and the base
+    const userMs = editHours * 3600000 + editMinutes * 60000 + editSeconds * 1000;
+    const baseMs = baseDate.getHours() * 3600000 + baseDate.getMinutes() * 60000 + baseDate.getSeconds() * 1000;
+    return userMs - baseMs;
+  }, [editHours, editMinutes, editSeconds, pendingTimeZone]);
+
   const handleApply = useCallback(() => {
+    const newOffset = userEdited.current ? computeOffsetFromEdit() : pendingTimeOffset;
+    setPendingTimeOffset(newOffset);
+    setStoreTimeOffset(newOffset);
+    setStoreTimeZone(pendingTimeZone);
+    userEdited.current = false;
     setStatusMsg('Settings applied');
     setTimeout(() => setStatusMsg(null), 1500);
-  }, []);
+  }, [computeOffsetFromEdit, pendingTimeOffset, pendingTimeZone, setStoreTimeOffset, setStoreTimeZone]);
 
   const handleOk = useCallback(() => {
     handleApply();
     setTimeout(() => closeWindow(), 400);
   }, [handleApply, closeWindow]);
+
+  const handleCancel = useCallback(() => {
+    // Discard pending changes
+    setPendingTimeOffset(storeTimeOffset);
+    setPendingTimeZone(storeTimeZone);
+    userEdited.current = false;
+    closeWindow();
+  }, [storeTimeOffset, storeTimeZone, closeWindow]);
+
+  // Spinner handlers for hours
+  const spinHour = useCallback((delta: number) => {
+    userEdited.current = true;
+    setEditHours((h) => ((h + delta) % 24 + 24) % 24);
+  }, []);
+
+  // Spinner handlers for minutes
+  const spinMinute = useCallback((delta: number) => {
+    userEdited.current = true;
+    setEditMinutes((m) => {
+      let newM = m + delta;
+      if (newM >= 60) { newM = 0; spinHour(1); }
+      if (newM < 0) { newM = 59; spinHour(-1); }
+      return newM;
+    });
+  }, [spinHour]);
+
+  // Handle timezone change
+  const handleTzChange = useCallback((newTzLabel: string) => {
+    setPendingTimeZone(newTzLabel);
+    userEdited.current = false;
+    // Immediately update display with new timezone
+    const tzOffset = getOffsetForTz(newTzLabel);
+    const adjusted = getAdjustedDate(tzOffset, pendingTimeOffset);
+    setDisplayDate(adjusted);
+    setEditHours(adjusted.getHours());
+    setEditMinutes(adjusted.getMinutes());
+    setEditSeconds(adjusted.getSeconds());
+  }, [pendingTimeOffset]);
 
   // SVG clock
   const clockSize = 120;
@@ -175,9 +284,9 @@ export function DateTime() {
   const cy = clockSize / 2;
   const clockRadius = 52;
 
-  const hourAngle = ((hours % 12) + minutes / 60) * 30 - 90;
-  const minuteAngle = (minutes + seconds / 60) * 6 - 90;
-  const secondAngle = seconds * 6 - 90;
+  const hourAngle = ((editHours % 12) + editMinutes / 60) * 30 - 90;
+  const minuteAngle = (editMinutes + editSeconds / 60) * 6 - 90;
+  const secondAngle = editSeconds * 6 - 90;
 
   function polarToCartesian(angleDeg: number, r: number) {
     const rad = (angleDeg * Math.PI) / 180;
@@ -188,7 +297,6 @@ export function DateTime() {
   const minEnd = polarToCartesian(minuteAngle, 38);
   const secEnd = polarToCartesian(secondAngle, 42);
 
-  // Tick marks
   const ticks = Array.from({ length: 12 }, (_, i) => {
     const angle = i * 30 - 90;
     const inner = polarToCartesian(angle, 44);
@@ -208,15 +316,14 @@ export function DateTime() {
         width: 410,
       }}
     >
-      {/* ── Top row: Date & Time ── */}
+      {/* -- Top row: Date & Time -- */}
       <div style={{ display: 'flex', gap: 10 }}>
-        {/* ── Date Section ── */}
+        {/* -- Date Section -- */}
         <div style={{ ...groupBoxStyle, flex: '1 1 55%' }}>
           <span style={groupLabelStyle}>Date</span>
 
           {/* Month / Year selectors */}
           <div style={{ display: 'flex', gap: 4, marginBottom: 6, alignItems: 'center' }}>
-            {/* Month dropdown */}
             <select
               value={viewMonth}
               onChange={(e) => setViewMonth(Number(e.target.value))}
@@ -234,7 +341,6 @@ export function DateTime() {
               ))}
             </select>
 
-            {/* Year with spinner */}
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
@@ -274,7 +380,6 @@ export function DateTime() {
               padding: 2,
             }}
           >
-            {/* Day headers */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center' }}>
               {DAY_HEADERS.map((d, i) => (
                 <div
@@ -292,7 +397,6 @@ export function DateTime() {
               ))}
             </div>
 
-            {/* Day cells */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center' }}>
               {calendarCells.map((cell, i) => {
                 const isSelected = cell.currentMonth && cell.day === selectedDay;
@@ -336,7 +440,7 @@ export function DateTime() {
           </div>
         </div>
 
-        {/* ── Time Section ── */}
+        {/* -- Time Section -- */}
         <div style={{ ...groupBoxStyle, flex: '1 1 45%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span style={groupLabelStyle}>Time</span>
 
@@ -348,23 +452,17 @@ export function DateTime() {
             viewBox={`0 0 ${clockSize} ${clockSize}`}
             style={{ margin: '4px 0 8px' }}
           >
-            {/* Face */}
             <circle cx={cx} cy={cy} r={clockRadius} fill="var(--win-white)" stroke="var(--win-black)" strokeWidth={1.5} />
-            {/* Hour ticks */}
             {ticks.map((t, i) => (
               <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="var(--win-black)" strokeWidth={1.5} />
             ))}
-            {/* Hour hand */}
             <line x1={cx} y1={cy} x2={hourEnd.x} y2={hourEnd.y} stroke="var(--win-black)" strokeWidth={2.5} strokeLinecap="round" />
-            {/* Minute hand */}
             <line x1={cx} y1={cy} x2={minEnd.x} y2={minEnd.y} stroke="var(--win-black)" strokeWidth={1.5} strokeLinecap="round" />
-            {/* Second hand */}
             <line x1={cx} y1={cy} x2={secEnd.x} y2={secEnd.y} stroke="red" strokeWidth={0.8} />
-            {/* Center dot */}
             <circle cx={cx} cy={cy} r={2.5} fill="var(--win-black)" />
           </svg>
 
-          {/* Digital time display */}
+          {/* Digital time display with spinners */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
             <div
               style={{
@@ -381,11 +479,11 @@ export function DateTime() {
               </span>
               <span>:</span>
               <span style={{ width: 20, textAlign: 'center', fontFamily: 'var(--font-system)', fontSize: 11 }}>
-                {pad2(minutes)}
+                {pad2(editMinutes)}
               </span>
               <span>:</span>
               <span style={{ width: 20, textAlign: 'center', fontFamily: 'var(--font-system)', fontSize: 11 }}>
-                {pad2(seconds)}
+                {pad2(editSeconds)}
               </span>
               <span style={{ marginLeft: 3, fontFamily: 'var(--font-system)', fontSize: 11 }}>{ampm}</span>
             </div>
@@ -393,39 +491,42 @@ export function DateTime() {
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <button
                 style={spinBtnStyle}
-                onClick={() => {
-                  const n2 = new Date(time);
-                  n2.setMinutes(n2.getMinutes() + 1);
-                  setTime(n2);
-                  setHours(n2.getHours());
-                  setMinutes(n2.getMinutes());
-                  setSeconds(n2.getSeconds());
-                }}
+                onClick={() => spinMinute(1)}
                 aria-label="Time up"
               >&#9650;</button>
               <button
                 style={spinBtnStyle}
-                onClick={() => {
-                  const n2 = new Date(time);
-                  n2.setMinutes(n2.getMinutes() - 1);
-                  setTime(n2);
-                  setHours(n2.getHours());
-                  setMinutes(n2.getMinutes());
-                  setSeconds(n2.getSeconds());
-                }}
+                onClick={() => spinMinute(-1)}
                 aria-label="Time down"
+              >&#9660;</button>
+            </div>
+          </div>
+
+          {/* Hour spinners */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+            <span style={{ fontFamily: 'var(--font-system)', fontSize: 10 }}>Hour:</span>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <button
+                style={spinBtnStyle}
+                onClick={() => spinHour(1)}
+                aria-label="Hour up"
+              >&#9650;</button>
+              <button
+                style={spinBtnStyle}
+                onClick={() => spinHour(-1)}
+                aria-label="Hour down"
               >&#9660;</button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Time Zone Section ── */}
+      {/* -- Time Zone Section -- */}
       <div style={{ ...groupBoxStyle, marginTop: 8 }}>
         <span style={groupLabelStyle}>Time Zone</span>
         <select
-          value={timeZone}
-          onChange={(e) => setTimeZone(e.target.value)}
+          value={pendingTimeZone}
+          onChange={(e) => handleTzChange(e.target.value)}
           style={{
             fontFamily: 'var(--font-system)',
             fontSize: 11,
@@ -441,7 +542,7 @@ export function DateTime() {
         </select>
       </div>
 
-      {/* ── Status message ── */}
+      {/* -- Status message -- */}
       {statusMsg && (
         <div
           style={{
@@ -456,10 +557,10 @@ export function DateTime() {
         </div>
       )}
 
-      {/* ── OK / Cancel / Apply buttons ── */}
+      {/* -- OK / Cancel / Apply buttons -- */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, marginTop: 10 }}>
         <button style={btnStyle} onClick={handleOk}>OK</button>
-        <button style={btnStyle} onClick={closeWindow}>Cancel</button>
+        <button style={btnStyle} onClick={handleCancel}>Cancel</button>
         <button style={btnStyle} onClick={handleApply}>Apply</button>
       </div>
     </div>

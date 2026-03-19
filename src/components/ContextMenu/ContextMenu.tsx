@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useDesktopStore } from '../../stores/desktopStore';
+import { Sounds } from '../../utils/sounds';
 import styles from './ContextMenu.module.css';
 
 /* ── Sub-menu component ── */
@@ -85,6 +86,12 @@ export function ContextMenu() {
     document.execCommand('delete');
   }, []);
 
+  // Wrap hideContextMenu to play click sound on any menu item selection
+  const hideWithSound = useCallback(() => {
+    Sounds.click();
+    hideContextMenu();
+  }, [hideContextMenu]);
+
   if (!contextMenu.visible) return null;
 
   const { variant, targetId } = contextMenu;
@@ -94,17 +101,17 @@ export function ContextMenu() {
     return (
       <div className={styles.menu} style={{ left: contextMenu.x, top: contextMenu.y }}>
         <SubMenu label="Arrange Icons" items={[
-          { label: 'by Name', onClick: () => { arrangeIcons(); hideContextMenu(); } },
-          { label: 'by Type', onClick: () => { arrangeIcons(); hideContextMenu(); } },
-          { label: 'by Size', onClick: () => { arrangeIcons(); hideContextMenu(); } },
-          { label: 'by Date', onClick: () => { arrangeIcons(); hideContextMenu(); } },
-          { label: 'Auto Arrange', onClick: () => { arrangeIcons(); hideContextMenu(); } },
+          { label: 'by Name', onClick: () => { arrangeIcons(); hideWithSound(); } },
+          { label: 'by Type', onClick: () => { arrangeIcons(); hideWithSound(); } },
+          { label: 'by Size', onClick: () => { arrangeIcons(); hideWithSound(); } },
+          { label: 'by Date', onClick: () => { arrangeIcons(); hideWithSound(); } },
+          { label: 'Auto Arrange', onClick: () => { arrangeIcons(); hideWithSound(); } },
         ]} />
-        <div className={styles.item} onClick={() => { arrangeIcons(); hideContextMenu(); }}>
+        <div className={styles.item} onClick={() => { arrangeIcons(); hideWithSound(); }}>
           Line up Icons
         </div>
         <div className={styles.separator} />
-        <div className={styles.item} onClick={() => { hideContextMenu(); window.location.reload(); }}>
+        <div className={styles.item} onClick={() => { hideWithSound(); window.location.reload(); }}>
           Refresh
         </div>
         <div className={styles.separator} />
@@ -112,19 +119,19 @@ export function ContextMenu() {
         <div className={styles.itemDisabled}>Paste Shortcut</div>
         <div className={styles.separator} />
         <SubMenu label="New" items={[
-          { label: 'Folder', onClick: () => { addDesktopItem('folder'); hideContextMenu(); } },
-          { label: 'Text Document', onClick: () => { addDesktopItem('notepad'); hideContextMenu(); } },
-          { label: 'Bitmap Image', onClick: () => { useDesktopStore.getState().addDesktopItemWithType('paint'); hideContextMenu(); } },
+          { label: 'Folder', onClick: () => { addDesktopItem('folder'); hideWithSound(); } },
+          { label: 'Text Document', onClick: () => { addDesktopItem('notepad'); hideWithSound(); } },
+          { label: 'Bitmap Image', onClick: () => { useDesktopStore.getState().addDesktopItemWithType('paint'); hideWithSound(); } },
         ]} />
         <div className={styles.separator} />
         <div className={styles.item} onClick={() => {
-          hideContextMenu();
+          hideWithSound();
           openWindow('settings');
         }}>
           Settings
         </div>
         <div className={styles.item} onClick={() => {
-          hideContextMenu();
+          hideWithSound();
           showProperties('Desktop Properties', {
             'System': 'DannyOS 95',
             'Version': '4.0 (Build 2004)',
@@ -157,13 +164,13 @@ export function ContextMenu() {
       <div className={styles.menu} style={{ left: contextMenu.x, top: contextMenu.y }}>
         <div className={`${styles.item} ${styles.itemBold}`} onClick={() => {
           if (targetId) openWindow(targetId);
-          hideContextMenu();
+          hideWithSound();
         }}>
           Open
         </div>
         <div className={styles.item} onClick={() => {
           if (targetId) openWindow(targetId);
-          hideContextMenu();
+          hideWithSound();
         }}>
           Explore
         </div>
@@ -175,7 +182,7 @@ export function ContextMenu() {
               <div className={styles.item} onClick={() => {
                 const content = fileSystem[targetId!] ?? '';
                 showSaveAsDialog(content, targetId!);
-                hideContextMenu();
+                hideWithSound();
               }}>
                 Save As...
               </div>
@@ -186,14 +193,14 @@ export function ContextMenu() {
         <div className={styles.separator} />
         <SubMenu label="Send To" items={[
           { label: '3\u00BD Floppy (A:)', onClick: () => {
-            hideContextMenu();
+            hideWithSound();
             showProperties('Error', { 'Message': 'Drive A: is not ready.', 'Drive': 'A:\\' });
           }},
           { label: 'Desktop as Shortcut', onClick: () => {
-            hideContextMenu();
+            hideWithSound();
             showProperties('Information', { 'Message': 'Shortcut already exists on desktop.' });
           }},
-          { label: 'Mail Recipient', onClick: () => { hideContextMenu(); openWindow('contact'); } },
+          { label: 'Mail Recipient', onClick: () => { hideWithSound(); openWindow('contact'); } },
         ]} />
         <div className={styles.separator} />
         <div className={styles.itemDisabled}>Cut</div>
@@ -202,7 +209,7 @@ export function ContextMenu() {
         <div className={styles.itemDisabled}>Create Shortcut</div>
         <div className={styles.item} onClick={() => {
           if (targetId) closeWindow(targetId);
-          hideContextMenu();
+          hideWithSound();
           showProperties('Error', {
             'Message': `Cannot delete ${iconLabels[targetId ?? ''] ?? 'this item'}.`,
             'Reason': 'Access is denied.',
@@ -211,7 +218,7 @@ export function ContextMenu() {
           Delete
         </div>
         <div className={styles.item} onClick={() => {
-          hideContextMenu();
+          hideWithSound();
           // Find the icon id from selectedIcons
           const iconId = [...selectedIcons][0] ?? null;
           if (iconId) {
@@ -222,7 +229,7 @@ export function ContextMenu() {
         </div>
         <div className={styles.separator} />
         <div className={styles.item} onClick={() => {
-          hideContextMenu();
+          hideWithSound();
           showProperties(`${iconLabels[targetId ?? ''] ?? 'Item'} Properties`, {
             'Type': 'Application',
             'Location': 'C:\\WINDOWS\\Desktop',
@@ -242,12 +249,12 @@ export function ContextMenu() {
       <div className={styles.menu} style={{ left: contextMenu.x, top: contextMenu.y }}>
         <div className={styles.itemDisabled}>Undo</div>
         <div className={styles.separator} />
-        <div className={styles.item} onClick={() => { hideContextMenu(); requestAnimationFrame(clipCut); }}>Cut</div>
-        <div className={styles.item} onClick={() => { hideContextMenu(); requestAnimationFrame(clipCopy); }}>Copy</div>
-        <div className={styles.item} onClick={() => { hideContextMenu(); requestAnimationFrame(clipPaste); }}>Paste</div>
-        <div className={styles.item} onClick={() => { hideContextMenu(); requestAnimationFrame(deleteSelection); }}>Delete</div>
+        <div className={styles.item} onClick={() => { hideWithSound(); requestAnimationFrame(clipCut); }}>Cut</div>
+        <div className={styles.item} onClick={() => { hideWithSound(); requestAnimationFrame(clipCopy); }}>Copy</div>
+        <div className={styles.item} onClick={() => { hideWithSound(); requestAnimationFrame(clipPaste); }}>Paste</div>
+        <div className={styles.item} onClick={() => { hideWithSound(); requestAnimationFrame(deleteSelection); }}>Delete</div>
         <div className={styles.separator} />
-        <div className={styles.item} onClick={() => { hideContextMenu(); requestAnimationFrame(selectAll); }}>Select All</div>
+        <div className={styles.item} onClick={() => { hideWithSound(); requestAnimationFrame(selectAll); }}>Select All</div>
       </div>
     );
   }
@@ -257,35 +264,35 @@ export function ContextMenu() {
     return (
       <div className={styles.menu} style={{ left: contextMenu.x, top: contextMenu.y }}>
         <SubMenu label="View" items={[
-          { label: 'Large Icons', onClick: () => hideContextMenu() },
-          { label: 'Small Icons', onClick: () => hideContextMenu() },
-          { label: 'List', onClick: () => hideContextMenu() },
-          { label: 'Details', onClick: () => hideContextMenu() },
+          { label: 'Large Icons', onClick: () => hideWithSound() },
+          { label: 'Small Icons', onClick: () => hideWithSound() },
+          { label: 'List', onClick: () => hideWithSound() },
+          { label: 'Details', onClick: () => hideWithSound() },
         ]} />
         <SubMenu label="Arrange Icons" items={[
-          { label: 'by Name', onClick: () => hideContextMenu() },
-          { label: 'by Type', onClick: () => hideContextMenu() },
-          { label: 'by Size', onClick: () => hideContextMenu() },
-          { label: 'by Date', onClick: () => hideContextMenu() },
+          { label: 'by Name', onClick: () => hideWithSound() },
+          { label: 'by Type', onClick: () => hideWithSound() },
+          { label: 'by Size', onClick: () => hideWithSound() },
+          { label: 'by Date', onClick: () => hideWithSound() },
         ]} />
-        <div className={styles.item} onClick={hideContextMenu}>Line up Icons</div>
+        <div className={styles.item} onClick={hideWithSound}>Line up Icons</div>
         <div className={styles.separator} />
         <div className={styles.itemDisabled}>Paste</div>
         <div className={styles.itemDisabled}>Paste Shortcut</div>
         <div className={styles.separator} />
         <SubMenu label="New" items={[
           { label: 'Folder', onClick: () => {
-            hideContextMenu();
+            hideWithSound();
             showProperties('Information', { 'Message': 'Cannot create new items here.' });
           }},
           { label: 'Text Document', onClick: () => {
-            hideContextMenu();
+            hideWithSound();
             showProperties('Information', { 'Message': 'Cannot create new items here.' });
           }},
         ]} />
         <div className={styles.separator} />
         <div className={styles.item} onClick={() => {
-          hideContextMenu();
+          hideWithSound();
           showProperties('Folder Properties', {
             'Type': 'File Folder',
             'Location': 'C:\\',

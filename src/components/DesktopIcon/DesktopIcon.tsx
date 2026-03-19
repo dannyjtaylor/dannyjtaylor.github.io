@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback, type MouseEvent } from 'react';
 import { useDesktopStore } from '../../stores/desktopStore';
 import { DynamicIcon } from '../Icons/Icons';
+import { Sounds } from '../../utils/sounds';
 import styles from './DesktopIcon.module.css';
 
 interface DesktopIconProps {
@@ -109,6 +110,7 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
             clearTimeout(clickTimer.current);
             clickTimer.current = null;
             lastClickedRef.current = null;
+            Sounds.doubleClick();
             openWindow(windowId);
           } else {
             lastClickedRef.current = id;

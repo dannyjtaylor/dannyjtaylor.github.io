@@ -13,7 +13,12 @@ interface LoadedTrack {
 }
 
 // Preset tracks - populate later with actual audio files
-const PRESET_TRACKS: PresetTrack[] = [];
+const PRESET_TRACKS: PresetTrack[] = [
+  { name: 'Kasane Teto - Kasane Territory', file: '/kasane_1.mp3' },
+  { name: 'FMAB - Again (YUI)', file: '/fmab_1.mp3' },
+  { name: 'JJK - Kaikai Kitan', file: '/jjk_1.mp3' },
+  { name: 'Deltarune - Field of Hopes and Dreams', file: '/deltarune_1.mp3' },
+];
 
 type MusicPlayerTab = 'Player' | 'Composer';
 
@@ -68,7 +73,6 @@ function formatTime(seconds: number): string {
    ════════════════════════════════════════════════════════════ */
 function PlayerMode() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
   const [tracks, setTracks] = useState<LoadedTrack[]>([]);
   const [currentTrackIdx, setCurrentTrackIdx] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);

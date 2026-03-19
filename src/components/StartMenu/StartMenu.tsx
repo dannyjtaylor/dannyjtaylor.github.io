@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDesktopStore } from '../../stores/desktopStore';
 import { DynamicIcon } from '../Icons/Icons';
+import { Sounds } from '../../utils/sounds';
 import styles from './StartMenu.module.css';
 
 interface MenuItem {
@@ -45,6 +46,10 @@ export function StartMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (isOpen) Sounds.menuOpen();
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!isOpen) return;
     function handleClick(e: globalThis.MouseEvent) {
       const target = e.target as HTMLElement;
@@ -57,6 +62,7 @@ export function StartMenu() {
   }, [isOpen, closeStartMenu]);
 
   const handleItemClick = (item: MenuItem) => {
+    Sounds.click();
     if (item.windowId) {
       openWindow(item.windowId);
       closeStartMenu();

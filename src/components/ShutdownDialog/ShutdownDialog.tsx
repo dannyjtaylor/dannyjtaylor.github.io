@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDesktopStore } from '../../stores/desktopStore';
+import { Sounds } from '../../utils/sounds';
 import styles from './ShutdownDialog.module.css';
 
 export function ShutdownDialog() {
@@ -26,6 +27,7 @@ export function ShutdownDialog() {
   if (phase !== 'shutdown-prompt') return null;
 
   const handleShutdown = () => {
+    Sounds.shutdown();
     setTimeout(() => setPhase('shutdown'), 800);
   };
 

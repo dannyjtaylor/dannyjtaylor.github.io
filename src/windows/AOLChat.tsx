@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { isFirebaseReady } from '../lib/firebase';
 import { useRoomCounts, useMultiplayerChat } from '../hooks/useMultiplayerChat';
+import { Sounds } from '../utils/sounds';
 
 /* ════════════════════════════════════════════════════════════
    NPC Character Definitions (Frieren & Edward Elric)
@@ -267,11 +268,14 @@ export function AOLChat() {
   /* ── Profile creation ── */
   const createProfile = () => {
     if (!screenName.trim()) return;
+    Sounds.aolDialup();
+    setTimeout(() => Sounds.aolWelcome(), 1200);
     setView({ kind: 'lobby' });
   };
 
   /* ── NPC chat helpers ── */
   const startNPC = (idx: number) => {
+    Sounds.aolDoorOpen();
     setView({ kind: 'npc', buddyIdx: idx });
     const buddy = NPC_BUDDIES[idx]!;
     if (!npcChats[idx] || npcChats[idx]!.length === 0) {
@@ -284,6 +288,7 @@ export function AOLChat() {
 
   const sendNPC = () => {
     if (view.kind !== 'npc' || !npcInput.trim() || npcTyping) return;
+    Sounds.aolMessageSend();
     const buddy = NPC_BUDDIES[view.buddyIdx]!;
     const text = npcInput.trim();
     const idx = view.buddyIdx;
@@ -295,6 +300,7 @@ export function AOLChat() {
     setNpcTyping(true);
     setTimeout(() => {
       const reply = getNPCResponse(buddy, text);
+      Sounds.aolMessageReceive();
       setNpcChats((prev) => ({
         ...prev,
         [idx]: [...(prev[idx] ?? []), { from: 'buddy', text: reply }],
@@ -307,6 +313,7 @@ export function AOLChat() {
   /* ── Multiplayer send ── */
   const sendMP = () => {
     if (!mpInput.trim()) return;
+    Sounds.aolMessageSend();
     mpSend(mpInput);
     setMpInput('');
   };

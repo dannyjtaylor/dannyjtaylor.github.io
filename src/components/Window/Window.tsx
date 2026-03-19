@@ -5,6 +5,7 @@ import {
 import { motion } from 'framer-motion';
 import { useDesktopStore } from '../../stores/desktopStore';
 import { DynamicIcon } from '../Icons/Icons';
+import { Sounds } from '../../utils/sounds';
 import styles from './Window.module.css';
 import type { MenuConfig } from '../../types';
 
@@ -193,19 +194,19 @@ export function Window({ id, title, icon, menus, children, className }: WindowPr
           <span className={styles.titleText}>{title}</span>
         </div>
         <div className={styles.controls}>
-          <button className={styles.winBtn} onClick={() => minimizeWindow(id)} aria-label="Minimize">
+          <button className={styles.winBtn} onClick={() => { Sounds.minimize(); minimizeWindow(id); }} aria-label="Minimize">
             <svg width="8" height="8" viewBox="0 0 8 8" shapeRendering="crispEdges">
               <rect x="0" y="6" width="8" height="2" fill="#000" />
             </svg>
           </button>
-          <button className={styles.winBtn} onClick={() => toggleMaximize(id)} aria-label="Maximize">
+          <button className={styles.winBtn} onClick={() => { Sounds.maximize(); toggleMaximize(id); }} aria-label="Maximize">
             <svg width="8" height="8" viewBox="0 0 8 8" shapeRendering="crispEdges">
               <rect x="0" y="0" width="8" height="8" fill="none" stroke="#000" strokeWidth="2" />
             </svg>
           </button>
           <button
             className={`${styles.winBtn} ${styles.closeBtn}`}
-            onClick={() => closeWindow(id)}
+            onClick={() => { Sounds.windowClose(); closeWindow(id); }}
             aria-label="Close"
           >
             <svg width="8" height="8" viewBox="0 0 8 8" shapeRendering="crispEdges">

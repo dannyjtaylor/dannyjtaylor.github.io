@@ -30,6 +30,17 @@ function GameIcon({ gameId }: { gameId: string }) {
           <rect x="3" y="12" width="8" height="1" fill="#4a9eff" />
         </svg>
       );
+    case 'cookieclicker':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+          <circle cx="7" cy="7" r="6" fill="#c89632" stroke="#7a5a2a" strokeWidth="0.8" />
+          <circle cx="4.5" cy="5" r="1.2" fill="#5a3a1a" />
+          <circle cx="8.5" cy="4.5" r="1" fill="#5a3a1a" />
+          <circle cx="6" cy="8.5" r="1.1" fill="#5a3a1a" />
+          <circle cx="9.5" cy="8" r="0.9" fill="#5a3a1a" />
+          <circle cx="5" cy="11" r="0.8" fill="#5a3a1a" />
+        </svg>
+      );
     case 'halflife3':
       return (
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
@@ -213,6 +224,16 @@ const GAME_ACHIEVEMENTS: Record<string, Achievement[]> = {
     { name: 'Curly Story', description: 'Complete Curly Story mode', unlocked: true, icon: 'ribbon' },
     { name: 'Speed Run', description: 'Beat the game in under 1 hour', unlocked: false, icon: 'timer' },
   ],
+  cookieclicker: [
+    { name: 'Wake and Bake', description: 'Bake your first cookie', unlocked: true, icon: 'star' },
+    { name: 'Cookie Monster', description: 'Bake 10,000 cookies per second', unlocked: true, icon: 'fire' },
+    { name: 'Mass Production', description: 'Bake 1 million cookies per second', unlocked: false, icon: 'lightning' },
+    { name: 'Cosmic Bakery', description: 'Bake 1 trillion cookies total', unlocked: false, icon: 'diamond' },
+    { name: 'Neverclick', description: 'Reach 1 million cookies without clicking', unlocked: false, icon: 'skull' },
+    { name: 'Frenzy', description: 'Activate a golden cookie frenzy', unlocked: true, icon: 'sparkle' },
+    { name: 'Quincentennial', description: 'Own 500 buildings', unlocked: false, icon: 'trophy' },
+    { name: 'Speed Baking III', description: 'Bake 1M cookies in 15 minutes', unlocked: false, icon: 'timer' },
+  ],
   halflife3: [
     { name: '???', description: 'Game not released yet', unlocked: false, icon: 'question' },
     { name: '???', description: 'Game not released yet', unlocked: false, icon: 'question' },
@@ -262,6 +283,18 @@ const GAMES: SteamGame[] = [
     tags: ['Platformer', 'Indie', 'Action'],
     boxArt: '/art/cavestory_box.png',
     bgImage: '/art/cavestory_bg.png',
+  },
+  {
+    id: 'cookieclicker',
+    title: 'Cookie Clicker',
+    developer: 'Orteil',
+    size: '2.4 MB',
+    installed: true,
+    lastPlayed: 'Today',
+    hours: 9999,
+    description: 'Bake cookies by clicking a giant cookie. Use your cookies to buy upgrades, buildings, and more in this classic idle game.',
+    windowId: 'cookieclicker',
+    tags: ['Idle', 'Clicker', 'Casual'],
   },
   {
     id: 'halflife3',

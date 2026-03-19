@@ -268,12 +268,14 @@ export function Settings() {
   const storeDesktopArea = useDesktopStore((s) => s.desktopArea);
   const storeFontSize = useDesktopStore((s) => s.fontSize);
   const storeIconSize = useDesktopStore((s) => s.iconSize);
+  const storeCursorTheme = useDesktopStore((s) => s.cursorTheme);
   const storeBrightnessSet = useDesktopStore((s) => s.setBrightness);
   const storeContrastSet = useDesktopStore((s) => s.setContrast);
   const storeColorSchemeSet = useDesktopStore((s) => s.setColorScheme);
   const storeDesktopAreaSet = useDesktopStore((s) => s.setDesktopArea);
   const storeFontSizeSet = useDesktopStore((s) => s.setFontSize);
   const storeIconSizeSet = useDesktopStore((s) => s.setIconSize);
+  const storeCursorThemeSet = useDesktopStore((s) => s.setCursorTheme);
 
   const [activeTab, setActiveTab] = useState<TabName>('Background');
 
@@ -295,6 +297,7 @@ export function Settings() {
   const [localColorScheme, setLocalColorScheme] = useState(storeColorScheme ?? 'Windows Standard');
   const [localFontSize, setLocalFontSize] = useState(storeFontSize ?? 'small');
   const [localIconSize, setLocalIconSize] = useState(storeIconSize ?? 'large');
+  const [localCursorTheme, setLocalCursorTheme] = useState(storeCursorTheme ?? 'Windows Default');
 
   // Settings
   const [localDesktopArea, setLocalDesktopArea] = useState(storeDesktopArea ?? '1024x768');
@@ -310,6 +313,7 @@ export function Settings() {
     desktopArea: storeDesktopArea ?? '1024x768',
     fontSize: storeFontSize ?? 'small',
     iconSize: storeIconSize ?? 'large',
+    cursorTheme: storeCursorTheme ?? 'Windows Default',
   });
 
   /* --- Apply all settings to the store --- */
@@ -322,11 +326,12 @@ export function Settings() {
     storeDesktopAreaSet?.(localDesktopArea);
     storeFontSizeSet?.(localFontSize);
     storeIconSizeSet?.(localIconSize);
+    storeCursorThemeSet?.(localCursorTheme);
   }, [
     localWallpaper, localWallpaperStyle, localBrightness, localContrast,
-    localColorScheme, localDesktopArea, localFontSize, localIconSize,
+    localColorScheme, localDesktopArea, localFontSize, localIconSize, localCursorTheme,
     setWallpaper, setWallpaperStyle, storeBrightnessSet, storeContrastSet,
-    storeColorSchemeSet, storeDesktopAreaSet, storeFontSizeSet, storeIconSizeSet,
+    storeColorSchemeSet, storeDesktopAreaSet, storeFontSizeSet, storeIconSizeSet, storeCursorThemeSet,
   ]);
 
   const handleOk = useCallback(() => {
@@ -345,8 +350,9 @@ export function Settings() {
     storeDesktopAreaSet?.(o.desktopArea);
     storeFontSizeSet?.(o.fontSize);
     storeIconSizeSet?.(o.iconSize);
+    storeCursorThemeSet?.(o.cursorTheme);
     closeWindow('settings');
-  }, [closeWindow, setWallpaper, setWallpaperStyle, storeBrightnessSet, storeContrastSet, storeColorSchemeSet, storeDesktopAreaSet, storeFontSizeSet, storeIconSizeSet]);
+  }, [closeWindow, setWallpaper, setWallpaperStyle, storeBrightnessSet, storeContrastSet, storeColorSchemeSet, storeDesktopAreaSet, storeFontSizeSet, storeIconSizeSet, storeCursorThemeSet]);
 
   const handleApply = useCallback(() => {
     applyAll();
@@ -809,6 +815,58 @@ export function Settings() {
                   <option value="large">Large Icons</option>
                   <option value="small">Small Icons</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Cursor Theme */}
+            <div style={{ ...groupBox, marginTop: 8 }}>
+              <span style={groupLabel}>Mouse Pointers</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <label style={{ ...labelStyle, minWidth: 50 }}>Scheme:</label>
+                <select
+                  style={{ ...selectStyle, flex: 1 }}
+                  value={localCursorTheme}
+                  onChange={(e) => setLocalCursorTheme(e.target.value)}
+                >
+                  {['Windows Default', 'Inverted', 'Neon', 'Hotdog', 'Ocean', 'Lavender', 'Crosshair', 'Pixel Sword'].map(ct => (
+                    <option key={ct} value={ct}>{ct}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={{
+                display: 'flex', gap: 12, justifyContent: 'center', marginTop: 8,
+                padding: '6px 0',
+              }}>
+                {/* Preview cursors inline as small SVGs */}
+                <div style={{ textAlign: 'center' }}>
+                  <svg width="16" height="24" viewBox="0 0 12 19" style={{ display: 'block', margin: '0 auto' }}>
+                    <path d="M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z"
+                      fill={localCursorTheme === 'Neon' ? '#00ff88' : localCursorTheme === 'Hotdog' ? '#ffcc00' : localCursorTheme === 'Ocean' ? '#66ccff' : localCursorTheme === 'Lavender' ? '#cc99ff' : localCursorTheme === 'Inverted' ? '#000' : '#fff'}
+                      stroke={localCursorTheme === 'Neon' ? '#003322' : localCursorTheme === 'Hotdog' ? '#ff0000' : localCursorTheme === 'Ocean' ? '#003366' : localCursorTheme === 'Lavender' ? '#4400aa' : localCursorTheme === 'Inverted' ? '#fff' : '#000'}
+                      strokeWidth="0.8" strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span style={{ fontSize: 8, color: 'var(--win-black)' }}>Normal</span>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <svg width="16" height="24" viewBox="0 0 15 20" style={{ display: 'block', margin: '0 auto' }}>
+                    <path d="M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z"
+                      fill={localCursorTheme === 'Neon' ? '#00ff88' : localCursorTheme === 'Hotdog' ? '#ffcc00' : localCursorTheme === 'Ocean' ? '#66ccff' : localCursorTheme === 'Lavender' ? '#cc99ff' : '#fff'}
+                      stroke={localCursorTheme === 'Neon' ? '#003322' : localCursorTheme === 'Hotdog' ? '#ff0000' : localCursorTheme === 'Ocean' ? '#003366' : localCursorTheme === 'Lavender' ? '#4400aa' : '#000'}
+                      strokeWidth="0.6"
+                    />
+                  </svg>
+                  <span style={{ fontSize: 8, color: 'var(--win-black)' }}>Select</span>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <svg width="10" height="20" viewBox="0 0 7 16" style={{ display: 'block', margin: '0 auto' }}>
+                    <path d="M1 0h5M3.5 0v16M1 16h5" fill="none"
+                      stroke={localCursorTheme === 'Neon' ? '#00ff88' : localCursorTheme === 'Hotdog' ? '#ff0000' : localCursorTheme === 'Ocean' ? '#003366' : localCursorTheme === 'Lavender' ? '#4400aa' : localCursorTheme === 'Inverted' ? '#fff' : '#000'}
+                      strokeWidth="1"
+                    />
+                  </svg>
+                  <span style={{ fontSize: 8, color: 'var(--win-black)' }}>Text</span>
+                </div>
               </div>
             </div>
           </div>

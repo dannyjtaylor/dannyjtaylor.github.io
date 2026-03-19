@@ -33,6 +33,7 @@ import { DateTime } from '../../windows/DateTime';
 import { Settings } from '../../windows/Settings';
 import { MusicPlayer } from '../../windows/MusicPlayer';
 import { DynamicNotepad } from '../../windows/DynamicNotepad';
+import { CookieClicker } from '../../windows/CookieClicker';
 import type { DesktopIconConfig, WindowConfig, MenuConfig } from '../../types';
 import styles from './Desktop.module.css';
 
@@ -212,6 +213,7 @@ const WINDOWS: WindowConfig[] = [
   { id: 'datetime', title: 'Date/Time Properties',      icon: 'datetime',  defaultWidth: 410, defaultHeight: 460, defaultX: 140, defaultY: 40 },
   { id: 'settings', title: 'Display Properties',        icon: 'settings',  defaultWidth: 420, defaultHeight: 500, defaultX: 120, defaultY: 30 },
   { id: 'musicplayer', title: 'Music Player',            icon: 'musicplayer', defaultWidth: 480, defaultHeight: 440, defaultX: 100, defaultY: 35 },
+  { id: 'cookieclicker', title: 'Cookie Clicker',       icon: 'file',       defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
 ];
 
 const WINDOW_CONTENT: Record<string, React.ComponentType> = {
@@ -237,6 +239,7 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   datetime: DateTime,
   settings: Settings,
   musicplayer: MusicPlayer,
+  cookieclicker: CookieClicker,
 };
 
 export function Desktop() {
@@ -261,6 +264,7 @@ export function Desktop() {
   const colorScheme = useDesktopStore((s) => s.colorScheme);
   const fontSize = useDesktopStore((s) => s.fontSize);
   const iconSize = useDesktopStore((s) => s.iconSize);
+  const cursorTheme = useDesktopStore((s) => s.cursorTheme);
 
   const iconsRef = useRef<HTMLDivElement>(null);
 
@@ -313,6 +317,87 @@ export function Desktop() {
     };
     root.style.setProperty('--desktop-icon-size', (iconSizes[iconSize] ?? '32') + 'px');
   }, [iconSize]);
+
+  /* ── Load cursor.png as resized pointer cursor + apply cursor themes ── */
+  useEffect(() => {
+    const root = document.documentElement;
+
+    // Cursor theme definitions — each has default (arrow), pointer (hand), text (I-beam)
+    const CURSOR_THEMES: Record<string, { default: string; pointer: string; text: string }> = {
+      'Windows Default': {
+        default: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='white' stroke='black' stroke-width='.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0`,
+        pointer: '', // will be set from cursor.png below
+        text: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") 3 8`,
+      },
+      'Inverted': {
+        default: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='black' stroke='white' stroke-width='.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0`,
+        pointer: '', // also set from cursor.png
+        text: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='white' stroke-width='1'/%3E%3C/svg%3E") 3 8`,
+      },
+      'Neon': {
+        default: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='%2300ff88' stroke='%23003322' stroke-width='.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0`,
+        pointer: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='20' viewBox='0 0 15 20'%3E%3Cpath d='M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z' fill='%2300ff88' stroke='%23003322' stroke-width='.6'/%3E%3C/svg%3E") 5 0`,
+        text: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='%2300ff88' stroke-width='1'/%3E%3C/svg%3E") 3 8`,
+      },
+      'Hotdog': {
+        default: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='%23ffcc00' stroke='%23ff0000' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0`,
+        pointer: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='20' viewBox='0 0 15 20'%3E%3Cpath d='M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z' fill='%23ffcc00' stroke='%23ff0000' stroke-width='.8'/%3E%3C/svg%3E") 5 0`,
+        text: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='%23ff0000' stroke-width='1'/%3E%3C/svg%3E") 3 8`,
+      },
+      'Ocean': {
+        default: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='%2366ccff' stroke='%23003366' stroke-width='.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0`,
+        pointer: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='20' viewBox='0 0 15 20'%3E%3Cpath d='M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z' fill='%2366ccff' stroke='%23003366' stroke-width='.6'/%3E%3C/svg%3E") 5 0`,
+        text: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='%23003366' stroke-width='1'/%3E%3C/svg%3E") 3 8`,
+      },
+      'Lavender': {
+        default: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='%23cc99ff' stroke='%234400aa' stroke-width='.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0`,
+        pointer: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='20' viewBox='0 0 15 20'%3E%3Cpath d='M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z' fill='%23cc99ff' stroke='%234400aa' stroke-width='.6'/%3E%3C/svg%3E") 5 0`,
+        text: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='%234400aa' stroke-width='1'/%3E%3C/svg%3E") 3 8`,
+      },
+      'Crosshair': {
+        default: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17' viewBox='0 0 17 17'%3E%3Ccircle cx='8.5' cy='8.5' r='7' fill='none' stroke='%23ff3333' stroke-width='1'/%3E%3Cline x1='8.5' y1='0' x2='8.5' y2='5' stroke='%23ff3333' stroke-width='1'/%3E%3Cline x1='8.5' y1='12' x2='8.5' y2='17' stroke='%23ff3333' stroke-width='1'/%3E%3Cline x1='0' y1='8.5' x2='5' y2='8.5' stroke='%23ff3333' stroke-width='1'/%3E%3Cline x1='12' y1='8.5' x2='17' y2='8.5' stroke='%23ff3333' stroke-width='1'/%3E%3Ccircle cx='8.5' cy='8.5' r='1' fill='%23ff3333'/%3E%3C/svg%3E") 8 8`,
+        pointer: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17' viewBox='0 0 17 17'%3E%3Ccircle cx='8.5' cy='8.5' r='7' fill='none' stroke='%2300ff00' stroke-width='1'/%3E%3Cline x1='8.5' y1='0' x2='8.5' y2='5' stroke='%2300ff00' stroke-width='1'/%3E%3Cline x1='8.5' y1='12' x2='8.5' y2='17' stroke='%2300ff00' stroke-width='1'/%3E%3Cline x1='0' y1='8.5' x2='5' y2='8.5' stroke='%2300ff00' stroke-width='1'/%3E%3Cline x1='12' y1='8.5' x2='17' y2='8.5' stroke='%2300ff00' stroke-width='1'/%3E%3Ccircle cx='8.5' cy='8.5' r='1' fill='%2300ff00'/%3E%3C/svg%3E") 8 8`,
+        text: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='%23ff3333' stroke-width='1'/%3E%3C/svg%3E") 3 8`,
+      },
+      'Pixel Sword': {
+        default: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='12' y='0' width='2' height='2' fill='%23888'/%3E%3Crect x='10' y='2' width='2' height='2' fill='%23ccc'/%3E%3Crect x='8' y='4' width='2' height='2' fill='%23ccc'/%3E%3Crect x='6' y='6' width='2' height='2' fill='%23ccc'/%3E%3Crect x='4' y='8' width='2' height='2' fill='%23964B00'/%3E%3Crect x='2' y='10' width='2' height='2' fill='%23964B00'/%3E%3Crect x='0' y='12' width='2' height='2' fill='%23ffcc00'/%3E%3Crect x='14' y='0' width='2' height='2' fill='%23aaa'/%3E%3Crect x='12' y='2' width='2' height='2' fill='%23ddd'/%3E%3Crect x='10' y='4' width='2' height='2' fill='%23ddd'/%3E%3C/svg%3E") 0 0`,
+        pointer: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='20' viewBox='0 0 15 20'%3E%3Cpath d='M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z' fill='%23ffcc00' stroke='%23964B00' stroke-width='.6'/%3E%3C/svg%3E") 5 0`,
+        text: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='%23964B00' stroke-width='1'/%3E%3C/svg%3E") 3 8`,
+      },
+    };
+
+    // Load and resize cursor.png for the pointer cursor (used by Windows Default and Inverted)
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const w = 24;
+      const h = Math.round((img.height / img.width) * w);
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/png');
+        const cursorCss = `url("${dataUrl}") 8 0`;
+        // Set the loaded cursor for themes that need it
+        CURSOR_THEMES['Windows Default']!.pointer = cursorCss;
+        CURSOR_THEMES['Inverted']!.pointer = cursorCss;
+        applyCursorTheme();
+      }
+    };
+    img.src = '/cursors/cursor.png';
+
+    function applyCursorTheme() {
+      const theme = CURSOR_THEMES[cursorTheme] ?? CURSOR_THEMES['Windows Default']!;
+      if (theme.default) root.style.setProperty('--cursor-default', theme.default);
+      if (theme.pointer) root.style.setProperty('--cursor-pointer', theme.pointer);
+      if (theme.text) root.style.setProperty('--cursor-text', theme.text);
+    }
+
+    // Apply immediately for non-cursor.png themes
+    applyCursorTheme();
+  }, [cursorTheme]);
 
   useEffect(() => {
     for (const w of WINDOWS) {

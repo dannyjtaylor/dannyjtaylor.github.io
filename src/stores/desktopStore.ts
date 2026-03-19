@@ -114,12 +114,14 @@ interface DesktopStore {
   desktopArea: string;
   fontSize: string;
   iconSize: string;
+  cursorTheme: string;
   setBrightness: (n: number) => void;
   setContrast: (n: number) => void;
   setColorScheme: (s: string) => void;
   setDesktopArea: (s: string) => void;
   setFontSize: (s: string) => void;
   setIconSize: (s: string) => void;
+  setCursorTheme: (s: string) => void;
 
   // Dynamic desktop items - extended to support paint files
   addDesktopItemWithType: (type: 'folder' | 'notepad' | 'paint', label?: string) => string;
@@ -564,12 +566,14 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
   desktopArea: '1024x768',
   fontSize: 'Small Fonts',
   iconSize: 'Large Icons',
+  cursorTheme: 'Windows Default',
   setBrightness: (n) => set({ brightness: n }),
   setContrast: (n) => set({ contrast: n }),
   setColorScheme: (s) => set({ colorScheme: s }),
   setDesktopArea: (s) => set({ desktopArea: s }),
   setFontSize: (s) => set({ fontSize: s }),
   setIconSize: (s) => set({ iconSize: s }),
+  setCursorTheme: (s) => set({ cursorTheme: s }),
 
   // Extended dynamic item creation (supports paint files)
   // When called with a label (e.g., from Save As), commit directly to desktop.

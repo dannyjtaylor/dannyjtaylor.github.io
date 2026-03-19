@@ -6,7 +6,16 @@
       "Bash(python:*)",
       "WebFetch(domain:github.com)",
       "Bash(curl:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(mkdir -p /c/Users/dtaylor/Documents/GitHub/Cursor/dannyjtaylor.github.io/public/cursors)",
+      "Bash(cp /c/Users/dtaylor/Documents/GitHub/Cursor/dannyjtaylor.github.io/cursor.png /c/Users/dtaylor/Documents/GitHub/Cursor/dannyjtaylor.github.io/public/cursors/)",
+      "Bash(cp /c/Users/dtaylor/Documents/GitHub/Cursor/dannyjtaylor.github.io/mouse.png /c/Users/dtaylor/Documents/GitHub/Cursor/dannyjtaylor.github.io/public/cursors/)",
+      "Bash(node -e \":*)",
+      "Bash(cmd.exe /c \"where node\" 2>/dev/null)",
+      "Bash(cmd.exe /c \"node --version\" 2>/dev/null)",
+      "Bash(ls node_modules/.bin/vite*)",
+      "Bash(npm --version)",
+      "Bash(cmd.exe /c \"npx tsc --noEmit 2>&1\")"
     ]
   }
 }

@@ -23,10 +23,22 @@ export function RecycleBin() {
       {/* Toolbar */}
       <div className={styles.explorerToolbar}>
         <button
-          className={styles.explorerUpBtn}
           disabled={recycleBin.length === 0}
           onClick={() => emptyRecycleBin()}
           title="Empty Recycle Bin"
+          style={{
+            fontFamily: 'var(--font-system)',
+            fontSize: 11,
+            padding: '2px 12px',
+            whiteSpace: 'nowrap',
+            background: 'var(--win-btn-face, #c0c0c0)',
+            borderTop: '2px solid var(--win-btn-hilight, #fff)',
+            borderLeft: '2px solid var(--win-btn-hilight, #fff)',
+            borderRight: '2px solid var(--win-btn-dk-shadow, #000)',
+            borderBottom: '2px solid var(--win-btn-dk-shadow, #000)',
+            cursor: recycleBin.length === 0 ? 'default' : 'pointer',
+            opacity: recycleBin.length === 0 ? 0.5 : 1,
+          }}
         >
           Empty Recycle Bin
         </button>

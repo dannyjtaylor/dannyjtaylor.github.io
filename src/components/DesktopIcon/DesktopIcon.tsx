@@ -22,6 +22,9 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
   const renamingIconId = useDesktopStore((s) => s.renamingIconId);
   const setRenamingIconId = useDesktopStore((s) => s.setRenamingIconId);
   const renameIcon = useDesktopStore((s) => s.renameIcon);
+  const moveToRecycleBin = useDesktopStore((s) => s.moveToRecycleBin);
+  const moveStaticToRecycleBin = useDesktopStore((s) => s.moveStaticToRecycleBin);
+  const isRecycleBin = id === 'icon-recycle';
 
   const isRenaming = renamingIconId === id;
   const [renameValue, setRenameValue] = useState(label);
@@ -99,11 +102,57 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
         }
       };
 
-      const onUp = () => {
+      const onUp = (ev: globalThis.MouseEvent) => {
         const wasDrag = dragRef.current?.hasMoved;
         dragRef.current = null;
         window.removeEventListener('mousemove', onMove);
         window.removeEventListener('mouseup', onUp);
+
+        // Check if dropped on recycle bin (only if dragged and not the recycle bin itself)
+        if (wasDrag && id !== 'icon-recycle') {
+          const recycleEl = document.querySelector('[data-icon-id="icon-recycle"]');
+          if (recycleEl) {
+            const rect = recycleEl.getBoundingClientRect();
+            if (ev.clientX >= rect.left && ev.clientX <= rect.right && ev.clientY >= rect.top && ev.clientY <= rect.bottom) {
+              // Dropped on recycle bin — delete this item
+              const state = useDesktopStore.getState();
+              const dynItem = state.dynamicItems.find((d) => d.id === id || d.windowId === windowId);
+              if (dynItem) {
+                moveToRecycleBin(dynItem.id);
+              } else {
+                // Static icon map
+                const staticIconMap: Record<string, { label: string; icon: string; windowId: string }> = {
+                  'icon-about': { label: 'About Me', icon: 'document', windowId: 'about' },
+                  'icon-projects': { label: 'Projects', icon: 'file', windowId: 'projects' },
+                  'icon-resume': { label: 'Resume', icon: 'notepad', windowId: 'resume' },
+                  'icon-contact': { label: 'Contact', icon: 'mail', windowId: 'contact' },
+                  'icon-mycomputer': { label: 'My Computer', icon: 'computer', windowId: 'mycomputer' },
+                  'icon-terminal': { label: 'MS-DOS', icon: 'console', windowId: 'terminal' },
+                  'icon-portfolio': { label: 'Portfolio', icon: 'document', windowId: 'portfolio' },
+                  'icon-transcript': { label: 'Transcript', icon: 'notepad', windowId: 'transcript' },
+                  'icon-discord': { label: '/gather Bot', icon: 'discord', windowId: 'discord' },
+                  'icon-interests': { label: 'Interests', icon: 'document', windowId: 'interests' },
+                  'icon-breadbox': { label: 'Breadbox', icon: 'breadbox', windowId: 'breadbox' },
+                  'icon-minesweeper': { label: 'Minesweeper', icon: 'minesweeper', windowId: 'minesweeper' },
+                  'icon-steam': { label: 'Steam', icon: 'steam', windowId: 'steam' },
+                  'icon-aol': { label: 'AOL Messenger', icon: 'aol', windowId: 'aol' },
+                  'icon-paint': { label: 'Paint', icon: 'paint', windowId: 'paint' },
+                  'icon-datetime': { label: 'Date/Time', icon: 'datetime', windowId: 'datetime' },
+                  'icon-settings': { label: 'Settings', icon: 'settings', windowId: 'settings' },
+                  'icon-musicplayer': { label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
+                };
+                const staticInfo = staticIconMap[id];
+                if (staticInfo) {
+                  moveStaticToRecycleBin(id, staticInfo.label, staticInfo.icon, staticInfo.windowId);
+                }
+              }
+              // Reset position since the icon was deleted
+              updateIconPosition(id, 0, 0);
+              Sounds.click();
+              return;
+            }
+          }
+        }
 
         if (!wasDrag) {
           if (lastClickedRef.current === id && clickTimer.current) {
@@ -125,7 +174,7 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
       window.addEventListener('mousemove', onMove);
       window.addEventListener('mouseup', onUp);
     },
-    [id, windowId, isSelected, selectIcon, toggleSelectIcon, openWindow, iconPosition, updateIconPosition],
+    [id, windowId, isSelected, selectIcon, toggleSelectIcon, openWindow, iconPosition, updateIconPosition, moveToRecycleBin, moveStaticToRecycleBin],
   );
 
   const handleContextMenu = useCallback(

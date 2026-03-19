@@ -35,21 +35,21 @@
 }
 
 /* --- Win95 Cursor --- */
-/* Default arrow cursor */
+/* Default arrow cursor — overridden by cursor theme via --cursor-default */
 html, body, #root {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='white' stroke='black' stroke-width='.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0, default;
+  cursor: var(--cursor-default, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M1 1v15l4-4 2.8 5.2 1.4-.8-2.8-5.2L11 11z' fill='white' stroke='black' stroke-width='.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0), default;
 }
 
-/* Pointer cursor for clickable elements */
+/* Pointer cursor for clickable elements — overridden at runtime by cursor.png (resized) */
 a, button, [role="button"], .clickable,
 input[type="submit"], input[type="button"] {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='20' viewBox='0 0 15 20'%3E%3Cpath d='M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z' fill='white' stroke='black' stroke-width='.6'/%3E%3C/svg%3E") 5 0, pointer;
+  cursor: var(--cursor-pointer, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='20' viewBox='0 0 15 20'%3E%3Cpath d='M5.5 0v8H3v2H1v7h10v-2h2V9h-2V8h-2V7H7V1h-1.5z' fill='white' stroke='black' stroke-width='.6'/%3E%3C/svg%3E") 5 0), pointer;
 }
 
-/* Text cursor for editable areas */
+/* Text cursor for editable areas — overridden by cursor theme via --cursor-text */
 textarea, input[type="text"], input[type="email"], input[type="password"],
 [contenteditable="true"] {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") 3 8, text;
+  cursor: var(--cursor-text, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='16' viewBox='0 0 7 16'%3E%3Cpath d='M1 0h5M3.5 0v16M1 16h5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E") 3 8), text;
 }
 
 /* --- Hard reset --- */

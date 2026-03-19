@@ -119,10 +119,43 @@ export const Sounds = {
     setTimeout(() => tone(392, 0.4, 0.05, 'triangle'), 600); // G4
   },
 
-  // Startup chime (same as boot)
+  // Startup chime — layered, ambient, Windows 95-inspired (Brian Eno style)
   startup: () => {
-    tone(523, 0.18, 0.05, 'triangle');
-    setTimeout(() => tone(659, 0.18, 0.05, 'triangle'), 120);
-    setTimeout(() => tone(784, 0.25, 0.05, 'triangle'), 240);
+    const vol = 0.045;
+    // Layer 1: Warm foundation chord (C major) — sine waves for smooth pad feel
+    tone(262, 2.5, vol, 'sine');       // C4
+    tone(330, 2.5, vol * 0.8, 'sine'); // E4
+    tone(392, 2.5, vol * 0.7, 'sine'); // G4
+
+    // Layer 2: Higher octave shimmer, slightly delayed for swell effect
+    setTimeout(() => {
+      tone(523, 2.0, vol * 0.6, 'sine');     // C5
+      tone(659, 2.0, vol * 0.5, 'sine');     // E5
+      tone(784, 2.0, vol * 0.45, 'sine');    // G5
+    }, 200);
+
+    // Layer 3: Triangle wave warmth — adds body and texture
+    setTimeout(() => {
+      tone(262, 2.0, vol * 0.5, 'triangle');  // C4
+      tone(392, 2.0, vol * 0.4, 'triangle');  // G4
+      tone(523, 1.8, vol * 0.35, 'triangle'); // C5
+    }, 350);
+
+    // Layer 4: Gentle melodic rise — the "hopeful" motif
+    setTimeout(() => tone(659, 1.2, vol * 0.5, 'sine'), 600);   // E5
+    setTimeout(() => tone(784, 1.0, vol * 0.5, 'sine'), 900);   // G5
+    setTimeout(() => tone(1047, 1.5, vol * 0.4, 'sine'), 1200); // C6
+
+    // Layer 5: Soft high sparkle for air and space
+    setTimeout(() => tone(1568, 1.2, vol * 0.2, 'sine'), 800);  // G6
+    setTimeout(() => tone(2093, 1.0, vol * 0.15, 'sine'), 1100); // C7
+
+    // Layer 6: Final resolving chord swell
+    setTimeout(() => {
+      tone(523, 1.8, vol * 0.4, 'sine');     // C5
+      tone(659, 1.8, vol * 0.35, 'sine');    // E5
+      tone(784, 1.8, vol * 0.3, 'sine');     // G5
+      tone(1047, 1.5, vol * 0.25, 'sine');   // C6
+    }, 1400);
   },
 };

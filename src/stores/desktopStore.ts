@@ -65,11 +65,23 @@ interface DesktopStore {
   removeDesktopItem: (id: string) => void;
   renameDesktopItem: (id: string, newLabel: string) => void;
 
+  // Pending files: created but not yet saved to desktop
+  pendingFiles: Set<string>;
+  pendingFileData: Record<string, DynamicDesktopItem>;
+  commitFileToDesktop: (windowId: string) => void;
+  cleanupPendingFile: (windowId: string) => void;
+
   // Recycle Bin
-  recycleBin: { id: string; label: string; icon: string; windowId: string; type: 'folder' | 'notepad'; content?: string }[];
+  recycleBin: { id: string; label: string; icon: string; windowId: string; type: 'folder' | 'notepad' | 'static'; content?: string; iconId?: string }[];
   moveToRecycleBin: (id: string) => void;
+  moveStaticToRecycleBin: (iconId: string, label: string, icon: string, windowId: string) => void;
   emptyRecycleBin: () => void;
   restoreFromRecycleBin: (id: string) => void;
+
+  // Hidden static icons (sent to recycle bin)
+  hiddenIcons: Set<string>;
+  hideIcon: (iconId: string) => void;
+  unhideIcon: (iconId: string) => void;
 
   // Properties dialog (Win95-style, not browser alert)
   propertiesDialog: PropertiesDialog | null;
@@ -166,7 +178,24 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
     }));
   },
 
-  closeWindow: (id) =>
+  closeWindow: (id) => {
+    const state = get();
+    // If this is a pending file (never saved), clean it up entirely
+    if (state.pendingFiles.has(id)) {
+      const newPending = new Set(state.pendingFiles);
+      newPending.delete(id);
+      const { [id]: _, ...restPendingData } = state.pendingFileData;
+      const { [id]: _f, ...restFileSystem } = state.fileSystem;
+      const { [id]: _w, ...restWindows } = state.windows;
+      set({
+        pendingFiles: newPending,
+        pendingFileData: restPendingData,
+        fileSystem: restFileSystem,
+        windows: restWindows,
+        activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
+      });
+      return;
+    }
     set((s) => {
       const win = s.windows[id];
       if (!win) return s;
@@ -177,7 +206,8 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
         },
         activeWindowId: s.activeWindowId === id ? null : s.activeWindowId,
       };
-    }),
+    });
+  },
 
   minimizeWindow: (id) =>
     set((s) => {
@@ -283,23 +313,47 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
     // Register the window for this item
     const { highestZ } = get();
     const title = type === 'folder' ? label : `${label} - Notepad`;
-    set((s) => ({
-      dynamicItems: [...s.dynamicItems, item],
-      windows: {
-        ...s.windows,
-        [windowId]: {
-          isOpen: false,
-          isMinimized: false,
-          isMaximized: false,
-          zIndex: highestZ,
-          x: 100 + dynamicCounter * 20,
-          y: 50 + dynamicCounter * 20,
-          width: type === 'folder' ? 420 : 480,
-          height: type === 'folder' ? 300 : 360,
-          title,
+
+    if (type === 'folder') {
+      // Folders go directly to desktop (no save concept)
+      set((s) => ({
+        dynamicItems: [...s.dynamicItems, item],
+        windows: {
+          ...s.windows,
+          [windowId]: {
+            isOpen: false,
+            isMinimized: false,
+            isMaximized: false,
+            zIndex: highestZ,
+            x: 100 + dynamicCounter * 20,
+            y: 50 + dynamicCounter * 20,
+            width: 420,
+            height: 300,
+            title,
+          },
         },
-      },
-    }));
+      }));
+    } else {
+      // Notepads go to pending (appear on desktop only after save)
+      set((s) => ({
+        pendingFiles: new Set(s.pendingFiles).add(windowId),
+        pendingFileData: { ...s.pendingFileData, [windowId]: item },
+        windows: {
+          ...s.windows,
+          [windowId]: {
+            isOpen: false,
+            isMinimized: false,
+            isMaximized: false,
+            zIndex: highestZ,
+            x: 100 + dynamicCounter * 20,
+            y: 50 + dynamicCounter * 20,
+            width: 480,
+            height: 360,
+            title,
+          },
+        },
+      }));
+    }
 
     // Initialize empty file content for notepads
     if (type === 'notepad') {
@@ -322,7 +376,7 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
     const item = state.dynamicItems.find((i) => i.id === id);
     if (!item) return;
     const content = state.fileSystem[item.windowId];
-    const recycleBinEntry = {
+    const recycleBinEntry: DesktopStore['recycleBin'][number] = {
       id: item.id,
       label: item.label,
       icon: item.icon,
@@ -344,11 +398,49 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
       fileSystem: newFileSystem,
     });
   },
+  moveStaticToRecycleBin: (iconId, label, icon, windowId) => {
+    const state = get();
+    const recycleBinEntry: DesktopStore['recycleBin'][number] = {
+      id: `static-recycled-${iconId}`,
+      label,
+      icon,
+      windowId,
+      type: 'static',
+      iconId,
+    };
+    // Close the window if open, hide the icon, add to recycle bin
+    const newWindows = { ...state.windows };
+    if (newWindows[windowId]) {
+      newWindows[windowId] = { ...newWindows[windowId]!, isOpen: false, isMinimized: false, isMaximized: false };
+    }
+    const newHidden = new Set(state.hiddenIcons);
+    newHidden.add(iconId);
+    set({
+      recycleBin: [...state.recycleBin, recycleBinEntry],
+      hiddenIcons: newHidden,
+      windows: newWindows,
+    });
+  },
   emptyRecycleBin: () => set({ recycleBin: [] }),
   restoreFromRecycleBin: (id) => {
     const state = get();
     const entry = state.recycleBin.find((i) => i.id === id);
     if (!entry) return;
+
+    // Handle static item restoration
+    if (entry.type === 'static') {
+      const newHidden = new Set(state.hiddenIcons);
+      if (entry.iconId) {
+        newHidden.delete(entry.iconId);
+      }
+      set({
+        recycleBin: state.recycleBin.filter((i) => i.id !== id),
+        hiddenIcons: newHidden,
+      });
+      return;
+    }
+
+    // Handle dynamic item restoration
     const restoredItem: DynamicDesktopItem = {
       id: entry.id,
       label: entry.label,
@@ -386,12 +478,59 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
     });
   },
 
+  // Hidden static icons
+  hiddenIcons: new Set<string>(),
+  hideIcon: (iconId) => set((s) => {
+    const next = new Set(s.hiddenIcons);
+    next.add(iconId);
+    return { hiddenIcons: next };
+  }),
+  unhideIcon: (iconId) => set((s) => {
+    const next = new Set(s.hiddenIcons);
+    next.delete(iconId);
+    return { hiddenIcons: next };
+  }),
+
   renameDesktopItem: (id, newLabel) =>
     set((s) => ({
       dynamicItems: s.dynamicItems.map((i) =>
         i.id === id ? { ...i, label: newLabel } : i
       ),
     })),
+
+  // Pending files (created but not yet saved)
+  pendingFiles: new Set<string>(),
+  pendingFileData: {},
+
+  commitFileToDesktop: (windowId) => {
+    const state = get();
+    const item = state.pendingFileData[windowId];
+    if (!item) return;
+    const newPending = new Set(state.pendingFiles);
+    newPending.delete(windowId);
+    const { [windowId]: _, ...restPendingData } = state.pendingFileData;
+    set({
+      pendingFiles: newPending,
+      pendingFileData: restPendingData,
+      dynamicItems: [...state.dynamicItems, item],
+    });
+  },
+
+  cleanupPendingFile: (windowId) => {
+    const state = get();
+    if (!state.pendingFiles.has(windowId)) return;
+    const newPending = new Set(state.pendingFiles);
+    newPending.delete(windowId);
+    const { [windowId]: _, ...restPendingData } = state.pendingFileData;
+    const { [windowId]: _f, ...restFileSystem } = state.fileSystem;
+    const { [windowId]: _w, ...restWindows } = state.windows;
+    set({
+      pendingFiles: newPending,
+      pendingFileData: restPendingData,
+      fileSystem: restFileSystem,
+      windows: restWindows,
+    });
+  },
 
   // Properties dialog
   propertiesDialog: null,
@@ -433,6 +572,8 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
   setIconSize: (s) => set({ iconSize: s }),
 
   // Extended dynamic item creation (supports paint files)
+  // When called with a label (e.g., from Save As), commit directly to desktop.
+  // When called without a label (new file from context menu), store as pending.
   addDesktopItemWithType: (type, label) => {
     dynamicCounter++;
     const id = `dynamic-${type}-${dynamicCounter}`;
@@ -444,23 +585,49 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
 
     const { highestZ } = get();
     const winTitle = type === 'folder' ? itemLabel : type === 'paint' ? `${itemLabel} - Paint` : `${itemLabel} - Notepad`;
-    set((s) => ({
-      dynamicItems: [...s.dynamicItems, { ...item, type: type as 'folder' | 'notepad' }],
-      windows: {
-        ...s.windows,
-        [windowId]: {
-          isOpen: false,
-          isMinimized: false,
-          isMaximized: false,
-          zIndex: highestZ,
-          x: 100 + dynamicCounter * 20,
-          y: 50 + dynamicCounter * 20,
-          width: type === 'folder' ? 420 : 480,
-          height: type === 'folder' ? 300 : 360,
-          title: winTitle,
+
+    // If a label was explicitly provided (Save As flow), commit directly to desktop
+    const commitDirectly = label !== undefined || type === 'folder';
+
+    if (commitDirectly) {
+      set((s) => ({
+        dynamicItems: [...s.dynamicItems, { ...item, type: type as 'folder' | 'notepad' }],
+        windows: {
+          ...s.windows,
+          [windowId]: {
+            isOpen: false,
+            isMinimized: false,
+            isMaximized: false,
+            zIndex: highestZ,
+            x: 100 + dynamicCounter * 20,
+            y: 50 + dynamicCounter * 20,
+            width: type === 'folder' ? 420 : 480,
+            height: type === 'folder' ? 300 : 360,
+            title: winTitle,
+          },
         },
-      },
-    }));
+      }));
+    } else {
+      // New file from context menu — store as pending
+      set((s) => ({
+        pendingFiles: new Set(s.pendingFiles).add(windowId),
+        pendingFileData: { ...s.pendingFileData, [windowId]: { ...item, type: type as 'folder' | 'notepad' } },
+        windows: {
+          ...s.windows,
+          [windowId]: {
+            isOpen: false,
+            isMinimized: false,
+            isMaximized: false,
+            zIndex: highestZ,
+            x: 100 + dynamicCounter * 20,
+            y: 50 + dynamicCounter * 20,
+            width: 480,
+            height: 360,
+            title: winTitle,
+          },
+        },
+      }));
+    }
 
     if (type === 'notepad' || type === 'paint') {
       get().saveFile(windowId, '');

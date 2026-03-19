@@ -45,6 +45,7 @@ export function ContextMenu() {
   const setRenamingIconId = useDesktopStore((s) => s.setRenamingIconId);
   const selectedIcons = useDesktopStore((s) => s.selectedIcons);
   const moveToRecycleBin = useDesktopStore((s) => s.moveToRecycleBin);
+  const moveStaticToRecycleBin = useDesktopStore((s) => s.moveStaticToRecycleBin);
   const emptyRecycleBin = useDesktopStore((s) => s.emptyRecycleBin);
 
   useEffect(() => {
@@ -162,6 +163,29 @@ export function ContextMenu() {
       musicplayer: 'Music Player',
     };
 
+    // Map from static icon IDs (icon-about, icon-paint, etc.) to their windowId and metadata
+    const staticIconMap: Record<string, { label: string; icon: string; windowId: string }> = {
+      'icon-about':      { label: 'About Me',       icon: 'document',  windowId: 'about' },
+      'icon-projects':   { label: 'Projects',       icon: 'file',      windowId: 'projects' },
+      'icon-resume':     { label: 'Resume',         icon: 'notepad',   windowId: 'resume' },
+      'icon-contact':    { label: 'Contact',        icon: 'mail',      windowId: 'contact' },
+      'icon-mycomputer': { label: 'My Computer',    icon: 'computer',  windowId: 'mycomputer' },
+      'icon-recycle':    { label: 'Recycle Bin',    icon: 'recycle',   windowId: 'recycle' },
+      'icon-terminal':   { label: 'MS-DOS',         icon: 'console',   windowId: 'terminal' },
+      'icon-portfolio':  { label: 'Portfolio',      icon: 'document',  windowId: 'portfolio' },
+      'icon-transcript': { label: 'Transcript',     icon: 'notepad',   windowId: 'transcript' },
+      'icon-discord':    { label: '/gather Bot',    icon: 'discord',   windowId: 'discord' },
+      'icon-interests':  { label: 'Interests',      icon: 'document',  windowId: 'interests' },
+      'icon-breadbox':   { label: 'Breadbox',       icon: 'breadbox',  windowId: 'breadbox' },
+      'icon-minesweeper':{ label: 'Minesweeper',    icon: 'minesweeper', windowId: 'minesweeper' },
+      'icon-steam':      { label: 'Steam',          icon: 'steam',     windowId: 'steam' },
+      'icon-aol':        { label: 'AOL Messenger',  icon: 'aol',       windowId: 'aol' },
+      'icon-paint':      { label: 'Paint',          icon: 'paint',     windowId: 'paint' },
+      'icon-datetime':   { label: 'Date/Time',      icon: 'datetime',  windowId: 'datetime' },
+      'icon-settings':   { label: 'Settings',       icon: 'settings',  windowId: 'settings' },
+      'icon-musicplayer':{ label: 'Music Player',   icon: 'musicplayer', windowId: 'musicplayer' },
+    };
+
     return (
       <div className={styles.menu} style={{ left: contextMenu.x, top: contextMenu.y }}>
         <div className={`${styles.item} ${styles.itemBold}`} onClick={() => {
@@ -219,18 +243,49 @@ export function ContextMenu() {
         <div className={styles.separator} />
         <div className={styles.itemDisabled}>Create Shortcut</div>
         <div className={styles.item} onClick={() => {
+          // First check: Recycle Bin itself cannot be deleted
+          if (targetId === 'recycle') {
+            hideWithSound();
+            showProperties('Error', {
+              'Message': 'Cannot delete Recycle Bin.',
+              'Reason': 'This is a system item.',
+            });
+            return;
+          }
+
+          // Try dynamic item first
           const dynItem = targetId ? dynamicItems.find((d) => d.id === targetId || d.windowId === targetId) : null;
           if (dynItem) {
             moveToRecycleBin(dynItem.id);
             hideWithSound();
-          } else {
-            if (targetId) closeWindow(targetId);
-            hideWithSound();
-            showProperties('Error', {
-              'Message': `Cannot delete ${iconLabels[targetId ?? ''] ?? 'this item'}.`,
-              'Reason': 'Access is denied.',
-            });
+            return;
           }
+
+          // Try static icon — find the icon ID from selected icons
+          const iconId = [...selectedIcons][0] ?? null;
+          const staticInfo = iconId ? staticIconMap[iconId] : null;
+          if (staticInfo) {
+            moveStaticToRecycleBin(iconId!, staticInfo.label, staticInfo.icon, staticInfo.windowId);
+            hideWithSound();
+            return;
+          }
+
+          // Fallback: try matching targetId as a windowId to a static icon
+          const staticEntry = Object.entries(staticIconMap).find(([, v]) => v.windowId === targetId);
+          if (staticEntry) {
+            const [sIconId, sInfo] = staticEntry;
+            moveStaticToRecycleBin(sIconId, sInfo.label, sInfo.icon, sInfo.windowId);
+            hideWithSound();
+            return;
+          }
+
+          // Nothing matched
+          if (targetId) closeWindow(targetId);
+          hideWithSound();
+          showProperties('Error', {
+            'Message': `Cannot delete ${iconLabels[targetId ?? ''] ?? 'this item'}.`,
+            'Reason': 'Access is denied.',
+          });
         }}>
           Delete
         </div>

@@ -37,6 +37,7 @@ export const PAINT_MENUS: MenuConfig[] = [
       { label: 'New', action: 'file-new' },
       { separator: true },
       { label: 'Save', action: 'file-save', shortcut: 'Ctrl+S' },
+      { label: 'Save As...', action: 'file-save-as' },
       { separator: true },
       { label: 'Exit', action: 'file-exit' },
     ],
@@ -268,12 +269,18 @@ function getPixelColor(ctx: CanvasRenderingContext2D, x: number, y: number): str
 }
 
 /* ── Component ── */
-export function Paint() {
+interface PaintProps {
+  fileId?: string;
+}
+
+export function Paint({ fileId }: PaintProps) {
+  const effectiveFileId = fileId ?? 'paint';
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const undoStack = useRef<ImageData[]>([]);
   const registerCallback = useContext(MenuCallbackContext);
   const saveFile = useDesktopStore((s) => s.saveFile);
+  const commitFileToDesktop = useDesktopStore((s) => s.commitFileToDesktop);
 
   const [tool, setTool] = useState<Tool>('pencil');
   const [fgColor, setFgColor] = useState('#000000');
@@ -318,7 +325,7 @@ export function Paint() {
     ctx.fillRect(0, 0, w, h);
 
     // Try to load saved canvas data
-    const saved = useDesktopStore.getState().loadFile('paint');
+    const saved = useDesktopStore.getState().loadFile(effectiveFileId);
     if (saved) {
       const img = new Image();
       img.onload = () => {
@@ -343,10 +350,16 @@ export function Paint() {
           ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           break;
         case 'file-save':
-          saveFile('paint', canvasRef.current!.toDataURL());
+          saveFile(effectiveFileId, canvasRef.current!.toDataURL());
+          commitFileToDesktop(effectiveFileId);
           break;
+        case 'file-save-as': {
+          saveFile(effectiveFileId, canvasRef.current!.toDataURL());
+          useDesktopStore.getState().showSaveAsDialog(canvasRef.current!.toDataURL(), effectiveFileId);
+          break;
+        }
         case 'file-exit':
-          useDesktopStore.getState().closeWindow('paint');
+          useDesktopStore.getState().closeWindow(effectiveFileId);
           break;
         case 'edit-undo':
           if (undoStack.current.length > 0) {
@@ -385,7 +398,22 @@ export function Paint() {
           break;
       }
     });
-  }, [registerCallback, pushUndo, saveFile, bgColor]);
+  }, [registerCallback, pushUndo, saveFile, commitFileToDesktop, bgColor, effectiveFileId]);
+
+  /* Ctrl+S quicksave */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (canvasRef.current) {
+          saveFile(effectiveFileId, canvasRef.current.toDataURL());
+          commitFileToDesktop(effectiveFileId);
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [saveFile, commitFileToDesktop, effectiveFileId]);
 
   /* Get coords relative to canvas */
   const getPos = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {

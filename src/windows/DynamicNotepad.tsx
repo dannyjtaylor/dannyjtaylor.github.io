@@ -10,6 +10,7 @@ interface DynamicNotepadProps {
 export function DynamicNotepad({ fileId }: DynamicNotepadProps) {
   const savedContent = useDesktopStore((s) => s.fileSystem[fileId]) ?? '';
   const saveFile = useDesktopStore((s) => s.saveFile);
+  const commitFileToDesktop = useDesktopStore((s) => s.commitFileToDesktop);
   const showContextMenu = useDesktopStore((s) => s.showContextMenu);
   const [text, setText] = useState(savedContent);
   const [wordWrap, setWordWrap] = useState(false);
@@ -35,6 +36,7 @@ export function DynamicNotepad({ fileId }: DynamicNotepadProps) {
           break;
         case 'file-save':
           saveFile(fileId, text);
+          commitFileToDesktop(fileId);
           break;
         case 'file-save-as':
           saveFile(fileId, text);
@@ -87,7 +89,7 @@ export function DynamicNotepad({ fileId }: DynamicNotepadProps) {
           break;
       }
     });
-  }, [registerCallback, text, fileId, saveFile]);
+  }, [registerCallback, text, fileId, saveFile, commitFileToDesktop]);
 
   // Ctrl+S quicksave
   const [saveFlash, setSaveFlash] = useState(false);
@@ -96,13 +98,14 @@ export function DynamicNotepad({ fileId }: DynamicNotepadProps) {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         saveFile(fileId, text);
+        commitFileToDesktop(fileId);
         setSaveFlash(true);
         setTimeout(() => setSaveFlash(false), 1000);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [fileId, text, saveFile]);
+  }, [fileId, text, saveFile, commitFileToDesktop]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {

@@ -77,16 +77,54 @@ const BootSounds = {
   fddSeek:  () => {
     for (let i = 0; i < 3; i++) setTimeout(() => noiseBurst(0.04, 600, 0.03), i * 70);
   },
-  /** Startup chime (ascending triad) */
+  /** Startup chime — layered, ambient, Windows 95-inspired (Brian Eno style) */
   chime: () => {
-    tone(523, 0.18, 0.05, 'triangle');               // C5
-    setTimeout(() => tone(659, 0.18, 0.05, 'triangle'), 120);  // E5
-    setTimeout(() => tone(784, 0.25, 0.05, 'triangle'), 240);  // G5
+    const vol = 0.045;
+    // Layer 1: Warm foundation chord (C major)
+    tone(262, 2.5, vol, 'sine');
+    tone(330, 2.5, vol * 0.8, 'sine');
+    tone(392, 2.5, vol * 0.7, 'sine');
+
+    // Layer 2: Higher octave shimmer, slightly delayed
+    setTimeout(() => {
+      tone(523, 2.0, vol * 0.6, 'sine');
+      tone(659, 2.0, vol * 0.5, 'sine');
+      tone(784, 2.0, vol * 0.45, 'sine');
+    }, 200);
+
+    // Layer 3: Triangle wave warmth
+    setTimeout(() => {
+      tone(262, 2.0, vol * 0.5, 'triangle');
+      tone(392, 2.0, vol * 0.4, 'triangle');
+      tone(523, 1.8, vol * 0.35, 'triangle');
+    }, 350);
+
+    // Layer 4: Gentle melodic rise
+    setTimeout(() => tone(659, 1.2, vol * 0.5, 'sine'), 600);
+    setTimeout(() => tone(784, 1.0, vol * 0.5, 'sine'), 900);
+    setTimeout(() => tone(1047, 1.5, vol * 0.4, 'sine'), 1200);
+
+    // Layer 5: Soft high sparkle
+    setTimeout(() => tone(1568, 1.2, vol * 0.2, 'sine'), 800);
+    setTimeout(() => tone(2093, 1.0, vol * 0.15, 'sine'), 1100);
+
+    // Layer 6: Final resolving chord swell
+    setTimeout(() => {
+      tone(523, 1.8, vol * 0.4, 'sine');
+      tone(659, 1.8, vol * 0.35, 'sine');
+      tone(784, 1.8, vol * 0.3, 'sine');
+      tone(1047, 1.5, vol * 0.25, 'sine');
+    }, 1400);
   },
 };
 
+/** Check if this is the user's first visit (no prior boot completed) */
+const isFirstVisit = !localStorage.getItem('dannyos_has_visited');
+
 function playBootSound(id?: BootLine['sound']) {
   if (!id) return;
+  // Skip the startup chime on the very first website visit
+  if (id === 'chime' && isFirstVisit) return;
   BootSounds[id]?.();
 }
 
@@ -213,7 +251,8 @@ export function BootScreen() {
         }
       }
 
-      // Boot done
+      // Boot done — mark that the user has visited at least once
+      localStorage.setItem('dannyos_has_visited', '1');
       if (!cancelRef.current) {
         finishBoot();
       }

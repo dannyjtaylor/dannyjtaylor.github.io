@@ -41,6 +41,133 @@ function GameIcon({ gameId }: { gameId: string }) {
   }
 }
 
+/* ─── Achievement SVG Icons ─── */
+type AchievementIconId = 'target' | 'star' | 'diamond' | 'fire' | 'trophy' | 'heart-yellow' | 'heart-red' | 'heart-dark' | 'heart-double' | 'star-glow' | 'sparkle' | 'lightning' | 'skull' | 'ribbon' | 'timer' | 'question';
+
+function AchievementIcon({ icon, color }: { icon: AchievementIconId; color: string }) {
+  const s = { flexShrink: 0 as const, display: 'block' as const };
+  switch (icon) {
+    case 'target':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <circle cx="7" cy="7" r="5.5" stroke={color} strokeWidth="1.2" />
+          <circle cx="7" cy="7" r="3" stroke={color} strokeWidth="1" />
+          <circle cx="7" cy="7" r="1" fill={color} />
+        </svg>
+      );
+    case 'star':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 1.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.7 3.8 11.4l.6-3.6L1.8 5.3l3.6-.5z" fill={color} />
+        </svg>
+      );
+    case 'diamond':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 1L12.5 5.5L7 13L1.5 5.5Z" fill={color} />
+          <path d="M1.5 5.5H12.5" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
+          <path d="M7 1L5 5.5L7 13L9 5.5Z" fill="rgba(255,255,255,0.15)" />
+        </svg>
+      );
+    case 'fire':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 1C7 1 4 4.5 4 7.5C4 9.5 5.3 11.5 7 12.5C8.7 11.5 10 9.5 10 7.5C10 4.5 7 1 7 1Z" fill={color} />
+          <path d="M7 5C7 5 5.5 7 5.5 8.5C5.5 9.6 6.2 10.5 7 11C7.8 10.5 8.5 9.6 8.5 8.5C8.5 7 7 5 7 5Z" fill="#ffdd57" />
+        </svg>
+      );
+    case 'trophy':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M4 2H10V6C10 8.2 8.7 9.5 7 9.5C5.3 9.5 4 8.2 4 6Z" fill={color} />
+          <path d="M4 3H2.5C2 3 1.5 3.5 1.5 4V5C1.5 6 2.2 6.5 3 6.5H4" stroke={color} strokeWidth="1" />
+          <path d="M10 3H11.5C12 3 12.5 3.5 12.5 4V5C12.5 6 11.8 6.5 11 6.5H10" stroke={color} strokeWidth="1" />
+          <rect x="6" y="9.5" width="2" height="2" fill={color} />
+          <rect x="4.5" y="11.5" width="5" height="1.5" rx="0.5" fill={color} />
+        </svg>
+      );
+    case 'heart-yellow':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 12L1.5 6.5C0.5 4.5 1 2.5 3.5 2.5C5.5 2.5 7 5 7 5C7 5 8.5 2.5 10.5 2.5C13 2.5 13.5 4.5 12.5 6.5Z" fill="#ffdd57" />
+        </svg>
+      );
+    case 'heart-red':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 12L1.5 6.5C0.5 4.5 1 2.5 3.5 2.5C5.5 2.5 7 5 7 5C7 5 8.5 2.5 10.5 2.5C13 2.5 13.5 4.5 12.5 6.5Z" fill="#ff4655" />
+        </svg>
+      );
+    case 'heart-dark':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 12L1.5 6.5C0.5 4.5 1 2.5 3.5 2.5C5.5 2.5 7 5 7 5C7 5 8.5 2.5 10.5 2.5C13 2.5 13.5 4.5 12.5 6.5Z" fill="#555" />
+        </svg>
+      );
+    case 'heart-double':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M5.5 10L1 5.5C0.2 4 0.6 2.5 2.5 2.5C4 2.5 5.5 4.5 5.5 4.5C5.5 4.5 7 2.5 8.5 2.5C10.4 2.5 10.8 4 10 5.5Z" fill="#ff8fba" opacity="0.7" />
+          <path d="M8.5 12L4 7.5C3.2 6 3.6 4.5 5.5 4.5C7 4.5 8.5 6.5 8.5 6.5C8.5 6.5 10 4.5 11.5 4.5C13.4 4.5 13.8 6 13 7.5Z" fill="#ff69b4" />
+        </svg>
+      );
+    case 'star-glow':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 1.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.7 3.8 11.4l.6-3.6L1.8 5.3l3.6-.5z" fill={color} />
+          <circle cx="7" cy="7" r="6" stroke={color} strokeWidth="0.5" opacity="0.4" />
+        </svg>
+      );
+    case 'sparkle':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 0.5L8 5.5L13 7L8 8.5L7 13.5L6 8.5L1 7L6 5.5Z" fill={color} />
+          <path d="M11 1.5L11.5 3.5L13.5 4L11.5 4.5L11 6.5L10.5 4.5L8.5 4L10.5 3.5Z" fill={color} opacity="0.6" />
+        </svg>
+      );
+    case 'lightning':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M8.5 1L4 7.5H7L5.5 13L10 6.5H7Z" fill={color} />
+        </svg>
+      );
+    case 'skull':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 1C4 1 2 3.5 2 6C2 8 3 9.5 4.5 10.5V12.5H5.5V11H6.5V12.5H7.5V11H8.5V12.5H9.5V10.5C11 9.5 12 8 12 6C12 3.5 10 1 7 1Z" fill={color} />
+          <circle cx="5" cy="6" r="1.2" fill="#1b2838" />
+          <circle cx="9" cy="6" r="1.2" fill="#1b2838" />
+          <path d="M5.5 9H8.5" stroke="#1b2838" strokeWidth="0.8" />
+          <path d="M6.5 8.5V9.5M7.5 8.5V9.5" stroke="#1b2838" strokeWidth="0.6" />
+        </svg>
+      );
+    case 'ribbon':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <path d="M7 2C5.5 2 4.5 3 4.5 4.5C4.5 6 5.5 7 7 7C8.5 7 9.5 6 9.5 4.5C9.5 3 8.5 2 7 2Z" fill={color} />
+          <path d="M5 6.5L3 12L5.5 10L7 12.5L8.5 10L11 12L9 6.5" fill={color} />
+        </svg>
+      );
+    case 'timer':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <circle cx="7" cy="7.5" r="5" stroke={color} strokeWidth="1.2" />
+          <path d="M7 4.5V7.5L9 9.5" stroke={color} strokeWidth="1" strokeLinecap="round" />
+          <rect x="5.5" y="1" width="3" height="1.5" rx="0.5" fill={color} />
+          <path d="M10 3.5L11 2.5" stroke={color} strokeWidth="1" strokeLinecap="round" />
+        </svg>
+      );
+    case 'question':
+      return (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={s}>
+          <circle cx="7" cy="7" r="6" stroke={color} strokeWidth="1.2" />
+          <path d="M5 5.5C5 4 6 3.5 7 3.5C8 3.5 9 4 9 5.2C9 6.2 8 6.5 7 7V8" stroke={color} strokeWidth="1.2" strokeLinecap="round" fill="none" />
+          <circle cx="7" cy="10" r="0.8" fill={color} />
+        </svg>
+      );
+  }
+}
+
 /* ─── Game data ─── */
 interface SteamGame {
   id: string;
@@ -61,35 +188,35 @@ interface Achievement {
   name: string;
   description: string;
   unlocked: boolean;
-  icon: string;
+  icon: AchievementIconId;
 }
 
 const GAME_ACHIEVEMENTS: Record<string, Achievement[]> = {
   valorant: [
-    { name: 'First Blood', description: 'Get your first kill', unlocked: true, icon: '🎯' },
-    { name: 'Ace', description: 'Kill all 5 enemies in a round', unlocked: true, icon: '⭐' },
-    { name: 'Radiant', description: 'Reach Radiant rank', unlocked: false, icon: '💎' },
-    { name: 'Clutch Master', description: 'Win a 1v5 clutch', unlocked: true, icon: '🔥' },
-    { name: 'Agent Expert', description: 'Master all agents', unlocked: false, icon: '🏆' },
+    { name: 'First Blood', description: 'Get your first kill', unlocked: true, icon: 'target' },
+    { name: 'Ace', description: 'Kill all 5 enemies in a round', unlocked: true, icon: 'star' },
+    { name: 'Radiant', description: 'Reach Radiant rank', unlocked: false, icon: 'diamond' },
+    { name: 'Clutch Master', description: 'Win a 1v5 clutch', unlocked: true, icon: 'fire' },
+    { name: 'Agent Expert', description: 'Master all agents', unlocked: false, icon: 'trophy' },
   ],
   undertale: [
-    { name: 'Pacifist', description: 'Complete True Pacifist route', unlocked: true, icon: '💛' },
-    { name: 'Determined', description: 'Die and come back 10 times', unlocked: true, icon: '❤️' },
-    { name: 'Genocide', description: 'Complete Genocide route', unlocked: false, icon: '🖤' },
-    { name: 'Date Night', description: 'Complete all dates', unlocked: true, icon: '💕' },
-    { name: 'Spare Everyone', description: 'Never kill a single monster', unlocked: true, icon: '🌟' },
+    { name: 'Pacifist', description: 'Complete True Pacifist route', unlocked: true, icon: 'heart-yellow' },
+    { name: 'Determined', description: 'Die and come back 10 times', unlocked: true, icon: 'heart-red' },
+    { name: 'Genocide', description: 'Complete Genocide route', unlocked: false, icon: 'heart-dark' },
+    { name: 'Date Night', description: 'Complete all dates', unlocked: true, icon: 'heart-double' },
+    { name: 'Spare Everyone', description: 'Never kill a single monster', unlocked: true, icon: 'star-glow' },
   ],
   cavestory: [
-    { name: 'Best Ending', description: 'Get the best ending', unlocked: true, icon: '✨' },
-    { name: 'Polar Star', description: 'Keep the Polar Star to the end', unlocked: false, icon: '⚡' },
-    { name: 'Sacred Grounds', description: 'Complete Sacred Grounds', unlocked: false, icon: '💀' },
-    { name: 'Curly Story', description: 'Complete Curly Story mode', unlocked: true, icon: '🎀' },
-    { name: 'Speed Run', description: 'Beat the game in under 1 hour', unlocked: false, icon: '⏱️' },
+    { name: 'Best Ending', description: 'Get the best ending', unlocked: true, icon: 'sparkle' },
+    { name: 'Polar Star', description: 'Keep the Polar Star to the end', unlocked: false, icon: 'lightning' },
+    { name: 'Sacred Grounds', description: 'Complete Sacred Grounds', unlocked: false, icon: 'skull' },
+    { name: 'Curly Story', description: 'Complete Curly Story mode', unlocked: true, icon: 'ribbon' },
+    { name: 'Speed Run', description: 'Beat the game in under 1 hour', unlocked: false, icon: 'timer' },
   ],
   halflife3: [
-    { name: '???', description: 'Game not released yet', unlocked: false, icon: '❓' },
-    { name: '???', description: 'Game not released yet', unlocked: false, icon: '❓' },
-    { name: '???', description: 'Game not released yet', unlocked: false, icon: '❓' },
+    { name: '???', description: 'Game not released yet', unlocked: false, icon: 'question' },
+    { name: '???', description: 'Game not released yet', unlocked: false, icon: 'question' },
+    { name: '???', description: 'Game not released yet', unlocked: false, icon: 'question' },
   ],
 };
 
@@ -433,36 +560,28 @@ export function Steam() {
                 background: selectedGame.bgImage
                   ? `url(${selectedGame.bgImage}) center/cover no-repeat`
                   : `linear-gradient(135deg, ${steamGray} 0%, ${steamDark} 100%)`,
-                backgroundSize: selectedGame.bgImage ? 'cover' : undefined,
-                backgroundPosition: selectedGame.bgImage ? 'center' : undefined,
-                padding: 20,
+                height: selectedGame.bgImage ? 180 : 160,
                 borderBottom: `1px solid ${steamBorder}`,
                 position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                flexShrink: 0,
               }}>
-                {/* Dark overlay for readability when bg image is present */}
-                {selectedGame.bgImage && (
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7))',
-                    pointerEvents: 'none',
-                  }} />
-                )}
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                {selectedGame.boxArt && (
-                  <div style={{
-                    width: '100%',
-                    height: 100,
-                    background: `url(${selectedGame.boxArt}) center/cover`,
-                    marginBottom: 12,
-                    border: `1px solid ${steamBorder}`,
-                  }} />
-                )}
-
-                <div style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
+                {/* Dark gradient overlay for readability */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: selectedGame.bgImage
+                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.85) 100%)'
+                    : 'none',
+                  pointerEvents: 'none',
+                }} />
+                <div style={{ position: 'relative', zIndex: 1, padding: '0 20px 16px' }}>
+                <div style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 4, textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
                   {selectedGame.title}
                 </div>
-                <div style={{ fontSize: 10, color: steamTextDim, marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
                   {selectedGame.developer}
                 </div>
 
@@ -472,11 +591,12 @@ export function Steam() {
                     <span
                       key={tag}
                       style={{
-                        background: 'rgba(255,255,255,0.1)',
+                        background: 'rgba(255,255,255,0.15)',
                         padding: '2px 8px',
                         borderRadius: 2,
                         fontSize: 9,
                         color: steamBlue,
+                        backdropFilter: 'blur(4px)',
                       }}
                     >
                       {tag}
@@ -611,7 +731,7 @@ export function Steam() {
                                   opacity: ach.unlocked ? 1 : 0.6,
                                 }}
                               >
-                                <span style={{ fontSize: 14 }}>{ach.icon}</span>
+                                <AchievementIcon icon={ach.icon} color={ach.unlocked ? steamGreenLight : steamTextDim} />
                                 {ach.name}
                               </div>
                             ))}

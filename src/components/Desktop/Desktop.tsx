@@ -250,8 +250,10 @@ export function Desktop() {
   const setSelectionBox = useDesktopStore((s) => s.setSelectionBox);
   const selectIconsInRect = useDesktopStore((s) => s.selectIconsInRect);
   const dynamicItems = useDesktopStore((s) => s.dynamicItems);
+  const pendingFileData = useDesktopStore((s) => s.pendingFileData);
   const iconLabelOverrides = useDesktopStore((s) => s.iconLabelOverrides);
   const recycleBin = useDesktopStore((s) => s.recycleBin);
+  const hiddenIcons = useDesktopStore((s) => s.hiddenIcons);
   const wallpaper = useDesktopStore((s) => s.wallpaper);
   const wallpaperStyle = useDesktopStore((s) => s.wallpaperStyle);
   const brightness = useDesktopStore((s) => s.brightness);
@@ -405,8 +407,9 @@ export function Desktop() {
   );
 
   // All icons (static + dynamic), applying any label overrides from rename
+  // Filter out hidden static icons (those sent to recycle bin)
   const allIcons = [
-    ...ICONS.map((ic) => ({
+    ...ICONS.filter((ic) => !hiddenIcons.has(ic.id)).map((ic) => ({
       ...ic,
       label: iconLabelOverrides[ic.id] || ic.label,
       // Dynamically change recycle bin icon based on contents
@@ -422,10 +425,14 @@ export function Desktop() {
     })),
   ];
 
-  // All windows (static + dynamic + project files)
+  // Pending files as an array for mapping
+  const pendingFileItems = Object.values(pendingFileData);
+
+  // All windows (static + dynamic + pending + project files)
   const staticAndDynamicIds = new Set([
     ...WINDOWS.map((w) => w.id),
     ...dynamicItems.map((d) => d.windowId),
+    ...pendingFileItems.map((d) => d.windowId),
   ]);
 
   // Find project file windows (registered by Projects component)
@@ -442,21 +449,25 @@ export function Desktop() {
       menus: NOTEPAD_MENUS,
     }));
 
+  // Helper to map a dynamic/pending item to a window config
+  const dynamicItemToWindowConfig = (d: typeof dynamicItems[number]) => {
+    const isPaint = d.label.endsWith('.bmp');
+    return {
+      id: d.windowId,
+      title: d.type === 'folder' ? d.label : isPaint ? `${d.label} - Paint` : `${d.label} - Notepad`,
+      icon: d.icon,
+      defaultWidth: d.type === 'folder' ? 420 : isPaint ? 640 : 480,
+      defaultHeight: d.type === 'folder' ? 300 : isPaint ? 480 : 360,
+      defaultX: 100,
+      defaultY: 50,
+      menus: isPaint ? PAINT_MENUS : d.type === 'notepad' ? NOTEPAD_MENUS : undefined,
+    };
+  };
+
   const allWindows = [
     ...WINDOWS,
-    ...dynamicItems.map((d) => {
-      const isPaint = d.label.endsWith('.bmp');
-      return {
-        id: d.windowId,
-        title: d.type === 'folder' ? d.label : isPaint ? `${d.label} - Paint` : `${d.label} - Notepad`,
-        icon: d.icon,
-        defaultWidth: d.type === 'folder' ? 420 : isPaint ? 640 : 480,
-        defaultHeight: d.type === 'folder' ? 300 : isPaint ? 480 : 360,
-        defaultX: 100,
-        defaultY: 50,
-        menus: isPaint ? PAINT_MENUS : d.type === 'notepad' ? NOTEPAD_MENUS : undefined,
-      };
-    }),
+    ...dynamicItems.map(dynamicItemToWindowConfig),
+    ...pendingFileItems.map(dynamicItemToWindowConfig),
     ...projectFileWindows,
   ];
 
@@ -521,8 +532,9 @@ export function Desktop() {
           const win = windows[wc.id];
           if (!win || !win.isOpen) return null;
 
-          // Check if it's a dynamic notepad/paint
-          const dynItem = dynamicItems.find((d) => d.windowId === wc.id);
+          // Check if it's a dynamic notepad/paint (committed or pending)
+          const dynItem = dynamicItems.find((d) => d.windowId === wc.id)
+            || pendingFileData[wc.id];
           const isStaticWindow = WINDOW_CONTENT[wc.id];
           const isPaintFile = dynItem?.label.endsWith('.bmp');
 
@@ -531,7 +543,7 @@ export function Desktop() {
             const Content = isStaticWindow;
             content = <Content />;
           } else if (isPaintFile) {
-            content = <Paint />;
+            content = <Paint fileId={wc.id} />;
           } else if (dynItem?.type === 'notepad') {
             content = <DynamicNotepad fileId={wc.id} />;
           } else if (wc.id.startsWith('proj-')) {

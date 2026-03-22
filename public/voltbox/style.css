@@ -838,6 +838,54 @@ body {
     line-height: 12px;
 }
 
+/* ==================== CLOCK/OSCILLATOR ==================== */
+
+.tool-clock {
+    color: #008800;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1;
+    font-family: monospace;
+}
+
+.clock-icon {
+    width: 14px;
+    height: 12px;
+    background: #2A3A2A;
+    border: 1px solid #1A2A1A;
+    position: relative;
+}
+
+.clock-icon::after {
+    content: '~';
+    position: absolute;
+    top: -2px; left: 0; right: 0;
+    text-align: center;
+    color: #00CC66;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 12px;
+}
+
+.clock-config {
+    padding: 4px;
+}
+
+.clock-freq-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.clock-freq-row label {
+    color: #000;
+}
+
+.clock-status {
+    padding: 2px;
+    font-weight: bold;
+}
+
 /* ==================== RESISTOR CONFIG ==================== */
 
 .resistor-config {

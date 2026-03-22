@@ -118,6 +118,37 @@ export function ContextMenu() {
           Refresh
         </div>
         <div className={styles.separator} />
+        <SubMenu label="Programs" items={[
+          { label: 'About Me', onClick: () => { openWindow('about'); hideWithSound(); } },
+          { label: 'AOL Messenger', onClick: () => { openWindow('aol'); hideWithSound(); } },
+          { label: 'Breadbox', onClick: () => { openWindow('breadbox'); hideWithSound(); } },
+          { label: 'Cave Story', onClick: () => { openWindow('cavestory'); hideWithSound(); } },
+          { label: 'Contact', onClick: () => { openWindow('contact'); hideWithSound(); } },
+          { label: 'Cookie Clicker', onClick: () => { openWindow('cookieclicker'); hideWithSound(); } },
+          { label: 'Date/Time', onClick: () => { openWindow('datetime'); hideWithSound(); } },
+          { label: '/gather Bot', onClick: () => { openWindow('discord'); hideWithSound(); } },
+          { label: 'Interests', onClick: () => { openWindow('interests'); hideWithSound(); } },
+          { label: 'Minesweeper', onClick: () => { openWindow('minesweeper'); hideWithSound(); } },
+          { label: 'MS-DOS Prompt', onClick: () => { openWindow('terminal'); hideWithSound(); } },
+          { label: 'Music Player', onClick: () => { openWindow('musicplayer'); hideWithSound(); } },
+          { label: 'My Computer', onClick: () => { openWindow('mycomputer'); hideWithSound(); } },
+          { label: 'Paint', onClick: () => { openWindow('paint'); hideWithSound(); } },
+          { label: 'Portfolio', onClick: () => { openWindow('portfolio'); hideWithSound(); } },
+          { label: 'Projects', onClick: () => { openWindow('projects'); hideWithSound(); } },
+          { label: 'Resume', onClick: () => { openWindow('resume'); hideWithSound(); } },
+          { label: 'Settings', onClick: () => { openWindow('settings'); hideWithSound(); } },
+          { label: 'Steam', onClick: () => { openWindow('steam'); hideWithSound(); } },
+          { label: 'Transcript', onClick: () => { openWindow('transcript'); hideWithSound(); } },
+          { label: 'UNDERTALE', onClick: () => { openWindow('undertale'); hideWithSound(); } },
+          { label: 'VALORANT', onClick: () => { openWindow('valorant'); hideWithSound(); } },
+        ]} />
+        {dynamicItems.length > 0 && (
+          <SubMenu label="Documents" items={dynamicItems.map((d) => ({
+            label: d.label,
+            onClick: () => { openWindow(d.windowId); hideWithSound(); },
+          }))} />
+        )}
+        <div className={styles.separator} />
         <div className={styles.itemDisabled}>Paste</div>
         <div className={styles.itemDisabled}>Paste Shortcut</div>
         <div className={styles.separator} />

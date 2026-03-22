@@ -100,9 +100,14 @@
             if (ci >= 0) {
                 var comp = VB.state.components[ci];
                 var info = comp.type.toUpperCase();
-                if (comp.pin)  info += ' at ' + CFG.ROW_LABELS[comp.pin.row]  + (comp.pin.col  + 1);
-                if (comp.pin1) info += ' ' + CFG.ROW_LABELS[comp.pin1.row] + (comp.pin1.col + 1) +
-                                       ' \u2192 ' + CFG.ROW_LABELS[comp.pin2.row] + (comp.pin2.col + 1);
+                if (comp.type === 'clock') {
+                    info += ' at col ' + (comp.col + 1) + ' (' + VB.state.clockFrequency + 'Hz, OUT=' + (VB.state.clockOutputHigh ? 'HIGH' : 'LOW') + ')';
+                } else if (comp.pin) {
+                    info += ' at ' + CFG.ROW_LABELS[comp.pin.row]  + (comp.pin.col  + 1);
+                } else if (comp.pin1) {
+                    info += ' ' + CFG.ROW_LABELS[comp.pin1.row] + (comp.pin1.col + 1) +
+                            ' \u2192 ' + CFG.ROW_LABELS[comp.pin2.row] + (comp.pin2.col + 1);
+                }
                 VB.UI.setStatus(info);
             } else {
                 var net = VB.Breadboard.getNetId(hole.col, hole.row);
@@ -138,6 +143,37 @@
             VB.state.components.push({ type: tool, col: startCol });
             VB.Sound.place();
             VB.UI.setStatus(tool.toUpperCase() + ' placed at column ' + (startCol + 1));
+            VB.UI.runSimulation();
+            return;
+        }
+
+        /* --- Clock/Oscillator placement --- */
+        if (tool === 'clock') {
+            var clkStartCol = hole.col;
+            // Check bounds: need 3 columns
+            if (clkStartCol + 2 >= CFG.COLS) {
+                VB.UI.setStatus('Not enough space \u2014 need 3 columns from here');
+                VB.Sound.error();
+                return;
+            }
+            // Check that rows 6 and 7 for these columns aren't occupied
+            var clkBlocked = false;
+            for (var clkc = clkStartCol; clkc <= clkStartCol + 2; clkc++) {
+                if (VB.Breadboard.getComponentAt(clkc, CFG.CLOCK_TOP_ROW) >= 0 ||
+                    VB.Breadboard.getComponentAt(clkc, CFG.CLOCK_BOT_ROW) >= 0) {
+                    clkBlocked = true;
+                    break;
+                }
+            }
+            if (clkBlocked) {
+                VB.UI.setStatus('Holes occupied \u2014 cannot place clock here');
+                VB.Sound.error();
+                return;
+            }
+            VB.state.components.push({ type: 'clock', col: clkStartCol });
+            VB.Sound.place();
+            VB.UI.setStatus('Clock placed at column ' + (clkStartCol + 1) + ' \u2014 Pins: VCC(top-left), OUT(top-right), GND(bot-left)');
+            VB.UI.restartClockTimer();
             VB.UI.runSimulation();
             return;
         }
@@ -198,10 +234,13 @@
     function handleRightClick(hole) {
         var idx = VB.Breadboard.getComponentAt(hole.col, hole.row);
         if (idx >= 0) {
+            var removedType = VB.state.components[idx].type;
             VB.state.components.splice(idx, 1);
             VB.Sound.del();
             VB.UI.setStatus('Component removed');
             VB.state.simulationResults = null;
+            // Restart clock timer if a clock was removed (or if any clock remains)
+            if (removedType === 'clock') VB.UI.restartClockTimer();
             if (VB.state.components.length > 0) VB.UI.runSimulation();
             else VB.UI.setStatus('READY');
         } else {

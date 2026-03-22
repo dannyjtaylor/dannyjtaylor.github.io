@@ -1,12 +1,65 @@
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDesktopStore } from '../../stores/desktopStore';
 import { Sounds } from '../../utils/sounds';
 import styles from './ShutdownDialog.module.css';
 
+type ShutdownOption = 'shutdown' | 'restart' | 'restart-dos' | 'standby';
+
 export function ShutdownDialog() {
   const phase = useDesktopStore((s) => s.phase);
   const setPhase = useDesktopStore((s) => s.setPhase);
+  const [selectedOption, setSelectedOption] = useState<ShutdownOption>('shutdown');
 
+  // Sleep screen: wake on any key or click
+  const handleWake = useCallback(() => {
+    if (phase === 'sleep') {
+      setPhase('desktop');
+    }
+  }, [phase, setPhase]);
+
+  useEffect(() => {
+    if (phase === 'sleep') {
+      window.addEventListener('keydown', handleWake);
+      window.addEventListener('mousedown', handleWake);
+      return () => {
+        window.removeEventListener('keydown', handleWake);
+        window.removeEventListener('mousedown', handleWake);
+      };
+    }
+  }, [phase, handleWake]);
+
+  // Restarting: show message then go to boot
+  useEffect(() => {
+    if (phase === 'restarting') {
+      const timer = setTimeout(() => setPhase('boot'), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, setPhase]);
+
+  // Sleep screen
+  if (phase === 'sleep') {
+    return (
+      <div className={styles.sleepScreen}>
+        <div className={styles.sleepMessage}>
+          Press any key or click to wake up
+        </div>
+      </div>
+    );
+  }
+
+  // Restarting screen
+  if (phase === 'restarting') {
+    return (
+      <div className={styles.shutdownScreen}>
+        <div className={styles.shutdownMessage}>
+          <p>Windows is restarting...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // "It's now safe to turn off" screen
   if (phase === 'shutdown') {
     return (
       <div className={styles.shutdownScreen}>
@@ -26,9 +79,16 @@ export function ShutdownDialog() {
 
   if (phase !== 'shutdown-prompt') return null;
 
-  const handleShutdown = () => {
-    Sounds.shutdown();
-    setTimeout(() => setPhase('shutdown'), 800);
+  const handleOk = () => {
+    if (selectedOption === 'shutdown') {
+      Sounds.shutdown();
+      setTimeout(() => setPhase('shutdown'), 800);
+    } else if (selectedOption === 'restart') {
+      Sounds.shutdown();
+      setTimeout(() => setPhase('restarting'), 800);
+    } else if (selectedOption === 'standby') {
+      setPhase('sleep');
+    }
   };
 
   return (
@@ -47,7 +107,7 @@ export function ShutdownDialog() {
         >
           {/* Title bar */}
           <div className={styles.titlebar}>
-            <span>Shut Down DannyOS</span>
+            <span>Shut Down Windows</span>
             <button
               className={styles.closeBtn}
               onClick={() => setPhase('desktop')}
@@ -61,20 +121,76 @@ export function ShutdownDialog() {
 
           {/* Body */}
           <div className={styles.body}>
-            <div className={styles.warningIcon}>&#9888;</div>
-            <div className={styles.text}>
-              <p>Are you sure you want to shut down?</p>
-              <p className={styles.subtext}>Thanks for visiting!</p>
+            <div className={styles.computerIcon}>
+              <img
+                src="/icons/computer.png"
+                alt=""
+                width="32"
+                height="32"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).parentElement!.textContent = '🖥️';
+                }}
+              />
+            </div>
+            <div className={styles.optionsArea}>
+              <p className={styles.prompt}>What do you want the computer to do?</p>
+              <div className={styles.radioGroup}>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="shutdownOption"
+                    className={styles.radioInput}
+                    checked={selectedOption === 'standby'}
+                    onChange={() => setSelectedOption('standby')}
+                  />
+                  <span className={styles.radioText}>Stand by</span>
+                </label>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="shutdownOption"
+                    className={styles.radioInput}
+                    checked={selectedOption === 'shutdown'}
+                    onChange={() => setSelectedOption('shutdown')}
+                  />
+                  <span className={styles.radioText}>Shut down</span>
+                </label>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="shutdownOption"
+                    className={styles.radioInput}
+                    checked={selectedOption === 'restart'}
+                    onChange={() => setSelectedOption('restart')}
+                  />
+                  <span className={styles.radioText}>Restart</span>
+                </label>
+                <label className={`${styles.radioLabel} ${styles.radioDisabled}`}>
+                  <input
+                    type="radio"
+                    name="shutdownOption"
+                    className={styles.radioInput}
+                    disabled
+                    checked={selectedOption === 'restart-dos'}
+                    onChange={() => setSelectedOption('restart-dos')}
+                  />
+                  <span className={styles.radioText}>Restart in MS-DOS mode</span>
+                </label>
+              </div>
             </div>
           </div>
 
           {/* Buttons */}
           <div className={styles.buttons}>
-            <button className={styles.btn} onClick={handleShutdown}>
+            <button className={styles.btn} onClick={handleOk}>
               OK
             </button>
             <button className={styles.btn} onClick={() => setPhase('desktop')}>
               Cancel
+            </button>
+            <button className={`${styles.btn} ${styles.btnDisabled}`} disabled>
+              Help
             </button>
           </div>
         </motion.div>

@@ -71,6 +71,12 @@ VB.CONFIG = {
     SEG7_WIDTH: 5,     // columns occupied
     SEG7_TOP_ROW: 6,   // row e (bottom of top terminal block)
     SEG7_BOT_ROW: 7,   // row f (top of bottom terminal block)
+
+    // Clock/Oscillator component
+    CLOCK_WIDTH: 3,      // columns occupied
+    CLOCK_TOP_ROW: 6,    // row e (bottom of top terminal block)
+    CLOCK_BOT_ROW: 7,    // row f (top of bottom terminal block)
+    CLOCK_FREQUENCIES: [0.5, 1, 2, 5],  // Hz options
 };
 
 /* ---- Resistor Color Band Data ---- */
@@ -190,6 +196,29 @@ VB.getSeg7Pins = function (startCol) {
     return result;
 };
 
+/* ---- Clock/Oscillator Pin Mapping ---- */
+// 3-pin DIP package straddling the center gap
+// Row 6 (e): pin 1 (VCC), pin 2 (OUT)  — left to right
+// Row 7 (f): pin 3 (GND)               — leftmost column
+
+VB.CLOCK_PINS = {
+    1: { func: 'vcc', row: 6, colOff: 0 },
+    2: { func: 'out', row: 6, colOff: 2 },
+    3: { func: 'gnd', row: 7, colOff: 0 },
+};
+
+/** Get all pin positions for a clock placed at startCol.
+ *  Returns { vcc: {col, row}, gnd: {col, row}, out: {col, row} }
+ */
+VB.getClockPins = function (startCol) {
+    var result = {};
+    for (var p = 1; p <= 3; p++) {
+        var pin = VB.CLOCK_PINS[p];
+        result[pin.func] = { col: startCol + pin.colOff, row: pin.row };
+    }
+    return result;
+};
+
 // ---- Shared Application State ----
 VB.state = {
     tool:             'wire',
@@ -207,4 +236,9 @@ VB.state = {
     // Resistor configuration
     resistorValue:     220,
     resistorBands:     ['red', 'red', 'brown', 'gold'],
+
+    // Clock/Oscillator state
+    clockFrequency:    1,          // Hz (default 1Hz)
+    clockOutputHigh:   false,      // current output state
+    clockTimerId:      null,       // interval timer id
 };

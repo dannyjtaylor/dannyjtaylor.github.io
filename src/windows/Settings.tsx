@@ -15,7 +15,7 @@ const DISPLAY_STYLES: { label: string; value: 'tile' | 'center' | 'stretch' }[] 
   { label: 'Stretch', value: 'stretch' },
 ];
 
-const SCREENSAVERS = ['(None)', 'Starfield', 'Matrix', 'Maze', 'Flying Windows'];
+const SCREENSAVERS = ['(None)', 'Starfield', 'Matrix', 'Maze', 'Flying Windows', 'Energy Star'];
 
 const COLOR_SCHEMES = [
   'Windows Standard',
@@ -269,6 +269,10 @@ export function Settings() {
   const storeFontSize = useDesktopStore((s) => s.fontSize);
   const storeIconSize = useDesktopStore((s) => s.iconSize);
   const storeCursorTheme = useDesktopStore((s) => s.cursorTheme);
+  const storeScreensaver = useDesktopStore((s) => s.screensaver);
+  const storeScreensaverTimeout = useDesktopStore((s) => s.screensaverTimeout);
+  const storeScreensaverSet = useDesktopStore((s) => s.setScreensaver);
+  const storeScreensaverTimeoutSet = useDesktopStore((s) => s.setScreensaverTimeout);
   const storeBrightnessSet = useDesktopStore((s) => s.setBrightness);
   const storeContrastSet = useDesktopStore((s) => s.setContrast);
   const storeColorSchemeSet = useDesktopStore((s) => s.setColorScheme);
@@ -287,8 +291,8 @@ export function Settings() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Screen Saver
-  const [screensaver, setScreensaver] = useState('(None)');
-  const [ssWait, setSsWait] = useState(15);
+  const [screensaver, setScreensaver] = useState(storeScreensaver);
+  const [ssWait, setSsWait] = useState(storeScreensaverTimeout);
   const [ssPreviewActive, setSsPreviewActive] = useState(false);
 
   // Appearance
@@ -314,6 +318,8 @@ export function Settings() {
     fontSize: storeFontSize ?? 'small',
     iconSize: storeIconSize ?? 'large',
     cursorTheme: storeCursorTheme ?? 'Windows Default',
+    screensaver: storeScreensaver,
+    screensaverTimeout: storeScreensaverTimeout,
   });
 
   /* --- Apply all settings to the store --- */
@@ -327,11 +333,15 @@ export function Settings() {
     storeFontSizeSet?.(localFontSize);
     storeIconSizeSet?.(localIconSize);
     storeCursorThemeSet?.(localCursorTheme);
+    storeScreensaverSet(screensaver);
+    storeScreensaverTimeoutSet(ssWait);
   }, [
     localWallpaper, localWallpaperStyle, localBrightness, localContrast,
     localColorScheme, localDesktopArea, localFontSize, localIconSize, localCursorTheme,
+    screensaver, ssWait,
     setWallpaper, setWallpaperStyle, storeBrightnessSet, storeContrastSet,
     storeColorSchemeSet, storeDesktopAreaSet, storeFontSizeSet, storeIconSizeSet, storeCursorThemeSet,
+    storeScreensaverSet, storeScreensaverTimeoutSet,
   ]);
 
   const handleOk = useCallback(() => {
@@ -351,8 +361,10 @@ export function Settings() {
     storeFontSizeSet?.(o.fontSize);
     storeIconSizeSet?.(o.iconSize);
     storeCursorThemeSet?.(o.cursorTheme);
+    storeScreensaverSet(o.screensaver);
+    storeScreensaverTimeoutSet(o.screensaverTimeout);
     closeWindow('settings');
-  }, [closeWindow, setWallpaper, setWallpaperStyle, storeBrightnessSet, storeContrastSet, storeColorSchemeSet, storeDesktopAreaSet, storeFontSizeSet, storeIconSizeSet, storeCursorThemeSet]);
+  }, [closeWindow, setWallpaper, setWallpaperStyle, storeBrightnessSet, storeContrastSet, storeColorSchemeSet, storeDesktopAreaSet, storeFontSizeSet, storeIconSizeSet, storeCursorThemeSet, storeScreensaverSet, storeScreensaverTimeoutSet]);
 
   const handleApply = useCallback(() => {
     applyAll();
@@ -625,6 +637,21 @@ export function Settings() {
                       <animateMotion dur="4s" repeatCount="indefinite" path="M 10,10 L 10,50 L 70,50 L 70,90 L 110,90 L 110,30 L 150,30 L 150,110 L 70,110 L 10,110 L 10,10" />
                     </circle>
                   </svg>
+                </div>
+              )}
+              {ssPreviewActive && screensaver === 'Energy Star' && (
+                <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img
+                    src="/energystar.png"
+                    alt="Energy Star"
+                    style={{
+                      width: 60,
+                      height: 45,
+                      objectFit: 'contain',
+                      animation: 'energyBounce 3s ease-in-out infinite alternate',
+                    }}
+                  />
+                  <style>{`@keyframes energyBounce { 0% { transform: translate(-40px, -20px); } 50% { transform: translate(40px, 20px); } 100% { transform: translate(-20px, 10px); } }`}</style>
                 </div>
               )}
               {ssPreviewActive && screensaver === '(None)' && (

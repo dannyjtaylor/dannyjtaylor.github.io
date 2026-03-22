@@ -35,7 +35,7 @@ export interface WindowState {
   title?: string;
 }
 
-export type AppPhase = 'boot' | 'desktop' | 'shutdown-prompt' | 'shutdown';
+export type AppPhase = 'boot' | 'desktop' | 'shutdown-prompt' | 'shutdown' | 'sleep' | 'restarting';
 
 export interface DesktopIconConfig {
   id: string;

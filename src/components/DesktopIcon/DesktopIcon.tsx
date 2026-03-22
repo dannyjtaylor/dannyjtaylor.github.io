@@ -153,6 +153,18 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
           }
         }
 
+        // Snap to grid after drag
+        if (wasDrag) {
+          const currentPos = useDesktopStore.getState().iconPositions[id];
+          if (currentPos) {
+            const gridW = 75;
+            const gridH = 75;
+            const snappedX = Math.round(currentPos.x / gridW) * gridW;
+            const snappedY = Math.round(currentPos.y / gridH) * gridH;
+            updateIconPosition(id, snappedX, snappedY);
+          }
+        }
+
         if (!wasDrag) {
           if (lastClickedRef.current === id && clickTimer.current) {
             clearTimeout(clickTimer.current);

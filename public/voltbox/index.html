@@ -85,6 +85,9 @@
                     <button class="tool-btn" data-tool="seg7-ca" title="7-Seg CA (9)">
                         <span class="tool-icon tool-seg7a">7</span>
                     </button>
+                    <button class="tool-btn" data-tool="clock" title="Clock/Oscillator (0)">
+                        <span class="tool-icon tool-clock">~</span>
+                    </button>
                     <div class="toolbar-separator"></div>
                     <button class="tool-btn" data-tool="power" title="Power +5V (5)">
                         <span class="tool-icon tool-power">+</span>
@@ -128,6 +131,10 @@
                                 <div class="palette-icon seg7-ca-icon"></div>
                                 <span>7-Seg CA</span>
                             </button>
+                            <button class="palette-btn" data-tool="clock">
+                                <div class="palette-icon clock-icon"></div>
+                                <span>Clock</span>
+                            </button>
                             <button class="palette-btn" data-tool="power">
                                 <div class="palette-icon power-icon"></div>
                                 <span>Power +5V</span>
@@ -169,6 +176,22 @@
                                 <div class="band-block" id="band-3" title="Tolerance - click to cycle"></div>
                             </div>
                             <div class="resistor-value-label" id="resistor-value-label">220&#937; &#177;5%</div>
+                        </div>
+
+                        <div class="palette-title">Clock</div>
+                        <div class="palette-section clock-config" id="clock-config">
+                            <div class="clock-freq-row">
+                                <label style="font-size:10px;">Frequency:</label>
+                                <select id="clock-freq-select" class="win95-select">
+                                    <option value="0.5">0.5 Hz</option>
+                                    <option value="1" selected>1 Hz</option>
+                                    <option value="2">2 Hz</option>
+                                    <option value="5">5 Hz</option>
+                                </select>
+                            </div>
+                            <div class="clock-status" id="clock-status" style="font-size:9px; text-align:center; margin-top:2px; color:#666;">
+                                Idle
+                            </div>
                         </div>
                     </div>
 
@@ -259,6 +282,13 @@
                         <ul>
                             <li>Set value and band colors in the left palette</li>
                             <li>Click each band to change its color</li>
+                        </ul>
+                        <p><strong>Clock/Oscillator:</strong></p>
+                        <ul>
+                            <li>A 555 timer-style IC that toggles its output HIGH/LOW</li>
+                            <li>Pins: VCC (top-left), OUT (top-right), GND (bottom-left)</li>
+                            <li>Connect VCC to +5V, GND to ground, then OUT to your circuit</li>
+                            <li>Set frequency (0.5&#8211;5 Hz) in the Clock palette section</li>
                         </ul>
                     </div>
                     <div class="dialog-buttons">

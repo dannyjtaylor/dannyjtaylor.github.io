@@ -24,7 +24,8 @@
             this._setupWireColors();
             this._setupResistorConfig();
             this._setupBandPicker();
-            this._setupClock();
+            this._setupTaskbarClock();
+            this._setupClockFrequency();
             this._setupKeyboard();
             this.updateCRT();
 
@@ -83,6 +84,7 @@
                         VB.state.components = [];
                         VB.state.firstPin = null;
                         VB.state.simulationResults = null;
+                        this.restartClockTimer();
                         this.setStatus('New circuit — board cleared');
                         VB.Sound.beep();
                     }
@@ -106,6 +108,7 @@
                     VB.state.components = [];
                     VB.state.firstPin = null;
                     VB.state.simulationResults = null;
+                    this.restartClockTimer();
                     this.setStatus('Board cleared');
                     VB.Sound.beep();
                     break;
@@ -466,9 +469,9 @@
             if (!found) sel.selectedIndex = -1;
         },
 
-        /* ==================== Clock ==================== */
+        /* ==================== Taskbar Clock ==================== */
 
-        _setupClock: function () {
+        _setupTaskbarClock: function () {
             function tick() {
                 var d = new Date();
                 var h = d.getHours(), m = d.getMinutes();
@@ -479,6 +482,70 @@
             }
             tick();
             setInterval(tick, 15000);
+        },
+
+        /* ==================== Clock/Oscillator Frequency ==================== */
+
+        _setupClockFrequency: function () {
+            var self = this;
+            var sel = document.getElementById('clock-freq-select');
+            sel.addEventListener('change', function () {
+                VB.state.clockFrequency = parseFloat(sel.value);
+                self.restartClockTimer();
+                VB.Sound.click();
+            });
+        },
+
+        /** Start or restart the clock oscillator timer if any clock component exists */
+        restartClockTimer: function () {
+            // Clear any existing timer
+            if (VB.state.clockTimerId !== null) {
+                clearInterval(VB.state.clockTimerId);
+                VB.state.clockTimerId = null;
+            }
+
+            // Check if any clock component exists
+            var hasClockComp = false;
+            for (var i = 0; i < VB.state.components.length; i++) {
+                if (VB.state.components[i].type === 'clock') {
+                    hasClockComp = true;
+                    break;
+                }
+            }
+
+            var statusEl = document.getElementById('clock-status');
+            if (!hasClockComp) {
+                VB.state.clockOutputHigh = false;
+                if (statusEl) statusEl.textContent = 'Idle';
+                return;
+            }
+
+            var freq = VB.state.clockFrequency;
+            var intervalMs = 1000 / (freq * 2); // toggle twice per period (high + low = 1 cycle)
+
+            VB.state.clockTimerId = setInterval(function () {
+                VB.state.clockOutputHigh = !VB.state.clockOutputHigh;
+                if (statusEl) {
+                    statusEl.textContent = VB.state.clockOutputHigh ? 'OUT: HIGH' : 'OUT: LOW';
+                    statusEl.style.color = VB.state.clockOutputHigh ? '#008800' : '#666';
+                }
+                // Re-run simulation silently (no sounds) to reflect new output state
+                if (VB.state.components.length > 0) {
+                    VB.Simulation.run();
+                    // Update status bar without playing sounds
+                    var r = VB.state.simulationResults;
+                    if (r && r.shortCircuit) {
+                        VB.UI.setStatus('\u26A0 SHORT CIRCUIT DETECTED!');
+                    } else if (r && r.activeLEDs.length > 0) {
+                        VB.UI.setStatus(r.activeLEDs.length + ' LED(s) active \u2713 [CLK ' + (VB.state.clockOutputHigh ? 'HIGH' : 'LOW') + ']');
+                    }
+                }
+            }, intervalMs);
+
+            if (statusEl) {
+                statusEl.textContent = 'Running ' + freq + 'Hz';
+                statusEl.style.color = '#008800';
+            }
         },
 
         /* ==================== Keyboard Shortcuts ==================== */
@@ -506,6 +573,7 @@
                     case '7': VB.UI.setTool('eraser');   break;
                     case '8': VB.UI.setTool('seg7-cc');  break;
                     case '9': VB.UI.setTool('seg7-ca');  break;
+                    case '0': VB.UI.setTool('clock');    break;
                     case ' ': e.preventDefault(); VB.UI.runSimulation(); break;
                     case 'Escape':
                         VB.state.firstPin = null;
@@ -516,10 +584,12 @@
                             var idx = VB.Breadboard.getComponentAt(
                                 VB.state.hoveredHole.col, VB.state.hoveredHole.row);
                             if (idx >= 0) {
+                                var delType = VB.state.components[idx].type;
                                 VB.state.components.splice(idx, 1);
                                 VB.state.simulationResults = null;
                                 VB.Sound.del();
                                 VB.UI.setStatus('Component removed');
+                                if (delType === 'clock') VB.UI.restartClockTimer();
                                 if (VB.state.components.length > 0) VB.UI.runSimulation();
                             }
                         }
@@ -572,12 +642,14 @@
                 VB.state.components = JSON.parse(VB.state.undoStack.pop());
                 VB.state.firstPin = null;
                 VB.state.simulationResults = null;
+                this.restartClockTimer();
                 this.setStatus('Undo');
                 VB.Sound.click();
             } else if (VB.state.components.length > 0) {
                 VB.state.components.pop();
                 VB.state.firstPin = null;
                 VB.state.simulationResults = null;
+                this.restartClockTimer();
                 this.setStatus('Removed last component');
                 VB.Sound.click();
             }
@@ -625,6 +697,7 @@
                         VB.state.components = parsed.components;
                         VB.state.firstPin = null;
                         VB.state.simulationResults = null;
+                        this.restartClockTimer();
                         VB.Sound.success();
                         this.setStatus('Circuit loaded from local storage');
                         return;
@@ -648,6 +721,7 @@
                             VB.state.components = p.components;
                             VB.state.firstPin = null;
                             VB.state.simulationResults = null;
+                            VB.UI.restartClockTimer();
                             VB.Sound.success();
                             VB.UI.setStatus('Circuit loaded from ' + file.name);
                         }

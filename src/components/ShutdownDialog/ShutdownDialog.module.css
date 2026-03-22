@@ -14,7 +14,7 @@
   border-left: 2px solid var(--win-btn-hilight);
   border-right: 2px solid var(--win-btn-dk-shadow);
   border-bottom: 2px solid var(--win-btn-dk-shadow);
-  width: 330px;
+  width: 370px;
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
   font-family: var(--font-system);
 }
@@ -56,27 +56,65 @@
 
 .body {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
-  padding: 20px 16px;
+  padding: 20px 16px 12px;
 }
 
-.warningIcon {
-  font-size: 32px;
-  color: #cc9900;
+.computerIcon {
   flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
 }
 
-.text p {
+.optionsArea {
+  flex: 1;
+}
+
+.prompt {
   font-family: var(--font-system);
   font-size: 11px;
-  line-height: 1.6;
+  color: var(--win-black);
+  margin-bottom: 12px;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 11px;
   color: var(--win-black);
 }
 
-.subtext {
-  color: var(--win-dark) !important;
-  margin-top: 4px;
+.radioLabel.radioDisabled {
+  cursor: default;
+  color: var(--win-btn-shadow, #808080);
+}
+
+.radioInput {
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--win-black);
+}
+
+.radioDisabled .radioInput {
+  cursor: default;
+}
+
+.radioText {
+  user-select: none;
 }
 
 .buttons {
@@ -109,6 +147,18 @@
 .btn:focus {
   outline: 1px dotted var(--win-black);
   outline-offset: -4px;
+}
+
+.btnDisabled {
+  color: var(--win-btn-shadow, #808080);
+  cursor: default;
+}
+
+.btnDisabled:active {
+  border-top: 2px solid var(--win-btn-hilight);
+  border-left: 2px solid var(--win-btn-hilight);
+  border-right: 2px solid var(--win-btn-dk-shadow);
+  border-bottom: 2px solid var(--win-btn-dk-shadow);
 }
 
 /* ── Shutdown "safe to turn off" screen ── */
@@ -144,4 +194,29 @@
 .rebootBtn:hover {
   background: #ff9900;
   color: #000;
+}
+
+/* ── Sleep screen ── */
+.sleepScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  cursor: pointer;
+}
+
+.sleepMessage {
+  text-align: center;
+  color: #555;
+  font-family: var(--font-system);
+  font-size: 13px;
+  animation: sleepPulse 3s ease-in-out infinite;
+}
+
+@keyframes sleepPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
 }

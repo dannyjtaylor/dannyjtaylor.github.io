@@ -314,6 +314,7 @@ export function DateTime() {
         padding: 10,
         userSelect: 'none',
         width: 410,
+        overflow: 'hidden',
       }}
     >
       {/* -- Top row: Date & Time -- */}

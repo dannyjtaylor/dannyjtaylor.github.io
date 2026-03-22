@@ -145,6 +145,14 @@ interface DesktopStore {
   timeZone: string;
   setTimeOffset: (offset: number) => void;
   setTimeZone: (tz: string) => void;
+
+  // Screensaver
+  screensaver: string;
+  screensaverTimeout: number;
+  screensaverActive: boolean;
+  setScreensaver: (s: string) => void;
+  setScreensaverTimeout: (n: number) => void;
+  setScreensaverActive: (active: boolean) => void;
 }
 
 let dynamicCounter = 0;
@@ -669,4 +677,12 @@ export const useDesktopStore = create<DesktopStore>((set, get) => ({
   timeZone: '(GMT-05:00) Eastern Time (US & Canada)',
   setTimeOffset: (offset) => set({ timeOffset: offset }),
   setTimeZone: (tz) => set({ timeZone: tz }),
+
+  // Screensaver
+  screensaver: '(None)',
+  screensaverTimeout: 15,
+  screensaverActive: false,
+  setScreensaver: (s) => set({ screensaver: s }),
+  setScreensaverTimeout: (n) => set({ screensaverTimeout: n }),
+  setScreensaverActive: (active) => set({ screensaverActive: active }),
 }));

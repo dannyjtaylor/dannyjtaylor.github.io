@@ -253,8 +253,7 @@ const GAMES: SteamGame[] = [
     description: 'A 5v5 character-based tactical FPS where precise gunplay meets unique agent abilities.',
     windowId: 'valorant',
     tags: ['FPS', 'Competitive', 'Multiplayer'],
-    boxArt: '/art/valorant_box.png',
-    bgImage: '/art/valorant_bg.png',
+    bgImage: '/backgrounds/valorant_bg.webp',
   },
   {
     id: 'undertale',
@@ -267,8 +266,7 @@ const GAMES: SteamGame[] = [
     description: 'A friendly RPG where nobody has to die. Explore the underground and meet a cast of unforgettable characters.',
     windowId: 'undertale',
     tags: ['RPG', 'Indie', 'Story Rich'],
-    boxArt: '/art/undertale_box.png',
-    bgImage: '/art/undertale_bg.png',
+    bgImage: '/backgrounds/undertale_bg.png',
   },
   {
     id: 'cavestory',
@@ -281,8 +279,7 @@ const GAMES: SteamGame[] = [
     description: 'A freeware side-scrolling platformer. Explore a vast cave system, fight monsters and uncover the mysteries within.',
     windowId: 'cavestory',
     tags: ['Platformer', 'Indie', 'Action'],
-    boxArt: '/art/cavestory_box.png',
-    bgImage: '/art/cavestory_bg.png',
+    bgImage: '/backgrounds/cavestorybg.png',
   },
   {
     id: 'cookieclicker',
@@ -305,7 +302,6 @@ const GAMES: SteamGame[] = [
     hours: 0,
     description: 'Coming soon... probably... maybe... one day...',
     tags: ['FPS', 'Sci-Fi', 'Wishlist'],
-    boxArt: '/art/halflife3_box.png',
   },
 ];
 

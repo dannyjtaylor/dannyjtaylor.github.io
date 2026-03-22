@@ -15,7 +15,32 @@
       "Bash(cmd.exe /c \"node --version\" 2>/dev/null)",
       "Bash(ls node_modules/.bin/vite*)",
       "Bash(npm --version)",
-      "Bash(cmd.exe /c \"npx tsc --noEmit 2>&1\")"
+      "Bash(cmd.exe /c \"npx tsc --noEmit 2>&1\")",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(echo $PATH)",
+      "Bash(where.exe npm:*)",
+      "Bash(cmd.exe /c \"npm run build\")",
+      "Bash(echo \"PATH: $PATH\")",
+      "Bash(where.exe node:*)",
+      "Bash(cmd.exe /c \"where npm\" 2>&1)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/nodejs:/c/Users/danny/AppData/Roaming/npm\")",
+      "Bash(cmd.exe /c \"npx tsc -b 2>&1\")",
+      "Bash(export 'PATH=/c/Program Files/nodejs:$PATH')",
+      "Read(//c/Users/danny/OneDrive/Documents/GitHub/dannyjtaylor.github.io/$APPDATA/**)",
+      "Read(//c/Users/danny/OneDrive/Documents/GitHub/dannyjtaylor.github.io/$LOCALAPPDATA/**)",
+      "Bash(cmd.exe /c 'npm run build')",
+      "Bash(cmd.exe /c \"npm run build 2>&1\")",
+      "Bash(ls C:/Users/danny/OneDrive/Documents/GitHub/dannyjtaylor.github.io/node_modules/.bin/tsc*)",
+      "Bash(npx -y acorn --ecma2015 public/voltbox/js/config.js)",
+      "Bash(cmd.exe /c \"where node && where npm\" 2>&1)",
+      "Bash(export PATH=\"/c/Users/danny/AppData/Roaming/nvm/v22.15.0:$PATH\")",
+      "Bash(npm -v)",
+      "Read(//c//**)",
+      "Read(//mnt/c/Program Files/**)",
+      "Bash(find /mnt -maxdepth 3 -name node.exe)",
+      "Bash(cmd.exe /c \"where node\")",
+      "Bash(cmd.exe /c \"node -v\")"
     ]
   }
 }

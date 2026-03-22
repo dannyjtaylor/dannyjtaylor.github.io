@@ -118,13 +118,8 @@ const BootSounds = {
   },
 };
 
-/** Check if this is the user's first visit (no prior boot completed) */
-const isFirstVisit = !localStorage.getItem('dannyos_has_visited');
-
 function playBootSound(id?: BootLine['sound']) {
   if (!id) return;
-  // Skip the startup chime on the very first website visit
-  if (id === 'chime' && isFirstVisit) return;
   BootSounds[id]?.();
 }
 
@@ -269,6 +264,12 @@ export function BootScreen() {
       onClick={skipBoot}
     >
       <div className={styles.crtOverlay} />
+      <img
+        src="/energystar.png"
+        alt="Energy Star"
+        className={styles.energyStar}
+        draggable={false}
+      />
       <div className={styles.terminal}>
         <pre ref={preRef} className={styles.text} />
         {!fading && <span className={styles.cursor}>_</span>}

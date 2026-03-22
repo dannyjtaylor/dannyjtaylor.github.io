@@ -53,6 +53,20 @@
                 if (comNet0 && comNet1) uf.union(comNet0, comNet1);
             }
             // Segment pins are NOT unioned to common — each is an independent LED path
+        } else if (comp.type === 'clock') {
+            // Clock/oscillator: VCC pin unions to POWER, GND pin unions to GROUND
+            // OUT pin unions to POWER only when clockOutputHigh is true
+            var cPins = VB.getClockPins(comp.col);
+            var vccNet = VB.Breadboard.getNetId(cPins.vcc.col, cPins.vcc.row);
+            var gndNet = VB.Breadboard.getNetId(cPins.gnd.col, cPins.gnd.row);
+            var outNet = VB.Breadboard.getNetId(cPins.out.col, cPins.out.row);
+            // VCC and GND are passthrough — they connect to whatever net they sit on
+            // but internally the chip routes VCC→POWER and GND→GROUND
+            // We don't auto-union VCC/GND to POWER/GROUND; they connect through wires.
+            // The OUT pin acts as a switched connection to VCC (power) when high.
+            if (VB.state.clockOutputHigh && vccNet && outNet) {
+                uf.union(vccNet, outNet);
+            }
         } else if (comp.pin) {
             // single-pin: power or ground marker
             var net = VB.Breadboard.getNetId(comp.pin.col, comp.pin.row);
@@ -101,6 +115,13 @@
                         var cn1 = VB.Breadboard.getNetId(seg7Pins.com[1].col, seg7Pins.com[1].row);
                         if (cn0 && cn1) wireUF.union(cn0, cn1);
                     }
+                }
+                // Include clock output union in short-circuit check when output is high
+                if (c.type === 'clock' && VB.state.clockOutputHigh) {
+                    var clkPins = VB.getClockPins(c.col);
+                    var clkVcc = VB.Breadboard.getNetId(clkPins.vcc.col, clkPins.vcc.row);
+                    var clkOut = VB.Breadboard.getNetId(clkPins.out.col, clkPins.out.row);
+                    if (clkVcc && clkOut) wireUF.union(clkVcc, clkOut);
                 }
             }
             if (wireUF.connected('POWER', 'GROUND')) {
@@ -196,6 +217,32 @@
                     results.messages.push('7-Seg display ' + (si + 1) + ': ' + litCount + ' segment(s) lit');
                 } else {
                     results.messages.push('7-Seg display ' + (si + 1) + ': No segments lit');
+                }
+            }
+
+            /* --- Step 4: clock status --- */
+            results.clockActive = false;
+            for (var ci = 0; ci < comps.length; ci++) {
+                if (comps[ci].type === 'clock') {
+                    var clkP = VB.getClockPins(comps[ci].col);
+                    // Build UF without the clock to check if VCC reaches POWER and GND reaches GROUND
+                    var cuf = new UF();
+                    seedNets(cuf);
+                    for (var cj = 0; cj < comps.length; cj++) {
+                        if (cj === ci) continue;
+                        addComponent(cuf, comps[cj]);
+                    }
+                    var clkVccNet = VB.Breadboard.getNetId(clkP.vcc.col, clkP.vcc.row);
+                    var clkGndNet = VB.Breadboard.getNetId(clkP.gnd.col, clkP.gnd.row);
+                    var powered = clkVccNet && clkGndNet &&
+                                  cuf.connected(clkVccNet, 'POWER') &&
+                                  cuf.connected(clkGndNet, 'GROUND');
+                    if (powered) {
+                        results.clockActive = true;
+                        results.messages.push('Clock ' + (ci + 1) + ': Running at ' + VB.state.clockFrequency + 'Hz — OUT is ' + (VB.state.clockOutputHigh ? 'HIGH' : 'LOW'));
+                    } else {
+                        results.messages.push('Clock ' + (ci + 1) + ': Not powered (connect VCC to +5V and GND to ground)');
+                    }
                 }
             }
 

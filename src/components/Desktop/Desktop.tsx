@@ -8,6 +8,7 @@ import { ShutdownDialog } from '../ShutdownDialog/ShutdownDialog';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
 import { PropertiesDialog } from '../PropertiesDialog/PropertiesDialog';
 import { SaveAsDialog } from '../SaveAsDialog/SaveAsDialog';
+import { Screensaver } from '../Screensaver/Screensaver';
 // DisplayProperties is now handled by the Settings window
 import { Window } from '../Window/Window';
 import { AboutMe } from '../../windows/AboutMe';
@@ -210,7 +211,7 @@ const WINDOWS: WindowConfig[] = [
   { id: 'steam',     title: 'Steam',                    icon: 'steam',     defaultWidth: 680, defaultHeight: 500, defaultX: 80,  defaultY: 25 },
   { id: 'aol',       title: 'AOL Instant Messenger',    icon: 'aol',       defaultWidth: 380, defaultHeight: 420, defaultX: 160, defaultY: 50 },
   { id: 'paint',    title: 'untitled - Paint',          icon: 'paint',     defaultWidth: 640, defaultHeight: 480, defaultX: 60,  defaultY: 20, menus: PAINT_MENUS },
-  { id: 'datetime', title: 'Date/Time Properties',      icon: 'datetime',  defaultWidth: 410, defaultHeight: 460, defaultX: 140, defaultY: 40 },
+  { id: 'datetime', title: 'Date/Time Properties',      icon: 'datetime',  defaultWidth: 410, defaultHeight: 370, defaultX: 140, defaultY: 40 },
   { id: 'settings', title: 'Display Properties',        icon: 'settings',  defaultWidth: 420, defaultHeight: 500, defaultX: 120, defaultY: 30 },
   { id: 'musicplayer', title: 'Music Player',            icon: 'musicplayer', defaultWidth: 480, defaultHeight: 440, defaultX: 100, defaultY: 35 },
   { id: 'cookieclicker', title: 'Cookie Clicker',       icon: 'file',       defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
@@ -662,6 +663,7 @@ export function Desktop() {
       <SaveAsDialog />
       <StartMenu />
       <ShutdownDialog />
+      <Screensaver />
       <Taskbar />
     </div>
   );

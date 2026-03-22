@@ -77,6 +77,10 @@
                     // 7-seg occupies rows 6–7, columns [col..col+4]
                     if (row >= CFG.SEG7_TOP_ROW && row <= CFG.SEG7_BOT_ROW &&
                         col >= c.col && col <= c.col + CFG.SEG7_WIDTH - 1) return i;
+                } else if (c.type === 'clock') {
+                    // Clock occupies rows 6–7, columns [col..col+2]
+                    if (row >= CFG.CLOCK_TOP_ROW && row <= CFG.CLOCK_BOT_ROW &&
+                        col >= c.col && col <= c.col + CFG.CLOCK_WIDTH - 1) return i;
                 } else if (c.pin) { // single-pin (power / ground)
                     if (c.pin.col === col && c.pin.row === row) return i;
                 } else {     // two-pin
@@ -225,6 +229,9 @@
                     // 7-segment display
                     var segStatus = (sim.seg7Status && sim.seg7Status[i]) || null;
                     this._drawSeg7(comp, segStatus);
+                } else if (comp.type === 'clock') {
+                    // Clock/oscillator
+                    this._drawClock(comp, sim);
                 } else if (comp.pin) {
                     // single-pin (power / ground marker)
                     var pp = this.gridToPixel(comp.pin.col, comp.pin.row);
@@ -521,6 +528,100 @@
             ctx.fill();
             ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
+        },
+
+        /* -- Clock/Oscillator -- */
+        _drawClock: function (comp, sim) {
+            var startCol = comp.col;
+            var pins = VB.getClockPins(startCol);
+
+            // Pixel positions for the DIP body corners
+            var topLeft  = this.gridToPixel(startCol, CFG.CLOCK_TOP_ROW);
+            var topRight = this.gridToPixel(startCol + CFG.CLOCK_WIDTH - 1, CFG.CLOCK_TOP_ROW);
+            var botLeft  = this.gridToPixel(startCol, CFG.CLOCK_BOT_ROW);
+
+            var bodyX = topLeft.x - 8;
+            var bodyY = topLeft.y - 10;
+            var bodyW = (topRight.x - topLeft.x) + 16;
+            var bodyH = (botLeft.y - topLeft.y) + 20;
+
+            // Draw pin legs extending from body into holes
+            ctx.strokeStyle = '#AAA';
+            ctx.lineWidth = 1.5;
+            for (var p = 1; p <= 3; p++) {
+                var pin = VB.CLOCK_PINS[p];
+                var pinPos = this.gridToPixel(startCol + pin.colOff, pin.row);
+                var legEndY = (pin.row === CFG.CLOCK_TOP_ROW) ? bodyY : bodyY + bodyH;
+                ctx.beginPath();
+                ctx.moveTo(pinPos.x, pinPos.y);
+                ctx.lineTo(pinPos.x, legEndY);
+                ctx.stroke();
+            }
+
+            // DIP body — dark package
+            ctx.fillStyle = '#2A3A2A';
+            ctx.fillRect(bodyX, bodyY, bodyW, bodyH);
+            ctx.strokeStyle = '#1A2A1A';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(bodyX, bodyY, bodyW, bodyH);
+
+            // Notch/dot at pin 1 end (top-left corner)
+            ctx.fillStyle = '#556655';
+            ctx.beginPath();
+            ctx.arc(bodyX + 5, bodyY + 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Label "CLK"
+            ctx.fillStyle = '#99BB99';
+            ctx.font = '7px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('CLK', bodyX + bodyW / 2, bodyY + bodyH / 2 - 4);
+
+            // Frequency label
+            ctx.fillStyle = '#778877';
+            ctx.font = '6px monospace';
+            ctx.fillText(VB.state.clockFrequency + 'Hz', bodyX + bodyW / 2, bodyY + bodyH / 2 + 4);
+
+            // Pin labels
+            ctx.fillStyle = '#668866';
+            ctx.font = '5px monospace';
+            ctx.textAlign = 'center';
+
+            // VCC label (pin 1 - top left)
+            var vccPos = this.gridToPixel(startCol + VB.CLOCK_PINS[1].colOff, VB.CLOCK_PINS[1].row);
+            ctx.textBaseline = 'bottom';
+            ctx.fillText('V', vccPos.x, bodyY - 1);
+
+            // OUT label (pin 2 - top right)
+            var outPos = this.gridToPixel(startCol + VB.CLOCK_PINS[2].colOff, VB.CLOCK_PINS[2].row);
+            ctx.fillText('O', outPos.x, bodyY - 1);
+
+            // GND label (pin 3 - bottom left)
+            var gndPos = this.gridToPixel(startCol + VB.CLOCK_PINS[3].colOff, VB.CLOCK_PINS[3].row);
+            ctx.textBaseline = 'top';
+            ctx.fillText('G', gndPos.x, bodyY + bodyH + 1);
+
+            // Output state indicator LED on the chip
+            var isPowered = sim && sim.clockActive;
+            var ledX = bodyX + bodyW - 8;
+            var ledY = bodyY + bodyH / 2;
+            if (isPowered && VB.state.clockOutputHigh) {
+                // Glow
+                var grad = ctx.createRadialGradient(ledX, ledY, 0, ledX, ledY, 8);
+                grad.addColorStop(0, 'rgba(0,255,100,0.5)');
+                grad.addColorStop(1, 'rgba(0,255,100,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath(); ctx.arc(ledX, ledY, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#00FF66';
+            } else if (isPowered) {
+                ctx.fillStyle = '#336633';
+            } else {
+                ctx.fillStyle = '#333';
+            }
+            ctx.beginPath(); ctx.arc(ledX, ledY, 2.5, 0, Math.PI * 2); ctx.fill();
+
+            ctx.lineWidth = 1;
         },
 
         /* -- Short-circuit warning overlay -- */

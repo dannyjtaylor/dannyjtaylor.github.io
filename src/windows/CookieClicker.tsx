@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 /* ═══════════════════════════════════════════════════════════════════
    Cookie Clicker — Full implementation inspired by Orteil's game
@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 // ─── Inline SVG Icon Component ───
 function CookieIcon({ name, size = 18 }: { name: string; size?: number }) {
   const s = size;
-  const icons: Record<string, JSX.Element> = {
+  const icons: Record<string, React.ReactNode> = {
     // Building icons
     cursor: (
       <svg width={s} height={s} viewBox="0 0 24 24" fill="none">

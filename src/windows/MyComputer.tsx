@@ -57,10 +57,26 @@ const FILE_SYSTEM: FsEntry[] = [
   },
 ];
 
+// Map virtual filenames to real window IDs
+const FILE_TO_WINDOW: Record<string, string> = {
+  'about_me.txt': 'about',
+  'resume.txt': 'resume',
+  'readme.txt': 'about',
+  'notepad.exe': 'paint',
+  'system.ini': 'terminal',
+  'win.ini': 'terminal',
+  'setup.exe': 'terminal',
+  'AUTOEXEC.BAT': 'terminal',
+  'CONFIG.SYS': 'terminal',
+  'backup.zip': 'mycomputer',
+};
+
 export function MyComputer() {
   const [path, setPath] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const showContextMenu = useDesktopStore((s) => s.showContextMenu);
+  const openWindow = useDesktopStore((s) => s.openWindow);
+  const showProperties = useDesktopStore((s) => s.showProperties);
 
   const getCurrentEntries = (): FsEntry[] => {
     if (path.length === 0) return FILE_SYSTEM;
@@ -83,6 +99,32 @@ export function MyComputer() {
     if (entry.children) {
       setPath([...path, entry.name]);
       setSelectedItem(null);
+    } else {
+      // Try to open the file in a mapped window
+      const windowId = FILE_TO_WINDOW[entry.name];
+      if (windowId) {
+        openWindow(windowId);
+      } else {
+        showProperties(`${entry.name} Properties`, {
+          'Type': entry.type === 'file' ? 'File' : 'Folder',
+          'Location': `C:\\${path.join('\\')}`,
+          'Size': entry.size ?? 'Unknown',
+          'Created': 'January 1, 2004',
+        });
+      }
+    }
+  };
+
+  const handleItemContextMenu = (e: React.MouseEvent, entry: FsEntry) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (entry.children) {
+      // Folders: use explorer variant (right-click on empty space behavior)
+      showContextMenu(e.clientX, e.clientY, 'explorer');
+    } else {
+      // Files: use explorer-item with mapped window ID
+      const windowId = FILE_TO_WINDOW[entry.name];
+      showContextMenu(e.clientX, e.clientY, 'explorer-item', windowId ?? 'mycomputer');
     }
   };
 
@@ -127,6 +169,7 @@ export function MyComputer() {
             className={`${styles.explorerItem} ${selectedItem === entry.name ? styles.explorerItemSelected : ''}`}
             onClick={() => setSelectedItem(entry.name)}
             onDoubleClick={() => handleDoubleClick(entry)}
+            onContextMenu={(ev) => handleItemContextMenu(ev, entry)}
           >
             <span className={styles.explorerIcon}>
               <DynamicIcon name={entry.icon} size={16} />

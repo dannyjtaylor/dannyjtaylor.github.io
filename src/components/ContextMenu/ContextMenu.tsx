@@ -409,5 +409,52 @@ export function ContextMenu() {
     );
   }
 
+  /* ── Explorer item right-click (files/folders inside explorer windows) ── */
+  if (variant === 'explorer-item') {
+    return (
+      <div className={styles.menu} style={{ left: contextMenu.x, top: contextMenu.y }}>
+        <div className={`${styles.item} ${styles.itemBold}`} onClick={() => {
+          if (targetId) openWindow(targetId);
+          hideWithSound();
+        }}>
+          Open
+        </div>
+        <div className={styles.item} onClick={() => {
+          if (targetId) openWindow(targetId);
+          hideWithSound();
+        }}>
+          Explore
+        </div>
+        <div className={styles.separator} />
+        <SubMenu label="Send To" items={[
+          { label: '3\u00BD Floppy (A:)', onClick: () => {
+            hideWithSound();
+            showProperties('Error', { 'Message': 'Drive A: is not ready.', 'Drive': 'A:\\' });
+          }},
+          { label: 'Desktop as Shortcut', onClick: () => {
+            hideWithSound();
+            showProperties('Information', { 'Message': 'Shortcut created on desktop.' });
+          }},
+          { label: 'Mail Recipient', onClick: () => { hideWithSound(); openWindow('contact'); } },
+        ]} />
+        <div className={styles.separator} />
+        <div className={styles.itemDisabled}>Cut</div>
+        <div className={styles.itemDisabled}>Copy</div>
+        <div className={styles.separator} />
+        <div className={styles.item} onClick={() => {
+          hideWithSound();
+          showProperties('Item Properties', {
+            'Type': 'File',
+            'Location': 'C:\\',
+            'Size': `${Math.floor(Math.random() * 500 + 50)} KB`,
+            'Created': 'January 1, 2004',
+          });
+        }}>
+          Properties
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }

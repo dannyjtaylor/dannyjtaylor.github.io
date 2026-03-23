@@ -44,7 +44,7 @@ export interface DesktopIconConfig {
   windowId: string;
 }
 
-export type ContextMenuVariant = 'desktop' | 'icon' | 'notepad' | 'explorer';
+export type ContextMenuVariant = 'desktop' | 'icon' | 'notepad' | 'explorer' | 'explorer-item';
 
 export interface ContextMenuState {
   visible: boolean;

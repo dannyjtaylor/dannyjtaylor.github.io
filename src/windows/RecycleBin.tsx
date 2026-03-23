@@ -52,7 +52,16 @@ export function RecycleBin() {
           </div>
         ) : (
           recycleBin.map((item) => (
-            <div key={item.id} className={styles.explorerItem} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div
+              key={item.id}
+              className={styles.explorerItem}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showContextMenu(e.clientX, e.clientY, 'explorer-item', item.windowId);
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span className={styles.explorerIcon}>
                   <DynamicIcon name={item.icon} size={16} />

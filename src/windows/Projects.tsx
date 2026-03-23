@@ -192,6 +192,11 @@ export function Projects() {
           <div
             key={pf.id}
             onDoubleClick={() => handleDoubleClick(pf.id)}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              showContextMenu(e.clientX, e.clientY, 'explorer-item', pf.id);
+            }}
             style={{
               display: 'flex',
               flexDirection: 'column',

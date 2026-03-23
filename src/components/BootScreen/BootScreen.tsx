@@ -264,13 +264,13 @@ export function BootScreen() {
       onClick={skipBoot}
     >
       <div className={styles.crtOverlay} />
-      <img
-        src="/energystar.png"
-        alt="Energy Star"
-        className={styles.energyStar}
-        draggable={false}
-      />
       <div className={styles.terminal}>
+        <img
+          src="/energystar.png"
+          alt="Energy Star"
+          className={styles.energyStar}
+          draggable={false}
+        />
         <pre ref={preRef} className={styles.text} />
         {!fading && <span className={styles.cursor}>_</span>}
       </div>

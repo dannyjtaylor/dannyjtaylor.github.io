@@ -1351,7 +1351,7 @@ function SpellingBeeGame({ onBack }: { onBack: () => void }) {
           <svg width={140} height={140} viewBox='0 0 140 140'>
             <HexButton letter={puzzle.center} x={hexPositions.center.x} y={hexPositions.center.y} isCenter={true} />
             {outerLetters.map((letter, i) => (
-              <HexButton key={i} letter={letter} x={hexPositions.outer[i].x} y={hexPositions.outer[i].y} isCenter={false} />
+              <HexButton key={i} letter={letter} x={hexPositions.outer[i]!.x} y={hexPositions.outer[i]!.y} isCenter={false} />
             ))}
           </svg>
 

@@ -50,7 +50,12 @@
       "Bash(cmd.exe /c \"npm install 2>&1 && npm run build 2>&1\")",
       "Bash(powershell.exe -Command \"cd 'C:\\\\Users\\\\danny\\\\OneDrive\\\\Documents\\\\GitHub\\\\dannyjtaylor.github.io'; npm install 2>&1; npm run build 2>&1\" 2>&1)",
       "Bash(./node_modules/.bin/tsc -b)",
-      "Bash(ls \"C:\\\\Users\\\\danny\\\\OneDrive\\\\Documents\\\\GitHub\\\\dannyjtaylor.github.io\\\\node_modules\\\\.bin\\\\tsc\"*)"
+      "Bash(ls \"C:\\\\Users\\\\danny\\\\OneDrive\\\\Documents\\\\GitHub\\\\dannyjtaylor.github.io\\\\node_modules\\\\.bin\\\\tsc\"*)",
+      "Bash(chmod:*)",
+      "Bash(cmd.exe /c \"where npx\" 2>&1)",
+      "Bash(powershell.exe -Command \"\\(Get-Command npx -ErrorAction SilentlyContinue\\).Source; \\(Get-Command node -ErrorAction SilentlyContinue\\).Source; \\(Get-Command npm -ErrorAction SilentlyContinue\\).Source\" 2>&1)",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Path 'C:\\\\Users\\\\danny' -Recurse -Filter 'node.exe' -Depth 5 -ErrorAction SilentlyContinue | Select-Object -First 5 -ExpandProperty FullName\" 2>&1)",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Path 'C:\\\\Program Files' -Recurse -Filter 'node.exe' -Depth 3 -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty FullName; Get-ChildItem -Path 'C:\\\\Program Files \\(x86\\)' -Recurse -Filter 'node.exe' -Depth 3 -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty FullName\" 2>&1)"
     ]
   }
 }

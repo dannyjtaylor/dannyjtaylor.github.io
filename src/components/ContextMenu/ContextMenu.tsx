@@ -125,6 +125,7 @@ export function ContextMenu() {
           { label: 'Cave Story', onClick: () => { openWindow('cavestory'); hideWithSound(); } },
           { label: 'Contact', onClick: () => { openWindow('contact'); hideWithSound(); } },
           { label: 'Cookie Clicker', onClick: () => { openWindow('cookieclicker'); hideWithSound(); } },
+          { label: 'NYT Games', onClick: () => { openWindow('nytgames'); hideWithSound(); } },
           { label: 'Date/Time', onClick: () => { openWindow('datetime'); hideWithSound(); } },
           { label: '/gather Bot', onClick: () => { openWindow('discord'); hideWithSound(); } },
           { label: 'Interests', onClick: () => { openWindow('interests'); hideWithSound(); } },

@@ -35,6 +35,7 @@ import { Settings } from '../../windows/Settings';
 import { MusicPlayer } from '../../windows/MusicPlayer';
 import { DynamicNotepad } from '../../windows/DynamicNotepad';
 import { CookieClicker } from '../../windows/CookieClicker';
+import { NYTGames } from '../../windows/NYTGames';
 import type { DesktopIconConfig, WindowConfig, MenuConfig } from '../../types';
 import styles from './Desktop.module.css';
 
@@ -189,6 +190,7 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-datetime',  label: 'Date/Time',      icon: 'datetime',  windowId: 'datetime' },
   { id: 'icon-settings',  label: 'Settings',       icon: 'settings',  windowId: 'settings' },
   { id: 'icon-musicplayer', label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
+  { id: 'icon-nytgames', label: 'NYT Games', icon: 'document', windowId: 'nytgames' },
 ];
 
 const WINDOWS: WindowConfig[] = [
@@ -215,6 +217,7 @@ const WINDOWS: WindowConfig[] = [
   { id: 'settings', title: 'Display Properties',        icon: 'settings',  defaultWidth: 420, defaultHeight: 500, defaultX: 120, defaultY: 30 },
   { id: 'musicplayer', title: 'Music Player',            icon: 'musicplayer', defaultWidth: 480, defaultHeight: 440, defaultX: 100, defaultY: 35 },
   { id: 'cookieclicker', title: 'Cookie Clicker',       icon: 'file',       defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
+  { id: 'nytgames', title: 'NYT Games',                  icon: 'document',  defaultWidth: 500, defaultHeight: 520, defaultX: 100, defaultY: 30 },
 ];
 
 const WINDOW_CONTENT: Record<string, React.ComponentType> = {
@@ -241,6 +244,7 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   settings: Settings,
   musicplayer: MusicPlayer,
   cookieclicker: CookieClicker,
+  nytgames: NYTGames,
 };
 
 export function Desktop() {

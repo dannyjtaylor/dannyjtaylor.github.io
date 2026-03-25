@@ -29,6 +29,7 @@ const MENU_ITEMS: MenuItem[] = [
   { label: 'Paint', icon: 'paint', windowId: 'paint' },
   { label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
   { label: 'AOL Messenger', icon: 'aol', windowId: 'aol' },
+  { label: 'NYT Games', icon: 'document', windowId: 'nytgames' },
   { label: '', icon: '', separator: true },
   { label: 'My Computer', icon: 'computer', windowId: 'mycomputer' },
   { label: 'MS-DOS Prompt', icon: 'console', windowId: 'terminal' },

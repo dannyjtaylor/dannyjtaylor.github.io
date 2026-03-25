@@ -632,15 +632,18 @@ function genVillage(): number[][] {
       else { m[y]![x] = 0; }
     }
   }
-  // buildings / platforms
-  for (let x = 10; x < 20; x++) m[18]![x] = 1;
-  for (let x = 10; x < 20; x++) m[12]![x] = 1;
-  for (let x = 25; x < 35; x++) m[16]![x] = 1;
-  for (let x = 40; x < 50; x++) m[18]![x] = 1;
-  for (let x = 55; x < 65; x++) m[15]![x] = 1;
-  for (let x = 68; x < 75; x++) m[18]![x] = 1;
-  // some walls
-  for (let y = 12; y < 23; y++) { m[y]![10] = 1; m[y]![19] = 1; }
+  // Building 1: small house (open at bottom for doorway)
+  for (let x = 12; x < 18; x++) m[16]![x] = 1; // roof
+  for (let y = 17; y <= 22; y++) { m[y]![12] = 1; } // left wall
+  for (let y = 17; y <= 22; y++) { m[y]![17] = 1; } // right wall
+  // doorway in left wall at ground level
+  m[21]![12] = 0; m[22]![12] = 0;
+
+  // Raised platforms for variety
+  for (let x = 25; x < 32; x++) m[19]![x] = 1;
+  for (let x = 38; x < 45; x++) m[17]![x] = 1;
+  for (let x = 52; x < 58; x++) m[19]![x] = 1;
+  for (let x = 65; x < 72; x++) m[18]![x] = 1;
   return m;
 }
 
@@ -774,7 +777,7 @@ function getAreaBoss(area: AreaId): Boss | null {
 interface ChestDef { x: number; y: number; area: AreaId; flag: string; weapon: WpnId | null }
 
 const CHESTS: ChestDef[] = [
-  { x: 40 * TILE, y: 17 * TILE, area: 'first_cave', flag: 'chest_polar', weapon: 'polar_star' },
+  { x: 6 * TILE, y: 21 * TILE, area: 'first_cave', flag: 'chest_polar', weapon: 'polar_star' },
   { x: 92 * TILE, y: 18 * TILE, area: 'egg_corridor', flag: 'chest_missile', weapon: 'missile' },
   { x: 30 * TILE, y: 18 * TILE, area: 'sand_zone', flag: 'chest_fireball', weapon: 'fireball' },
 ];
@@ -844,8 +847,8 @@ function initGameState(): GameState {
       x: 3 * TILE, y: 20 * TILE, vx: 0, vy: 0, w: 14, h: 16,
       hp: MAX_HP, facing: 1, grounded: false, invincible: 0, shootCooldown: 0,
       walkFrame: 0, walkTimer: 0, charId: 'quote',
-      weapons: [{ id: 'polar_star', ammo: -1, maxAmmo: -1 }],
-      activeWeapon: 0, weaponXp: [0, 0, 0, 0], weaponLevels: [1, 1, 1, 1],
+      weapons: [],
+      activeWeapon: -1, weaponXp: [0, 0, 0, 0], weaponLevels: [1, 1, 1, 1],
     },
     enemies: getAreaEnemies('first_cave'),
     boss: null,
@@ -937,6 +940,9 @@ export function CaveStory() {
       const ammo = id === 'missile' ? 10 : -1;
       const maxAmmo = id === 'missile' ? 30 : -1;
       p.weapons.push({ id, ammo, maxAmmo });
+      if (p.activeWeapon < 0) {
+        p.activeWeapon = 0;
+      }
     }
   }, []);
 
@@ -946,13 +952,15 @@ export function CaveStory() {
     if (p.invincible > 0) return;
     p.hp -= dmg;
     p.invincible = 60;
-    // lose weapon xp
-    const wi = wpnIndex(p.weapons[p.activeWeapon]?.id ?? 'polar_star');
-    gs.player.weaponXp[wi] = Math.max(0, (gs.player.weaponXp[wi] ?? 0) - 5);
-    // level down if xp drops below threshold
-    const curLvl = gs.player.weaponLevels[wi] ?? 1;
-    if (curLvl > 1 && (gs.player.weaponXp[wi] ?? 0) < (XP_THRESH[curLvl - 1] ?? 0)) {
-      gs.player.weaponLevels[wi] = curLvl - 1;
+    // lose weapon xp (only if player has a weapon equipped)
+    if (p.weapons.length > 0 && p.activeWeapon >= 0 && p.weapons[p.activeWeapon]) {
+      const wi = wpnIndex(p.weapons[p.activeWeapon]!.id);
+      gs.player.weaponXp[wi] = Math.max(0, (gs.player.weaponXp[wi] ?? 0) - 5);
+      // level down if xp drops below threshold
+      const curLvl = gs.player.weaponLevels[wi] ?? 1;
+      if (curLvl > 1 && (gs.player.weaponXp[wi] ?? 0) < (XP_THRESH[curLvl - 1] ?? 0)) {
+        gs.player.weaponLevels[wi] = curLvl - 1;
+      }
     }
     spawnParticles(p.x + p.w / 2, p.y + p.h / 2, 8, '#ff4444');
     if (p.hp <= 0) {
@@ -965,7 +973,7 @@ export function CaveStory() {
     const gs = gsRef.current;
     const p = gs.player;
     if (p.shootCooldown > 0) return;
-    if (p.weapons.length === 0) return;
+    if (p.weapons.length === 0 || p.activeWeapon < 0) return;
     const wpn = p.weapons[p.activeWeapon];
     if (!wpn) return;
     if (wpn.id === 'missile' && wpn.ammo === 0) return;
@@ -1039,7 +1047,7 @@ export function CaveStory() {
         gs.particles = [];
         gs.player.hp = MAX_HP;
         gs.player.weapons = [];
-        gs.player.activeWeapon = 0;
+        gs.player.activeWeapon = -1;
         gs.player.weaponXp = [0, 0, 0, 0];
         gs.player.weaponLevels = [1, 1, 1, 1];
         gs.flags = new Set();
@@ -1248,7 +1256,7 @@ export function CaveStory() {
     if (keys.has('z') || keys.has('x')) { shoot(); }
 
     // Weapon switch
-    if (p.weapons.length > 0) {
+    if (p.weapons.length > 0 && p.activeWeapon >= 0) {
       if (jp.has('a') && !left) {
         p.activeWeapon = (p.activeWeapon - 1 + p.weapons.length) % p.weapons.length;
       }
@@ -1494,8 +1502,8 @@ export function CaveStory() {
       if (pk.life <= 0) { gs.pickups.splice(i, 1); continue; }
       if (rectOverlap(p.x, p.y, p.w, p.h, pk.x - 4, pk.y - 4, 8, 8)) {
         if (pk.type === 'xp') {
-          if (p.weapons.length > 0) {
-            const wi = wpnIndex(p.weapons[p.activeWeapon]?.id ?? 'polar_star');
+          if (p.weapons.length > 0 && p.activeWeapon >= 0 && p.weapons[p.activeWeapon]) {
+            const wi = wpnIndex(p.weapons[p.activeWeapon]!.id);
             gs.player.weaponXp[wi] = (gs.player.weaponXp[wi] ?? 0) + 1;
             // Level up check
             const curLvl = gs.player.weaponLevels[wi] ?? 1;
@@ -1766,7 +1774,7 @@ export function CaveStory() {
     }
 
     // Weapon info
-    if (p.weapons.length > 0) {
+    if (p.weapons.length > 0 && p.activeWeapon >= 0) {
       const wpn = p.weapons[p.activeWeapon];
       if (wpn) {
         const wi = wpnIndex(wpn.id);

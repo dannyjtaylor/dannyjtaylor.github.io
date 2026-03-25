@@ -1054,14 +1054,14 @@ function CrosswordGame({ onBack }: { onBack: () => void }) {
   const checkCompletion = useCallback((g: CrosswordCell[][]) => {
     for (let r = 0; r < 5; r++) {
       for (let c = 0; c < 5; c++) {
-        if (!g[r][c].isBlack && g[r][c].userLetter !== g[r][c].letter) return false;
+        if (!g[r]![c]!.isBlack && g[r]![c]!.userLetter !== g[r]![c]!.letter) return false;
       }
     }
     return true;
   }, []);
 
   const handleCellClick = useCallback((r: number, c: number) => {
-    if (grid[r][c].isBlack) return;
+    if (grid[r]![c]!.isBlack) return;
     if (r === selRow && c === selCol) {
       setDirection(d => d === 'across' ? 'down' : 'across');
     } else {
@@ -1075,7 +1075,7 @@ function CrosswordGame({ onBack }: { onBack: () => void }) {
     const key = e.key.toUpperCase();
     if (/^[A-Z]$/.test(key)) {
       const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
-      newGrid[selRow][selCol].userLetter = key;
+      newGrid[selRow]![selCol]!.userLetter = key;
       setGrid(newGrid);
       if (checkCompletion(newGrid)) {
         setCompleted(true);
@@ -1083,16 +1083,16 @@ function CrosswordGame({ onBack }: { onBack: () => void }) {
       // Advance cursor
       if (direction === 'across' && selCol < 4) {
         let nc = selCol + 1;
-        while (nc < 5 && newGrid[selRow][nc].isBlack) nc++;
+        while (nc < 5 && newGrid[selRow]![nc]!.isBlack) nc++;
         if (nc < 5) setSelCol(nc);
       } else if (direction === 'down' && selRow < 4) {
         let nr = selRow + 1;
-        while (nr < 5 && newGrid[nr][selCol].isBlack) nr++;
+        while (nr < 5 && newGrid[nr]![selCol]!.isBlack) nr++;
         if (nr < 5) setSelRow(nr);
       }
     } else if (e.key === 'Backspace') {
       const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
-      newGrid[selRow][selCol].userLetter = '';
+      newGrid[selRow]![selCol]!.userLetter = '';
       setGrid(newGrid);
     } else if (e.key === 'Tab') {
       e.preventDefault();
@@ -1128,7 +1128,7 @@ function CrosswordGame({ onBack }: { onBack: () => void }) {
     const cells = new Set<string>();
     if (direction === 'across') {
       for (let c = 0; c < 5; c++) {
-        if (!grid[selRow][c].isBlack) cells.add(`${selRow}-${c}`);
+        if (!grid[selRow]![c]!.isBlack) cells.add(`${selRow}-${c}`);
         else if (c <= selCol) cells.clear();
         else break;
       }
@@ -1136,7 +1136,7 @@ function CrosswordGame({ onBack }: { onBack: () => void }) {
       const wordCells = new Set<string>();
       let inWord = false;
       for (let c = 0; c < 5; c++) {
-        if (grid[selRow][c].isBlack) {
+        if (grid[selRow]![c]!.isBlack) {
           if (inWord) break;
           continue;
         }
@@ -1149,7 +1149,7 @@ function CrosswordGame({ onBack }: { onBack: () => void }) {
       const wordCells = new Set<string>();
       let inWord = false;
       for (let r = 0; r < 5; r++) {
-        if (grid[r][selCol].isBlack) {
+        if (grid[r]![selCol]!.isBlack) {
           if (inWord) break;
           wordCells.clear();
           continue;

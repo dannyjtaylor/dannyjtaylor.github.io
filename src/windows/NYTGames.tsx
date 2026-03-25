@@ -634,7 +634,7 @@ function shuffleArray<T>(arr: T[]): T[] {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
+    [copy[i], copy[j]] = [copy[j]!, copy[i]!];
   }
   return copy;
 }
@@ -692,7 +692,7 @@ function GameMenu({ onSelect }: { onSelect: (g: GameScreen) => void }) {
 // WORDLE
 // ═══════════════════════════════════════════════
 function WordleGame({ onBack }: { onBack: () => void }) {
-  const [answer, setAnswer] = useState(() => WORDLE_WORDS[Math.floor(Math.random() * WORDLE_WORDS.length)]);
+  const [answer, setAnswer] = useState(() => WORDLE_WORDS[Math.floor(Math.random() * WORDLE_WORDS.length)]!);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [current, setCurrent] = useState('');
   const [gameOver, setGameOver] = useState(false);
@@ -705,7 +705,7 @@ function WordleGame({ onBack }: { onBack: () => void }) {
 
   const getLetterStatus = useCallback((guess: string): LetterStatus[] => {
     const result: LetterStatus[] = Array(5).fill('absent');
-    const ansArr = answer.split('');
+    const ansArr = (answer ?? '').split('');
     const used = Array(5).fill(false);
 
     // First pass: correct positions
@@ -734,7 +734,7 @@ function WordleGame({ onBack }: { onBack: () => void }) {
     guesses.forEach(g => {
       const s = getLetterStatus(g);
       for (let i = 0; i < 5; i++) {
-        const letter = g[i];
+        const letter = g[i]!;
         const cur = status[letter];
         if (s[i] === 'correct') status[letter] = 'correct';
         else if (s[i] === 'present' && cur !== 'correct') status[letter] = 'present';
@@ -778,7 +778,7 @@ function WordleGame({ onBack }: { onBack: () => void }) {
   }, [handleKey]);
 
   const newGame = useCallback(() => {
-    setAnswer(WORDLE_WORDS[Math.floor(Math.random() * WORDLE_WORDS.length)]);
+    setAnswer(WORDLE_WORDS[Math.floor(Math.random() * WORDLE_WORDS.length)]!);
     setGuesses([]);
     setCurrent('');
     setGameOver(false);
@@ -825,7 +825,7 @@ function WordleGame({ onBack }: { onBack: () => void }) {
             <div key={row} style={{ display: 'flex', gap: 3 }}>
               {Array.from({ length: 5 }).map((_, col) => {
                 const letter = guess ? guess[col] : (isCurrent ? (current[col] || '') : '');
-                const bg = statuses ? statusColor(statuses[col]) : '#c0c0c0';
+                const bg = statuses ? statusColor(statuses[col] ?? 'absent') : '#c0c0c0';
                 const textColor = statuses ? '#fff' : '#000';
                 return (
                   <div key={col} style={{
@@ -885,7 +885,7 @@ function WordleGame({ onBack }: { onBack: () => void }) {
 // ═══════════════════════════════════════════════
 function ConnectionsGame({ onBack }: { onBack: () => void }) {
   const [puzzleIndex] = useState(() => Math.floor(Math.random() * CONNECTIONS_PUZZLES.length));
-  const puzzle = CONNECTIONS_PUZZLES[puzzleIndex];
+  const puzzle = CONNECTIONS_PUZZLES[puzzleIndex]!;
   const [shuffledWords, setShuffledWords] = useState<string[]>(() =>
     shuffleArray(puzzle.categories.flatMap(c => c.words))
   );
@@ -1016,7 +1016,7 @@ function ConnectionsGame({ onBack }: { onBack: () => void }) {
 // ═══════════════════════════════════════════════
 function CrosswordGame({ onBack }: { onBack: () => void }) {
   const [puzzleIndex] = useState(() => Math.floor(Math.random() * CROSSWORD_PUZZLES.length));
-  const puzzleData = CROSSWORD_PUZZLES[puzzleIndex];
+  const puzzleData = CROSSWORD_PUZZLES[puzzleIndex]!;
 
   const buildGrid = useCallback((): CrosswordCell[][] => {
     return puzzleData.grid.map((row, ri) =>
@@ -1241,7 +1241,7 @@ function CrosswordGame({ onBack }: { onBack: () => void }) {
 // ═══════════════════════════════════════════════
 function SpellingBeeGame({ onBack }: { onBack: () => void }) {
   const [puzzleIndex] = useState(() => Math.floor(Math.random() * SPELLING_BEE_PUZZLES.length));
-  const puzzle = SPELLING_BEE_PUZZLES[puzzleIndex];
+  const puzzle = SPELLING_BEE_PUZZLES[puzzleIndex]!;
   const [outerLetters, setOuterLetters] = useState<string[]>(() => [...puzzle.outer]);
   const [input, setInput] = useState('');
   const [found, setFound] = useState<string[]>([]);

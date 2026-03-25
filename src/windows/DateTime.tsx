@@ -8,34 +8,65 @@ const MONTH_NAMES = [
 ];
 const DAY_HEADERS = ['S','M','T','W','T','F','S'];
 
-const TIME_ZONES = [
-  { label: '(GMT-12:00) Intl Date Line West', offset: -12 },
-  { label: '(GMT-11:00) Midway Island, Samoa', offset: -11 },
-  { label: '(GMT-10:00) Hawaii', offset: -10 },
-  { label: '(GMT-09:00) Alaska', offset: -9 },
-  { label: '(GMT-08:00) Pacific Time (US & Canada)', offset: -8 },
-  { label: '(GMT-07:00) Mountain Time (US & Canada)', offset: -7 },
-  { label: '(GMT-06:00) Central Time (US & Canada)', offset: -6 },
-  { label: '(GMT-05:00) Eastern Time (US & Canada)', offset: -5 },
-  { label: '(GMT-04:00) Atlantic Time (Canada)', offset: -4 },
-  { label: '(GMT-03:00) Buenos Aires, Greenland', offset: -3 },
-  { label: '(GMT-02:00) Mid-Atlantic', offset: -2 },
-  { label: '(GMT-01:00) Azores, Cape Verde Is.', offset: -1 },
-  { label: '(GMT+00:00) UTC / London, Dublin', offset: 0 },
-  { label: '(GMT+01:00) Berlin, Paris, Rome', offset: 1 },
-  { label: '(GMT+02:00) Cairo, Helsinki, Athens', offset: 2 },
-  { label: '(GMT+03:00) Moscow, Kuwait, Riyadh', offset: 3 },
-  { label: '(GMT+04:00) Abu Dhabi, Muscat, Baku', offset: 4 },
-  { label: '(GMT+05:00) Islamabad, Karachi', offset: 5 },
-  { label: '(GMT+05:30) Mumbai, Kolkata, Chennai', offset: 5.5 },
-  { label: '(GMT+06:00) Astana, Dhaka', offset: 6 },
-  { label: '(GMT+07:00) Bangkok, Hanoi, Jakarta', offset: 7 },
-  { label: '(GMT+08:00) Beijing, Singapore, Perth', offset: 8 },
-  { label: '(GMT+09:00) Tokyo, Seoul, Osaka', offset: 9 },
-  { label: '(GMT+10:00) Sydney, Melbourne, Guam', offset: 10 },
-  { label: '(GMT+11:00) Magadan, Solomon Is.', offset: 11 },
-  { label: '(GMT+12:00) Auckland, Wellington, Fiji', offset: 12 },
+/** Compute the CURRENT UTC offset for a given IANA timezone (accounts for DST) */
+function getCurrentOffset(tz: string): number {
+  const now = new Date();
+  // Get the UTC time string in that timezone and parse the offset
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    timeZoneName: 'shortOffset',
+  }).formatToParts(now);
+  const tzPart = parts.find(p => p.type === 'timeZoneName');
+  if (!tzPart) return 0;
+  const m = tzPart.value.match(/GMT([+-]?\d+)?(?::(\d+))?/);
+  if (!m) return 0;
+  const hours = parseInt(m[1] || '0', 10);
+  const mins = parseInt(m[2] || '0', 10);
+  return hours + (hours < 0 ? -mins : mins) / 60;
+}
+
+/** Build timezone list with DST-aware offsets */
+const TZ_DEFS: { label: string; iana: string }[] = [
+  { label: 'Intl Date Line West', iana: 'Etc/GMT+12' },
+  { label: 'Midway Island, Samoa', iana: 'Pacific/Midway' },
+  { label: 'Hawaii', iana: 'Pacific/Honolulu' },
+  { label: 'Alaska', iana: 'America/Anchorage' },
+  { label: 'Pacific Time (US & Canada)', iana: 'America/Los_Angeles' },
+  { label: 'Mountain Time (US & Canada)', iana: 'America/Denver' },
+  { label: 'Central Time (US & Canada)', iana: 'America/Chicago' },
+  { label: 'Eastern Time (US & Canada)', iana: 'America/New_York' },
+  { label: 'Atlantic Time (Canada)', iana: 'America/Halifax' },
+  { label: 'Buenos Aires, Greenland', iana: 'America/Argentina/Buenos_Aires' },
+  { label: 'Mid-Atlantic', iana: 'Atlantic/South_Georgia' },
+  { label: 'Azores, Cape Verde Is.', iana: 'Atlantic/Azores' },
+  { label: 'UTC / London, Dublin', iana: 'Europe/London' },
+  { label: 'Berlin, Paris, Rome', iana: 'Europe/Berlin' },
+  { label: 'Cairo, Helsinki, Athens', iana: 'Europe/Athens' },
+  { label: 'Moscow, Kuwait, Riyadh', iana: 'Europe/Moscow' },
+  { label: 'Abu Dhabi, Muscat, Baku', iana: 'Asia/Dubai' },
+  { label: 'Islamabad, Karachi', iana: 'Asia/Karachi' },
+  { label: 'Mumbai, Kolkata, Chennai', iana: 'Asia/Kolkata' },
+  { label: 'Astana, Dhaka', iana: 'Asia/Dhaka' },
+  { label: 'Bangkok, Hanoi, Jakarta', iana: 'Asia/Bangkok' },
+  { label: 'Beijing, Singapore, Perth', iana: 'Asia/Shanghai' },
+  { label: 'Tokyo, Seoul, Osaka', iana: 'Asia/Tokyo' },
+  { label: 'Sydney, Melbourne, Guam', iana: 'Australia/Sydney' },
+  { label: 'Magadan, Solomon Is.', iana: 'Pacific/Guadalcanal' },
+  { label: 'Auckland, Wellington, Fiji', iana: 'Pacific/Auckland' },
 ];
+
+function buildTimeZones() {
+  return TZ_DEFS.map(tz => {
+    const offset = getCurrentOffset(tz.iana);
+    const sign = offset >= 0 ? '+' : '-';
+    const absH = Math.floor(Math.abs(offset));
+    const absM = Math.round((Math.abs(offset) - absH) * 60);
+    const label = `(GMT${sign}${String(absH).padStart(2, '0')}:${String(absM).padStart(2, '0')}) ${tz.label}`;
+    return { label, offset };
+  });
+}
+
+const TIME_ZONES = buildTimeZones();
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();

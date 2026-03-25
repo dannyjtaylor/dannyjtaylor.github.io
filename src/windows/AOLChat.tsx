@@ -3,6 +3,11 @@ import { isFirebaseReady } from '../lib/firebase';
 import { useRoomCounts, useMultiplayerChat } from '../hooks/useMultiplayerChat';
 import { Sounds } from '../utils/sounds';
 
+/** Format a UTC timestamp as local time (e.g. "1:41 PM") using the user's browser timezone */
+function formatTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
 /* ════════════════════════════════════════════════════════════
    NPC Character Definitions (Frieren & Edward Elric)
    ════════════════════════════════════════════════════════════ */
@@ -10,6 +15,7 @@ import { Sounds } from '../utils/sounds';
 interface NPCMessage {
   from: 'user' | 'buddy';
   text: string;
+  timestamp: number;
 }
 
 interface BuddyProfile {
@@ -281,7 +287,7 @@ export function AOLChat() {
     if (!npcChats[idx] || npcChats[idx]!.length === 0) {
       setNpcChats((prev) => ({
         ...prev,
-        [idx]: [{ from: 'buddy', text: buddy.greeting }],
+        [idx]: [{ from: 'buddy', text: buddy.greeting, timestamp: Date.now() }],
       }));
     }
   };
@@ -294,7 +300,7 @@ export function AOLChat() {
     const idx = view.buddyIdx;
     setNpcChats((prev) => ({
       ...prev,
-      [idx]: [...(prev[idx] ?? []), { from: 'user', text }],
+      [idx]: [...(prev[idx] ?? []), { from: 'user', text, timestamp: Date.now() }],
     }));
     setNpcInput('');
     setNpcTyping(true);
@@ -303,7 +309,7 @@ export function AOLChat() {
       Sounds.aolMessageReceive();
       setNpcChats((prev) => ({
         ...prev,
-        [idx]: [...(prev[idx] ?? []), { from: 'buddy', text: reply }],
+        [idx]: [...(prev[idx] ?? []), { from: 'buddy', text: reply, timestamp: Date.now() }],
       }));
       setNpcTyping(false);
       setTimeout(() => inputRef.current?.focus(), 0);
@@ -486,6 +492,9 @@ export function AOLChat() {
             )}
             {mpMessages.map((msg) => (
               <div key={msg.id} style={{ marginBottom: 3 }}>
+                <span style={{ fontSize: 9, color: '#888', marginRight: 4 }}>
+                  {formatTime(msg.timestamp)}
+                </span>
                 <span style={{ fontWeight: 'bold', color: msg.color, fontSize: 12 }}>
                   {msg.from}:
                 </span>{' '}
@@ -558,6 +567,9 @@ export function AOLChat() {
       <div style={{ ...S.chatArea, flex: 1, margin: '2px 4px' }}>
         {npcMsgs.map((msg, i) => (
           <div key={i} style={{ marginBottom: 4 }}>
+            <span style={{ fontSize: 9, color: '#888', marginRight: 4 }}>
+              {formatTime(msg.timestamp)}
+            </span>
             <span style={{
               fontWeight: 'bold',
               color: msg.from === 'user' ? '#0000CC' : '#CC0000',

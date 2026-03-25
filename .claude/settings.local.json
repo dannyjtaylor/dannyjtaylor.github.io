@@ -40,7 +40,17 @@
       "Read(//mnt/c/Program Files/**)",
       "Bash(find /mnt -maxdepth 3 -name node.exe)",
       "Bash(cmd.exe /c \"where node\")",
-      "Bash(cmd.exe /c \"node -v\")"
+      "Bash(cmd.exe /c \"node -v\")",
+      "Bash(node_modules/.bin/tsc -b)",
+      "Bash(ls node_modules/.bin/tsc*)",
+      "Bash(npm install:*)",
+      "Bash(cmd.exe /c \"where npm\")",
+      "Bash(PATH=\"$PATH:/c/Program Files/nodejs\")",
+      "Bash(cmd.exe /c \"node --version\" 2>&1)",
+      "Bash(cmd.exe /c \"npm install 2>&1 && npm run build 2>&1\")",
+      "Bash(powershell.exe -Command \"cd 'C:\\\\Users\\\\danny\\\\OneDrive\\\\Documents\\\\GitHub\\\\dannyjtaylor.github.io'; npm install 2>&1; npm run build 2>&1\" 2>&1)",
+      "Bash(./node_modules/.bin/tsc -b)",
+      "Bash(ls \"C:\\\\Users\\\\danny\\\\OneDrive\\\\Documents\\\\GitHub\\\\dannyjtaylor.github.io\\\\node_modules\\\\.bin\\\\tsc\"*)"
     ]
   }
 }

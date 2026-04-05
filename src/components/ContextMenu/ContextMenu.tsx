@@ -216,6 +216,7 @@ export function ContextMenu() {
       'icon-datetime':   { label: 'Date/Time',      icon: 'datetime',  windowId: 'datetime' },
       'icon-settings':   { label: 'Settings',       icon: 'settings',  windowId: 'settings' },
       'icon-musicplayer':{ label: 'Music Player',   icon: 'musicplayer', windowId: 'musicplayer' },
+      'icon-credits':    { label: 'Credits',        icon: 'credits',     windowId: 'credits' },
     };
 
     return (

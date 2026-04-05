@@ -39,6 +39,7 @@ const PNG_ICONS: Record<string, string> = {
   musicplayer: '/icons/musicplayer.png',
   recyclebinfull: '/icons/recycle-full.png',
   recyclebinempty: '/icons/recycle-empty.png',
+  credits: '/icons/credits.svg',
 };
 
 /* ── Canvas Pixel Art Component ── */

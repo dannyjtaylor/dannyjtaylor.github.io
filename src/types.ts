@@ -42,6 +42,7 @@ export interface DesktopIconConfig {
   label: string;
   icon: string;
   windowId: string;
+  externalUrl?: string; // opens URL in new tab instead of a window
 }
 
 export type ContextMenuVariant = 'desktop' | 'icon' | 'notepad' | 'explorer' | 'explorer-item';

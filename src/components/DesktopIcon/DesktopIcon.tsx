@@ -9,9 +9,10 @@ interface DesktopIconProps {
   label: string;
   icon: string;
   windowId: string;
+  externalUrl?: string;
 }
 
-export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
+export function DesktopIcon({ id, label, icon, windowId, externalUrl }: DesktopIconProps) {
   const selectedIcons = useDesktopStore((s) => s.selectedIcons);
   const selectIcon = useDesktopStore((s) => s.selectIcon);
   const toggleSelectIcon = useDesktopStore((s) => s.toggleSelectIcon);
@@ -139,6 +140,7 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
                   'icon-datetime': { label: 'Date/Time', icon: 'datetime', windowId: 'datetime' },
                   'icon-settings': { label: 'Settings', icon: 'settings', windowId: 'settings' },
                   'icon-musicplayer': { label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
+                  'icon-credits': { label: 'Credits', icon: 'credits', windowId: 'credits' },
                 };
                 const staticInfo = staticIconMap[id];
                 if (staticInfo) {
@@ -171,7 +173,11 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
             clickTimer.current = null;
             lastClickedRef.current = null;
             Sounds.doubleClick();
-            openWindow(windowId);
+            if (externalUrl) {
+              window.open(externalUrl, '_blank');
+            } else {
+              openWindow(windowId);
+            }
           } else {
             lastClickedRef.current = id;
             clickTimer.current = setTimeout(() => {
@@ -185,7 +191,7 @@ export function DesktopIcon({ id, label, icon, windowId }: DesktopIconProps) {
       window.addEventListener('mousemove', onMove);
       window.addEventListener('mouseup', onUp);
     },
-    [id, windowId, isSelected, selectIcon, toggleSelectIcon, openWindow, iconPosition, updateIconPosition, moveToRecycleBin, moveStaticToRecycleBin],
+    [id, windowId, externalUrl, isSelected, selectIcon, toggleSelectIcon, openWindow, iconPosition, updateIconPosition, moveToRecycleBin, moveStaticToRecycleBin],
   );
 
   const handleContextMenu = useCallback(

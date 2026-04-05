@@ -19,6 +19,7 @@ import {
   remove,
   query,
   limitToLast,
+  serverTimestamp,
   type Unsubscribe,
 } from 'firebase/database';
 import { db } from '../lib/firebase';
@@ -97,7 +98,7 @@ export function useMultiplayerChat(
     set(userRef, {
       name: screenName,
       color: userColor,
-      joinedAt: Date.now(),
+      joinedAt: serverTimestamp(),
     });
 
     // Auto-remove on disconnect
@@ -126,17 +127,22 @@ export function useMultiplayerChat(
         setMessages([]);
         return;
       }
-      const msgs: ChatMessage[] = Object.entries(val).map(([id, data]) => {
-        const d = data as Record<string, unknown>;
-        return {
-          id,
-          text: (d.text as string) ?? '',
-          from: (d.from as string) ?? '???',
-          color: (d.color as string) ?? '#000',
-          timestamp: (d.timestamp as number) ?? 0,
-        };
-      });
-      msgs.sort((a, b) => a.timestamp - b.timestamp);
+      // Firebase push keys are chronologically ordered, so sorting by
+      // key guarantees correct insertion order regardless of client
+      // clock differences. This is more reliable than sorting by
+      // timestamp, which used to use Date.now() (client clock).
+      const msgs: ChatMessage[] = Object.entries(val)
+        .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+        .map(([id, data]) => {
+          const d = data as Record<string, unknown>;
+          return {
+            id,
+            text: (d.text as string) ?? '',
+            from: (d.from as string) ?? '???',
+            color: (d.color as string) ?? '#000',
+            timestamp: (d.timestamp as number) ?? Date.now(),
+          };
+        });
       setMessages(msgs);
     });
 
@@ -180,7 +186,7 @@ export function useMultiplayerChat(
         text: text.trim(),
         from: screenName,
         color: userColor,
-        timestamp: Date.now(),
+        timestamp: serverTimestamp(),
       });
     },
     [roomId, screenName, userColor],

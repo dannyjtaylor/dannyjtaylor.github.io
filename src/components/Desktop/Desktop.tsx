@@ -191,6 +191,7 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-settings',  label: 'Settings',       icon: 'settings',  windowId: 'settings' },
   { id: 'icon-musicplayer', label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
   { id: 'icon-nytgames', label: 'NYT Games', icon: 'document', windowId: 'nytgames' },
+  { id: 'icon-credits', label: 'Credits', icon: 'credits', windowId: 'credits', externalUrl: '/credits' },
 ];
 
 const WINDOWS: WindowConfig[] = [
@@ -512,6 +513,7 @@ export function Desktop() {
       label: iconLabelOverrides[d.id] || d.label,
       icon: d.icon,
       windowId: d.windowId,
+      externalUrl: undefined as string | undefined,
     })),
   ];
 
@@ -611,6 +613,7 @@ export function Desktop() {
             label={ic.label}
             icon={ic.icon}
             windowId={ic.windowId}
+            externalUrl={ic.externalUrl}
           />
         ))}
         {renderSelectionBox()}

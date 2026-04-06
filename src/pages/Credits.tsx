@@ -7,6 +7,7 @@ const TRACKS = [
   { name: 'FMAB - Again (YUI)', file: '/fmab_1.mp3' },
   { name: 'JJK - AIZO', file: '/jjk_1.mp3' },
   { name: 'Deltarune - Paradise, Paradise', file: '/deltarune_1.mp3' },
+  { name: 'I Wish That I Could Fall', file: '/iwishthaticouldfall.mp3' },
 ];
 
 /* ── Credits data ── */
@@ -14,6 +15,7 @@ interface CreditEntry {
   name: string;
   role?: string;
   photo?: string; // filename in /credits-photos/
+  needsLastName?: boolean;
 }
 
 interface CreditSection {
@@ -23,101 +25,191 @@ interface CreditSection {
 
 const CREDITS_DATA: CreditSection[] = [
   {
-    title: 'Family',
+    title: '2404-1313',
     entries: [
-      { name: 'Mom', role: 'For everything, always' },
-      { name: 'Dad', role: 'For believing in me from day one' },
-      { name: 'Sarah Taylor', role: 'Best sister anyone could ask for' },
-      { name: 'Grandma Jean', role: 'Unconditional love & Sunday dinners' },
-      { name: 'Grandpa Robert', role: 'Teaching me to never give up' },
-      { name: 'Uncle Mike', role: 'For the life advice (and the BBQ)' },
+      { name: 'Bryon Catlin' },
+      { name: 'Noah Campise' },
+      { name: 'George Mancini' },
     ],
   },
   {
-    title: 'Best Friends',
+    title: "Bryon's Family",
     entries: [
-      { name: 'Alex Chen', role: 'Day one. Through everything.' },
-      { name: 'Jordan Williams', role: 'Late night study sessions & bad ideas' },
-      { name: 'Sam Rivera', role: 'The one who always picked up the phone' },
-      { name: 'Taylor Kim', role: 'Roommate, co-conspirator, legend' },
-      { name: 'Morgan Davis', role: 'For keeping me grounded' },
-      { name: 'Casey Johnson', role: 'Road trips & reality checks' },
+      { name: 'Bryon Catlin II' },
+      { name: 'Dylan Catlin' },
+      { name: 'Leona Catlin' },
+      { name: 'Stephanie Catlin' },
+      { name: 'Sam Critchlow' },
+      { name: 'Tyler Critchlow' },
     ],
   },
   {
-    title: 'The Squad',
+    title: 'Good Mythical Morning Enjoyers',
     entries: [
-      { name: 'Dylan Park' },
-      { name: 'Jamie Lee' },
-      { name: 'Riley Cooper' },
-      { name: 'Drew Martinez' },
-      { name: 'Avery Thompson' },
-      { name: 'Quinn Mitchell' },
-      { name: 'Blake Anderson' },
-      { name: 'Reese Carter' },
+      { name: 'Emma', needsLastName: true },
+      { name: 'Jaylee', needsLastName: true },
     ],
   },
   {
-    title: 'Professors & Mentors',
+    title: 'My Family',
     entries: [
-      { name: 'Dr. Elizabeth Warren', role: 'Computer Science Department' },
-      { name: 'Prof. James Mitchell', role: 'Data Structures & Algorithms' },
-      { name: 'Dr. Sarah Chen', role: 'Software Engineering' },
-      { name: 'Prof. Michael Torres', role: 'Operating Systems' },
-      { name: 'Dr. Amanda Foster', role: 'Capstone Advisor' },
-      { name: 'Prof. David Kim', role: 'Discrete Mathematics' },
-      { name: 'Dr. Rachel Green', role: 'Database Systems' },
-      { name: 'Prof. Christopher Lee', role: 'Computer Networks' },
+      { name: 'Katherine Taylor', role: 'Mother' },
+      { name: 'John Taylor', role: 'Father' },
+      { name: 'Johnny Taylor', role: 'Brother' },
+      { name: 'Patricia Taylor', role: 'Sister' },
+      { name: 'Forrest Taylor', role: 'Brother' },
+      { name: 'Aunt Caroline', role: 'Aunt' },
+      { name: 'Aunt Silvia', role: 'Aunt' },
+      { name: 'Aunt Sue', role: 'Aunt' },
+      { name: 'Uncle Boo', role: 'Uncle' },
+      { name: 'Uncle Clagget', role: 'Uncle' },
+      { name: 'Uncle Randy', role: 'Uncle' },
+      { name: 'Andrew Livingston', role: 'Cousin' },
+      { name: 'George Livingston', role: 'Cousin' },
+      { name: 'Hannah Livingston', role: 'Cousin' },
+      { name: 'Hunter Livingston', role: 'Cousin' },
+      { name: 'Jacob Livingston', role: 'Cousin' },
     ],
   },
   {
-    title: 'Teaching Assistants',
+    title: 'Paul Patullo',
     entries: [
-      { name: 'Emily Nguyen', role: 'Made office hours actually useful' },
-      { name: 'Marcus Brown', role: 'Debugged my life (and my code)' },
-      { name: 'Priya Patel', role: 'Turned confusion into clarity' },
+      { name: 'Paul Patullo' },
     ],
   },
   {
-    title: 'Classmates & Lab Partners',
+    title: "Polk County Sheriff's Office LiDAR Team (Capstone)",
     entries: [
-      { name: 'Nathan Wright' },
-      { name: 'Olivia Santos' },
-      { name: 'Ethan Clark' },
-      { name: 'Sophia Hernandez' },
-      { name: 'Lucas Martin' },
-      { name: 'Mia Robinson' },
-      { name: 'Benjamin Hall' },
-      { name: 'Isabella Young' },
-      { name: 'Daniel King' },
-      { name: 'Emma Scott' },
+      { name: 'James Allegra' },
+      { name: 'Gaspar Chayer' },
+      { name: 'Gerardo Claudio' },
+      { name: 'Jackson Giles' },
+      { name: 'Leon Harry' },
+      { name: 'Michael Stevenson' },
+      { name: 'Lillian Wright' },
+      { name: 'Michael Kennon', role: 'Sponsor' },
+      { name: 'Jeremy Webb', role: 'Sponsor' },
     ],
   },
   {
-    title: 'People Who Made College Bearable',
+    title: 'Professors',
     entries: [
-      { name: 'The barista at the campus coffee shop', role: 'Who remembered my order' },
-      { name: 'The library security guard', role: 'Who let me stay past closing' },
-      { name: 'My therapist', role: 'Seriously. Thank you.' },
-      { name: 'The IT help desk crew', role: 'For not judging my questions' },
+      { name: 'Dr. Rawa Adla' },
+      { name: 'Dr. Hoan Ngo' },
+      { name: 'Dr. Sundari Ramabhotla' },
+      { name: 'Dr. Onur Toker' },
+      { name: 'Dr. Muhammad Ullah' },
     ],
   },
   {
-    title: 'Online Friends & Communities',
+    title: 'Rotaract',
     entries: [
-      { name: 'The Discord server' },
-      { name: 'Stack Overflow contributors' },
-      { name: 'That one Reddit thread from 2023' },
-      { name: 'Open source maintainers everywhere' },
+      { name: 'Alex Cam' },
+      { name: 'Brittany Cam' },
+      { name: 'Jeremy Casanova' },
+      { name: 'Jack Everheart' },
+      { name: 'Bobby Green' },
+      { name: 'Izzy Greer' },
+      { name: 'Domenic Iorfida' },
+      { name: 'Tommy Jackson' },
+      { name: 'Trenton McCutcheon' },
+      { name: 'Aidan Morris' },
+      { name: 'Melanie Najera' },
+      { name: 'Danielle Rivers' },
+      { name: 'Jesus Sanchez' },
+      { name: 'Bryden Silva' },
+      { name: 'Alyson Smyth' },
+      { name: 'Ryan Thomas' },
+      { name: 'Jeff Tillman' },
+      { name: 'Brian Tran' },
+      { name: 'Larry Walker' },
     ],
   },
   {
-    title: 'Honorable Mentions',
+    title: 'SHPE',
     entries: [
-      { name: 'Coffee', role: 'The real MVP' },
-      { name: 'My laptop', role: 'For not dying during finals' },
-      { name: 'Wikipedia', role: 'You know what you did' },
-      { name: 'The vending machine in the CS building', role: 'Consistent. Reliable. There for me at 3 AM.' },
+      { name: 'Sebastian Anzola' },
+      { name: 'Carlos Marillo' },
+      { name: 'Samuel Marillo' },
+      { name: 'Gabriel Sanchez' },
+    ],
+  },
+  {
+    title: 'SHPE Eboard 2025\u20132026',
+    entries: [
+      { name: 'Ines Alonso' },
+      { name: 'Naibys "Kro" Alzugaray' },
+      { name: 'Gabriel Basalo' },
+      { name: 'Nicolas Izquierdo' },
+      { name: 'Shriraj Mandulapalli' },
+      { name: 'Alex Meert' },
+      { name: 'Ethan Puig' },
+    ],
+  },
+  {
+    title: 'Student Government Association',
+    entries: [
+      { name: 'Colby Mandrodt', role: 'President' },
+      { name: 'Nolan Nguyen', role: 'Vice President' },
+    ],
+  },
+  {
+    title: 'VALORANT Varsity',
+    entries: [
+      { name: 'Bethany', needsLastName: true },
+      { name: 'Jay', needsLastName: true },
+      { name: 'Jonathan', needsLastName: true },
+      { name: 'Julian', needsLastName: true },
+      { name: 'Ryan', needsLastName: true },
+      { name: 'Wack', needsLastName: true },
+    ],
+  },
+  {
+    title: 'Winter Haven Technology Services',
+    entries: [
+      { name: 'Michael Adams' },
+      { name: 'Angel', needsLastName: true },
+      { name: 'Praythusa Bhuma' },
+      { name: 'Blake', needsLastName: true },
+      { name: 'Adriana Bottega' },
+      { name: 'Connor', needsLastName: true },
+      { name: 'Christopher Duclos' },
+      { name: 'Esteban', needsLastName: true },
+      { name: 'Jeremiah', needsLastName: true },
+      { name: 'Aizan "Bobby" Khan' },
+      { name: 'Mikey LaFollette' },
+      { name: 'Hiep Nguyen' },
+      { name: 'Nickolas Phan' },
+      { name: 'Pickleball John', needsLastName: true },
+      { name: 'Kristina Smith' },
+      { name: 'Joshua Stone' },
+      { name: 'Christopher Taylor' },
+      { name: 'Katiya Taylor' },
+      { name: 'Robert van Druten' },
+      { name: 'Jose Vega' },
+      { name: 'Wen Zhang' },
+    ],
+  },
+  {
+    title: 'Special Thanks',
+    entries: [
+      { name: 'Edward Elric' },
+      { name: 'Maya Fey' },
+      { name: 'Toby Fox' },
+      { name: 'Hornet' },
+      { name: 'Itadori Yuji' },
+      { name: 'Apollo Justice' },
+      { name: 'Hideo Kojima' },
+      { name: 'Jotaro Kujo' },
+      { name: 'Akira Kurusu' },
+      { name: 'Lucy MacLean' },
+      { name: 'Roy Mustang' },
+      { name: 'Yu Narukami' },
+      { name: 'Kasane Teto' },
+      { name: 'The Knight' },
+      { name: 'Thorfinn Son of Thors' },
+      { name: 'Phoenix Wright' },
+      { name: 'Makoto Yuki' },
     ],
   },
 ];
@@ -129,7 +221,7 @@ const SPEED_OPTIONS = [
   { label: '2x', value: 2 },
 ];
 
-const BASE_DURATION = 140; // seconds at 1x speed
+const BASE_DURATION = 180; // seconds at 1x speed (more content now)
 
 export function Credits() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -217,7 +309,7 @@ export function Credits() {
           ))}
         </select>
         <button className={styles.playBtn} onClick={togglePlay}>
-          {isPlaying ? '⏸' : '▶'}
+          {isPlaying ? '\u23F8' : '\u25B6'}
         </button>
         <input
           type="range"
@@ -259,18 +351,11 @@ export function Credits() {
 
           <div className={styles.divider} />
 
-          <div className={styles.quote}>
-            &ldquo;We do not remember days, we remember moments.&rdquo;
-            <div className={styles.quoteAttribution}>&mdash; Cesare Pavese</div>
-          </div>
-
-          <div className={styles.divider} />
-
           {CREDITS_DATA.map((section) => (
             <div key={section.title}>
               <div className={styles.sectionTitle}>{section.title}</div>
               {section.entries.map((entry) => (
-                <div key={entry.name}>
+                <div key={`${section.title}-${entry.name}`}>
                   {entry.photo && (
                     <div className={styles.photoSlot}>
                       <img src={`/credits-photos/${entry.photo}`} alt={entry.name} />
@@ -278,17 +363,14 @@ export function Credits() {
                   )}
                   <div className={styles.name}>{entry.name}</div>
                   {entry.role && <div className={styles.role}>{entry.role}</div>}
+                  {entry.needsLastName && (
+                    <div className={styles.placeholder}>[INSERT LAST NAME]</div>
+                  )}
                 </div>
               ))}
               <div className={styles.divider} />
             </div>
           ))}
-
-          <div className={styles.quote}>
-            &ldquo;The tassel was worth the hassle.&rdquo;
-          </div>
-
-          <div className={styles.divider} />
 
           <div className={styles.closingMessage}>Thank You</div>
           <div className={styles.closingSubtext}>

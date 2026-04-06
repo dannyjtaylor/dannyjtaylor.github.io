@@ -9,7 +9,100 @@
   color: #ffffff;
 }
 
-/* ── Music controls bar ── */
+/* ═══════════════════════════════════════════
+   Song Selection Modal
+   ═══════════════════════════════════════════ */
+
+.songSelectOverlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+
+.songSelectCard {
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+
+.songSelectTitle {
+  font-size: 36px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.songSelectSubtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 40px;
+  font-style: italic;
+}
+
+.songList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.songItem {
+  padding: 16px 24px;
+  background: transparent;
+  border: 1px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #aaa;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.songItem:hover {
+  border-color: #666;
+  color: #fff;
+}
+
+.songItemActive {
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.playButton {
+  padding: 16px 64px;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 20px;
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 3px;
+  transition: opacity 0.2s;
+}
+
+.playButton:hover {
+  opacity: 0.85;
+}
+
+.playButton:active {
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════
+   Controls Bar
+   ═══════════════════════════════════════════ */
+
 .controlsBar {
   position: fixed;
   top: 0;
@@ -19,9 +112,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 24px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
+  padding: 12px 20px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 70%, transparent 100%);
   transition: opacity 0.4s;
+  flex-wrap: wrap;
 }
 
 .controlsBar:not(:hover) {
@@ -33,9 +127,8 @@
 }
 
 .controlsLabel {
-  font-family: 'Georgia', serif;
   font-size: 13px;
-  color: #aaa;
+  color: #888;
   white-space: nowrap;
 }
 
@@ -44,86 +137,76 @@
   color: #fff;
   border: 1px solid #444;
   border-radius: 4px;
-  padding: 6px 12px;
+  padding: 6px 10px;
   font-family: 'Georgia', serif;
   font-size: 13px;
   cursor: pointer;
-  min-width: 240px;
+  min-width: 180px;
+  flex-shrink: 1;
 }
 
 .trackSelect:focus {
   outline: 1px solid #999;
 }
 
-.playBtn {
-  background: none;
-  border: 1px solid #555;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
+.volumeSlider {
+  width: 70px;
+  accent-color: #fff;
+  flex-shrink: 0;
+}
+
+.speedGroup {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: border-color 0.2s, color 0.2s;
+  gap: 8px;
 }
 
-.playBtn:hover {
-  border-color: #ccc;
-  color: #fff;
-}
-
-.volumeSlider {
-  width: 80px;
+.speedSlider {
+  width: 90px;
   accent-color: #fff;
 }
 
-.speedControls {
+.controlsRight {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
   margin-left: auto;
 }
 
-.speedBtn {
-  background: none;
-  border: 1px solid #444;
-  border-radius: 4px;
-  color: #888;
-  font-family: 'Georgia', serif;
-  font-size: 11px;
-  padding: 4px 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.speedBtn:hover {
-  border-color: #888;
-  color: #ccc;
-}
-
-.speedBtnActive {
-  border-color: #fff;
-  color: #fff;
-  background: rgba(255,255,255,0.1);
-}
-
 .backLink {
-  color: #888;
+  color: #666;
   text-decoration: none;
-  font-family: 'Georgia', serif;
   font-size: 13px;
-  margin-left: 16px;
   transition: color 0.2s;
+  white-space: nowrap;
 }
 
 .backLink:hover {
   color: #fff;
 }
 
-/* ── Scroll container ── */
+.lastGoodbyeBtn {
+  background: none;
+  border: 1px solid #555;
+  color: #999;
+  font-family: 'Georgia', serif;
+  font-size: 13px;
+  padding: 5px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.lastGoodbyeBtn:hover {
+  border-color: #ff0000;
+  color: #ff4444;
+}
+
+/* ═══════════════════════════════════════════
+   Scrolling Credits
+   ═══════════════════════════════════════════ */
+
 .scrollContainer {
   position: absolute;
   inset: 0;
@@ -134,32 +217,17 @@
 
 .creditsTrack {
   position: absolute;
-  bottom: 0;
+  top: 0;
   width: 100%;
   max-width: 700px;
   text-align: center;
   padding: 0 24px;
   will-change: transform;
-  animation: scrollUp var(--scroll-duration, 120s) linear forwards;
-  animation-play-state: paused;
+  transition: opacity 1.5s;
 }
 
-.creditsTrack.playing {
-  animation-play-state: running;
-}
-
-@keyframes scrollUp {
-  from {
-    transform: translateY(100vh);
-  }
-  to {
-    transform: translateY(var(--scroll-end, -6000px));
-  }
-}
-
-/* ── Credits content sections ── */
 .openingSpace {
-  height: 40vh;
+  height: 30vh;
 }
 
 .mainTitle {
@@ -169,7 +237,7 @@
   text-transform: uppercase;
   color: #fff;
   margin-bottom: 8px;
-  text-shadow: 0 0 40px rgba(255,255,255,0.15);
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
 }
 
 .subtitle {
@@ -222,7 +290,7 @@
   border-radius: 50%;
   margin: 0 auto 10px;
   overflow: hidden;
-  border: 2px solid rgba(255,255,255,0.15);
+  border: 2px solid rgba(255, 255, 255, 0.15);
 }
 
 .photoSlot img {
@@ -238,21 +306,6 @@
   margin: 50px auto;
 }
 
-.quote {
-  font-size: 18px;
-  font-style: italic;
-  color: #ccc;
-  max-width: 500px;
-  margin: 40px auto;
-  line-height: 1.6;
-}
-
-.quoteAttribution {
-  font-size: 14px;
-  color: #888;
-  margin-top: 8px;
-}
-
 .closingMessage {
   font-size: 32px;
   font-weight: 700;
@@ -260,7 +313,7 @@
   margin-top: 80px;
   margin-bottom: 20px;
   letter-spacing: 3px;
-  text-shadow: 0 0 40px rgba(255,255,255,0.15);
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
 }
 
 .closingSubtext {
@@ -282,17 +335,133 @@
   height: 100vh;
 }
 
-/* ── Vignette overlay ── */
+/* ═══════════════════════════════════════════
+   Vignette
+   ═══════════════════════════════════════════ */
+
 .vignette {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.6) 100%);
   z-index: 10;
 }
 
-/* ── Responsive ── */
-@media (max-width: 600px) {
+/* ═══════════════════════════════════════════
+   Confirm Dialog
+   ═══════════════════════════════════════════ */
+
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 24px;
+}
+
+.confirmCard {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 36px 40px;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.confirmText {
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.confirmYes,
+.confirmNo {
+  padding: 12px 36px;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-weight: 700;
+}
+
+.confirmYes {
+  background: #ff0000;
+  color: #fff;
+}
+
+.confirmYes:hover {
+  opacity: 0.85;
+}
+
+.confirmNo {
+  background: #333;
+  color: #fff;
+}
+
+.confirmNo:hover {
+  opacity: 0.85;
+}
+
+/* ═══════════════════════════════════════════
+   Attack Mode (Last Goodbye)
+   ═══════════════════════════════════════════ */
+
+.attackOverlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 500;
+}
+
+.attackCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.attackExitBtn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 510;
+  background: none;
+  border: 1px solid #555;
+  color: #888;
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.attackExitBtn:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════
+   Responsive — Mobile
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 640px) {
   .mainTitle {
     font-size: 32px;
     letter-spacing: 3px;
@@ -300,6 +469,7 @@
 
   .subtitle {
     font-size: 16px;
+    margin-bottom: 40px;
   }
 
   .name {
@@ -309,11 +479,95 @@
   .sectionTitle {
     font-size: 13px;
     letter-spacing: 5px;
+    margin-top: 50px;
+    margin-bottom: 20px;
   }
 
+  .closingMessage {
+    font-size: 24px;
+  }
+
+  .year {
+    font-size: 32px;
+  }
+
+  .songSelectTitle {
+    font-size: 24px;
+    letter-spacing: 2px;
+  }
+
+  .songItem {
+    font-size: 14px;
+    padding: 14px 18px;
+  }
+
+  .playButton {
+    padding: 14px 48px;
+    font-size: 18px;
+    width: 100%;
+  }
+
+  /* Controls bar stacks on mobile */
   .controlsBar {
-    flex-wrap: wrap;
-    padding: 8px 12px;
+    padding: 10px 12px;
     gap: 8px;
+  }
+
+  .controlsBar:not(:hover) {
+    opacity: 0.5;
+  }
+
+  .trackSelect {
+    min-width: 0;
+    flex: 1;
+    font-size: 12px;
+  }
+
+  .speedGroup {
+    order: 10;
+    width: 100%;
+  }
+
+  .speedSlider {
+    flex: 1;
+  }
+
+  .controlsRight {
+    order: 11;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .confirmCard {
+    padding: 28px 24px;
+  }
+
+  .confirmText {
+    font-size: 18px;
+  }
+
+  .attackExitBtn {
+    width: 56px;
+    height: 56px;
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mainTitle {
+    font-size: 26px;
+  }
+
+  .name {
+    font-size: 19px;
+  }
+
+  .songSelectTitle {
+    font-size: 20px;
+  }
+
+  .songItem {
+    font-size: 13px;
+    padding: 12px 14px;
   }
 }

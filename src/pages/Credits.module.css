@@ -126,6 +126,14 @@
   opacity: 1;
 }
 
+/* Touch devices have no hover — keep controls visible */
+@media (pointer: coarse) {
+  .controlsBar,
+  .controlsBar:not(:hover) {
+    opacity: 0.85;
+  }
+}
+
 .controlsLabel {
   font-size: 13px;
   color: #888;
@@ -511,10 +519,6 @@
   .controlsBar {
     padding: 10px 12px;
     gap: 8px;
-  }
-
-  .controlsBar:not(:hover) {
-    opacity: 0.5;
   }
 
   .trackSelect {

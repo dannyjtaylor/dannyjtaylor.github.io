@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './Credits.module.css';
 
 /* ═══════════════════════════════════════════
@@ -478,6 +478,8 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       window.removeEventListener('resize', resize);
+      canvas.removeEventListener('touchstart', onTouchStart);
+      canvas.removeEventListener('touchmove', onTouchMove);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -511,6 +513,8 @@ export function Credits() {
   const lastFrameRef = useRef(0);
   const contentHeightRef = useRef(0);
   const blackPauseRef = useRef(false);
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef(1);
   const volumeRef = useRef(60);
 
@@ -523,16 +527,16 @@ export function Credits() {
     if (audioRef.current) audioRef.current.volume = volume / 100;
   }, [volume]);
 
-  // Measure content height after credits DOM is painted
-  useLayoutEffect(() => {
-    if (mode === 'credits' && trackRef.current) {
-      contentHeightRef.current = trackRef.current.scrollHeight;
-    }
-  }, [mode]);
-
   // JS-driven scroll animation (replaces CSS animation for looping + dynamic speed)
   useEffect(() => {
     if (mode !== 'credits') return;
+
+    // Measure content height (and re-measure on resize/orientation change)
+    const measure = () => {
+      if (trackRef.current) contentHeightRef.current = trackRef.current.scrollHeight;
+    };
+    measure();
+    window.addEventListener('resize', measure);
 
     scrollPosRef.current = 0;
     lastFrameRef.current = 0;
@@ -556,14 +560,13 @@ export function Credits() {
           blackPauseRef.current = true;
           if (trackRef.current) trackRef.current.style.opacity = '0';
 
-          setTimeout(() => {
+          pauseTimerRef.current = setTimeout(() => {
             scrollPosRef.current = 0;
             if (trackRef.current) {
               trackRef.current.style.transform = 'translateY(0)';
               trackRef.current.style.opacity = '1';
             }
-            // Resume scrolling after fade-in
-            setTimeout(() => {
+            resumeTimerRef.current = setTimeout(() => {
               blackPauseRef.current = false;
             }, 1500);
           }, 3000);
@@ -574,7 +577,12 @@ export function Credits() {
     };
 
     animFrameRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animFrameRef.current);
+    return () => {
+      cancelAnimationFrame(animFrameRef.current);
+      window.removeEventListener('resize', measure);
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    };
   }, [mode]);
 
   // Cleanup audio on unmount
@@ -709,7 +717,7 @@ export function Credits() {
         />
         <div className={styles.speedGroup}>
           <span className={styles.controlsLabel}>
-            Speed: {speed % 1 === 0 ? `${speed}x` : `${speed.toFixed(2)}x`}
+            Speed: {speed % 1 === 0 ? `${speed}x` : `${speed.toFixed(speed % 0.5 === 0 ? 1 : 2)}x`}
           </span>
           <input
             type="range"

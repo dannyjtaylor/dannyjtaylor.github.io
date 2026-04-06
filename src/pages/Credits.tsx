@@ -159,7 +159,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'IEEE',
-    photo: 'IEEE.png',
+    photo: ['IEEE.png', 'IEEEhkn.png'],
     entries: [
       { name: 'Anthony Dreier' },
       { name: 'Colby Bradford' },
@@ -218,7 +218,6 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Really Smart People',
-    photo: 'IEEEhkn.png',
     entries: [
       { name: 'Zane Wolfe' },
     ],
@@ -440,6 +439,7 @@ const CREDITS_DATA: CreditSection[] = [
 
 const ALL_NAMES = CREDITS_DATA.flatMap((s) => s.entries.map((e) => e.name));
 const BASE_DURATION = 180;
+const TWO_COL_THRESHOLD = 10;
 
 /* ═══════════════════════════════════════════
    Attack Mode — Undertale "Last Goodbye"
@@ -458,26 +458,54 @@ interface Projectile {
 
 let nextProjId = 0;
 
+const DETERMINATION_MONO = "'DeterminationMono', monospace";
+const DETERMINATION_SANS = "'DeterminationSans', sans-serif";
+
+function loadHeartImage(): Promise<HTMLImageElement> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(img);
+    img.src = '/credits-photos/undertaleHEART.png';
+  });
+}
+
+async function preloadFonts() {
+  try {
+    await Promise.all([
+      document.fonts.load(`20px ${DETERMINATION_MONO}`),
+      document.fonts.load(`20px ${DETERMINATION_SANS}`),
+    ]);
+  } catch { /* fonts will still work, just might flash */ }
+}
+
 function drawHeart(
   ctx: CanvasRenderingContext2D,
   cx: number,
   cy: number,
   size: number,
   flash: boolean,
+  heartImg: HTMLImageElement | null,
 ) {
   ctx.save();
-  ctx.fillStyle = flash ? '#ffffff' : '#ff0000';
-  const s = size;
-  const top = cy - s * 0.5;
-  const curveH = s * 0.3;
-  ctx.beginPath();
-  ctx.moveTo(cx, top + curveH);
-  ctx.bezierCurveTo(cx, top, cx - s * 0.5, top, cx - s * 0.5, top + curveH);
-  ctx.bezierCurveTo(cx - s * 0.5, top + s * 0.65, cx, top + s * 0.85, cx, top + s * 1.1);
-  ctx.bezierCurveTo(cx, top + s * 0.85, cx + s * 0.5, top + s * 0.65, cx + s * 0.5, top + curveH);
-  ctx.bezierCurveTo(cx + s * 0.5, top, cx, top, cx, top + curveH);
-  ctx.closePath();
-  ctx.fill();
+  if (heartImg && heartImg.complete && heartImg.naturalWidth > 0) {
+    if (flash) ctx.filter = 'brightness(10)';
+    ctx.drawImage(heartImg, cx - size, cy - size, size * 2, size * 2);
+    ctx.filter = 'none';
+  } else {
+    ctx.fillStyle = flash ? '#ffffff' : '#ff0000';
+    const s = size;
+    const top = cy - s * 0.5;
+    const curveH = s * 0.3;
+    ctx.beginPath();
+    ctx.moveTo(cx, top + curveH);
+    ctx.bezierCurveTo(cx, top, cx - s * 0.5, top, cx - s * 0.5, top + curveH);
+    ctx.bezierCurveTo(cx - s * 0.5, top + s * 0.65, cx, top + s * 0.85, cx, top + s * 1.1);
+    ctx.bezierCurveTo(cx, top + s * 0.85, cx + s * 0.5, top + s * 0.65, cx + s * 0.5, top + curveH);
+    ctx.bezierCurveTo(cx + s * 0.5, top, cx, top, cx, top + curveH);
+    ctx.closePath();
+    ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -510,6 +538,10 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     audio.loop = true;
     audio.volume = 0.7;
     audio.play().catch(() => {});
+
+    let heartImg: HTMLImageElement | null = null;
+    loadHeartImage().then((img) => { heartImg = img; });
+    preloadFonts();
 
     const heart = { x: W() / 2, y: H() * 0.7 };
     let projectiles: Projectile[] = [];
@@ -556,7 +588,7 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       const name = ALL_NAMES[nameIdx % ALL_NAMES.length] ?? 'Danny';
       nameIdx++;
       const fontSize = Math.max(16, Math.min(26, W() / 28));
-      ctx.font = `${fontSize}px Georgia, serif`;
+      ctx.font = `${fontSize}px ${DETERMINATION_SANS}`;
       const tw = ctx.measureText(name).width;
       const th = fontSize * 1.2;
       const id = nextProjId++;
@@ -657,15 +689,15 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       }
 
       const drawFontSize = Math.max(16, Math.min(26, w / 28));
-      ctx.font = `${drawFontSize}px Georgia, serif`;
+      ctx.font = `${drawFontSize}px ${DETERMINATION_SANS}`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
       ctx.fillStyle = '#ffffff';
       for (const p of projectiles) ctx.fillText(p.text, p.x, p.y);
 
-      drawHeart(ctx, heart.x, heart.y, HEART_SIZE, hitFlash > 0);
+      drawHeart(ctx, heart.x, heart.y, HEART_SIZE, hitFlash > 0, heartImg);
 
-      ctx.font = '13px Georgia, serif';
+      ctx.font = `13px ${DETERMINATION_MONO}`;
       ctx.fillStyle = '#444';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
@@ -996,29 +1028,37 @@ export function Credits() {
 
           <div className={styles.divider} />
 
-          {CREDITS_DATA.map((section) => (
-            <div key={section.title}>
-              {section.photo && renderSectionPhoto(section.photo)}
-              <div className={section.title === 'In Memory Of' ? styles.memorialTitle : styles.sectionTitle}>
-                {section.title}
-              </div>
-              {section.entries.map((entry) => (
-                <div key={`${section.title}-${entry.name}`}>
-                  {entry.photo && (
-                    <div className={styles.photoSlot}>
-                      <img src={`/credits-photos/${entry.photo}`} alt={entry.name} />
-                    </div>
-                  )}
-                  <div className={section.title === 'In Memory Of' ? styles.memorialName : styles.name}>
-                    {entry.name}
+          {CREDITS_DATA.map((section) => {
+            const useTwoCol = section.entries.length >= TWO_COL_THRESHOLD;
+            const nameEntries = section.entries.map((entry) => (
+              <div key={`${section.title}-${entry.name}`}>
+                {entry.photo && (
+                  <div className={styles.photoSlot}>
+                    <img src={`/credits-photos/${entry.photo}`} alt={entry.name} />
                   </div>
-                  {entry.role && <div className={styles.role}>{entry.role}</div>}
-                  {entry.needsLastName && <div className={styles.placeholder}>[INSERT LAST NAME]</div>}
+                )}
+                <div className={section.title === 'In Memory Of' ? styles.memorialName : styles.name}>
+                  {entry.name}
                 </div>
-              ))}
-              <div className={styles.divider} />
-            </div>
-          ))}
+                {entry.role && <div className={styles.role}>{entry.role}</div>}
+                {entry.needsLastName && <div className={styles.placeholder}>[INSERT LAST NAME]</div>}
+              </div>
+            ));
+            return (
+              <div key={section.title}>
+                {section.photo && renderSectionPhoto(section.photo)}
+                <div className={section.title === 'In Memory Of' ? styles.memorialTitle : styles.sectionTitle}>
+                  {section.title}
+                </div>
+                {useTwoCol ? (
+                  <div className={styles.twoColumnNames}>{nameEntries}</div>
+                ) : (
+                  nameEntries
+                )}
+                <div className={styles.divider} />
+              </div>
+            );
+          })}
 
           <div className={styles.closingMessage}>Thank You</div>
           <div className={styles.closingSubtext}>To everyone who helped me get here.</div>

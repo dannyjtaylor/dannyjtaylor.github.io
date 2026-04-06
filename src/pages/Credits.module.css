@@ -1,3 +1,20 @@
+/* Undertale "Determination Mono" font for Last Goodbye mode */
+@font-face {
+  font-family: 'DeterminationMono';
+  src: url('/determination-mono-web-font/DeterminationMonoWebRegular-Z5oq.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DeterminationSans';
+  src: url('/determination-mono-web-font/DeterminationSansWebRegular-369X.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Credits page — movie-style rolling credits */
 
 .creditsPage {
@@ -181,11 +198,13 @@
   width: 70px;
   accent-color: #fff;
   flex-shrink: 0;
+  touch-action: none;
 }
 
 .speedSlider {
   width: 90px;
   accent-color: #fff;
+  touch-action: none;
 }
 
 .controlsRight {
@@ -211,7 +230,7 @@
   background: none;
   border: 1px solid #555;
   color: #999;
-  font-family: 'Georgia', serif;
+  font-family: 'DeterminationSans', 'Georgia', serif;
   font-size: 13px;
   padding: 5px 14px;
   border-radius: 4px;
@@ -327,32 +346,33 @@
 }
 
 .sectionPhoto {
-  width: 140px;
-  height: 140px;
-  border-radius: 12px;
   margin: 60px auto 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
 }
 
 .sectionPhoto img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 280px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sectionPhotoRow {
   display: flex;
   gap: 16px;
   justify-content: center;
+  align-items: center;
   margin: 60px auto 16px;
 }
 
 .sectionPhotoRow img {
-  width: 120px;
-  height: 120px;
+  max-width: 200px;
+  max-height: 160px;
+  width: auto;
+  height: auto;
   border-radius: 12px;
-  object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -374,6 +394,12 @@
   letter-spacing: 1px;
 }
 
+.twoColumnNames {
+  column-count: 2;
+  column-gap: 40px;
+  text-align: center;
+}
+
 .role {
   font-size: 14px;
   color: #999;
@@ -393,18 +419,17 @@
 }
 
 .photoSlot {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
   margin: 0 auto 10px;
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  text-align: center;
 }
 
 .photoSlot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 160px;
+  max-height: 160px;
+  width: auto;
+  height: auto;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
 }
 
 .divider {
@@ -467,20 +492,16 @@
 }
 
 .adventurePhoto {
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
   margin: 0 auto 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
 }
 
 .adventurePhoto img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #fff;
-  padding: 8px;
+  max-width: 180px;
+  max-height: 120px;
+  width: auto;
+  height: auto;
+  border-radius: 12px;
 }
 
 .adventureCompany {
@@ -555,6 +576,7 @@
 }
 
 .confirmText {
+  font-family: 'DeterminationSans', 'Georgia', serif;
   font-size: 20px;
   color: #fff;
   margin-bottom: 28px;
@@ -572,7 +594,7 @@
   padding: 12px 36px;
   border: none;
   border-radius: 6px;
-  font-family: 'Georgia', serif;
+  font-family: 'DeterminationSans', 'Georgia', serif;
   font-size: 16px;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -679,14 +701,18 @@
     margin-bottom: 20px;
   }
 
-  .sectionPhoto {
-    width: 100px;
-    height: 100px;
+  .sectionPhoto img {
+    max-width: 200px;
+    max-height: 140px;
   }
 
   .sectionPhotoRow img {
-    width: 90px;
-    height: 90px;
+    max-width: 140px;
+    max-height: 110px;
+  }
+
+  .twoColumnNames {
+    column-count: 1;
   }
 
   .closingMessage {
@@ -747,7 +773,7 @@
   .speedSlider,
   .volumeSlider {
     flex: 1;
-    min-width: 0;
+    min-width: 60px;
   }
 
   .controlsRight {

@@ -587,7 +587,7 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     const spawn = () => {
       const name = ALL_NAMES[nameIdx % ALL_NAMES.length] ?? 'Danny';
       nameIdx++;
-      const fontSize = Math.max(16, Math.min(26, W() / 28));
+      const fontSize = Math.max(24, Math.min(38, W() / 18));
       ctx.font = `${fontSize}px ${DETERMINATION_SANS}`;
       const tw = ctx.measureText(name).width;
       const th = fontSize * 1.2;
@@ -688,7 +688,7 @@ function AttackGame({ onExit }: { onExit: () => void }) {
         ctx.fillRect(0, 0, w, h);
       }
 
-      const drawFontSize = Math.max(16, Math.min(26, w / 28));
+      const drawFontSize = Math.max(24, Math.min(38, w / 18));
       ctx.font = `${drawFontSize}px ${DETERMINATION_SANS}`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
@@ -1031,7 +1031,7 @@ export function Credits() {
           {CREDITS_DATA.map((section) => {
             const useTwoCol = section.entries.length >= TWO_COL_THRESHOLD;
             const nameEntries = section.entries.map((entry) => (
-              <div key={`${section.title}-${entry.name}`}>
+              <div key={`${section.title}-${entry.name}`} className={useTwoCol ? styles.twoColumnEntry : undefined}>
                 {entry.photo && (
                   <div className={styles.photoSlot}>
                     <img src={`/credits-photos/${entry.photo}`} alt={entry.name} />

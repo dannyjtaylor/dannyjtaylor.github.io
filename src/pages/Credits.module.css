@@ -51,6 +51,9 @@
   flex-direction: column;
   gap: 8px;
   margin-bottom: 32px;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .songItem {
@@ -134,12 +137,6 @@
   }
 }
 
-.controlsLabel {
-  font-size: 13px;
-  color: #888;
-  white-space: nowrap;
-}
-
 .trackSelect {
   background: #1a1a1a;
   color: #fff;
@@ -157,16 +154,33 @@
   outline: 1px solid #999;
 }
 
+.sliderGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sliderLabel {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  min-width: 32px;
+  text-align: right;
+}
+
+.sliderValue {
+  font-size: 12px;
+  color: #aaa;
+  white-space: nowrap;
+  min-width: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
 .volumeSlider {
   width: 70px;
   accent-color: #fff;
   flex-shrink: 0;
-}
-
-.speedGroup {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .speedSlider {
@@ -527,13 +541,16 @@
     font-size: 12px;
   }
 
-  .speedGroup {
+  .sliderGroup {
     order: 10;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
   }
 
-  .speedSlider {
+  .speedSlider,
+  .volumeSlider {
     flex: 1;
+    min-width: 0;
   }
 
   .controlsRight {

@@ -6,11 +6,40 @@ import styles from './Credits.module.css';
    ═══════════════════════════════════════════ */
 
 const TRACKS = [
-  { name: 'Kasane Teto - Machine Love', file: '/kasane_1.mp3' },
-  { name: 'FMAB - Again (YUI)', file: '/fmab_1.mp3' },
-  { name: 'JJK - AIZO', file: '/jjk_1.mp3' },
+  { name: 'Anri - I Can\'t Stop the Loneliness', file: '/anri_icantstopthelonliness.mp3' },
+  { name: 'Billy Joel - Movin\' Out', file: '/billy_joel_movinout.mp3' },
+  { name: 'Boy Pablo - Dance Baby', file: '/boy_pablo_dancebaby.mp3' },
+  { name: 'Carter Vail - Napoleon', file: '/carter_vail_napoleon.mp3' },
+  { name: 'Clairo - 4EVER', file: '/clairo_4ever.mp3' },
+  { name: 'Clairo - Add Up My Love', file: '/clairo_addupmylove.mp3' },
+  { name: 'Clairo - Thank You', file: '/thankyou_clairo.mp3' },
+  { name: 'Cowboy Bebop - The Real Folk Blues', file: '/cowboybebop_therealfolkblues.mp3' },
+  { name: 'Cyberpunk - I Really Want to Stay at Your House', file: '/cyberpunk_ireallywanttostayatyourhouse.mp3' },
+  { name: 'Daft Punk - Give Life Back to Music', file: '/daft_punk_givelifebacktomusic.mp3' },
+  { name: 'Daft Punk - One More Time', file: '/daft_punk_onemoretime.mp3' },
   { name: 'Deltarune - Paradise, Paradise', file: '/deltarune_1.mp3' },
-  { name: 'I Wish That I Could Fall', file: '/iwishthaticouldfall.mp3' },
+  { name: 'FMAB - Ending Theme', file: '/full_metal_alchemist_brotherhood_ending.mp3' },
+  { name: 'Ginger Root - Loretta', file: '/ginger_root_loretta.mp3' },
+  { name: 'glaive - Icarus', file: '/glaive_icarus.mp3' },
+  { name: 'Gorillaz - On Melancholy Hill', file: '/gorillaz_onmeloncholyhill.mp3' },
+  { name: 'Hai Yorokonde', file: '/hai_yorokonde.mp3' },
+  { name: 'Invincible', file: '/invincible.mp3' },
+  { name: 'Jamie Paige - Human', file: '/jamie_paige_human.mp3' },
+  { name: 'Jamie Paige - I Wish That I Could Fall', file: '/jamie_paige_iwishthaticouldfall.mp3' },
+  { name: 'JJK - AIZO', file: '/jjk_AIZO.mp3' },
+  { name: 'JJK - Lost in Paradise', file: '/jjk_lostinparadise.mp3' },
+  { name: 'Kaiju No. 8 - Nobody', file: '/kaijuno8_nobody.mp3' },
+  { name: 'Masayoshi Takanaka - Brazilian Skies', file: '/masayoshi_takanaka_brasilianskies.mp3' },
+  { name: 'MOSQ - Way of Life', file: '/mosq_way_of_life.mp3' },
+  { name: 'NGE - Fly Me to the Moon', file: '/nge_flymetothemoon.mp3' },
+  { name: 'ODDEEO - Chinatown Blues', file: '/ODDEEO_chinatownblues.mp3' },
+  { name: 'Persona 4 - Nevermore', file: '/persona_4_nevermore.mp3' },
+  { name: 'Sakanaction - Kaiju', file: '/sakanaction - Kaiju (SPOTISAVER).mp3' },
+  { name: 'Superman - Punk Rocker', file: '/superman_punkrocker.mp3' },
+  { name: 'Tame Impala - The Less I Know the Better', file: '/tame_impala_thelessiknowthebetter.mp3' },
+  { name: 'Toby Fox - Castle Funk', file: '/tobyfox_castlefunk.mp3' },
+  { name: 'Toby Fox - The Third Sanctuary', file: '/tobyfox_thethirdsanctuary.mp3' },
+  { name: 'Wallows - OK', file: '/wallows_ok.mp3' },
 ];
 
 interface CreditEntry {
@@ -27,22 +56,33 @@ interface CreditSection {
 
 const CREDITS_DATA: CreditSection[] = [
   {
-    title: '2404-1313',
+    title: 'My Family',
     entries: [
-      { name: 'Bryon Catlin' },
-      { name: 'Noah Campise' },
-      { name: 'George Mancini' },
+      { name: 'Andrew Livingston', role: 'Cousin' },
+      { name: 'Aunt Caroline', role: 'Aunt' },
+      { name: 'Aunt Silvia', role: 'Aunt' },
+      { name: 'Aunt Sue', role: 'Aunt' },
+      { name: 'Forrest Taylor', role: 'Brother' },
+      { name: 'George Livingston', role: 'Cousin' },
+      { name: 'Hannah Livingston', role: 'Cousin' },
+      { name: 'Hunter Livingston', role: 'Cousin' },
+      { name: 'Jacob Livingston', role: 'Cousin' },
+      { name: 'John Taylor', role: 'Father' },
+      { name: 'Johnny Taylor', role: 'Brother' },
+      { name: 'Katherine Taylor', role: 'Mother' },
+      { name: 'Katheryn', needsLastName: true },
+      { name: 'Patricia Taylor', role: 'Sister' },
+      { name: 'Uncle Boo', role: 'Uncle' },
+      { name: 'Uncle Clagget', role: 'Uncle' },
+      { name: 'Uncle Randy', role: 'Uncle' },
     ],
   },
   {
-    title: "Bryon's Family",
+    title: '2404-1313',
     entries: [
-      { name: 'Bryon Catlin II' },
-      { name: 'Dylan Catlin' },
-      { name: 'Leona Catlin' },
-      { name: 'Stephanie Catlin' },
-      { name: 'Sam Critchlow' },
-      { name: 'Tyler Critchlow' },
+      { name: 'Bryon Catlin' },
+      { name: 'George Mancini' },
+      { name: 'Noah Campise' },
     ],
   },
   {
@@ -53,29 +93,70 @@ const CREDITS_DATA: CreditSection[] = [
     ],
   },
   {
-    title: 'My Family',
+    title: 'IEEE',
     entries: [
-      { name: 'Katherine Taylor', role: 'Mother' },
-      { name: 'John Taylor', role: 'Father' },
-      { name: 'Johnny Taylor', role: 'Brother' },
-      { name: 'Patricia Taylor', role: 'Sister' },
-      { name: 'Forrest Taylor', role: 'Brother' },
-      { name: 'Aunt Caroline', role: 'Aunt' },
-      { name: 'Aunt Silvia', role: 'Aunt' },
-      { name: 'Aunt Sue', role: 'Aunt' },
-      { name: 'Uncle Boo', role: 'Uncle' },
-      { name: 'Uncle Clagget', role: 'Uncle' },
-      { name: 'Uncle Randy', role: 'Uncle' },
-      { name: 'Andrew Livingston', role: 'Cousin' },
-      { name: 'George Livingston', role: 'Cousin' },
-      { name: 'Hannah Livingston', role: 'Cousin' },
-      { name: 'Hunter Livingston', role: 'Cousin' },
-      { name: 'Jacob Livingston', role: 'Cousin' },
+      { name: 'Anthony Dreier' },
+      { name: 'Colby Bradford' },
+      { name: 'Raymond', needsLastName: true },
+      { name: 'Sahil', needsLastName: true },
+      { name: 'Sterling', needsLastName: true },
+      { name: 'Thomas Cook' },
+      { name: 'Will', needsLastName: true },
+    ],
+  },
+  {
+    title: 'In Memory Of',
+    entries: [
+      { name: 'Logan Hewitt' },
+    ],
+  },
+  {
+    title: 'Online Friends',
+    entries: [
+      { name: 'Alibaba', needsLastName: true },
+      { name: 'Andy', needsLastName: true },
+      { name: 'Athena', needsLastName: true },
+      { name: 'Bruno', needsLastName: true },
+      { name: 'Daichi', needsLastName: true },
+      { name: 'Daniela', needsLastName: true },
+      { name: 'Elysha', needsLastName: true },
+      { name: 'Emily Lu' },
+      { name: 'Genia', needsLastName: true },
+      { name: 'Joseph Gregory Salazar Rosillo' },
+      { name: 'Lele', needsLastName: true },
+      { name: 'Liv', needsLastName: true },
+      { name: 'Nanox', needsLastName: true },
+      { name: 'Ouroborix', needsLastName: true },
+      { name: 'Ridge', needsLastName: true },
+      { name: 'Ryan', needsLastName: true },
+      { name: 'Savanna', needsLastName: true },
+      { name: 'Shin', needsLastName: true },
+      { name: 'Tim', needsLastName: true },
+      { name: 'Z', needsLastName: true },
     ],
   },
   {
     title: 'Paul Patullo',
-    entries: [{ name: 'Paul Patullo' }],
+    entries: [
+      { name: 'Joe Patullo' },
+      { name: 'Natasha Patullo' },
+      { name: 'Paul Patullo' },
+    ],
+  },
+  {
+    title: 'People I Know Because of Bryon',
+    entries: [
+      { name: 'Bryon Catlin II' },
+      { name: 'Carson', needsLastName: true },
+      { name: 'Dylan Catlin' },
+      { name: 'Jackson Bopp' },
+      { name: 'Karl', needsLastName: true },
+      { name: 'Leona Catlin' },
+      { name: 'Michael', needsLastName: true },
+      { name: 'Sam Critchlow' },
+      { name: 'Stephanie Catlin' },
+      { name: 'Tyler Critchlow' },
+    ],
   },
   {
     title: "Polk County Sheriff's Office LiDAR Team (Capstone)",
@@ -85,53 +166,85 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Gerardo Claudio' },
       { name: 'Jackson Giles' },
       { name: 'Leon Harry' },
-      { name: 'Michael Stevenson' },
       { name: 'Lillian Wright' },
       { name: 'Michael Kennon', role: 'Sponsor' },
+      { name: 'Michael Stevenson' },
       { name: 'Jeremy Webb', role: 'Sponsor' },
     ],
   },
   {
     title: 'Professors',
     entries: [
-      { name: 'Dr. Rawa Adla' },
+      { name: 'Austin Anderson' },
+      { name: 'Dr. Drourin' },
+      { name: 'Dr. Elizabeth Kames' },
+      { name: 'Dr. Emad Foaud' },
+      { name: 'Dr. Farmani' },
       { name: 'Dr. Hoan Ngo' },
-      { name: 'Dr. Sundari Ramabhotla' },
-      { name: 'Dr. Onur Toker' },
+      { name: 'Dr. Jared Bunn' },
+      { name: 'Dr. Manoj' },
       { name: 'Dr. Muhammad Ullah' },
+      { name: 'Dr. Olin' },
+      { name: 'Dr. Onur Toker' },
+      { name: 'Dr. Rawa Adla' },
+      { name: 'Dr. Sakib' },
+      { name: 'Dr. Sista' },
+      { name: 'Dr. Sundari Ramabhotla' },
+      { name: 'Mr. Falcao' },
+    ],
+  },
+  {
+    title: 'RAs/CDs',
+    entries: [
+      { name: 'Emily', needsLastName: true },
+      { name: 'Jordan Hall' },
+      { name: 'Maddox', needsLastName: true },
+    ],
+  },
+  {
+    title: 'Really Smart People',
+    entries: [
+      { name: 'Zane Wolfe' },
     ],
   },
   {
     title: 'Rotaract',
     entries: [
+      { name: 'Aidan Morris' },
       { name: 'Alex Cam' },
-      { name: 'Brittany Cam' },
-      { name: 'Jeremy Casanova' },
-      { name: 'Jack Everheart' },
+      { name: 'Alyson Smyth' },
       { name: 'Bobby Green' },
-      { name: 'Izzy Greer' },
+      { name: 'Brian Tran' },
+      { name: 'Brittany Cam' },
+      { name: 'Bryden Silva' },
+      { name: 'Danielle Rivers' },
       { name: 'Domenic Iorfida' },
+      { name: 'Izzy Greer' },
+      { name: 'Jack Everheart' },
+      { name: 'Jeff Tillman' },
+      { name: 'Jeremy Casanova' },
+      { name: 'Jesus Sanchez' },
+      { name: 'Larry Walker' },
+      { name: 'Lawrence Drake' },
+      { name: 'Melanie Najera' },
+      { name: 'Patrick', needsLastName: true },
+      { name: 'Ryan Thomas' },
       { name: 'Tommy Jackson' },
       { name: 'Trenton McCutcheon' },
-      { name: 'Aidan Morris' },
-      { name: 'Melanie Najera' },
-      { name: 'Danielle Rivers' },
-      { name: 'Jesus Sanchez' },
-      { name: 'Bryden Silva' },
-      { name: 'Alyson Smyth' },
-      { name: 'Ryan Thomas' },
-      { name: 'Jeff Tillman' },
-      { name: 'Brian Tran' },
-      { name: 'Larry Walker' },
     ],
   },
   {
     title: 'SHPE',
     entries: [
-      { name: 'Sebastian Anzola' },
+      { name: 'Benji Guzman' },
       { name: 'Carlos Marillo' },
-      { name: 'Samuel Marillo' },
       { name: 'Gabriel Sanchez' },
+      { name: 'Louis Irias' },
+      { name: 'Maria Roman' },
+      { name: 'Raul Lopez III' },
+      { name: 'Samuel Marillo' },
+      { name: 'Sebastian Anzola' },
+      { name: 'The City of Philadelphia', role: 'for stealing my wallet' },
     ],
   },
   {
@@ -144,6 +257,97 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Shriraj Mandulapalli' },
       { name: 'Alex Meert' },
       { name: 'Ethan Puig' },
+    ],
+  },
+  {
+    title: "Sorry I Couldn't Think of a Category For You Guys",
+    entries: [
+      { name: 'Albert Ubieta' },
+      { name: 'Alfonso', needsLastName: true },
+      { name: 'Aliyah', needsLastName: true },
+      { name: 'Alis Craig' },
+      { name: 'Andrew Blackwelder' },
+      { name: "Andrew Blackwelder's Cousin Thats Dating Andrew My Cousin" },
+      { name: 'Andrew Graham' },
+      { name: 'Andrew Piasecki' },
+      { name: 'Andrew Ptazek' },
+      { name: 'Anthony Parinello' },
+      { name: 'Brady Lenox' },
+      { name: 'Brandon Camacho' },
+      { name: 'Cameron', needsLastName: true },
+      { name: 'Chiara Bottega' },
+      { name: 'Chris Mather' },
+      { name: 'Christian Cruz' },
+      { name: 'Clara Satterfield' },
+      { name: 'Connor', needsLastName: true },
+      { name: 'Dante', needsLastName: true },
+      { name: 'David Para' },
+      { name: 'David Tarbox' },
+      { name: 'David Vidana' },
+      { name: 'David Zambrano' },
+      { name: "Duce D'Anthony Dossey" },
+      { name: 'Eddrick', needsLastName: true },
+      { name: 'Eli Wolfe' },
+      { name: 'Elijah Kenney' },
+      { name: 'Emily', needsLastName: true, role: 'Not the RA' },
+      { name: 'Erich Esqueda' },
+      { name: 'Eugene', needsLastName: true },
+      { name: 'Fabian', needsLastName: true },
+      { name: 'Francisco', needsLastName: true },
+      { name: 'Gabby', needsLastName: true },
+      { name: 'Gavin Higgs' },
+      { name: 'Giana', needsLastName: true },
+      { name: 'Henry Casanova' },
+      { name: 'Ian Lopez' },
+      { name: 'Jacob Brescia' },
+      { name: 'Jacob Paccione' },
+      { name: 'Jacob Suppuel' },
+      { name: 'Jake Diaz-Iglesias' },
+      { name: 'Jannice', needsLastName: true },
+      { name: 'Jasmine', needsLastName: true },
+      { name: 'Javon', needsLastName: true },
+      { name: 'Jbo', needsLastName: true },
+      { name: 'Jillian', needsLastName: true },
+      { name: 'Jorgeandres Alvarez' },
+      { name: 'Josh Alletto' },
+      { name: 'Justis', needsLastName: true },
+      { name: 'Kailey Gibbons' },
+      { name: 'Kaitlyn Surovy' },
+      { name: 'Kevin Su' },
+      { name: 'Kody Byrd' },
+      { name: 'Koral', needsLastName: true },
+      { name: 'Kyla Harpe' },
+      { name: 'Kyle', needsLastName: true },
+      { name: 'Kyle Blanchard' },
+      { name: 'Lauren', needsLastName: true },
+      { name: 'Leia', needsLastName: true },
+      { name: 'Liam', needsLastName: true },
+      { name: 'Logan', needsLastName: true },
+      { name: 'Lucas Batista' },
+      { name: 'Luis Mata-Moreno' },
+      { name: 'Luis Silva' },
+      { name: 'Lukas Kelk' },
+      { name: 'Lyra', needsLastName: true },
+      { name: 'Marisa de Comier' },
+      { name: 'Maya Stuhlman' },
+      { name: 'Meleena Scott' },
+      { name: 'Melanie Morenson' },
+      { name: 'Michael Carlson' },
+      { name: 'Miguel', needsLastName: true },
+      { name: 'Mikala Yin-Furiato' },
+      { name: 'Mo Hadid' },
+      { name: 'Moises', needsLastName: true },
+      { name: 'Noelia Sanchez' },
+      { name: 'Pressley Hendrix' },
+      { name: 'Quentin', needsLastName: true },
+      { name: 'Rita', role: 'for cutting my hair so many times' },
+      { name: 'Robert', needsLastName: true },
+      { name: 'Roland', needsLastName: true },
+      { name: 'Ryan Mullins' },
+      { name: 'Stella Asanova' },
+      { name: 'Thomas Risalvato' },
+      { name: 'Tugba', needsLastName: true },
+      { name: 'Zander Butler' },
     ],
   },
   {
@@ -167,49 +371,57 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Winter Haven Technology Services',
     entries: [
-      { name: 'Michael Adams' },
-      { name: 'Angel', needsLastName: true },
-      { name: 'Praythusa Bhuma' },
-      { name: 'Blake', needsLastName: true },
       { name: 'Adriana Bottega' },
-      { name: 'Connor', needsLastName: true },
-      { name: 'Christopher Duclos' },
-      { name: 'Esteban', needsLastName: true },
-      { name: 'Jeremiah', needsLastName: true },
       { name: 'Aizan "Bobby" Khan' },
-      { name: 'Mikey LaFollette' },
+      { name: 'Angel', needsLastName: true },
+      { name: 'Blake', needsLastName: true },
+      { name: 'Christopher Duclos' },
+      { name: 'Christopher Taylor' },
+      { name: 'Connor', needsLastName: true },
+      { name: 'Esteban', needsLastName: true },
       { name: 'Hiep Nguyen' },
+      { name: 'Jeremiah', needsLastName: true },
+      { name: 'Jose Vega' },
+      { name: 'Joshua Stone' },
+      { name: 'Katiya Taylor' },
+      { name: 'Kristina Smith' },
+      { name: 'Michael Adams' },
+      { name: 'Mikey LaFollette' },
       { name: 'Nickolas Phan' },
       { name: 'Pickleball John', needsLastName: true },
-      { name: 'Kristina Smith' },
-      { name: 'Joshua Stone' },
-      { name: 'Christopher Taylor' },
-      { name: 'Katiya Taylor' },
+      { name: 'Praythusa Bhuma' },
+      { name: 'Raul Gonzales' },
       { name: 'Robert van Druten' },
-      { name: 'Jose Vega' },
+      { name: 'The Winter Haven Librarians' },
       { name: 'Wen Zhang' },
     ],
   },
   {
     title: 'Special Thanks',
     entries: [
+      { name: 'Akira Kurusu' },
+      { name: 'Apollo Justice' },
+      { name: 'Arataka Reigen' },
+      { name: 'Clairo' },
       { name: 'Edward Elric' },
-      { name: 'Maya Fey' },
-      { name: 'Toby Fox' },
+      { name: 'Hideo Kojima' },
       { name: 'Hornet' },
       { name: 'Itadori Yuji' },
-      { name: 'Apollo Justice' },
-      { name: 'Hideo Kojima' },
       { name: 'Jotaro Kujo' },
-      { name: 'Akira Kurusu' },
-      { name: 'Lucy MacLean' },
-      { name: 'Roy Mustang' },
-      { name: 'Yu Narukami' },
       { name: 'Kasane Teto' },
+      { name: 'Lucy MacLean' },
+      { name: 'Makoto Yuki' },
+      { name: 'MAPPA' },
+      { name: 'Maya Fey' },
+      { name: 'ONE' },
+      { name: 'Phoenix Wright' },
+      { name: 'Roy Mustang' },
+      { name: 'Shigeo Kageyama' },
+      { name: 'Team Cherry' },
       { name: 'The Knight' },
       { name: 'Thorfinn Son of Thors' },
-      { name: 'Phoenix Wright' },
-      { name: 'Makoto Yuki' },
+      { name: 'Toby Fox' },
+      { name: 'Yu Narukami' },
     ],
   },
 ];
@@ -285,7 +497,7 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     const H = () => window.innerHeight;
 
     // Audio
-    const audio = new Audio('/lastgoodbye.mp3');
+    const audio = new Audio('/toby_fox_lastgoodbye.mp3');
     audio.loop = true;
     audio.volume = 0.7;
     audio.play().catch(() => {});
@@ -337,7 +549,7 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     canvas.addEventListener('touchstart', onTouchStart, { passive: true });
     canvas.addEventListener('touchmove', onTouchMove, { passive: false });
 
-    // Spawn a projectile
+    // Spawn a projectile — ~70% target the heart directly (Undertale-style)
     const spawn = () => {
       const name = ALL_NAMES[nameIdx % ALL_NAMES.length] ?? 'Danny';
       nameIdx++;
@@ -345,35 +557,50 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       ctx.font = `${fontSize}px Georgia, serif`;
       const tw = ctx.measureText(name).width;
       const th = fontSize * 1.2;
-      const speed = 130 + Math.random() * 80 + elapsed * 0.3;
       const id = nextProjId++;
       const w = W();
       const h = H();
-      const pattern = Math.floor(Math.random() * 6);
 
-      switch (pattern) {
-        case 0: // left → right
-          projectiles.push({ id, text: name, x: -tw - 10, y: Math.random() * h, vx: speed, vy: 0, w: tw, h: th });
-          break;
-        case 1: // right → left
-          projectiles.push({ id, text: name, x: w + 10, y: Math.random() * h, vx: -speed, vy: 0, w: tw, h: th });
-          break;
-        case 2: // top → bottom
-          projectiles.push({ id, text: name, x: Math.random() * (w - tw), y: -th, vx: 0, vy: speed, w: tw, h: th });
-          break;
-        case 3: // bottom → top
-          projectiles.push({ id, text: name, x: Math.random() * (w - tw), y: h + th, vx: 0, vy: -speed, w: tw, h: th });
-          break;
-        case 4: // targeted at player
-        case 5: {
-          const fromLeft = Math.random() < 0.5;
-          const sx = fromLeft ? -tw - 10 : w + 10;
-          const sy = Math.random() * h;
-          const dx = heart.x - sx;
-          const dy = heart.y - sy;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          projectiles.push({ id, text: name, x: sx, y: sy, vx: (dx / dist) * speed, vy: (dy / dist) * speed, w: tw, h: th });
-          break;
+      // Wide speed variation — some crawl, some fly
+      const baseSpeed = 80 + elapsed * 0.3;
+      const speed = baseSpeed + Math.random() * 220;
+
+      const roll = Math.random();
+
+      if (roll < 0.7) {
+        // ── Targeted: spawn from a random edge, aim directly at the heart ──
+        const edge = Math.floor(Math.random() * 4);
+        let sx: number, sy: number;
+        switch (edge) {
+          case 0: sx = -tw - 10; sy = Math.random() * h; break;
+          case 1: sx = w + 10; sy = Math.random() * h; break;
+          case 2: sx = Math.random() * (w - tw); sy = -th; break;
+          default: sx = Math.random() * (w - tw); sy = h + th; break;
+        }
+        const dx = heart.x - sx;
+        const dy = heart.y - sy;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        projectiles.push({
+          id, text: name, x: sx, y: sy,
+          vx: (dx / dist) * speed, vy: (dy / dist) * speed,
+          w: tw, h: th,
+        });
+      } else {
+        // ── Random straight-line directions ──
+        const pattern = Math.floor(Math.random() * 4);
+        switch (pattern) {
+          case 0:
+            projectiles.push({ id, text: name, x: -tw - 10, y: Math.random() * h, vx: speed, vy: 0, w: tw, h: th });
+            break;
+          case 1:
+            projectiles.push({ id, text: name, x: w + 10, y: Math.random() * h, vx: -speed, vy: 0, w: tw, h: th });
+            break;
+          case 2:
+            projectiles.push({ id, text: name, x: Math.random() * (w - tw), y: -th, vx: 0, vy: speed, w: tw, h: th });
+            break;
+          default:
+            projectiles.push({ id, text: name, x: Math.random() * (w - tw), y: h + th, vx: 0, vy: -speed, w: tw, h: th });
+            break;
         }
       }
     };
@@ -402,7 +629,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       if (spawnTimer > spawnInterval) {
         spawnTimer = 0;
         spawn();
-        // Occasionally spawn a burst
         if (Math.random() < 0.2) { spawn(); spawn(); }
       }
 
@@ -435,15 +661,14 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       // ── Draw ──
       ctx.clearRect(0, 0, w, h);
 
-      // Hit flash overlay
       if (hitFlash > 0) {
         ctx.fillStyle = `rgba(255, 0, 0, ${hitFlash * 0.15})`;
         ctx.fillRect(0, 0, w, h);
       }
 
       // Projectiles
-      const fontSize = Math.max(16, Math.min(26, w / 28));
-      ctx.font = `${fontSize}px Georgia, serif`;
+      const drawFontSize = Math.max(16, Math.min(26, w / 28));
+      ctx.font = `${drawFontSize}px Georgia, serif`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
       ctx.fillStyle = '#ffffff';
@@ -499,6 +724,12 @@ function AttackGame({ onExit }: { onExit: () => void }) {
 
 type Mode = 'select' | 'credits' | 'attack';
 
+function formatSpeed(s: number): string {
+  if (Number.isInteger(s)) return `${s}`;
+  const str = s.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+  return str;
+}
+
 export function Credits() {
   const [mode, setMode] = useState<Mode>('select');
   const [selectedTrack, setSelectedTrack] = useState(0);
@@ -531,7 +762,6 @@ export function Credits() {
   useEffect(() => {
     if (mode !== 'credits') return;
 
-    // Measure content height (and re-measure on resize/orientation change)
     const measure = () => {
       if (trackRef.current) contentHeightRef.current = trackRef.current.scrollHeight;
     };
@@ -555,7 +785,6 @@ export function Credits() {
           trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
         }
 
-        // End of scroll — loop with black pause
         if (scrollPosRef.current <= -contentHeightRef.current) {
           blackPauseRef.current = true;
           if (trackRef.current) trackRef.current.style.opacity = '0';
@@ -706,19 +935,22 @@ export function Credits() {
             </option>
           ))}
         </select>
-        <input
-          type="range"
-          className={styles.volumeSlider}
-          min={0}
-          max={100}
-          value={volume}
-          onChange={(e) => setVolume(Number(e.target.value))}
-          title={`Volume: ${volume}%`}
-        />
-        <div className={styles.speedGroup}>
-          <span className={styles.controlsLabel}>
-            Speed: {speed % 1 === 0 ? `${speed}x` : `${speed.toFixed(speed % 0.5 === 0 ? 1 : 2)}x`}
-          </span>
+
+        <div className={styles.sliderGroup}>
+          <span className={styles.sliderLabel}>Vol</span>
+          <input
+            type="range"
+            className={styles.volumeSlider}
+            min={0}
+            max={100}
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+          />
+          <span className={styles.sliderValue}>{volume}%</span>
+        </div>
+
+        <div className={styles.sliderGroup}>
+          <span className={styles.sliderLabel}>Speed</span>
           <input
             type="range"
             className={styles.speedSlider}
@@ -728,7 +960,9 @@ export function Credits() {
             value={speed}
             onChange={(e) => setSpeed(Number(e.target.value))}
           />
+          <span className={styles.sliderValue}>{formatSpeed(speed)}x</span>
         </div>
+
         <div className={styles.controlsRight}>
           <a href="/" className={styles.backLink}>
             Back to Desktop

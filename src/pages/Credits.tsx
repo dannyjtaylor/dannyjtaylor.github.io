@@ -52,9 +52,11 @@ interface CreditEntry {
 interface CreditSection {
   title: string;
   entries: CreditEntry[];
+  photo?: string | string[];
 }
 
 const CREDITS_DATA: CreditSection[] = [
+  /* ── Top sections ── */
   {
     title: 'My Family',
     entries: [
@@ -78,6 +80,69 @@ const CREDITS_DATA: CreditSection[] = [
     ],
   },
   {
+    title: 'Professors',
+    entries: [
+      { name: 'Austin Anderson' },
+      { name: 'Dr. Drourin' },
+      { name: 'Dr. Elizabeth Kames' },
+      { name: 'Dr. Emad Foaud' },
+      { name: 'Dr. Farmani' },
+      { name: 'Dr. Hoan Ngo' },
+      { name: 'Dr. Jared Bunn' },
+      { name: 'Dr. Manoj' },
+      { name: 'Dr. Muhammad Ullah' },
+      { name: 'Dr. Olin' },
+      { name: 'Dr. Onur Toker' },
+      { name: 'Dr. Rawa Adla' },
+      { name: 'Dr. Sakib' },
+      { name: 'Dr. Sista' },
+      { name: 'Dr. Sundari Ramabhotla' },
+      { name: 'Mr. Falcao' },
+    ],
+  },
+  {
+    title: 'SHPE Eboard 2025\u20132026',
+    photo: 'SHPE.png',
+    entries: [
+      { name: 'Ines Alonso' },
+      { name: 'Naibys "Kro" Alzugaray' },
+      { name: 'Gabriel Basalo' },
+      { name: 'Nicolas Izquierdo' },
+      { name: 'Shriraj Mandulapalli' },
+      { name: 'Alex Meert' },
+      { name: 'Ethan Puig' },
+    ],
+  },
+  {
+    title: 'Rotaract',
+    photo: 'rotaract.png',
+    entries: [
+      { name: 'Aidan Morris' },
+      { name: 'Alex Cam' },
+      { name: 'Alyson Smyth' },
+      { name: 'Bobby Green' },
+      { name: 'Brian Tran' },
+      { name: 'Brittany Cam' },
+      { name: 'Bryden Silva' },
+      { name: 'Danielle Rivers' },
+      { name: 'Domenic Iorfida' },
+      { name: 'Izzy Greer' },
+      { name: 'Jack Everheart' },
+      { name: 'Jeff Tillman' },
+      { name: 'Jeremy Casanova' },
+      { name: 'Jesus Sanchez' },
+      { name: 'Larry Walker' },
+      { name: 'Lawrence Drake' },
+      { name: 'Melanie Najera' },
+      { name: 'Patrick', needsLastName: true },
+      { name: 'Ryan Thomas' },
+      { name: 'Tommy Jackson' },
+      { name: 'Trenton McCutcheon' },
+    ],
+  },
+
+  /* ── Alphabetical middle ── */
+  {
     title: '2404-1313',
     entries: [
       { name: 'Bryon Catlin' },
@@ -94,6 +159,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'IEEE',
+    photo: 'IEEE.png',
     entries: [
       { name: 'Anthony Dreier' },
       { name: 'Colby Bradford' },
@@ -102,37 +168,6 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Sterling', needsLastName: true },
       { name: 'Thomas Cook' },
       { name: 'Will', needsLastName: true },
-    ],
-  },
-  {
-    title: 'In Memory Of',
-    entries: [
-      { name: 'Logan Hewitt' },
-    ],
-  },
-  {
-    title: 'Online Friends',
-    entries: [
-      { name: 'Alibaba', needsLastName: true },
-      { name: 'Andy', needsLastName: true },
-      { name: 'Athena', needsLastName: true },
-      { name: 'Bruno', needsLastName: true },
-      { name: 'Daichi', needsLastName: true },
-      { name: 'Daniela', needsLastName: true },
-      { name: 'Elysha', needsLastName: true },
-      { name: 'Emily Lu' },
-      { name: 'Genia', needsLastName: true },
-      { name: 'Joseph Gregory Salazar Rosillo' },
-      { name: 'Lele', needsLastName: true },
-      { name: 'Liv', needsLastName: true },
-      { name: 'Nanox', needsLastName: true },
-      { name: 'Ouroborix', needsLastName: true },
-      { name: 'Ridge', needsLastName: true },
-      { name: 'Ryan', needsLastName: true },
-      { name: 'Savanna', needsLastName: true },
-      { name: 'Shin', needsLastName: true },
-      { name: 'Tim', needsLastName: true },
-      { name: 'Z', needsLastName: true },
     ],
   },
   {
@@ -160,6 +195,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: "Polk County Sheriff's Office LiDAR Team (Capstone)",
+    photo: 'sheriffsoffice.png',
     entries: [
       { name: 'James Allegra' },
       { name: 'Gaspar Chayer' },
@@ -173,27 +209,6 @@ const CREDITS_DATA: CreditSection[] = [
     ],
   },
   {
-    title: 'Professors',
-    entries: [
-      { name: 'Austin Anderson' },
-      { name: 'Dr. Drourin' },
-      { name: 'Dr. Elizabeth Kames' },
-      { name: 'Dr. Emad Foaud' },
-      { name: 'Dr. Farmani' },
-      { name: 'Dr. Hoan Ngo' },
-      { name: 'Dr. Jared Bunn' },
-      { name: 'Dr. Manoj' },
-      { name: 'Dr. Muhammad Ullah' },
-      { name: 'Dr. Olin' },
-      { name: 'Dr. Onur Toker' },
-      { name: 'Dr. Rawa Adla' },
-      { name: 'Dr. Sakib' },
-      { name: 'Dr. Sista' },
-      { name: 'Dr. Sundari Ramabhotla' },
-      { name: 'Mr. Falcao' },
-    ],
-  },
-  {
     title: 'RAs/CDs',
     entries: [
       { name: 'Emily', needsLastName: true },
@@ -203,34 +218,9 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Really Smart People',
+    photo: 'IEEEhkn.png',
     entries: [
       { name: 'Zane Wolfe' },
-    ],
-  },
-  {
-    title: 'Rotaract',
-    entries: [
-      { name: 'Aidan Morris' },
-      { name: 'Alex Cam' },
-      { name: 'Alyson Smyth' },
-      { name: 'Bobby Green' },
-      { name: 'Brian Tran' },
-      { name: 'Brittany Cam' },
-      { name: 'Bryden Silva' },
-      { name: 'Danielle Rivers' },
-      { name: 'Domenic Iorfida' },
-      { name: 'Izzy Greer' },
-      { name: 'Jack Everheart' },
-      { name: 'Jeff Tillman' },
-      { name: 'Jeremy Casanova' },
-      { name: 'Jesus Sanchez' },
-      { name: 'Larry Walker' },
-      { name: 'Lawrence Drake' },
-      { name: 'Melanie Najera' },
-      { name: 'Patrick', needsLastName: true },
-      { name: 'Ryan Thomas' },
-      { name: 'Tommy Jackson' },
-      { name: 'Trenton McCutcheon' },
     ],
   },
   {
@@ -245,18 +235,6 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Samuel Marillo' },
       { name: 'Sebastian Anzola' },
       { name: 'The City of Philadelphia', role: 'for stealing my wallet' },
-    ],
-  },
-  {
-    title: 'SHPE Eboard 2025\u20132026',
-    entries: [
-      { name: 'Ines Alonso' },
-      { name: 'Naibys "Kro" Alzugaray' },
-      { name: 'Gabriel Basalo' },
-      { name: 'Nicolas Izquierdo' },
-      { name: 'Shriraj Mandulapalli' },
-      { name: 'Alex Meert' },
-      { name: 'Ethan Puig' },
     ],
   },
   {
@@ -359,6 +337,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'VALORANT Varsity',
+    photo: ['flpolyesports.png', 'valorant.png'],
     entries: [
       { name: 'Bethany', needsLastName: true },
       { name: 'Jay', needsLastName: true },
@@ -396,6 +375,33 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Wen Zhang' },
     ],
   },
+
+  /* ── End sections ── */
+  {
+    title: 'Online Friends',
+    entries: [
+      { name: 'Alibaba', needsLastName: true },
+      { name: 'Andy', needsLastName: true },
+      { name: 'Athena', needsLastName: true },
+      { name: 'Bruno', needsLastName: true },
+      { name: 'Daichi', needsLastName: true },
+      { name: 'Daniela', needsLastName: true },
+      { name: 'Elysha', needsLastName: true },
+      { name: 'Emily Lu' },
+      { name: 'Genia', needsLastName: true },
+      { name: 'Joseph Gregory Salazar Rosillo' },
+      { name: 'Lele', needsLastName: true },
+      { name: 'Liv', needsLastName: true },
+      { name: 'Nanox', needsLastName: true },
+      { name: 'Ouroborix', needsLastName: true },
+      { name: 'Ridge', needsLastName: true },
+      { name: 'Ryan', needsLastName: true },
+      { name: 'Savanna', needsLastName: true },
+      { name: 'Shin', needsLastName: true },
+      { name: 'Tim', needsLastName: true },
+      { name: 'Z', needsLastName: true },
+    ],
+  },
   {
     title: 'Special Thanks',
     entries: [
@@ -422,6 +428,12 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Thorfinn Son of Thors' },
       { name: 'Toby Fox' },
       { name: 'Yu Narukami' },
+    ],
+  },
+  {
+    title: 'In Memory Of',
+    entries: [
+      { name: 'Logan Hewitt' },
     ],
   },
 ];
@@ -480,7 +492,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // High-DPI setup
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
@@ -492,17 +503,14 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     resize();
     window.addEventListener('resize', resize);
 
-    // Logical dimensions (CSS pixels)
     const W = () => window.innerWidth;
     const H = () => window.innerHeight;
 
-    // Audio
     const audio = new Audio('/toby_fox_lastgoodbye.mp3');
     audio.loop = true;
     audio.volume = 0.7;
     audio.play().catch(() => {});
 
-    // State (all refs for 60fps performance)
     const heart = { x: W() / 2, y: H() * 0.7 };
     let projectiles: Projectile[] = [];
     let hitFlash = 0;
@@ -515,20 +523,15 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     const HEART_SIZE = 18;
     const HITBOX = 5;
 
-    // Keyboard
     const keys = new Set<string>();
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onExitRef.current();
-        return;
-      }
+      if (e.key === 'Escape') { onExitRef.current(); return; }
       keys.add(e.key.toLowerCase());
     };
     const onKeyUp = (e: KeyboardEvent) => keys.delete(e.key.toLowerCase());
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
-    // Touch
     let touchX = 0;
     let touchY = 0;
     const onTouchStart = (e: TouchEvent) => {
@@ -549,7 +552,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     canvas.addEventListener('touchstart', onTouchStart, { passive: true });
     canvas.addEventListener('touchmove', onTouchMove, { passive: false });
 
-    // Spawn a projectile — ~70% target the heart directly (Undertale-style)
     const spawn = () => {
       const name = ALL_NAMES[nameIdx % ALL_NAMES.length] ?? 'Danny';
       nameIdx++;
@@ -560,15 +562,11 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       const id = nextProjId++;
       const w = W();
       const h = H();
-
-      // Wide speed variation — some crawl, some fly
       const baseSpeed = 80 + elapsed * 0.3;
       const speed = baseSpeed + Math.random() * 220;
-
       const roll = Math.random();
 
       if (roll < 0.7) {
-        // ── Targeted: spawn from a random edge, aim directly at the heart ──
         const edge = Math.floor(Math.random() * 4);
         let sx: number, sy: number;
         switch (edge) {
@@ -586,7 +584,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
           w: tw, h: th,
         });
       } else {
-        // ── Random straight-line directions ──
         const pattern = Math.floor(Math.random() * 4);
         switch (pattern) {
           case 0:
@@ -605,7 +602,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       }
     };
 
-    // Game loop
     const gameLoop = (time: number) => {
       if (!lastTime) lastTime = time;
       const dt = Math.min((time - lastTime) / 1000, 0.1);
@@ -615,7 +611,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       const w = W();
       const h = H();
 
-      // Move heart
       if (keys.has('arrowleft') || keys.has('a')) heart.x -= HEART_SPEED * dt;
       if (keys.has('arrowright') || keys.has('d')) heart.x += HEART_SPEED * dt;
       if (keys.has('arrowup') || keys.has('w')) heart.y -= HEART_SPEED * dt;
@@ -623,7 +618,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       heart.x = Math.max(HEART_SIZE, Math.min(w - HEART_SIZE, heart.x));
       heart.y = Math.max(HEART_SIZE, Math.min(h - HEART_SIZE, heart.y));
 
-      // Spawn
       const spawnInterval = Math.max(0.4, 1.0 - elapsed * 0.005);
       spawnTimer += dt;
       if (spawnTimer > spawnInterval) {
@@ -632,7 +626,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
         if (Math.random() < 0.2) { spawn(); spawn(); }
       }
 
-      // Update projectiles
       for (const p of projectiles) {
         p.x += p.vx * dt;
         p.y += p.vy * dt;
@@ -641,7 +634,6 @@ function AttackGame({ onExit }: { onExit: () => void }) {
         (p) => p.x > -500 && p.x < w + 500 && p.y > -200 && p.y < h + 200,
       );
 
-      // Collision (tiny hitbox like Undertale)
       if (hitFlash <= 0) {
         for (const p of projectiles) {
           if (
@@ -658,28 +650,21 @@ function AttackGame({ onExit }: { onExit: () => void }) {
         hitFlash -= dt;
       }
 
-      // ── Draw ──
       ctx.clearRect(0, 0, w, h);
-
       if (hitFlash > 0) {
         ctx.fillStyle = `rgba(255, 0, 0, ${hitFlash * 0.15})`;
         ctx.fillRect(0, 0, w, h);
       }
 
-      // Projectiles
       const drawFontSize = Math.max(16, Math.min(26, w / 28));
       ctx.font = `${drawFontSize}px Georgia, serif`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
       ctx.fillStyle = '#ffffff';
-      for (const p of projectiles) {
-        ctx.fillText(p.text, p.x, p.y);
-      }
+      for (const p of projectiles) ctx.fillText(p.text, p.x, p.y);
 
-      // Heart
       drawHeart(ctx, heart.x, heart.y, HEART_SIZE, hitFlash > 0);
 
-      // Hints
       ctx.font = '13px Georgia, serif';
       ctx.fillStyle = '#444';
       ctx.textAlign = 'center';
@@ -687,8 +672,7 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       const isMobile = 'ontouchstart' in window;
       ctx.fillText(
         isMobile ? 'Drag to move \u00B7 Tap \u2715 to exit' : 'Arrow keys / WASD to move \u00B7 ESC to exit',
-        w / 2,
-        h - 16,
+        w / 2, h - 16,
       );
 
       frameId = requestAnimationFrame(gameLoop);
@@ -726,15 +710,14 @@ type Mode = 'select' | 'credits' | 'attack';
 
 function formatSpeed(s: number): string {
   if (Number.isInteger(s)) return `${s}`;
-  const str = s.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
-  return str;
+  return s.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
 }
 
 export function Credits() {
   const [mode, setMode] = useState<Mode>('select');
   const [selectedTrack, setSelectedTrack] = useState(0);
   const [volume, setVolume] = useState(60);
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(0.4);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -745,20 +728,17 @@ export function Credits() {
   const contentHeightRef = useRef(0);
   const blackPauseRef = useRef(false);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const speedRef = useRef(1);
+  const speedRef = useRef(0.4);
   const volumeRef = useRef(60);
 
-  // Keep refs in sync
   useEffect(() => { speedRef.current = speed; }, [speed]);
   useEffect(() => { volumeRef.current = volume; }, [volume]);
 
-  // Sync volume to audio element
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume / 100;
   }, [volume]);
 
-  // JS-driven scroll animation (replaces CSS animation for looping + dynamic speed)
+  // JS-driven scroll animation with seamless loop (scrolls back into frame from bottom)
   useEffect(() => {
     if (mode !== 'credits') return;
 
@@ -785,19 +765,17 @@ export function Credits() {
           trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
         }
 
+        // End of scroll — brief black, then scroll back in from below viewport
         if (scrollPosRef.current <= -contentHeightRef.current) {
           blackPauseRef.current = true;
-          if (trackRef.current) trackRef.current.style.opacity = '0';
 
           pauseTimerRef.current = setTimeout(() => {
-            scrollPosRef.current = 0;
+            // Position content just below the viewport so it scrolls up into view
+            scrollPosRef.current = window.innerHeight;
             if (trackRef.current) {
-              trackRef.current.style.transform = 'translateY(0)';
-              trackRef.current.style.opacity = '1';
+              trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
             }
-            resumeTimerRef.current = setTimeout(() => {
-              blackPauseRef.current = false;
-            }, 1500);
+            blackPauseRef.current = false;
           }, 3000);
         }
       }
@@ -810,11 +788,9 @@ export function Credits() {
       cancelAnimationFrame(animFrameRef.current);
       window.removeEventListener('resize', measure);
       if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
-      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
     };
   }, [mode]);
 
-  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -874,6 +850,30 @@ export function Credits() {
     startAudio(selectedTrack);
     setMode('credits');
   }, [selectedTrack, startAudio]);
+
+  const handleReset = useCallback(() => {
+    scrollPosRef.current = 0;
+    blackPauseRef.current = false;
+    if (pauseTimerRef.current) { clearTimeout(pauseTimerRef.current); pauseTimerRef.current = null; }
+    if (trackRef.current) {
+      trackRef.current.style.transform = 'translateY(0)';
+    }
+  }, []);
+
+  /* ═══════════════════════════════════════════
+     Render helpers
+     ═══════════════════════════════════════════ */
+
+  const renderSectionPhoto = (photo: string | string[]) => {
+    const photos = Array.isArray(photo) ? photo : [photo];
+    return (
+      <div className={photos.length > 1 ? styles.sectionPhotoRow : styles.sectionPhoto}>
+        {photos.map((p) => (
+          <img key={p} src={`/credits-photos/${p}`} alt="" />
+        ))}
+      </div>
+    );
+  };
 
   /* ═══════════════════════════════════════════
      Render: Song Selection
@@ -954,14 +954,18 @@ export function Credits() {
           <input
             type="range"
             className={styles.speedSlider}
-            min={0.25}
+            min={0.1}
             max={3}
-            step={0.25}
+            step={0.1}
             value={speed}
             onChange={(e) => setSpeed(Number(e.target.value))}
           />
           <span className={styles.sliderValue}>{formatSpeed(speed)}x</span>
         </div>
+
+        <button className={styles.resetBtn} onClick={handleReset} title="Reset to beginning">
+          &#x21BA;
+        </button>
 
         <div className={styles.controlsRight}>
           <a href="/" className={styles.backLink}>
@@ -978,14 +982,26 @@ export function Credits() {
         <div ref={trackRef} className={styles.creditsTrack}>
           <div className={styles.openingSpace} />
 
-          <div className={styles.mainTitle}>Danny Taylor</div>
-          <div className={styles.subtitle}>Class of 2026</div>
+          <div className={styles.universityLogo}>
+            <img src="/credits-photos/flpoly.png" alt="Florida Polytechnic University" />
+          </div>
+
+          <div className={styles.mainTitle}>Daniel J. Taylor</div>
+
+          <div className={styles.subtitleBlock}>
+            <div className={styles.subtitleUniversity}>Florida Polytechnic University</div>
+            <div className={styles.subtitleDegree}>Computer Engineering</div>
+            <div className={styles.subtitleClass}>Class of 2026 Graduate</div>
+          </div>
 
           <div className={styles.divider} />
 
           {CREDITS_DATA.map((section) => (
             <div key={section.title}>
-              <div className={styles.sectionTitle}>{section.title}</div>
+              {section.photo && renderSectionPhoto(section.photo)}
+              <div className={section.title === 'In Memory Of' ? styles.memorialTitle : styles.sectionTitle}>
+                {section.title}
+              </div>
               {section.entries.map((entry) => (
                 <div key={`${section.title}-${entry.name}`}>
                   {entry.photo && (
@@ -993,7 +1009,9 @@ export function Credits() {
                       <img src={`/credits-photos/${entry.photo}`} alt={entry.name} />
                     </div>
                   )}
-                  <div className={styles.name}>{entry.name}</div>
+                  <div className={section.title === 'In Memory Of' ? styles.memorialName : styles.name}>
+                    {entry.name}
+                  </div>
                   {entry.role && <div className={styles.role}>{entry.role}</div>}
                   {entry.needsLastName && <div className={styles.placeholder}>[INSERT LAST NAME]</div>}
                 </div>
@@ -1005,6 +1023,29 @@ export function Credits() {
           <div className={styles.closingMessage}>Thank You</div>
           <div className={styles.closingSubtext}>To everyone who helped me get here.</div>
           <div className={styles.closingSubtext}>I couldn&apos;t have done it without you.</div>
+
+          <div className={styles.divider} />
+
+          <div className={styles.adventureTitle}>Onto The Next Adventure</div>
+
+          <div className={styles.adventureEntry}>
+            <div className={styles.adventurePhoto}>
+              <img src="/credits-photos/wellsfargo.jpg" alt="Wells Fargo" />
+            </div>
+            <div className={styles.adventureCompany}>Wells Fargo</div>
+            <div className={styles.adventureRole}>Cybersecurity Intern</div>
+            <div className={styles.adventureLocation}>Charlotte, NC</div>
+          </div>
+
+          <div className={styles.adventureEntry}>
+            <div className={styles.adventurePhoto}>
+              <img src="/credits-photos/IBM.png" alt="IBM" />
+            </div>
+            <div className={styles.adventureCompany}>IBM</div>
+            <div className={styles.adventureRole}>IBM Power Systems QA/Test Developer</div>
+            <div className={styles.adventureLocation}>Austin, TX</div>
+          </div>
+
           <div className={styles.year}>2026</div>
           <div className={styles.endSpace} />
         </div>

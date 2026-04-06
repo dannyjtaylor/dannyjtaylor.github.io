@@ -225,6 +225,29 @@
   color: #ff4444;
 }
 
+.resetBtn {
+  background: none;
+  border: 1px solid #555;
+  color: #888;
+  font-size: 20px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+
+.resetBtn:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
 /* ═══════════════════════════════════════════
    Scrolling Credits
    ═══════════════════════════════════════════ */
@@ -252,22 +275,85 @@
   height: 30vh;
 }
 
+.universityLogo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 32px;
+  opacity: 0.9;
+}
+
+.universityLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(1.1);
+}
+
 .mainTitle {
   font-size: 52px;
   font-weight: 700;
   letter-spacing: 6px;
   text-transform: uppercase;
   color: #fff;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
 }
 
-.subtitle {
-  font-size: 22px;
-  font-style: italic;
-  color: #ccc;
+.subtitleBlock {
   margin-bottom: 60px;
+}
+
+.subtitleUniversity {
+  font-size: 20px;
+  color: #ccc;
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+.subtitleDegree {
+  font-size: 24px;
+  color: #e0e0e0;
   letter-spacing: 2px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.subtitleClass {
+  font-size: 18px;
+  color: #999;
+  letter-spacing: 2px;
+  font-style: italic;
+}
+
+.sectionPhoto {
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  margin: 60px auto 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sectionPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sectionPhotoRow {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 60px auto 16px;
+}
+
+.sectionPhotoRow img {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sectionTitle {
@@ -343,6 +429,80 @@
   color: #ccc;
   font-style: italic;
   margin-bottom: 20px;
+}
+
+.memorialTitle {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  color: #bbb;
+  margin-top: 70px;
+  margin-bottom: 30px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.memorialName {
+  font-size: 28px;
+  font-weight: 400;
+  color: #e0e0e0;
+  margin: 14px 0;
+  letter-spacing: 1px;
+  font-style: italic;
+}
+
+.adventureTitle {
+  font-size: 36px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 4px;
+  margin-top: 60px;
+  margin-bottom: 50px;
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
+}
+
+.adventureEntry {
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.adventurePhoto {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  margin: 0 auto 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.adventurePhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+  padding: 8px;
+}
+
+.adventureCompany {
+  font-size: 28px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.adventureRole {
+  font-size: 18px;
+  color: #ccc;
+  font-style: italic;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.adventureLocation {
+  font-size: 15px;
+  color: #888;
+  letter-spacing: 1px;
 }
 
 .year {
@@ -484,29 +644,66 @@
    ═══════════════════════════════════════════ */
 
 @media (max-width: 640px) {
+  .universityLogo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+
   .mainTitle {
     font-size: 32px;
     letter-spacing: 3px;
   }
 
-  .subtitle {
+  .subtitleUniversity {
     font-size: 16px;
-    margin-bottom: 40px;
+  }
+
+  .subtitleDegree {
+    font-size: 18px;
+  }
+
+  .subtitleClass {
+    font-size: 14px;
   }
 
   .name {
     font-size: 22px;
   }
 
-  .sectionTitle {
+  .sectionTitle,
+  .memorialTitle {
     font-size: 13px;
     letter-spacing: 5px;
     margin-top: 50px;
     margin-bottom: 20px;
   }
 
+  .sectionPhoto {
+    width: 100px;
+    height: 100px;
+  }
+
+  .sectionPhotoRow img {
+    width: 90px;
+    height: 90px;
+  }
+
   .closingMessage {
     font-size: 24px;
+  }
+
+  .adventureTitle {
+    font-size: 26px;
+    letter-spacing: 2px;
+  }
+
+  .adventureCompany {
+    font-size: 22px;
+  }
+
+  .adventureRole {
+    font-size: 15px;
   }
 
   .year {
@@ -579,6 +776,10 @@
     font-size: 26px;
   }
 
+  .subtitleDegree {
+    font-size: 16px;
+  }
+
   .name {
     font-size: 19px;
   }
@@ -590,5 +791,13 @@
   .songItem {
     font-size: 13px;
     padding: 12px 14px;
+  }
+
+  .adventureTitle {
+    font-size: 22px;
+  }
+
+  .adventureCompany {
+    font-size: 19px;
   }
 }

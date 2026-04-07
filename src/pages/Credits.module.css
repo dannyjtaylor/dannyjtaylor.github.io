@@ -295,7 +295,7 @@
 }
 
 .universityLogo {
-  width: min(900px, calc(100vw - 48px));
+  width: min(620px, calc(100vw - 48px));
   margin: 0 auto 32px;
   opacity: 0.9;
 }
@@ -671,7 +671,7 @@
 
 @media (max-width: 640px) {
   .universityLogo {
-    width: min(520px, calc(100vw - 24px));
+    width: min(380px, calc(100vw - 24px));
     margin-bottom: 20px;
   }
 

@@ -92,7 +92,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Dr. Manoj Lamichhane', role: "Taught me Differential Equations and Calculus 3" },
       { name: 'Dr. Muhammad Ullah', role: "Taught me Circuits 1, Circuits 2, breadboards, oscilloscopes, Digital Electronics, and VLSI Design" },
       { name: 'Dr. Olin', role: "Chemistry Lab"},
-      { name: 'Dr. Onur Toker':, role: "Best Capstone professor ever" },
+      { name: 'Dr. Onur Toker', role: "Best Capstone professor ever" },
       { name: 'Dr. Rawa Adla', role: "Taught me about Autonomous Vehicles, Electric and Hybrid Vehicles. Bowled with her, went to SunTrax with her, went to IMSA with her, went to Chick-fil-A with her"},
       { name: 'Dr. Sakib', role: "Taught me Digital Logic Design"},
       { name: 'Dr. Sista', role: "Taught me Chemistry"},

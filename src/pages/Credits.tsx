@@ -930,7 +930,7 @@ export function Credits() {
               ))}
             </div>
             <button className={styles.playButton} onClick={() => handleSongSelect(selectedTrack)}>
-              &#9654; Play
+              {'\u25B6\uFE0E'} Play
             </button>
           </div>
         </div>

@@ -200,6 +200,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Will Carroll'},
       { name: 'Fabian Bosneanu' },
       { name: 'Jacob Brescia' },
+      { name: 'Aidan Flynn'}
     ],
   },
   {
@@ -376,7 +377,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Vanessa Korthas' },
       { name: 'Jaden Akers-Atkins' },
       { name: 'Johnathan Nguyen', role: "Duelist" },
-      { name: 'Julian', needsLastName: true },
+      { name: 'Julian Amato', role: "cool guy to play with and gym with, sorry for 1-tapping you so much" },
       { name: 'Ryan Trinh', role: "aeri, Duelist" },
       { name: 'Wack', role: "ThatsWack, Team Captain & Omen Player" },
     ],
@@ -416,10 +417,10 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Alibaba' },
       { name: 'Andy Miller', role: 'Lets me carry him in VALORANT' },
-      { name: 'Athena', role: 'Best Sage main' },
+      { name: 'Nicole Curatolo', role: 'athena, Best Sage main' },
       { name: 'Bruno', needsLastName: true },
       { name: 'Daichi' },
-      { name: 'Daniela', needsLastName: true, role: 'LatvianOccupier' },
+      { name: 'Daniela Mazurevich', role: 'LatvianOccupier' },
       { name: 'Elysha' },
       { name: 'Emily Lu' },
       { name: 'Genia Korovaychuk' },
@@ -618,7 +619,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       hitSounds.push(s);
     }
     let hitSoundIdx = 0;
+    let lastHitSoundTime = 0;
     const playHitSound = () => {
+      const now = performance.now();
+      if (now - lastHitSoundTime < 50) return;
+      lastHitSoundTime = now;
       const s = hitSounds[hitSoundIdx % hitSounds.length];
       if (s) { s.currentTime = 0; s.play().catch(() => {}); }
       hitSoundIdx++;
@@ -649,7 +654,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let gameOver = false;
     let endTimer = 0;
     const HEART_SPEED = 300;
-    const HEART_SIZE = 14;
+    const getSlotH = () => getFontSize() * 1.15;
+    const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.45));
 
     /* ── Phase system ── */
     const PHASE_THRESHOLDS = [
@@ -709,34 +715,46 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 2: Uniform walls from both sides (Undertale-style, no gaps) ── */
+    /* ── Phase 2: Walls from both sides with heart-sized gaps ── */
     const spawnWalls = () => {
       const h = H();
       const w = W();
-      const fontSize = getFontSize();
-      const slotH = fontSize * 1.4;
-      const slotCount = Math.floor(h / slotH);
+      const slotH = getSlotH();
+      const heartGap = getHeartSize() * 2.5;
+      const groupSize = 4;
+      const wallSpeed = Math.min(280, W() * 0.45);
 
-      /* Left wall — every slot filled */
-      for (let i = 0; i < slotCount; i++) {
+      /* Build vertical positions: groups of names with gaps between */
+      const positions: number[] = [];
+      let y = 0;
+      while (y < h) {
+        for (let g = 0; g < groupSize && y < h; g++) {
+          positions.push(y);
+          y += slotH;
+        }
+        y += heartGap;
+      }
+
+      /* Left wall */
+      for (const yPos of positions) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: -tw - 20, y: i * slotH,
-          vx: 320, w: tw, h: th,
+          x: -tw - 20, y: yPos,
+          vx: wallSpeed, w: tw, h: th,
         }));
       }
-      /* Right wall — every slot filled, offset half a slot */
-      for (let i = 0; i < slotCount; i++) {
+      /* Right wall — same grid positions so they align */
+      for (const yPos of positions) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: w + 20, y: i * slotH + slotH * 0.5,
-          vx: -320, w: tw, h: th,
+          x: w + 20, y: yPos,
+          vx: -wallSpeed, w: tw, h: th,
         }));
       }
     };
@@ -759,27 +777,35 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 7: Spinning spirals (Undertale-style: 10 names, slow orbit) ── */
-    const spawnSpiral = (cx: number, cy: number, driftVx: number) => {
-      const count = 10;
-      const startAngle = Math.random() * 360;
-      const radius = Math.max(80, Math.min(W() * 0.18, 300));
-      for (let i = 0; i < count; i++) {
-        const name = nextName();
-        if (!name) return;
-        const { tw, th } = measureName(name);
-        const angleDeg = startAngle + (360 / count) * i;
-        const angleRad = (angleDeg * Math.PI) / 180;
-        projectiles.push(mkProj({
-          id: nextProjId++, text: name,
-          x: cx + Math.cos(angleRad) * radius,
-          y: cy + Math.sin(angleRad) * radius,
-          vx: driftVx,
-          w: tw, h: th,
-          orbitCx: cx, orbitCy: cy,
-          orbitR: radius, orbitAngle: angleDeg,
-          orbitSpeed: driftVx > 0 ? 1.5 : -1.5,
-        }));
+    /* ── Phase 7: Pinwheel — names radiate from center in 8 directions ── */
+    const spawnPinwheel = () => {
+      const cx = W() / 2;
+      const cy = H() / 2;
+      const arms = 8;
+      const namesPerArm = W() < 640 ? 2 : 3;
+      const outwardSpeed = 110;
+      const nameSpacing = Math.max(40, Math.min(70, W() / 15));
+      const baseRotation = phaseRound * 22.5;
+
+      for (let arm = 0; arm < arms; arm++) {
+        const angleDeg = baseRotation + (arm * 360 / arms);
+        const rad = (angleDeg * Math.PI) / 180;
+
+        for (let i = 0; i < namesPerArm; i++) {
+          const name = nextName();
+          if (!name) return;
+          const { tw, th } = measureName(name);
+          const startDist = 20 + i * nameSpacing;
+
+          projectiles.push(mkProj({
+            id: nextProjId++, text: name,
+            x: cx + Math.cos(rad) * startDist - tw / 2,
+            y: cy + Math.sin(rad) * startDist - th / 2,
+            vx: Math.cos(rad) * outwardSpeed,
+            vy: Math.sin(rad) * outwardSpeed,
+            w: tw, h: th,
+          }));
+        }
       }
     };
 
@@ -873,7 +899,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         const fadeAlpha = Math.min(1, endTimer / 2);
         ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha})`;
         ctx.fillRect(0, 0, w, h);
-        drawHeart(ctx, heart.x, heart.y, HEART_SIZE, false, heartImg);
+        drawHeart(ctx, heart.x, heart.y, getHeartSize(), false, heartImg);
         frameId = requestAnimationFrame(gameLoop);
         return;
       }
@@ -883,8 +909,9 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       if (keys.has('arrowright') || keys.has('d')) heart.x += HEART_SPEED * dt;
       if (keys.has('arrowup') || keys.has('w')) heart.y -= HEART_SPEED * dt;
       if (keys.has('arrowdown') || keys.has('s')) heart.y += HEART_SPEED * dt;
-      heart.x = Math.max(HEART_SIZE, Math.min(w - HEART_SIZE, heart.x));
-      heart.y = Math.max(HEART_SIZE, Math.min(h - HEART_SIZE, heart.y));
+      const hs = getHeartSize();
+      heart.x = Math.max(hs, Math.min(w - hs, heart.x));
+      heart.y = Math.max(hs, Math.min(h - hs, heart.y));
 
       /* ── Phase-based spawning ── */
       if (nameIdx < totalNames) {
@@ -915,13 +942,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
               spawnVerticalRain(phaseRound % 2 === 0);
               phaseRound++;
               break;
-            case 7: {
-              const spiralDrift = Math.max(80, w / 6);
-              spawnSpiral(-100, h * 0.4, spiralDrift);
-              spawnSpiral(w + 100, h * 0.6, -spiralDrift);
+            case 7:
+              spawnPinwheel();
               phaseRound++;
               break;
-            }
             case 1:
               spawnGravityRain();
               phaseRound++;
@@ -1004,24 +1028,16 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           if (p.x > w + 80) p.x = -60;
         }
 
-        if (p.orbitR > 0) {
-          p.orbitCx += p.vx * dt;
-          p.orbitCy += p.vy * dt;
-          p.orbitAngle += p.orbitSpeed;
-          if (Math.abs(p.orbitSpeed) < 3) p.orbitSpeed *= 1.001;
-          const rad = (p.orbitAngle * Math.PI) / 180;
-          p.x = p.orbitCx + Math.cos(rad) * p.orbitR;
-          p.y = p.orbitCy + Math.sin(rad) * p.orbitR;
-        }
       }
 
       projectiles = projectiles.filter(
         (p) => p.x > -600 && p.x < w + 600 && p.y > -400 && p.y < h + 400,
       );
 
-      /* ── Hit detection — instant, no delay between hits ── */
+      /* ── Hit detection — batched per frame for mobile perf ── */
       if (hitFlash > 0) hitFlash -= dt;
-      const HR = HEART_SIZE * 0.55;
+      const HR = getHeartSize() * 0.55;
+      let hitsThisFrame = 0;
       for (const p of projectiles) {
         if (p.hit) continue;
         if (
@@ -1031,11 +1047,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           heart.y - HR < p.y + p.h
         ) {
           p.hit = true;
-          hitFlash = 0.12;
+          hitsThisFrame++;
           hitCount++;
           hitNames.push(p.text);
-          playHitSound();
         }
+      }
+      if (hitsThisFrame > 0) {
+        hitFlash = 0.12;
+        playHitSound();
       }
 
       /* ── Render ── */
@@ -1070,7 +1089,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         ctx.restore();
       }
 
-      drawHeart(ctx, heart.x, heart.y, HEART_SIZE, hitFlash > 0, heartImg);
+      drawHeart(ctx, heart.x, heart.y, getHeartSize(), hitFlash > 0, heartImg);
 
       /* HUD */
       ctx.font = `16px ${DETERMINATION_MONO}`;

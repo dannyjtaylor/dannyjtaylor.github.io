@@ -10,7 +10,7 @@ import {
   onValue,
   query,
   orderByChild,
-  limitToLast,
+  limitToFirst,
   serverTimestamp,
   type Unsubscribe,
 } from 'firebase/database';
@@ -23,13 +23,16 @@ export interface LeaderboardEntry {
   timestamp: number;
 }
 
+/* Module-level cache so reopening the window is instant */
+let cachedEntries: LeaderboardEntry[] | null = null;
+
 /**
  * Subscribe to the top leaderboard scores (lowest hits = best).
  * Returns entries sorted ascending by hits (best first).
  */
 export function useLeaderboard(limit = 50) {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>(cachedEntries ?? []);
+  const [loading, setLoading] = useState(cachedEntries === null);
 
   useEffect(() => {
     if (!db) {
@@ -40,7 +43,7 @@ export function useLeaderboard(limit = 50) {
     const lbRef = query(
       ref(db, 'leaderboard'),
       orderByChild('hits'),
-      limitToLast(limit),
+      limitToFirst(limit),
     );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,9 +59,12 @@ export function useLeaderboard(limit = 50) {
           timestamp: val.timestamp,
         });
       });
-      // Sort ascending by hits (fewer hits = better score)
       data.sort((a, b) => a.hits - b.hits);
+      cachedEntries = data;
       setEntries(data);
+      setLoading(false);
+    }, (error: Error) => {
+      console.error('Leaderboard fetch error:', error);
       setLoading(false);
     });
 

@@ -61,45 +61,54 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'My Family',
     entries: [
-      { name: 'Andrew Livingston', role: 'Cousin' },
+      { name: 'Katherine Taylor', role: 'Mother' },
+      { name: 'John Taylor', role: 'Father' },
+      { name: 'Patricia Taylor', role: 'Sister' },
+      { name: 'Johnny Taylor', role: 'Brother' },
+      { name: 'Forrest Taylor', role: 'Brother' },
       { name: 'Caroline Livingston', role: 'Aunt' },
       { name: 'Silvia Livingston', role: 'Aunt' },
+      { name: 'Clagget Taylor', role: 'Uncle' },
       { name: 'Sue Taylor', role: 'Aunt' },
-      { name: 'Forrest Taylor', role: 'Brother' },
+      { name: 'Jacob Livingston', role: 'Cousin' },
+      { name: 'Andrew Livingston', role: 'Cousin' },
       { name: 'George Livingston', role: 'Cousin' },
       { name: 'Hannah Livingston', role: 'Cousin' },
       { name: 'Hunter Livingston', role: 'Cousin' },
-      { name: 'Jacob Livingston', role: 'Cousin' },
-      { name: 'John Taylor', role: 'Father' },
-      { name: 'Johnny Taylor', role: 'Brother' },
-      { name: 'Katherine Taylor', role: 'Mother' },
       { name: 'Katheryn Livingston', role: 'Cousin' },
-      { name: 'Patricia Taylor', role: 'Sister' },
       { name: 'Robert Livingston', role: 'Uncle' },
-      { name: 'Clagget Taylor', role: 'Uncle' },
       { name: 'Randy Livingston', role: 'Uncle' },
     ],
   },
   {
-    title: 'Professors',
+    title: 'Professors/Faculty & Staff',
     entries: [
       { name: 'Dr. Austin Anderson', role: "Research Supervisor, Professor I TA'd Differential Equations For"},
-      { name: 'Dr. Drouin', role: "Taught me Computational Linear Algebra" },
-      { name: 'Dr. Elizabeth Kames', role: "Taught me SOLIDWORKS" },
+      { name: 'Dr. Joshua Drouin', role: "Taught me Computational Linear Algebra" },
+      { name: 'Dr. Elisabeth Kames', role: "Taught me SOLIDWORKS" },
       { name: 'Dr. Emadelden Fouad', role: "Taught me Physics 1 and 2" },
-      { name: 'Dr. Farmani', role: "Taught me Verilog & Cybersecurity" },
+      { name: 'Dr. Mohammad Farmani', role: "Taught me Verilog & Cybersecurity" },
       { name: 'Dr. Hoan Ngo', role: "Taught me Embedded Operating Systems" },
       { name: 'Dr. Jared Bunn', role: "Taught me Topology & Discrete Math" },
       { name: 'Dr. Manoj Lamichhane', role: "Taught me Differential Equations and Calculus 3" },
-      { name: 'Dr. Muhammad Ullah', role: "Taught me Circuits 1, Circuits 2, breadboards, oscilloscopes, Digital Electronics, and VLSI Design" },
-      { name: 'Dr. Olin', role: "Chemistry Lab"},
+      { name: 'Dr. Muhammad Ullah', role: "Taught me Circuits 1, Circuits 2, breadboards, oscilloscopes, Digital Electronics, and VLSI Design, 'We know these things'" },
+      { name: 'Dr. Tracy Olin', role: "Chemistry Lab"},
       { name: 'Dr. Onur Toker', role: "Best Capstone professor ever" },
-      { name: 'Dr. Rawa Adla', role: "Taught me about Autonomous Vehicles, Electric and Hybrid Vehicles. Bowled with her, went to SunTrax with her, went to IMSA with her, went to Chick-fil-A with her"},
-      { name: 'Dr. Sakib', role: "Taught me Digital Logic Design"},
-      { name: 'Dr. Sista', role: "Taught me Chemistry"},
+      { name: 'Dr. Rawa Adla', role: "Taught me about Autonomous Vehicles, Electric and Hybrid Vehicles, Microprocessors, and Computer Architecture. Bowled with her, went to SunTrax with her, went to IMSA with her, went to Chick-fil-A with her"},
+      { name: 'Dr. Ashiq Sakib', role: "Taught me Digital Logic Design, 'Gone are the days of Plugging and Chugging'"},
+      { name: 'Dr. Venkata Sista', role: "Taught me Chemistry"},
       { name: 'Dr. Sundari Ramabhotla', role: "Taught me Systems and Signals, and Smart Grid and Physical Cyber Security" },
-      { name: 'Mr. Falcao', role: "Taught me Calculus 1 and Calculus 2. Thanks for making college not scary when I first came in" },
-    ],
+      { name: 'Mr. Silvano Falcao', role: "Taught me Calculus 1 and Calculus 2. Thanks for making college not scary when I first came in" },
+      { name: 'Dr. Mary Vollaro', role: "F.L.A.M.E" },
+      { name: 'Mr. Igor Mirsalikhov', role: "Taught me everything I know about coding, C and C++" },
+      { name: 'Dr. Susan LeFrancois', role: "Legal, Ethical, Management Issues in Technology, I won her Kahoot" },
+      { name: 'Ms. Ramamourty Manimegalai', role: "Physics 1 and 2 Lab"},
+      { name: 'Dr. Ranses Alfonso Roriguez', role: "Taught me Probability and Statistics, our SHPE advisor"},
+      { name: 'Dr. Bradford Barker', role: "Taught me Quantum Information and Computing"},
+      { name: 'Dr. Asai Asaithambi', role: "Taught me Advanced Engineering Math, though that first quiz got all of us"},
+      { name: "Ms. Martha Seney", role: "Career Services Director, Rotaract & SHPE member, taught me a lot about professional development"},
+      { name: "Ms. Noelia Sanchez", role: "Nicest person alive & Rotaract's advisor!"}
+    ],  
   },
   {
     title: 'SHPE Eboard 2025\u20132026',
@@ -144,6 +153,21 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Trenton McCutcheon' },
     ],
   },
+  {
+    title: 'SHPE',
+    entries: [
+      { name: 'Benji Guzman' },
+      { name: 'Carlos Marillo' },
+      { name: 'Gabriel Sanchez' },
+      { name: 'Louis Irias' },
+      { name: 'Maria Roman' },
+      { name: 'Raul Lopez III' },
+      { name: 'Samuel Marillo' },
+      { name: 'Sebastian Anzola' },
+      { name: 'The City of Philadelphia', role: 'for stealing my wallet' },
+    ],
+  },
+
 
   /* ── Alphabetical middle ── */
   {
@@ -172,29 +196,6 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Sterling Peters', needsLastName: true },
       { name: 'Thomas Cook' },
       { name: 'Will Carroll', needsLastName: true },
-    ],
-  },
-  {
-    title: 'Paul Patullo',
-    entries: [
-      { name: 'Joe Patullo' },
-      { name: 'Natasha Patullo' },
-      { name: 'Paul Patullo' },
-    ],
-  },
-  {
-    title: 'People I Know Because of Bryon',
-    entries: [
-      { name: 'Bryon Catlin II' },
-      { name: 'Carson Elliott', role: "NerdLabz" },
-      { name: 'Dylan Catlin' },
-      { name: 'Jackson Bopp' },
-      { name: 'Karl', needsLastName: true },
-      { name: 'Leona Catlin' },
-      { name: 'Michael Testa' },
-      { name: 'Sam Critchlow' },
-      { name: 'Stephanie Catlin' },
-      { name: 'Tyler Critchlow' },
     ],
   },
   {
@@ -227,17 +228,49 @@ const CREDITS_DATA: CreditSection[] = [
     ],
   },
   {
-    title: 'SHPE',
+    title: 'Lake Placid/Sebring',
     entries: [
-      { name: 'Benji Guzman' },
-      { name: 'Carlos Marillo' },
-      { name: 'Gabriel Sanchez' },
-      { name: 'Louis Irias' },
-      { name: 'Maria Roman' },
-      { name: 'Raul Lopez III' },
-      { name: 'Samuel Marillo' },
-      { name: 'Sebastian Anzola' },
-      { name: 'The City of Philadelphia', role: 'for stealing my wallet' },
+      { name: 'Brianna Pratts' },
+      { name: 'Casen Simmons' },
+      { name: 'Connor', needsLastName: true },
+      { name: 'Danyela Marcelo-Lopez' },
+      { name: "Duce D'Anthony Dossey" },
+      { name: 'ESKETIT', needsLastName: true },
+      { name: 'Esperansa', needsLastName: true },
+      { name: 'Gavin Higgs' },
+      { name: 'Jacob Sueppel' },
+      { name: 'James Swaford' },
+      { name: 'Jennifer Angeles' },
+      { name: 'Joshua Spurlock' },
+      { name: 'Keith Sigrist' },
+      { name: 'Kevin Su' },
+      { name: 'Lyra Ganaban' },
+      { name: 'Ms. Burnett' },
+      { name: 'Ms. Curry' },
+      { name: 'Ms. Sohn' },
+    ],
+  },
+  {
+    title: 'Paul Patullo',
+    entries: [
+      { name: 'Joe Patullo' },
+      { name: 'Natasha Patullo' },
+      { name: 'Paul Patullo' },
+    ],
+  },
+  {
+    title: 'People I Know Because of Bryon',
+    entries: [
+      { name: 'Bryon Catlin II' },
+      { name: 'Carson Elliott', role: "NerdLabz" },
+      { name: 'Dylan Catlin' },
+      { name: 'Jackson Bopp' },
+      { name: 'Karl', needsLastName: true },
+      { name: 'Leona Catlin' },
+      { name: 'Michael Testa' },
+      { name: 'Sam Critchlow' },
+      { name: 'Stephanie Catlin' },
+      { name: 'Tyler Critchlow' },
     ],
   },
   {
@@ -248,7 +281,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Aliyah Schouten' },
       { name: 'Alis Craig' },
       { name: 'Andrew Blackwelder' },
-      { name: "Andrew Blackwelder's Cousin Thats Dating Andrew My Cousin" },
+      { name: "" },
       { name: 'Andrew Graham' },
       { name: 'Andrew Piasecki' },
       { name: 'Andrew Ptazek' },
@@ -267,7 +300,6 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'David Tarbox' },
       { name: 'David Vidana' },
       { name: 'David Zambrano' },
-      { name: "Duce D'Anthony Dossey" },
       { name: 'Eddrick', needsLastName: true },
       { name: 'Eli Wolfe' },
       { name: 'Elijah Kenney' },
@@ -277,11 +309,9 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Fabian', needsLastName: true },
       { name: 'Francisco', needsLastName: true },
       { name: 'Gabby Villalba', needsLastName: true },
-      { name: 'Gavin Higgs' },
       { name: 'Giana Reyes' },
       { name: 'Jacob Brescia' },
       { name: 'Jacob Paccione' },
-      { name: 'Jacob Suppuel' },
       { name: 'Jake Diaz-Iglesias' },
       { name: 'Jannice', needsLastName: true },
       { name: 'Jasmine Heymann' },
@@ -293,7 +323,6 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Justis', needsLastName: true },
       { name: 'Kailey Gibbons' },
       { name: 'Kaitlyn Surovy' },
-      { name: 'Kevin Su' },
       { name: 'Kody Byrd' },
       { name: 'Koral', needsLastName: true },
       { name: 'Kyla Harpe' },
@@ -307,7 +336,6 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Luis Mata-Moreno' },
       { name: 'Luis Silva' },
       { name: 'Lukas Kelk' },
-      { name: 'Lyra Ganaban' },
       { name: 'Maya Stuhlman' },
       { name: 'Meleena Scott' },
       { name: 'Melanie Morenson' },
@@ -439,7 +467,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
 ];
 
-const ALL_NAMES = CREDITS_DATA.flatMap((s) => s.entries.map((e) => e.name));
+const ALL_NAMES = CREDITS_DATA.flatMap((s) => s.entries.map((e) => e.name)).filter(Boolean);
 const BASE_DURATION = 180;
 const TWO_COL_THRESHOLD = 10;
 
@@ -459,8 +487,6 @@ interface Projectile {
   hit: boolean;
   action: number;       // 0=normal, 1=homing-lock, 3=wrap
   frame: number;
-  lockX: number;
-  lockY: number;
   gravity: number;
   angle: number;
   orbitCx: number;
@@ -468,12 +494,21 @@ interface Projectile {
   orbitR: number;
   orbitAngle: number;
   orbitSpeed: number;
+  logoImg: HTMLImageElement | null;
 }
 
 let nextProjId = 0;
 
 const DETERMINATION_MONO = "'DeterminationMono', monospace";
 const DETERMINATION_SANS = "'DeterminationSans', sans-serif";
+
+const ATTACK_LOGOS = [
+  { src: '/credits-photos/rotaract.png', name: 'Rotaract' },
+  { src: '/credits-photos/SHPE.png', name: 'SHPE' },
+  { src: '/credits-photos/IEEE.png', name: 'IEEE' },
+  { src: '/credits-photos/wellsfargo.jpg', name: 'Wells Fargo' },
+  { src: '/credits-photos/IBM.png', name: 'IBM' },
+];
 
 function loadHeartImage(): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
@@ -526,8 +561,8 @@ function drawHeart(
 function mkProj(base: Partial<Projectile> & { id: number; text: string; x: number; y: number; w: number; h: number }): Projectile {
   return {
     vx: 0, vy: 0, hit: false, action: 0, frame: 0,
-    lockX: 0, lockY: 0, gravity: 0, angle: 0,
-    orbitCx: 0, orbitCy: 0, orbitR: 0, orbitAngle: 0, orbitSpeed: 0,
+    gravity: 0, angle: 0,
+    orbitCx: 0, orbitCy: 0, orbitR: 0, orbitAngle: 0, orbitSpeed: 0, logoImg: null,
     ...base,
   };
 }
@@ -588,6 +623,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     loadHeartImage().then((img) => { heartImg = img; });
     preloadFonts();
 
+    /* ── Preload logo images for random logo projectiles ── */
+    const logoImages: HTMLImageElement[] = ATTACK_LOGOS.map((logo) => {
+      const img = new Image();
+      img.src = logo.src;
+      return img;
+    });
+    let logoTimer = 0;
+
     /* ── Game state ── */
     const heart = { x: W() / 2, y: H() * 0.7 };
     let projectiles: Projectile[] = [];
@@ -601,8 +644,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let gameOver = false;
     let endTimer = 0;
     const HEART_SPEED = 300;
-    const HEART_SIZE = 18;
-    const HITBOX = 5;
+    const HEART_SIZE = 14;
 
     /* ── Phase system ── */
     const PHASE_THRESHOLDS = [
@@ -714,7 +756,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         const { tw, th } = measureName(name);
         const angleDeg = startAngle + (360 / count) * i;
         const angleRad = (angleDeg * Math.PI) / 180;
-        const radius = 70;
+        const radius = Math.max(70, Math.min(W() * 0.12, 220));
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
           x: cx + Math.cos(angleRad) * radius,
@@ -873,27 +915,64 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         }
       }
 
+      /* ── Spawn random logos ── */
+      logoTimer += dt;
+      if (logoTimer >= 8 && logoImages.length > 0) {
+        logoTimer = 0;
+        const li = Math.floor(Math.random() * ATTACK_LOGOS.length);
+        const logoInfo = ATTACK_LOGOS[li];
+        const limg = logoImages[li];
+        if (logoInfo && limg && limg.complete && limg.naturalWidth > 0) {
+          const fromR = Math.random() > 0.5;
+          const sz = 60;
+          const yp = Math.random() * (h - sz * 2) + sz;
+          projectiles.push(mkProj({
+            id: nextProjId++, text: logoInfo.name,
+            x: fromR ? w + sz : -sz, y: yp,
+            vx: fromR ? -140 : 140,
+            w: sz, h: sz, logoImg: limg,
+          }));
+        }
+      }
+
       /* ── Update projectiles ── */
       for (const p of projectiles) {
         p.frame++;
 
         if (p.action === 1) {
-          if (p.frame < 30) {
+          if (p.frame < 40) {
+            /* Phase 1: Slide in */
             p.x += p.vx * dt;
             p.y += p.vy * dt;
-          } else if (p.frame === 30) {
+          } else if (p.frame === 40) {
             p.vx = 0;
             p.vy = 0;
-          } else if (p.frame > 30 && p.frame < 50) {
-            p.lockX = heart.x - p.x;
-            p.lockY = heart.y - p.y;
-          } else if (p.frame === 50) {
-            const dx = p.lockX || (heart.x - p.x);
-            const dy = p.lockY || (heart.y - p.y);
-            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          } else if (p.frame > 40 && p.frame < 85) {
+            /* Phase 2: Aim — rotate text to point toward heart (Undertale-style) */
+            const pcx = p.x + p.w / 2;
+            const pcy = p.y + p.h / 2;
+            const idealAngle = Math.atan2(heart.y - pcy, heart.x - pcx);
+
+            let angleDiff = idealAngle - p.angle;
+            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+            const absDiff = Math.abs(angleDiff);
+            let turnSpeed = 0.04;
+            if (absDiff > 0.17) turnSpeed = 0.07;
+            if (absDiff > 0.35) turnSpeed = 0.13;
+            if (absDiff > 0.52) turnSpeed = 0.22;
+            if (absDiff > 0.7) turnSpeed = 0.35;
+
+            const deadZone = 0.05;
+            if (absDiff > deadZone) {
+              p.angle += Math.sign(angleDiff) * Math.min(turnSpeed, absDiff);
+            }
+          } else if (p.frame === 85) {
+            /* Phase 3: Fire in aimed direction */
             const speed = 280;
-            p.vx = (dx / dist) * speed;
-            p.vy = (dy / dist) * speed;
+            p.vx = Math.cos(p.angle) * speed;
+            p.vy = Math.sin(p.angle) * speed;
             p.action = 0;
           }
         } else {
@@ -923,26 +1002,23 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         (p) => p.x > -600 && p.x < w + 600 && p.y > -400 && p.y < h + 400,
       );
 
-      /* ── Hit detection ── */
-      if (hitFlash <= 0) {
-        for (const p of projectiles) {
-          if (p.hit) continue;
-          if (
-            heart.x + HITBOX > p.x &&
-            heart.x - HITBOX < p.x + p.w &&
-            heart.y + HITBOX > p.y - p.h * 0.2 &&
-            heart.y - HITBOX < p.y + p.h
-          ) {
-            p.hit = true;
-            hitFlash = 0.35;
-            hitCount++;
-            hitNames.push(p.text);
-            playHitSound();
-            break;
-          }
+      /* ── Hit detection — instant, no delay between hits ── */
+      if (hitFlash > 0) hitFlash -= dt;
+      const HR = HEART_SIZE * 0.55;
+      for (const p of projectiles) {
+        if (p.hit) continue;
+        if (
+          heart.x + HR > p.x &&
+          heart.x - HR < p.x + p.w &&
+          heart.y + HR > p.y &&
+          heart.y - HR < p.y + p.h
+        ) {
+          p.hit = true;
+          hitFlash = 0.12;
+          hitCount++;
+          hitNames.push(p.text);
+          playHitSound();
         }
-      } else {
-        hitFlash -= dt;
       }
 
       /* ── Render ── */
@@ -959,13 +1035,20 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       ctx.textBaseline = 'top';
       for (const p of projectiles) {
         ctx.save();
-        ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
-        if (p.angle) {
-          ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
-          ctx.rotate(p.angle);
-          ctx.fillText(p.text, -p.w / 2, -p.h / 2);
+        ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+        if (p.angle) ctx.rotate(p.angle);
+        if (p.logoImg && p.logoImg.complete && p.logoImg.naturalWidth > 0) {
+          if (p.hit) ctx.globalAlpha = 0.6;
+          ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
+          if (p.hit) {
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = '#FFFF00';
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.globalAlpha = 1;
+          }
         } else {
-          ctx.fillText(p.text, p.x, p.y);
+          ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
+          ctx.fillText(p.text, -p.w / 2, -p.h / 2);
         }
         ctx.restore();
       }
@@ -1160,6 +1243,7 @@ export function Credits() {
   const lastFrameRef = useRef(0);
   const contentHeightRef = useRef(0);
   const blackPauseRef = useRef(false);
+  const loopCountRef = useRef(0);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef(0.4);
   const volumeRef = useRef(60);
@@ -1198,15 +1282,18 @@ export function Credits() {
         }
 
         if (scrollPosRef.current <= -contentHeightRef.current) {
+          loopCountRef.current++;
           blackPauseRef.current = true;
 
-          pauseTimerRef.current = setTimeout(() => {
-            scrollPosRef.current = window.innerHeight;
-            if (trackRef.current) {
-              trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
-            }
-            blackPauseRef.current = false;
-          }, 3000);
+          if (loopCountRef.current < 2) {
+            pauseTimerRef.current = setTimeout(() => {
+              scrollPosRef.current = window.innerHeight;
+              if (trackRef.current) {
+                trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
+              }
+              blackPauseRef.current = false;
+            }, 3000);
+          }
         }
       }
 
@@ -1289,6 +1376,7 @@ export function Credits() {
   }, [attackResult, submitScore]);
 
   const handleExitAttack = useCallback(() => {
+    loopCountRef.current = 0;
     startAudio(selectedTrack);
     setMode('credits');
   }, [selectedTrack, startAudio]);
@@ -1296,6 +1384,7 @@ export function Credits() {
   const handleReset = useCallback(() => {
     scrollPosRef.current = 0;
     blackPauseRef.current = false;
+    loopCountRef.current = 0;
     if (pauseTimerRef.current) { clearTimeout(pauseTimerRef.current); pauseTimerRef.current = null; }
     if (trackRef.current) {
       trackRef.current.style.transform = 'translateY(0)';
@@ -1394,7 +1483,7 @@ export function Credits() {
           ))}
         </select>
 
-        <div className={styles.sliderGroup}>
+        <div className={`${styles.sliderGroup} ${styles.volumeSliderGroup}`}>
           <span className={styles.sliderLabel}>Vol</span>
           <input
             type="range"
@@ -1488,7 +1577,7 @@ export function Credits() {
 
           <div className={styles.closingMessage}>Thank You</div>
           <div className={styles.closingSubtext}>To everyone who helped me get here.</div>
-          <div className={styles.closingSubtext}>I couldn&apos;t have done it without you.</div>
+          <div className={styles.closingSubtext}>We made it!</div>
 
           <div className={styles.divider} />
 

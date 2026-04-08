@@ -69,7 +69,12 @@
       "WebFetch(domain:cyberpedia.miraheze.org)",
       "WebFetch(domain:whatculture.com)",
       "WebFetch(domain:www.thegamer.com)",
-      "WebFetch(domain:tvtropes.org)"
+      "WebFetch(domain:tvtropes.org)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(echo \"EXIT: $?\")"
     ]
   }
 }

@@ -80,7 +80,19 @@ export function DesktopIcon({ id, label, icon, windowId, externalUrl }: DesktopI
         selectIcon(id);
       }
 
-      const pos = iconPosition ?? { x: 0, y: 0 };
+      // If no stored position, compute it from the icon's DOM rect
+      let pos: { x: number; y: number };
+      if (iconPosition) {
+        pos = iconPosition;
+      } else {
+        const el = (e.target as HTMLElement).closest('[data-icon-id]') as HTMLElement | null;
+        if (el) {
+          const parentRect = el.parentElement?.getBoundingClientRect() ?? { left: 0, top: 0 };
+          pos = { x: el.getBoundingClientRect().left - parentRect.left, y: el.getBoundingClientRect().top - parentRect.top };
+        } else {
+          pos = { x: 0, y: 0 };
+        }
+      }
 
       dragRef.current = {
         startX: e.clientX,
@@ -141,6 +153,7 @@ export function DesktopIcon({ id, label, icon, windowId, externalUrl }: DesktopI
                   'icon-settings': { label: 'Settings', icon: 'settings', windowId: 'settings' },
                   'icon-musicplayer': { label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
                   'icon-credits': { label: 'Credits', icon: 'credits', windowId: 'credits' },
+                  'icon-leaderboard': { label: 'Leaderboard.txt', icon: 'notepad', windowId: 'leaderboard' },
                 };
                 const staticInfo = staticIconMap[id];
                 if (staticInfo) {
@@ -205,7 +218,7 @@ export function DesktopIcon({ id, label, icon, windowId, externalUrl }: DesktopI
   );
 
   const posStyle = iconPosition
-    ? { transform: `translate(${iconPosition.x}px, ${iconPosition.y}px)` }
+    ? { position: 'absolute' as const, left: iconPosition.x, top: iconPosition.y }
     : undefined;
 
   return (

@@ -59,7 +59,17 @@
       "Bash(ls:*)",
       "Bash(mkdir -p \"C:/Users/lpdtd/OneDrive/Documents/GitHub/Cursor/dannyjtaylor.github.io/public/credits-photos\")",
       "Bash(mkdir -p \"C:/Users/lpdtd/OneDrive/Documents/GitHub/Cursor/dannyjtaylor.github.io/src/pages\")",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(sed 's/<[^>]*>//g')",
+      "WebFetch(domain:undertale.wiki)",
+      "WebFetch(domain:steamcommunity.com)",
+      "WebFetch(domain:gamefaqs.gamespot.com)",
+      "WebFetch(domain:undertale.fandom.com)",
+      "WebFetch(domain:afantasyreality.fandom.com)",
+      "WebFetch(domain:cyberpedia.miraheze.org)",
+      "WebFetch(domain:whatculture.com)",
+      "WebFetch(domain:www.thegamer.com)",
+      "WebFetch(domain:tvtropes.org)"
     ]
   }
 }

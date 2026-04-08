@@ -36,6 +36,7 @@ import { MusicPlayer } from '../../windows/MusicPlayer';
 import { DynamicNotepad } from '../../windows/DynamicNotepad';
 import { CookieClicker } from '../../windows/CookieClicker';
 import { NYTGames } from '../../windows/NYTGames';
+import { Leaderboard } from '../../windows/Leaderboard';
 import type { DesktopIconConfig, WindowConfig, MenuConfig } from '../../types';
 import styles from './Desktop.module.css';
 
@@ -192,6 +193,7 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-musicplayer', label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
   { id: 'icon-nytgames', label: 'NYT Games', icon: 'document', windowId: 'nytgames' },
   { id: 'icon-credits', label: 'Credits', icon: 'credits', windowId: 'credits', externalUrl: '/credits' },
+  { id: 'icon-leaderboard', label: 'Leaderboard.txt', icon: 'notepad', windowId: 'leaderboard' },
 ];
 
 const WINDOWS: WindowConfig[] = [
@@ -219,6 +221,7 @@ const WINDOWS: WindowConfig[] = [
   { id: 'musicplayer', title: 'Music Player',            icon: 'musicplayer', defaultWidth: 480, defaultHeight: 440, defaultX: 100, defaultY: 35 },
   { id: 'cookieclicker', title: 'Cookie Clicker',       icon: 'file',       defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
   { id: 'nytgames', title: 'NYT Games',                  icon: 'document',  defaultWidth: 500, defaultHeight: 520, defaultX: 100, defaultY: 30 },
+  { id: 'leaderboard', title: 'Leaderboard.txt - Notepad', icon: 'notepad', defaultWidth: 380, defaultHeight: 420, defaultX: 160, defaultY: 60 },
 ];
 
 const WINDOW_CONTENT: Record<string, React.ComponentType> = {
@@ -246,6 +249,7 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   musicplayer: MusicPlayer,
   cookieclicker: CookieClicker,
   nytgames: NYTGames,
+  leaderboard: Leaderboard,
 };
 
 export function Desktop() {
@@ -418,6 +422,20 @@ export function Desktop() {
         height: w.defaultHeight,
         title: w.title,
       });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ── Position Credits & Leaderboard icons in top-right column ── */
+  const updateIconPosition = useDesktopStore((s) => s.updateIconPosition);
+  const iconPositions = useDesktopStore((s) => s.iconPositions);
+  useEffect(() => {
+    // Only set initial positions once (if they haven't been dragged)
+    if (!iconPositions['icon-credits'] && !iconPositions['icon-leaderboard']) {
+      const rightX = window.innerWidth - 85;
+      const snappedX = Math.round(rightX / 75) * 75;
+      updateIconPosition('icon-credits', snappedX, 0);
+      updateIconPosition('icon-leaderboard', snappedX, 75);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

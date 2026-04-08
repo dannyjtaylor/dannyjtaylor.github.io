@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './Credits.module.css';
+import { useLeaderboard } from '../hooks/useLeaderboard';
 
 /* ═══════════════════════════════════════════
    Track & Credits Data
@@ -314,7 +315,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Miguel Mondragon' },
       { name: 'Mikala Yin-Furiato' },
       { name: 'Mo Hadid' },
-      { name: 'Moisés Muñoz Salazar'},
+      { name: 'Mois\u00e9s Mu\u00f1oz Salazar'},
       { name: 'Noelia Sanchez' },
       { name: 'Pressley Hendrix' },
       { name: 'Quentin Lockwood' },
@@ -324,7 +325,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Ryan Mullins' },
       { name: 'Stella Asanova' },
       { name: 'Thomas Risalvato' },
-      { name: 'Tuğba Güneysu' },
+      { name: 'Tu\u011fba G\u00fcneysu' },
       { name: 'Zander Butler' },
     ],
   },
@@ -455,6 +456,18 @@ interface Projectile {
   vy: number;
   w: number;
   h: number;
+  hit: boolean;
+  action: number;       // 0=normal, 1=homing-lock, 3=wrap
+  frame: number;
+  lockX: number;
+  lockY: number;
+  gravity: number;
+  angle: number;
+  orbitCx: number;
+  orbitCy: number;
+  orbitR: number;
+  orbitAngle: number;
+  orbitSpeed: number;
 }
 
 let nextProjId = 0;
@@ -510,10 +523,27 @@ function drawHeart(
   ctx.restore();
 }
 
-function AttackGame({ onExit }: { onExit: () => void }) {
+function mkProj(base: Partial<Projectile> & { id: number; text: string; x: number; y: number; w: number; h: number }): Projectile {
+  return {
+    vx: 0, vy: 0, hit: false, action: 0, frame: 0,
+    lockX: 0, lockY: 0, gravity: 0, angle: 0,
+    orbitCx: 0, orbitCy: 0, orbitR: 0, orbitAngle: 0, orbitSpeed: 0,
+    ...base,
+  };
+}
+
+/* ── End-screen result ── */
+interface AttackResult {
+  hitCount: number;
+  hitNames: string[];
+}
+
+function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (result: AttackResult) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const onExitRef = useRef(onExit);
+  const onFinishRef = useRef(onFinish);
   onExitRef.current = onExit;
+  onFinishRef.current = onFinish;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -535,27 +565,187 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     const W = () => window.innerWidth;
     const H = () => window.innerHeight;
 
+    /* ── Audio ── */
     const audio = new Audio('/toby_fox_lastgoodbye.mp3');
-    audio.loop = true;
+    audio.loop = false;
     audio.volume = 0.7;
     audio.play().catch(() => {});
+
+    const hitSounds: HTMLAudioElement[] = [];
+    for (let i = 0; i < 6; i++) {
+      const s = new Audio('/deltarune_hit.mp3');
+      s.volume = 0.5;
+      hitSounds.push(s);
+    }
+    let hitSoundIdx = 0;
+    const playHitSound = () => {
+      const s = hitSounds[hitSoundIdx % hitSounds.length];
+      if (s) { s.currentTime = 0; s.play().catch(() => {}); }
+      hitSoundIdx++;
+    };
 
     let heartImg: HTMLImageElement | null = null;
     loadHeartImage().then((img) => { heartImg = img; });
     preloadFonts();
 
+    /* ── Game state ── */
     const heart = { x: W() / 2, y: H() * 0.7 };
     let projectiles: Projectile[] = [];
     let hitFlash = 0;
-    let spawnTimer = 0;
     let nameIdx = 0;
     let lastTime = 0;
     let frameId = 0;
     let elapsed = 0;
+    let hitCount = 0;
+    const hitNames: string[] = [];
+    let gameOver = false;
+    let endTimer = 0;
     const HEART_SPEED = 300;
     const HEART_SIZE = 18;
     const HITBOX = 5;
 
+    /* ── Phase system ── */
+    const PHASE_THRESHOLDS = [
+      { phase: 0, start: 0 },
+      { phase: 2, start: 60 },
+      { phase: 4, start: 140 },
+      { phase: 7, start: 220 },
+      { phase: 6, start: 290 },
+      { phase: 1, start: 360 },
+    ];
+    let currentPhase = 0;
+    let phaseTimer = 0;
+    let phaseRound = 0;
+    const totalNames = ALL_NAMES.length;
+
+    const getPhase = (idx: number): number => {
+      let p = 0;
+      for (const t of PHASE_THRESHOLDS) {
+        if (idx >= t.start) p = t.phase;
+      }
+      return p;
+    };
+
+    const getFontSize = () => Math.max(20, Math.min(32, W() / 22));
+
+    const measureName = (name: string): { tw: number; th: number } => {
+      const fontSize = getFontSize();
+      ctx.font = `${fontSize}px ${DETERMINATION_SANS}`;
+      return { tw: ctx.measureText(name).width, th: fontSize * 1.2 };
+    };
+
+    const nextName = (): string => {
+      if (nameIdx >= totalNames) return '';
+      const name = ALL_NAMES[nameIdx] ?? 'Danny';
+      nameIdx++;
+      return name;
+    };
+
+    /* ── Phase 0 & 6: Homing clusters ── */
+    const spawnHomingCluster = (fromRight: boolean, yCenter: number) => {
+      const w = W();
+      for (let i = 0; i < 5; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        const startX = fromRight ? w + 50 + i * 45 : -tw - 50 - i * 45;
+        const startY = yCenter + (i - 2) * 35;
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name, x: startX, y: startY,
+          vx: fromRight ? -350 : 350, w: tw, h: th,
+          action: 1,
+        }));
+      }
+    };
+
+    /* ── Phase 2: Walls from both sides with gaps ── */
+    const spawnWalls = () => {
+      const h = H();
+      const w = W();
+      const slotCount = Math.floor(h / 42);
+      const gapCountL = 2 + Math.floor(Math.random() * 2);
+      const gapCountR = 2 + Math.floor(Math.random() * 2);
+      const gapsL = new Set<number>();
+      const gapsR = new Set<number>();
+      while (gapsL.size < gapCountL) gapsL.add(Math.floor(Math.random() * slotCount));
+      while (gapsR.size < gapCountR) gapsR.add(Math.floor(Math.random() * slotCount));
+
+      for (let i = 0; i < slotCount; i++) {
+        if (!gapsL.has(i)) {
+          const name = nextName();
+          if (!name) return;
+          const { tw, th } = measureName(name);
+          projectiles.push(mkProj({ id: nextProjId++, text: name, x: -tw - 20, y: i * 42, vx: 320, w: tw, h: th }));
+        }
+        if (!gapsR.has(i)) {
+          const name = nextName();
+          if (!name) return;
+          const { tw, th } = measureName(name);
+          projectiles.push(mkProj({ id: nextProjId++, text: name, x: w + 20, y: i * 42 + 21, vx: -320, w: tw, h: th }));
+        }
+      }
+    };
+
+    /* ── Phase 4: Vertical rain with drift and wrap ── */
+    const spawnVerticalRain = (driftRight: boolean) => {
+      const w = W();
+      const cols = Math.floor(w / 70);
+      for (let i = 0; i < cols; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: i * 70 + 20, y: -th - Math.random() * 200,
+          vx: driftRight ? 80 : -80, vy: 220,
+          w: tw, h: th, action: 3,
+          angle: driftRight ? Math.PI / 2 : -Math.PI / 2,
+        }));
+      }
+    };
+
+    /* ── Phase 7: Spinning spirals ── */
+    const spawnSpiral = (cx: number, cy: number, driftVx: number) => {
+      const count = 8;
+      const startAngle = Math.random() * 360;
+      for (let i = 0; i < count; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        const angleDeg = startAngle + (360 / count) * i;
+        const angleRad = (angleDeg * Math.PI) / 180;
+        const radius = 70;
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: cx + Math.cos(angleRad) * radius,
+          y: cy + Math.sin(angleRad) * radius,
+          vx: driftVx,
+          w: tw, h: th,
+          orbitCx: cx, orbitCy: cy,
+          orbitR: radius, orbitAngle: angleDeg,
+          orbitSpeed: driftVx > 0 ? 3 : -3,
+        }));
+      }
+    };
+
+    /* ── Phase 1: Gravity rain ── */
+    const spawnGravityRain = () => {
+      const w = W();
+      const startX = Math.random() * (w - 300);
+      for (let i = 0; i < 4; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: startX + i * 90, y: -th - 40,
+          vy: 20, w: tw, h: th,
+          gravity: 400,
+        }));
+      }
+    };
+
+    /* ── Input ── */
     const keys = new Set<string>();
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { onExitRef.current(); return; }
@@ -585,56 +775,19 @@ function AttackGame({ onExit }: { onExit: () => void }) {
     canvas.addEventListener('touchstart', onTouchStart, { passive: true });
     canvas.addEventListener('touchmove', onTouchMove, { passive: false });
 
-    const spawn = () => {
-      const name = ALL_NAMES[nameIdx % ALL_NAMES.length] ?? 'Danny';
-      nameIdx++;
-      const fontSize = Math.max(24, Math.min(38, W() / 18));
-      ctx.font = `${fontSize}px ${DETERMINATION_SANS}`;
-      const tw = ctx.measureText(name).width;
-      const th = fontSize * 1.2;
-      const id = nextProjId++;
-      const w = W();
-      const h = H();
-      const baseSpeed = 80 + elapsed * 0.3;
-      const speed = baseSpeed + Math.random() * 220;
-      const roll = Math.random();
-
-      if (roll < 0.7) {
-        const edge = Math.floor(Math.random() * 4);
-        let sx: number, sy: number;
-        switch (edge) {
-          case 0: sx = -tw - 10; sy = Math.random() * h; break;
-          case 1: sx = w + 10; sy = Math.random() * h; break;
-          case 2: sx = Math.random() * (w - tw); sy = -th; break;
-          default: sx = Math.random() * (w - tw); sy = h + th; break;
-        }
-        const dx = heart.x - sx;
-        const dy = heart.y - sy;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        projectiles.push({
-          id, text: name, x: sx, y: sy,
-          vx: (dx / dist) * speed, vy: (dy / dist) * speed,
-          w: tw, h: th,
-        });
-      } else {
-        const pattern = Math.floor(Math.random() * 4);
-        switch (pattern) {
-          case 0:
-            projectiles.push({ id, text: name, x: -tw - 10, y: Math.random() * h, vx: speed, vy: 0, w: tw, h: th });
-            break;
-          case 1:
-            projectiles.push({ id, text: name, x: w + 10, y: Math.random() * h, vx: -speed, vy: 0, w: tw, h: th });
-            break;
-          case 2:
-            projectiles.push({ id, text: name, x: Math.random() * (w - tw), y: -th, vx: 0, vy: speed, w: tw, h: th });
-            break;
-          default:
-            projectiles.push({ id, text: name, x: Math.random() * (w - tw), y: h + th, vx: 0, vy: -speed, w: tw, h: th });
-            break;
-        }
+    const getSpawnInterval = (phase: number): number => {
+      switch (phase) {
+        case 0: return 1.2;
+        case 2: return 2.5;
+        case 4: return 2.8;
+        case 7: return 2.8;
+        case 6: return 0.8;
+        case 1: return 0.5;
+        default: return 1.0;
       }
     };
 
+    /* ── Main game loop ── */
     const gameLoop = (time: number) => {
       if (!lastTime) lastTime = time;
       const dt = Math.min((time - lastTime) / 1000, 0.1);
@@ -644,6 +797,33 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       const w = W();
       const h = H();
 
+      /* Check game over */
+      if (nameIdx >= totalNames && !gameOver) {
+        const allGone = projectiles.every(p =>
+          p.x < -300 || p.x > w + 300 || p.y < -300 || p.y > h + 300
+        );
+        if (projectiles.length === 0 || allGone) {
+          gameOver = true;
+          endTimer = 0;
+        }
+      }
+
+      if (gameOver) {
+        endTimer += dt;
+        if (endTimer > 3) {
+          onFinishRef.current({ hitCount, hitNames });
+          return;
+        }
+        ctx.clearRect(0, 0, w, h);
+        const fadeAlpha = Math.min(1, endTimer / 2);
+        ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha})`;
+        ctx.fillRect(0, 0, w, h);
+        drawHeart(ctx, heart.x, heart.y, HEART_SIZE, false, heartImg);
+        frameId = requestAnimationFrame(gameLoop);
+        return;
+      }
+
+      /* ── Movement ── */
       if (keys.has('arrowleft') || keys.has('a')) heart.x -= HEART_SPEED * dt;
       if (keys.has('arrowright') || keys.has('d')) heart.x += HEART_SPEED * dt;
       if (keys.has('arrowup') || keys.has('w')) heart.y -= HEART_SPEED * dt;
@@ -651,31 +831,113 @@ function AttackGame({ onExit }: { onExit: () => void }) {
       heart.x = Math.max(HEART_SIZE, Math.min(w - HEART_SIZE, heart.x));
       heart.y = Math.max(HEART_SIZE, Math.min(h - HEART_SIZE, heart.y));
 
-      const spawnInterval = Math.max(0.4, 1.0 - elapsed * 0.005);
-      spawnTimer += dt;
-      if (spawnTimer > spawnInterval) {
-        spawnTimer = 0;
-        spawn();
-        if (Math.random() < 0.2) { spawn(); spawn(); }
+      /* ── Phase-based spawning ── */
+      if (nameIdx < totalNames) {
+        const newPhase = getPhase(nameIdx);
+        if (newPhase !== currentPhase) {
+          currentPhase = newPhase;
+          phaseTimer = 0;
+          phaseRound = 0;
+        }
+        phaseTimer += dt;
+        const interval = getSpawnInterval(currentPhase);
+        if (phaseTimer >= interval) {
+          phaseTimer = 0;
+          switch (currentPhase) {
+            case 0:
+            case 6: {
+              const fromRight = phaseRound % 2 === 0;
+              const yCenter = phaseRound % 4 < 2 ? h * 0.25 : h * 0.65;
+              spawnHomingCluster(fromRight, yCenter);
+              phaseRound++;
+              break;
+            }
+            case 2:
+              spawnWalls();
+              phaseRound++;
+              break;
+            case 4:
+              spawnVerticalRain(phaseRound % 2 === 0);
+              phaseRound++;
+              break;
+            case 7:
+              spawnSpiral(-100, h * 0.4, 150);
+              spawnSpiral(w + 100, h * 0.6, -150);
+              phaseRound++;
+              break;
+            case 1:
+              spawnGravityRain();
+              phaseRound++;
+              break;
+          }
+        }
       }
 
+      /* ── Update projectiles ── */
       for (const p of projectiles) {
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
+        p.frame++;
+
+        if (p.action === 1) {
+          if (p.frame < 30) {
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+          } else if (p.frame === 30) {
+            p.vx = 0;
+            p.vy = 0;
+          } else if (p.frame > 30 && p.frame < 50) {
+            p.lockX = heart.x - p.x;
+            p.lockY = heart.y - p.y;
+          } else if (p.frame === 50) {
+            const dx = p.lockX || (heart.x - p.x);
+            const dy = p.lockY || (heart.y - p.y);
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const speed = 280;
+            p.vx = (dx / dist) * speed;
+            p.vy = (dy / dist) * speed;
+            p.action = 0;
+          }
+        } else {
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+        }
+
+        if (p.gravity) p.vy += p.gravity * dt;
+
+        if (p.action === 3) {
+          if (p.x < -80) p.x = w + 60;
+          if (p.x > w + 80) p.x = -60;
+        }
+
+        if (p.orbitR > 0) {
+          p.orbitCx += p.vx * dt;
+          p.orbitCy += p.vy * dt;
+          p.orbitAngle += p.orbitSpeed;
+          if (Math.abs(p.orbitSpeed) < 8) p.orbitSpeed *= 1.003;
+          const rad = (p.orbitAngle * Math.PI) / 180;
+          p.x = p.orbitCx + Math.cos(rad) * p.orbitR;
+          p.y = p.orbitCy + Math.sin(rad) * p.orbitR;
+        }
       }
+
       projectiles = projectiles.filter(
-        (p) => p.x > -500 && p.x < w + 500 && p.y > -200 && p.y < h + 200,
+        (p) => p.x > -600 && p.x < w + 600 && p.y > -400 && p.y < h + 400,
       );
 
+      /* ── Hit detection ── */
       if (hitFlash <= 0) {
         for (const p of projectiles) {
+          if (p.hit) continue;
           if (
             heart.x + HITBOX > p.x &&
             heart.x - HITBOX < p.x + p.w &&
             heart.y + HITBOX > p.y - p.h * 0.2 &&
             heart.y - HITBOX < p.y + p.h
           ) {
-            hitFlash = 0.5;
+            p.hit = true;
+            hitFlash = 0.35;
+            hitCount++;
+            hitNames.push(p.text);
+            playHitSound();
             break;
           }
         }
@@ -683,20 +945,62 @@ function AttackGame({ onExit }: { onExit: () => void }) {
         hitFlash -= dt;
       }
 
+      /* ── Render ── */
       ctx.clearRect(0, 0, w, h);
+
       if (hitFlash > 0) {
-        ctx.fillStyle = `rgba(255, 0, 0, ${hitFlash * 0.15})`;
+        ctx.fillStyle = `rgba(255, 0, 0, ${hitFlash * 0.18})`;
         ctx.fillRect(0, 0, w, h);
       }
 
-      const drawFontSize = Math.max(24, Math.min(38, w / 18));
+      const drawFontSize = getFontSize();
       ctx.font = `${drawFontSize}px ${DETERMINATION_SANS}`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = '#ffffff';
-      for (const p of projectiles) ctx.fillText(p.text, p.x, p.y);
+      for (const p of projectiles) {
+        ctx.save();
+        ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
+        if (p.angle) {
+          ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+          ctx.rotate(p.angle);
+          ctx.fillText(p.text, -p.w / 2, -p.h / 2);
+        } else {
+          ctx.fillText(p.text, p.x, p.y);
+        }
+        ctx.restore();
+      }
 
       drawHeart(ctx, heart.x, heart.y, HEART_SIZE, hitFlash > 0, heartImg);
+
+      /* HUD */
+      ctx.font = `16px ${DETERMINATION_MONO}`;
+      ctx.fillStyle = '#FFFF00';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`HITS: ${hitCount}`, 16, 16);
+
+      if (elapsed < 8) {
+        const alpha = elapsed < 6 ? 1 : Math.max(0, 1 - (elapsed - 6) / 2);
+        ctx.globalAlpha = alpha;
+        ctx.font = `20px ${DETERMINATION_SANS}`;
+        ctx.fillStyle = '#00ff00';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('SPECIAL THANKS', w / 2, 20);
+        ctx.globalAlpha = 1;
+      }
+
+      const barY = h - 40;
+      ctx.font = `14px ${DETERMINATION_MONO}`;
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('HP', 16, barY);
+      ctx.fillStyle = '#FFFF00';
+      ctx.font = `18px ${DETERMINATION_SANS}`;
+      ctx.fillText('\u221E', 40, barY);
+      ctx.fillStyle = '#FFFF00';
+      ctx.fillRect(60, barY - 6, 80, 12);
 
       ctx.font = `13px ${DETERMINATION_MONO}`;
       ctx.fillStyle = '#444';
@@ -736,10 +1040,103 @@ function AttackGame({ onExit }: { onExit: () => void }) {
 }
 
 /* ═══════════════════════════════════════════
+   End Screen — score + name input + leaderboard submit
+   ═══════════════════════════════════════════ */
+
+function AttackEndScreen({
+  result,
+  onSubmit,
+  onExit,
+}: {
+  result: AttackResult;
+  onSubmit: (name: string) => void;
+  onExit: () => void;
+}) {
+  const [name, setName] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = () => {
+    const trimmed = name.trim().split(/\s+/)[0]?.slice(0, 10) ?? '';
+    if (!trimmed) return;
+    setSubmitted(true);
+    onSubmit(trimmed);
+  };
+
+  return (
+    <div className={styles.attackOverlay} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+      <div style={{ textAlign: 'center', fontFamily: DETERMINATION_SANS, color: '#fff', maxWidth: 480, padding: 24 }}>
+        <div style={{ fontSize: 36, color: '#FFFF00', letterSpacing: 3, marginBottom: 24 }}>
+          CREDITS COMPLETE
+        </div>
+        <div style={{ fontSize: 22, marginBottom: 8 }}>
+          You were touched by
+        </div>
+        <div style={{ fontSize: 64, color: result.hitCount === 0 ? '#00ff00' : '#FFFF00', fontWeight: 700, marginBottom: 16 }}>
+          {result.hitCount}
+        </div>
+        <div style={{ fontSize: 18, color: '#aaa', marginBottom: 40 }}>
+          {result.hitCount === 0 ? 'Incredible! You dodged every single name!' : `name${result.hitCount === 1 ? '' : 's'}`}
+        </div>
+
+        {!submitted ? (
+          <>
+            <div style={{ fontSize: 16, color: '#888', marginBottom: 12 }}>
+              Enter your name for the leaderboard (1 word, 10 chars max):
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center' }}>
+              <input
+                type="text"
+                maxLength={10}
+                value={name}
+                onChange={(e) => setName(e.target.value.replace(/\s/g, '').slice(0, 10))}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
+                placeholder="YourName"
+                style={{
+                  background: '#111', border: '2px solid #FFFF00', color: '#fff',
+                  fontFamily: DETERMINATION_SANS, fontSize: 20,
+                  padding: '8px 16px', borderRadius: 4, outline: 'none',
+                  width: 180, textAlign: 'center',
+                }}
+                autoFocus
+              />
+              <button
+                onClick={handleSubmit}
+                style={{
+                  background: '#FFFF00', color: '#000', border: 'none',
+                  fontFamily: DETERMINATION_SANS, fontSize: 18, fontWeight: 700,
+                  padding: '10px 24px', borderRadius: 4, cursor: 'pointer',
+                }}
+              >
+                Submit
+              </button>
+            </div>
+          </>
+        ) : (
+          <div style={{ fontSize: 20, color: '#00ff00', marginBottom: 24 }}>
+            Score submitted!
+          </div>
+        )}
+
+        <button
+          onClick={onExit}
+          style={{
+            marginTop: 32, background: 'none', border: '1px solid #555',
+            color: '#888', fontFamily: DETERMINATION_SANS, fontSize: 16,
+            padding: '10px 32px', borderRadius: 4, cursor: 'pointer',
+          }}
+        >
+          Back to Credits
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
    Main Credits Component
    ═══════════════════════════════════════════ */
 
-type Mode = 'select' | 'credits' | 'attack';
+type Mode = 'select' | 'credits' | 'attack' | 'endscreen';
 
 function formatSpeed(s: number): string {
   if (Number.isInteger(s)) return `${s}`;
@@ -752,6 +1149,9 @@ export function Credits() {
   const [volume, setVolume] = useState(60);
   const [speed, setSpeed] = useState(0.4);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [attackResult, setAttackResult] = useState<AttackResult | null>(null);
+
+  const { submitScore } = useLeaderboard();
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -771,7 +1171,6 @@ export function Credits() {
     if (audioRef.current) audioRef.current.volume = volume / 100;
   }, [volume]);
 
-  // JS-driven scroll animation with seamless loop (scrolls back into frame from bottom)
   useEffect(() => {
     if (mode !== 'credits') return;
 
@@ -798,12 +1197,10 @@ export function Credits() {
           trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
         }
 
-        // End of scroll — brief black, then scroll back in from below viewport
         if (scrollPosRef.current <= -contentHeightRef.current) {
           blackPauseRef.current = true;
 
           pauseTimerRef.current = setTimeout(() => {
-            // Position content just below the viewport so it scrolls up into view
             scrollPosRef.current = window.innerHeight;
             if (trackRef.current) {
               trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
@@ -876,8 +1273,20 @@ export function Credits() {
       audioRef.current = null;
     }
     setShowConfirm(false);
+    setAttackResult(null);
     setMode('attack');
   }, []);
+
+  const handleAttackFinish = useCallback((result: AttackResult) => {
+    setAttackResult(result);
+    setMode('endscreen');
+  }, []);
+
+  const handleScoreSubmit = useCallback((playerName: string) => {
+    if (attackResult) {
+      submitScore(playerName, attackResult.hitCount);
+    }
+  }, [attackResult, submitScore]);
 
   const handleExitAttack = useCallback(() => {
     startAudio(selectedTrack);
@@ -946,7 +1355,23 @@ export function Credits() {
   if (mode === 'attack') {
     return (
       <div className={styles.creditsPage}>
-        <AttackGame onExit={handleExitAttack} />
+        <AttackGame onExit={handleExitAttack} onFinish={handleAttackFinish} />
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════
+     Render: End Screen
+     ═══════════════════════════════════════════ */
+
+  if (mode === 'endscreen' && attackResult) {
+    return (
+      <div className={styles.creditsPage}>
+        <AttackEndScreen
+          result={attackResult}
+          onSubmit={handleScoreSubmit}
+          onExit={handleExitAttack}
+        />
       </div>
     );
   }

@@ -442,14 +442,14 @@
 }
 
 .twoColumnNames {
-  column-count: 2;
-  column-gap: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 40px;
   text-align: center;
 }
 
 .twoColumnEntry {
-  break-inside: avoid;
-  -webkit-column-break-inside: avoid;
+  /* grid child — no special rules needed */
 }
 
 .role {
@@ -763,7 +763,7 @@
   }
 
   .twoColumnNames {
-    column-count: 1;
+    grid-template-columns: 1fr;
   }
 
   .closingMessage {

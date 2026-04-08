@@ -189,13 +189,15 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'IEEE',
     photo: ['IEEE.png', 'IEEEhkn.png'],
     entries: [
-      { name: 'Anthony Dreier' },
-      { name: 'Colby Bradford' },
-      { name: 'Raymond Walker', needsLastName: true },
-      { name: 'Sahil Tahwalker', needsLastName: true },
-      { name: 'Sterling Peters', needsLastName: true },
-      { name: 'Thomas Cook' },
-      { name: 'Will Carroll', needsLastName: true },
+      { name: 'Anthony Dreier'},
+      { name: 'Colby Bradford'},
+      { name: 'Raymond Walker'},
+      { name: 'Sahil Tahwalker'},
+      { name: 'Sterling Peters'},
+      { name: 'Thomas Cook'},
+      { name: 'Will Carroll'},
+      { name: 'Fabian Bosneanu' },
+      { name: 'Jacob Brescia' },
     ],
   },
   {
@@ -306,11 +308,9 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Emily', needsLastName: true, role: 'Not the RA' },
       { name: 'Erich Esqueda' },
       { name: 'Eugene', needsLastName: true },
-      { name: 'Fabian', needsLastName: true },
       { name: 'Francisco', needsLastName: true },
       { name: 'Gabby Villalba', needsLastName: true },
       { name: 'Giana Reyes' },
-      { name: 'Jacob Brescia' },
       { name: 'Jacob Paccione' },
       { name: 'Jake Diaz-Iglesias' },
       { name: 'Jannice', needsLastName: true },
@@ -602,7 +602,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
     /* ── Audio ── */
     const audio = new Audio('/toby_fox_lastgoodbye.mp3');
-    audio.loop = false;
+    audio.loop = true;
     audio.volume = 0.7;
     audio.play().catch(() => {});
 
@@ -623,13 +623,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     loadHeartImage().then((img) => { heartImg = img; });
     preloadFonts();
 
-    /* ── Preload logo images for random logo projectiles ── */
+    /* ── Preload logo images (each appears once at natural aspect ratio) ── */
     const logoImages: HTMLImageElement[] = ATTACK_LOGOS.map((logo) => {
       const img = new Image();
       img.src = logo.src;
       return img;
     });
-    let logoTimer = 0;
+    const logoSpawned = new Array(ATTACK_LOGOS.length).fill(false) as boolean[];
 
     /* ── Game state ── */
     const heart = { x: W() / 2, y: H() * 0.7 };
@@ -658,12 +658,16 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let currentPhase = 0;
     let phaseTimer = 0;
     let phaseRound = 0;
-    const totalNames = ALL_NAMES.length;
+    const totalNames = ALL_NAMES.length * 2;
+    const logoSpawnPoints = ATTACK_LOGOS.map((_, i) =>
+      Math.floor(totalNames * (i + 1) / (ATTACK_LOGOS.length + 1))
+    );
 
     const getPhase = (idx: number): number => {
+      const modIdx = idx % ALL_NAMES.length;
       let p = 0;
       for (const t of PHASE_THRESHOLDS) {
-        if (idx >= t.start) p = t.phase;
+        if (modIdx >= t.start) p = t.phase;
       }
       return p;
     };
@@ -678,7 +682,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
     const nextName = (): string => {
       if (nameIdx >= totalNames) return '';
-      const name = ALL_NAMES[nameIdx] ?? 'Danny';
+      const name = ALL_NAMES[nameIdx % ALL_NAMES.length] ?? 'Danny';
       nameIdx++;
       return name;
     };
@@ -700,31 +704,35 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 2: Walls from both sides with gaps ── */
+    /* ── Phase 2: Uniform walls from both sides (Undertale-style, no gaps) ── */
     const spawnWalls = () => {
       const h = H();
       const w = W();
-      const slotCount = Math.floor(h / 42);
-      const gapCountL = 2 + Math.floor(Math.random() * 2);
-      const gapCountR = 2 + Math.floor(Math.random() * 2);
-      const gapsL = new Set<number>();
-      const gapsR = new Set<number>();
-      while (gapsL.size < gapCountL) gapsL.add(Math.floor(Math.random() * slotCount));
-      while (gapsR.size < gapCountR) gapsR.add(Math.floor(Math.random() * slotCount));
+      const fontSize = getFontSize();
+      const slotH = fontSize * 1.4;
+      const slotCount = Math.floor(h / slotH);
 
+      /* Left wall — every slot filled */
       for (let i = 0; i < slotCount; i++) {
-        if (!gapsL.has(i)) {
-          const name = nextName();
-          if (!name) return;
-          const { tw, th } = measureName(name);
-          projectiles.push(mkProj({ id: nextProjId++, text: name, x: -tw - 20, y: i * 42, vx: 320, w: tw, h: th }));
-        }
-        if (!gapsR.has(i)) {
-          const name = nextName();
-          if (!name) return;
-          const { tw, th } = measureName(name);
-          projectiles.push(mkProj({ id: nextProjId++, text: name, x: w + 20, y: i * 42 + 21, vx: -320, w: tw, h: th }));
-        }
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: -tw - 20, y: i * slotH,
+          vx: 320, w: tw, h: th,
+        }));
+      }
+      /* Right wall — every slot filled, offset half a slot */
+      for (let i = 0; i < slotCount; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: w + 20, y: i * slotH + slotH * 0.5,
+          vx: -320, w: tw, h: th,
+        }));
       }
     };
 
@@ -746,17 +754,17 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 7: Spinning spirals ── */
+    /* ── Phase 7: Spinning spirals (Undertale-style: 10 names, slow orbit) ── */
     const spawnSpiral = (cx: number, cy: number, driftVx: number) => {
-      const count = 8;
+      const count = 10;
       const startAngle = Math.random() * 360;
+      const radius = Math.max(80, Math.min(W() * 0.18, 300));
       for (let i = 0; i < count; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
         const angleDeg = startAngle + (360 / count) * i;
         const angleRad = (angleDeg * Math.PI) / 180;
-        const radius = Math.max(70, Math.min(W() * 0.12, 220));
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
           x: cx + Math.cos(angleRad) * radius,
@@ -765,7 +773,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           w: tw, h: th,
           orbitCx: cx, orbitCy: cy,
           orbitR: radius, orbitAngle: angleDeg,
-          orbitSpeed: driftVx > 0 ? 3 : -3,
+          orbitSpeed: driftVx > 0 ? 1.5 : -1.5,
         }));
       }
     };
@@ -902,11 +910,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
               spawnVerticalRain(phaseRound % 2 === 0);
               phaseRound++;
               break;
-            case 7:
-              spawnSpiral(-100, h * 0.4, 150);
-              spawnSpiral(w + 100, h * 0.6, -150);
+            case 7: {
+              const spiralDrift = Math.max(80, w / 6);
+              spawnSpiral(-100, h * 0.4, spiralDrift);
+              spawnSpiral(w + 100, h * 0.6, -spiralDrift);
               phaseRound++;
               break;
+            }
             case 1:
               spawnGravityRain();
               phaseRound++;
@@ -915,23 +925,25 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         }
       }
 
-      /* ── Spawn random logos ── */
-      logoTimer += dt;
-      if (logoTimer >= 8 && logoImages.length > 0) {
-        logoTimer = 0;
-        const li = Math.floor(Math.random() * ATTACK_LOGOS.length);
-        const logoInfo = ATTACK_LOGOS[li];
-        const limg = logoImages[li];
-        if (logoInfo && limg && limg.complete && limg.naturalWidth > 0) {
-          const fromR = Math.random() > 0.5;
-          const sz = 60;
-          const yp = Math.random() * (h - sz * 2) + sz;
-          projectiles.push(mkProj({
-            id: nextProjId++, text: logoInfo.name,
-            x: fromR ? w + sz : -sz, y: yp,
-            vx: fromR ? -140 : 140,
-            w: sz, h: sz, logoImg: limg,
-          }));
+      /* ── Spawn logos (each appears exactly once at natural aspect ratio) ── */
+      for (let li = 0; li < ATTACK_LOGOS.length; li++) {
+        if (!logoSpawned[li] && nameIdx >= (logoSpawnPoints[li] ?? Infinity)) {
+          const logoInfo = ATTACK_LOGOS[li];
+          const limg = logoImages[li];
+          if (logoInfo && limg && limg.complete && limg.naturalWidth > 0) {
+            logoSpawned[li] = true;
+            const fromR = li % 2 === 0;
+            const ar = limg.naturalWidth / limg.naturalHeight;
+            const lh = 70;
+            const lw = lh * ar;
+            const yp = Math.random() * (h - lh * 2) + lh;
+            projectiles.push(mkProj({
+              id: nextProjId++, text: logoInfo.name,
+              x: fromR ? w + lw : -lw, y: yp,
+              vx: fromR ? -120 : 120,
+              w: lw, h: lh, logoImg: limg,
+            }));
+          }
         }
       }
 
@@ -991,7 +1003,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           p.orbitCx += p.vx * dt;
           p.orbitCy += p.vy * dt;
           p.orbitAngle += p.orbitSpeed;
-          if (Math.abs(p.orbitSpeed) < 8) p.orbitSpeed *= 1.003;
+          if (Math.abs(p.orbitSpeed) < 3) p.orbitSpeed *= 1.001;
           const rad = (p.orbitAngle * Math.PI) / 180;
           p.x = p.orbitCx + Math.cos(rad) * p.orbitR;
           p.y = p.orbitCy + Math.sin(rad) * p.orbitR;
@@ -1243,7 +1255,6 @@ export function Credits() {
   const lastFrameRef = useRef(0);
   const contentHeightRef = useRef(0);
   const blackPauseRef = useRef(false);
-  const loopCountRef = useRef(0);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef(0.4);
   const volumeRef = useRef(60);
@@ -1282,18 +1293,15 @@ export function Credits() {
         }
 
         if (scrollPosRef.current <= -contentHeightRef.current) {
-          loopCountRef.current++;
           blackPauseRef.current = true;
 
-          if (loopCountRef.current < 2) {
-            pauseTimerRef.current = setTimeout(() => {
-              scrollPosRef.current = window.innerHeight;
-              if (trackRef.current) {
-                trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
-              }
-              blackPauseRef.current = false;
-            }, 3000);
-          }
+          pauseTimerRef.current = setTimeout(() => {
+            scrollPosRef.current = window.innerHeight;
+            if (trackRef.current) {
+              trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
+            }
+            blackPauseRef.current = false;
+          }, 3000);
         }
       }
 
@@ -1376,7 +1384,6 @@ export function Credits() {
   }, [attackResult, submitScore]);
 
   const handleExitAttack = useCallback(() => {
-    loopCountRef.current = 0;
     startAudio(selectedTrack);
     setMode('credits');
   }, [selectedTrack, startAudio]);
@@ -1384,7 +1391,6 @@ export function Credits() {
   const handleReset = useCallback(() => {
     scrollPosRef.current = 0;
     blackPauseRef.current = false;
-    loopCountRef.current = 0;
     if (pauseTimerRef.current) { clearTimeout(pauseTimerRef.current); pauseTimerRef.current = null; }
     if (trackRef.current) {
       trackRef.current.style.transform = 'translateY(0)';

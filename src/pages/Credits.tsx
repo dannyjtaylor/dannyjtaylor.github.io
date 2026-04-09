@@ -714,7 +714,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
     /* ── Corridor state ── */
     let corridorActive = false;
-    let corridorCx = W() / 2;
     let corridorElapsed = 0;
     let corridorSpawnTimer = 0;
 
@@ -783,72 +782,86 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 3: Corridor — oscillating vertical walls the heart must navigate ── */
+    /* ── Phase 3: Corridor — predetermined winding path (Undertale-style) ── */
     const getCorridorGapHalf = () => Math.max(38, W() * 0.055);
     const getCorridorFallSpeed = () => H() * 0.75;
-    const getCorridorMoveSpeed = () => W() * 0.19;
+    const CORRIDOR_TOTAL_PAIRS = 56; /* ~14 seconds at 4 pairs/sec */
+
+    /* Predetermined gap path — waypoints as fraction of screen width.
+       The gap smoothly interpolates between these positions using smoothstep.
+       Each row of walls is placed at a fixed x and falls straight down. */
+    const CORRIDOR_WAYPOINTS = [
+      { t: 0.00, x: 0.50 },
+      { t: 0.08, x: 0.50 },
+      { t: 0.18, x: 0.65 },
+      { t: 0.26, x: 0.65 },
+      { t: 0.36, x: 0.35 },
+      { t: 0.44, x: 0.28 },
+      { t: 0.52, x: 0.50 },
+      { t: 0.60, x: 0.68 },
+      { t: 0.70, x: 0.68 },
+      { t: 0.78, x: 0.38 },
+      { t: 0.86, x: 0.58 },
+      { t: 0.94, x: 0.35 },
+      { t: 1.00, x: 0.50 },
+    ];
+
+    const getCorridorGapX = (progress: number): number => {
+      const w = W();
+      const gh = getCorridorGapHalf();
+      for (let i = 0; i < CORRIDOR_WAYPOINTS.length - 1; i++) {
+        const a = CORRIDOR_WAYPOINTS[i]!;
+        const b = CORRIDOR_WAYPOINTS[i + 1]!;
+        if (progress <= b.t) {
+          const local = (progress - a.t) / (b.t - a.t);
+          const smooth = local * local * (3 - 2 * local); /* smoothstep */
+          const gapX = w * (a.x + (b.x - a.x) * smooth);
+          return Math.max(gh + 30, Math.min(w - gh - 30, gapX));
+        }
+      }
+      return w * 0.5;
+    };
+
+    let corridorSpawnCount = 0;
 
     const updateCorridor = (dt: number) => {
       corridorElapsed += dt;
-      const t = corridorElapsed;
-      const sp = getCorridorMoveSpeed();
-
-      /* Predetermined oscillation matching Undertale's corridor pattern */
-      if (t >= 1.5 && t < 2.2) corridorCx += sp * dt;
-      else if (t >= 2.8 && t < 3.5) corridorCx -= sp * dt;
-      else if (t >= 4.5 && t < 5.2) corridorCx -= sp * dt;
-      else if (t >= 5.6 && t < 6.3) corridorCx += sp * dt;
-      else if (t >= 7.2 && t < 7.9) corridorCx += sp * dt;
-      else if (t >= 7.9 && t < 8.6) corridorCx -= sp * dt;
-      else if (t >= 8.6) {
-        /* Increasing sine wave oscillation */
-        const sineT = t - 8.6;
-        const amp = (8 + sineT * 20) * W() / 624;
-        corridorCx = W() / 2 + Math.sin(sineT * 2.7) * amp;
-      }
-
-      /* Clamp to screen */
-      const gh = getCorridorGapHalf();
-      corridorCx = Math.max(gh + 30, Math.min(W() - gh - 30, corridorCx));
 
       /* Spawn two names (one each side) at ~4 pairs/sec.
-         Use action 6 so names track corridorCx each frame → aligned walls. */
+         Each pair gets its gap position from the predetermined path. */
       corridorSpawnTimer += dt;
       const spawnRate = 0.25;
-      while (corridorSpawnTimer >= spawnRate && nameIdx < totalNames) {
+      while (corridorSpawnTimer >= spawnRate && nameIdx < totalNames && corridorSpawnCount < CORRIDOR_TOTAL_PAIRS) {
         corridorSpawnTimer -= spawnRate;
         const fallSpeed = getCorridorFallSpeed();
+        const gh = getCorridorGapHalf();
+        const gapX = getCorridorGapX(corridorSpawnCount / CORRIDOR_TOTAL_PAIRS);
+        corridorSpawnCount++;
 
         const nameL = nextName();
         if (nameL) {
           const { tw, th } = measureName(nameL);
-          /* Left wall: right-align to gap edge → right edge at corridorCx - gh */
-          const xOffL = -gh - tw;
           projectiles.push(mkProj({
             id: nextProjId++, text: nameL,
-            x: corridorCx + xOffL, y: -th - 10,
+            x: gapX - gh - tw, y: -th - 10,
             vy: fallSpeed, w: tw, h: th,
             action: 6,
-            orbitCx: xOffL, /* x-offset from corridorCx */
           }));
         }
         const nameR = nextName();
         if (nameR) {
           const { tw, th } = measureName(nameR);
-          /* Right wall: left-align to gap edge → left edge at corridorCx + gh */
-          const xOffR = gh;
           projectiles.push(mkProj({
             id: nextProjId++, text: nameR,
-            x: corridorCx + xOffR, y: -th - 10,
+            x: gapX + gh, y: -th - 10,
             vy: fallSpeed, w: tw, h: th,
             action: 6,
-            orbitCx: xOffR,
           }));
         }
       }
 
-      /* End corridor after ~14 seconds */
-      if (corridorElapsed >= 14) {
+      /* End corridor after all pairs spawned */
+      if (corridorSpawnCount >= CORRIDOR_TOTAL_PAIRS) {
         corridorActive = false;
       }
     };
@@ -857,16 +870,15 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const spawnVerticalRain = (driftRight: boolean) => {
       const w = W();
       const cols = Math.floor(w / 70);
-      /* Align first letters: account for text width under rotation so the
-         leading character of every name enters at the same y coordinate */
       const rotAngle = driftRight ? Math.PI / 2 : -Math.PI / 2;
       for (let i = 0; i < cols; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
-        /* After rotation, the first letter's y offset from center is ±tw/2.
-           Set y so that first letter starts at the same y (just above screen). */
-        const startY = -tw / 2 - th / 2;
+        /* After rotation by ±90°, the rotated text's top visual edge is at
+           center_y - tw/2. Set startY so that edge = -5 for ALL names,
+           regardless of text width → all top edges aligned. */
+        const startY = tw / 2 - th / 2 - 5;
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
           x: i * 70 + 20, y: startY,
@@ -881,12 +893,12 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const spawnSpinningWheels = () => {
       const w = W();
       const h = H();
-      const spokeRadius = Math.max(70, Math.min(140, W() / 6));
-      const spokes = 7;
+      const spokeRadius = Math.max(100, Math.min(200, W() / 4));
+      const spokes = 5;
       const baseRotSpeed = 1.5;
       const driftSpeed = W() * 0.065;
       /* Fixed inner radius — first letter of every name starts here */
-      const innerR = Math.max(18, spokeRadius * 0.15);
+      const innerR = Math.max(28, spokeRadius * 0.2);
 
       /* Wheel 1: enters from left, near bottom */
       const cx1 = -spokeRadius * 2;
@@ -1063,9 +1075,9 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           } else if (currentPhase === 3 && !corridorActive) {
             /* Start corridor */
             corridorActive = true;
-            corridorCx = W() / 2;
             corridorElapsed = 0;
             corridorSpawnTimer = 0;
+            corridorSpawnCount = 0;
           } else if (currentPhase !== 3) {
             phaseTimer += dt;
             const interval = getSpawnInterval(currentPhase);
@@ -1168,8 +1180,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           p.y = p.orbitCy + Math.sin(p.orbitAngle) * p.orbitR - p.h / 2;
           p.angle = p.orbitAngle;
         } else if (p.action === 6) {
-          /* Corridor wall name — track corridorCx so walls stay aligned */
-          p.x = corridorCx + p.orbitCx;
+          /* Corridor wall — just fall straight down (x is fixed at spawn) */
           p.y += p.vy * dt;
         } else {
           p.x += p.vx * dt;
@@ -1186,8 +1197,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
 
       projectiles = projectiles.filter((p) => {
-        /* Remove hit projectiles after a short time to reduce count */
-        if (p.hit && p.frame > 60) return false;
+        /* Keep hit projectiles visible (they turn yellow) — don't cull them early */
         if (p.action === 5) {
           return p.orbitCx > -p.orbitR - 300 && p.orbitCx < w + p.orbitR + 300;
         }
@@ -1203,15 +1213,24 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
       /* ── Hit detection — batched per frame for mobile perf ── */
       if (hitFlash > 0) hitFlash -= dt;
-      const HR = getHeartSize() * 0.55;
+      const HR = getHeartSize(); /* exact match to drawn heart bounds */
       let hitsThisFrame = 0;
       for (const p of projectiles) {
         if (p.hit) continue;
+        /* Compute axis-aligned bounding box that accounts for rotation.
+           For unrotated text (angle=0), this equals (p.w, p.h).
+           For 90°-rotated text, dimensions swap: width→h, height→w. */
+        const cosA = Math.abs(Math.cos(p.angle));
+        const sinA = Math.abs(Math.sin(p.angle));
+        const aabbW = p.w * cosA + p.h * sinA;
+        const aabbH = p.w * sinA + p.h * cosA;
+        const pcx = p.x + p.w / 2;
+        const pcy = p.y + p.h / 2;
         if (
-          heart.x + HR > p.x &&
-          heart.x - HR < p.x + p.w &&
-          heart.y + HR > p.y &&
-          heart.y - HR < p.y + p.h
+          heart.x + HR > pcx - aabbW / 2 &&
+          heart.x - HR < pcx + aabbW / 2 &&
+          heart.y + HR > pcy - aabbH / 2 &&
+          heart.y - HR < pcy + aabbH / 2
         ) {
           p.hit = true;
           hitsThisFrame++;

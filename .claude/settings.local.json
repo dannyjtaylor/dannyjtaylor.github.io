@@ -85,7 +85,16 @@
       "Bash(powershell.exe -Command \"npx tsc -b 2>&1\")",
       "Bash(powershell.exe -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object Source\")",
       "Bash(powershell.exe -Command \"Get-Command npm -ErrorAction SilentlyContinue | Select-Object Source\")",
-      "Bash(node_modules/.bin/tsc --noEmit --pretty)"
+      "Bash(node_modules/.bin/tsc --noEmit --pretty)",
+      "Bash(powershell.exe -Command \"Get-Command node\")",
+      "Bash(powershell.exe -Command \"npm run build\")",
+      "Bash(node_modules/.bin/tsc -b --noEmit)",
+      "Bash(which tsc:*)",
+      "Bash(ls node_modules/typescript/bin/)",
+      "Bash(node node_modules/typescript/bin/tsc -b --noEmit)",
+      "Bash(where node:*)",
+      "Bash(where tsc:*)",
+      "Bash(cmd.exe /c \"where tsc\")"
     ]
   }
 }

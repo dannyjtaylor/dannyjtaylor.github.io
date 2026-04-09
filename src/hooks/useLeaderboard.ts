@@ -71,14 +71,23 @@ export function useLeaderboard(limit = 50) {
     return () => unsub();
   }, [limit]);
 
-  const submitScore = useCallback(async (name: string, hits: number) => {
-    if (!db) return;
-    const lbRef = ref(db, 'leaderboard');
-    await push(lbRef, {
-      name: name.trim().slice(0, 10),
-      hits,
-      timestamp: serverTimestamp(),
-    });
+  const submitScore = useCallback(async (name: string, hits: number): Promise<boolean> => {
+    if (!db) {
+      console.warn('Leaderboard: Firebase not configured — score not saved');
+      return false;
+    }
+    try {
+      const lbRef = ref(db, 'leaderboard');
+      await push(lbRef, {
+        name: name.trim().slice(0, 10),
+        hits,
+        timestamp: serverTimestamp(),
+      });
+      return true;
+    } catch (err) {
+      console.error('Leaderboard: Failed to submit score:', err);
+      return false;
+    }
   }, []);
 
   return { entries, loading, submitScore };

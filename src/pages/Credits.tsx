@@ -641,16 +641,22 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       img.src = logo.src;
       return img;
     });
+    /* Pre-render yellow hit versions of each logo */
     const yellowLogoCanvases: (HTMLCanvasElement | null)[] = new Array(ATTACK_LOGOS.length).fill(null);
     const createYellowLogo = (img: HTMLImageElement, idx: number) => {
       if (!img.complete || img.naturalWidth === 0) return;
+      const logoInfo = ATTACK_LOGOS[idx];
+      if (!logoInfo) return;
       const c = document.createElement('canvas');
       c.width = img.naturalWidth;
       c.height = img.naturalHeight;
       const cctx = c.getContext('2d');
       if (!cctx) return;
       cctx.drawImage(img, 0, 0);
-      cctx.globalCompositeOperation = 'source-in';
+      /* JPGs have no alpha so source-in turns them into a solid block.
+         Use multiply instead, which preserves detail and tints yellow. */
+      const isJpg = /\.jpe?g$/i.test(logoInfo.src);
+      cctx.globalCompositeOperation = isJpg ? 'multiply' : 'source-in';
       cctx.fillStyle = '#FFFF00';
       cctx.fillRect(0, 0, c.width, c.height);
       yellowLogoCanvases[idx] = c;
@@ -675,8 +681,9 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let endTimer = 0;
     let normalFinish = false;
     const HEART_SPEED = 300;
+    const MAX_PROJECTILES = 120; /* performance cap */
     const getSlotH = () => getFontSize() * 1.15;
-    const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.32));
+    const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.25));
 
     /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
     let currentPhase = 0;
@@ -804,7 +811,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const gh = getCorridorGapHalf();
       corridorCx = Math.max(gh + 30, Math.min(W() - gh - 30, corridorCx));
 
-      /* Spawn two names (one each side) at ~4 pairs/sec */
+      /* Spawn two names (one each side) at ~4 pairs/sec.
+         Use action 6 so names track corridorCx each frame → aligned walls. */
       corridorSpawnTimer += dt;
       const spawnRate = 0.25;
       while (corridorSpawnTimer >= spawnRate && nameIdx < totalNames) {
@@ -814,19 +822,27 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         const nameL = nextName();
         if (nameL) {
           const { tw, th } = measureName(nameL);
+          /* Left wall: right-align to gap edge → right edge at corridorCx - gh */
+          const xOffL = -gh - tw;
           projectiles.push(mkProj({
             id: nextProjId++, text: nameL,
-            x: corridorCx - gh - tw - 15, y: -th - 10,
+            x: corridorCx + xOffL, y: -th - 10,
             vy: fallSpeed, w: tw, h: th,
+            action: 6,
+            orbitCx: xOffL, /* x-offset from corridorCx */
           }));
         }
         const nameR = nextName();
         if (nameR) {
           const { tw, th } = measureName(nameR);
+          /* Right wall: left-align to gap edge → left edge at corridorCx + gh */
+          const xOffR = gh;
           projectiles.push(mkProj({
             id: nextProjId++, text: nameR,
-            x: corridorCx + gh + 15, y: -th - 10,
+            x: corridorCx + xOffR, y: -th - 10,
             vy: fallSpeed, w: tw, h: th,
+            action: 6,
+            orbitCx: xOffR,
           }));
         }
       }
@@ -866,7 +882,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const w = W();
       const h = H();
       const spokeRadius = Math.max(70, Math.min(140, W() / 6));
-      const spokes = 10;
+      const spokes = 7;
       const baseRotSpeed = 1.5;
       const driftSpeed = W() * 0.065;
       /* Fixed inner radius — first letter of every name starts here */
@@ -960,7 +976,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         case 0: return 1.2;   // Aimed spreads
         case 2: return 1.7;   // Crossing streams
         case 4: return 2.6;   // Vertical rain
-        case 7: return 2.5;   // Spinning wheels
+        case 7: return 3.5;   // Spinning wheels
         case 6: return 0.8;   // Fast aimed spreads
         default: return 1.0;
       }
@@ -1037,9 +1053,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             phaseTransitionDelay = PHASE_TRANSITION_DURATION;
           }
 
-          /* Wait for transition delay before spawning new phase */
+          /* Wait for transition delay before spawning new phase.
+             Phase 6 also waits for all spinning wheel spokes to exit. */
+          const spokesStillAlive = currentPhase === 6 && projectiles.some(p => p.action === 5);
           if (phaseTransitionDelay > 0) {
             phaseTransitionDelay -= dt;
+          } else if (spokesStillAlive) {
+            /* Hold phase 6 spawning until spokes are gone */
           } else if (currentPhase === 3 && !corridorActive) {
             /* Start corridor */
             corridorActive = true;
@@ -1095,8 +1115,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
               x: fromR ? w + lw : -lw, y: yp,
               vx: fromR ? -120 : 120,
               w: lw, h: lh, logoImg: limg,
-              // store yellow canvas index in gravity field (unused for logos)
-              gravity: li,
             }));
           }
         }
@@ -1149,12 +1167,16 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           p.x = p.orbitCx + Math.cos(p.orbitAngle) * p.orbitR - p.w / 2;
           p.y = p.orbitCy + Math.sin(p.orbitAngle) * p.orbitR - p.h / 2;
           p.angle = p.orbitAngle;
+        } else if (p.action === 6) {
+          /* Corridor wall name — track corridorCx so walls stay aligned */
+          p.x = corridorCx + p.orbitCx;
+          p.y += p.vy * dt;
         } else {
           p.x += p.vx * dt;
           p.y += p.vy * dt;
         }
 
-        if (p.gravity) p.vy += p.gravity * dt;
+        if (p.gravity && !p.logoImg) p.vy += p.gravity * dt;
 
         if (p.action === 3) {
           if (p.x < -80) p.x = w + 60;
@@ -1164,12 +1186,20 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
 
       projectiles = projectiles.filter((p) => {
+        /* Remove hit projectiles after a short time to reduce count */
+        if (p.hit && p.frame > 60) return false;
         if (p.action === 5) {
-          /* Spinning wheel spokes — cull when wheel center exits screen */
           return p.orbitCx > -p.orbitR - 300 && p.orbitCx < w + p.orbitR + 300;
         }
-        return p.x > -600 && p.x < w + 600 && p.y > -400 && p.y < h + 400;
+        if (p.action === 6) {
+          return p.y < h + 100; /* corridor names: cull past bottom */
+        }
+        return p.x > -400 && p.x < w + 400 && p.y > -300 && p.y < h + 300;
       });
+      /* Hard cap for mobile perf — drop oldest projectiles first */
+      if (projectiles.length > MAX_PROJECTILES) {
+        projectiles = projectiles.slice(projectiles.length - MAX_PROJECTILES);
+      }
 
       /* ── Hit detection — batched per frame for mobile perf ── */
       if (hitFlash > 0) hitFlash -= dt;
@@ -1211,15 +1241,21 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
         if (p.angle) ctx.rotate(p.angle);
         if (p.logoImg && p.logoImg.complete && p.logoImg.naturalWidth > 0) {
-          if (p.hit) ctx.globalAlpha = 0.6;
-          /* Use pre-rendered yellow silhouette if available */
-          const yellowCanvas = yellowLogoCanvases[Math.round(p.gravity)];
-          if (yellowCanvas) {
-            ctx.drawImage(yellowCanvas, -p.w / 2, -p.h / 2, p.w, p.h);
+          if (p.hit) {
+            /* Yellow version on hit */
+            ctx.globalAlpha = 0.8;
+            const logoIdx = ATTACK_LOGOS.findIndex(l => l.name === p.text);
+            const yellowCanvas = logoIdx >= 0 ? yellowLogoCanvases[logoIdx] : null;
+            if (yellowCanvas) {
+              ctx.drawImage(yellowCanvas, -p.w / 2, -p.h / 2, p.w, p.h);
+            } else {
+              ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
+            }
+            ctx.globalAlpha = 1;
           } else {
+            /* Normal color before hit */
             ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
           }
-          if (p.hit) ctx.globalAlpha = 1;
         } else {
           ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
           ctx.fillText(p.text, -p.w / 2, -p.h / 2);
@@ -1247,18 +1283,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         ctx.globalAlpha = 1;
       }
 
-      const barY = h - 40;
-      ctx.font = `14px ${DETERMINATION_MONO}`;
-      ctx.fillStyle = '#fff';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('HP', 16, barY);
-      ctx.fillStyle = '#FFFF00';
-      ctx.font = `18px ${DETERMINATION_SANS}`;
-      ctx.fillText('\u221E', 40, barY);
-      ctx.fillStyle = '#FFFF00';
-      ctx.fillRect(60, barY - 6, 80, 12);
-
+      /* ── Bottom HUD — centered ── */
       ctx.font = `13px ${DETERMINATION_MONO}`;
       ctx.fillStyle = '#444';
       ctx.textAlign = 'center';
@@ -1266,8 +1291,23 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const isMobile = 'ontouchstart' in window;
       ctx.fillText(
         isMobile ? 'Drag to move \u00B7 Tap \u2715 to exit' : 'Arrow keys / WASD to move \u00B7 ESC to exit',
-        w / 2, h - 16,
+        w / 2, h - 12,
       );
+
+      /* HP bar — centered just above instruction text */
+      const barY = h - 38;
+      const hpTotalW = 110; /* HP + ∞ + bar width */
+      const hpStartX = (w - hpTotalW) / 2;
+      ctx.font = `14px ${DETERMINATION_MONO}`;
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('HP', hpStartX, barY);
+      ctx.fillStyle = '#FFFF00';
+      ctx.font = `18px ${DETERMINATION_SANS}`;
+      ctx.fillText('\u221E', hpStartX + 24, barY);
+      ctx.fillStyle = '#FFFF00';
+      ctx.fillRect(hpStartX + 44, barY - 6, 66, 12);
 
       frameId = requestAnimationFrame(gameLoop);
     };
@@ -1309,17 +1349,18 @@ function AttackEndScreen({
   onExit,
 }: {
   result: AttackResult;
-  onSubmit: (name: string) => void;
+  onSubmit: (name: string) => Promise<boolean>;
   onExit: () => void;
 }) {
   const [name, setName] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmed = name.trim().split(/\s+/)[0]?.slice(0, 10) ?? '';
     if (!trimmed) return;
-    setSubmitted(true);
-    onSubmit(trimmed);
+    setSubmitState('submitting');
+    const ok = await onSubmit(trimmed);
+    setSubmitState(ok ? 'success' : 'error');
   };
 
   return (
@@ -1338,7 +1379,7 @@ function AttackEndScreen({
           {result.hitCount === 0 ? 'Incredible! You dodged every single name!' : ''}
         </div>
 
-        {!submitted ? (
+        {submitState === 'idle' || submitState === 'submitting' ? (
           <>
             <div style={{ fontSize: 16, color: '#888', marginBottom: 12 }}>
               Enter your name for the leaderboard (1 word, 10 chars max):
@@ -1351,6 +1392,7 @@ function AttackEndScreen({
                 onChange={(e) => setName(e.target.value.replace(/\s/g, '').slice(0, 10))}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
                 placeholder="YourName"
+                disabled={submitState === 'submitting'}
                 style={{
                   background: '#111', border: '2px solid #FFFF00', color: '#fff',
                   fontFamily: DETERMINATION_SANS, fontSize: 20,
@@ -1361,19 +1403,25 @@ function AttackEndScreen({
               />
               <button
                 onClick={handleSubmit}
+                disabled={submitState === 'submitting'}
                 style={{
                   background: '#FFFF00', color: '#000', border: 'none',
                   fontFamily: DETERMINATION_SANS, fontSize: 18, fontWeight: 700,
                   padding: '10px 24px', borderRadius: 4, cursor: 'pointer',
+                  opacity: submitState === 'submitting' ? 0.5 : 1,
                 }}
               >
-                Submit
+                {submitState === 'submitting' ? '...' : 'Submit'}
               </button>
             </div>
           </>
-        ) : (
+        ) : submitState === 'success' ? (
           <div style={{ fontSize: 20, color: '#00ff00', marginBottom: 24 }}>
             Score submitted!
+          </div>
+        ) : (
+          <div style={{ fontSize: 18, color: '#ff4444', marginBottom: 24 }}>
+            Could not save score (offline or not configured).
           </div>
         )}
 
@@ -1566,14 +1614,11 @@ export function Credits() {
     setMode('endscreen');
   }, []);
 
-  const handleScoreSubmit = useCallback(async (playerName: string) => {
+  const handleScoreSubmit = useCallback(async (playerName: string): Promise<boolean> => {
     if (attackResult) {
-      try {
-        await submitScore(playerName, attackResult.hitCount);
-      } catch (err) {
-        console.error('Failed to submit score:', err);
-      }
+      return await submitScore(playerName, attackResult.hitCount);
     }
+    return false;
   }, [attackResult, submitScore]);
 
   const handleExitAttack = useCallback(() => {

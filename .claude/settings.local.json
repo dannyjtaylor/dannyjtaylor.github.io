@@ -84,7 +84,8 @@
       "Bash(cmd.exe /c \"npx tsc -b\")",
       "Bash(powershell.exe -Command \"npx tsc -b 2>&1\")",
       "Bash(powershell.exe -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object Source\")",
-      "Bash(powershell.exe -Command \"Get-Command npm -ErrorAction SilentlyContinue | Select-Object Source\")"
+      "Bash(powershell.exe -Command \"Get-Command npm -ErrorAction SilentlyContinue | Select-Object Source\")",
+      "Bash(node_modules/.bin/tsc --noEmit --pretty)"
     ]
   }
 }

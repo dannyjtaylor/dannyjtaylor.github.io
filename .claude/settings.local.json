@@ -76,7 +76,9 @@
       "Bash(node_modules/.bin/tsc --noEmit)",
       "Bash(echo \"EXIT: $?\")",
       "Read(//c/Program Files/**)",
-      "Bash(powershell.exe -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\" 2>&1)"
+      "Bash(powershell.exe -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\" 2>&1)",
+      "WebFetch(domain:undertale-encyclopedia.tumblr.com)",
+      "Bash(echo \"EXIT_CODE=$?\")"
     ]
   }
 }

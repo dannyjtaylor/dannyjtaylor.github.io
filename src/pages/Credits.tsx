@@ -11,6 +11,7 @@ const TRACKS = [
   { name: 'Billy Joel - Movin\' Out', file: '/billy_joel_movinout.mp3' },
   { name: 'Boy Pablo - Dance Baby', file: '/boy_pablo_dancebaby.mp3' },
   { name: 'Carter Vail - Napoleon', file: '/carter_vail_napoleon.mp3' },
+  { name: 'Cave Story - Wind Fortress', file: '/cave_story_windfortress.mp3' },
   { name: 'Clairo - 4EVER', file: '/clairo_4ever.mp3' },
   { name: 'Clairo - Add Up My Love', file: '/clairo_addupmylove.mp3' },
   { name: 'Clairo - Thank You', file: '/thankyou_clairo.mp3' },
@@ -491,7 +492,7 @@ interface Projectile {
   w: number;
   h: number;
   hit: boolean;
-  action: number;       // 0=normal, 1=homing-lock, 3=wrap
+  action: number;       // 0=normal, 1=homing-lock, 3=wrap, 5=wheel-spoke
   frame: number;
   gravity: number;
   angle: number;
@@ -657,15 +658,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const getSlotH = () => getFontSize() * 1.15;
     const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.45));
 
-    /* ── Phase system ── */
-    const PHASE_THRESHOLDS = [
-      { phase: 0, start: 0 },
-      { phase: 2, start: 60 },
-      { phase: 4, start: 140 },
-      { phase: 7, start: 220 },
-      { phase: 6, start: 290 },
-      { phase: 1, start: 360 },
-    ];
+    /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
     let currentPhase = 0;
     let phaseTimer = 0;
     let phaseRound = 0;
@@ -674,14 +667,27 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       Math.floor(totalNames * (i + 1) / (ATTACK_LOGOS.length + 1))
     );
 
+    /* Phase thresholds (proportional to Undertale's ~881-name distribution) */
+    const phase0End = Math.floor(totalNames * 0.07);
+    const phase2End = Math.floor(totalNames * 0.29);
+    const phase3End = Math.floor(totalNames * 0.53);
+    const phase4End = Math.floor(totalNames * 0.68);
+    const phase7End = Math.floor(totalNames * 0.82);
+
     const getPhase = (idx: number): number => {
-      const modIdx = idx % ALL_NAMES.length;
-      let p = 0;
-      for (const t of PHASE_THRESHOLDS) {
-        if (modIdx >= t.start) p = t.phase;
-      }
-      return p;
+      if (idx < phase0End) return 0;  // Aimed spreads
+      if (idx < phase2End) return 2;  // Crossing streams
+      if (idx < phase3End) return 3;  // Corridor
+      if (idx < phase4End) return 4;  // Vertical rain
+      if (idx < phase7End) return 7;  // Spinning wheels
+      return 6;                       // Fast aimed spreads
     };
+
+    /* ── Corridor state ── */
+    let corridorActive = false;
+    let corridorCx = W() / 2;
+    let corridorElapsed = 0;
+    let corridorSpawnTimer = 0;
 
     const getFontSize = () => Math.max(20, Math.min(32, W() / 22));
 
@@ -698,15 +704,16 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       return name;
     };
 
-    /* ── Phase 0 & 6: Homing clusters ── */
-    const spawnHomingCluster = (fromRight: boolean, yCenter: number) => {
+    /* ── Phase 0 & 6: Aimed Spreads — groups of 5, stop, aim at heart, fire ── */
+    const spawnAimedSpread = (fromRight: boolean, yCenter: number) => {
       const w = W();
+      const spacing = Math.max(30, W() / 18);
       for (let i = 0; i < 5; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
-        const startX = fromRight ? w + 50 + i * 45 : -tw - 50 - i * 45;
-        const startY = yCenter + (i - 2) * 35;
+        const startX = fromRight ? w + 50 + i * spacing : -tw - 50 - i * spacing;
+        const startY = yCenter + (i - 2) * spacing;
         projectiles.push(mkProj({
           id: nextProjId++, text: name, x: startX, y: startY,
           vx: fromRight ? -350 : 350, w: tw, h: th,
@@ -715,47 +722,96 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 2: Walls from both sides with heart-sized gaps ── */
-    const spawnWalls = () => {
+    /* ── Phase 2: Crossing Streams — two waves from opposite sides ── */
+    const spawnCrossingStreams = () => {
       const h = H();
       const w = W();
-      const slotH = getSlotH();
-      const heartGap = getHeartSize() * 2.5;
-      const groupSize = 4;
-      const wallSpeed = Math.min(280, W() * 0.45);
+      const streamSpeed = Math.min(350, W() * 0.55);
+      const vertSpacing = Math.max(30, h / 14);
+      const count = Math.min(12, Math.floor(h / vertSpacing));
 
-      /* Build vertical positions: groups of names with gaps between */
-      const positions: number[] = [];
-      let y = 0;
-      while (y < h) {
-        for (let g = 0; g < groupSize && y < h; g++) {
-          positions.push(y);
-          y += slotH;
+      /* Left-to-right wave */
+      for (let i = 0; i < count; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: -tw - 200, y: 10 + i * vertSpacing,
+          vx: streamSpeed, w: tw, h: th,
+        }));
+      }
+      /* Right-to-left wave, offset vertically */
+      for (let i = 0; i < count; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: w + 200, y: vertSpacing / 2 + i * vertSpacing,
+          vx: -streamSpeed, w: tw, h: th,
+        }));
+      }
+    };
+
+    /* ── Phase 3: Corridor — oscillating vertical walls the heart must navigate ── */
+    const getCorridorGapHalf = () => Math.max(45, W() * 0.07);
+    const getCorridorFallSpeed = () => H() * 0.75;
+    const getCorridorMoveSpeed = () => W() * 0.19;
+
+    const updateCorridor = (dt: number) => {
+      corridorElapsed += dt;
+      const t = corridorElapsed;
+      const sp = getCorridorMoveSpeed();
+
+      /* Predetermined oscillation matching Undertale's corridor pattern */
+      if (t >= 1.5 && t < 2.2) corridorCx += sp * dt;
+      else if (t >= 2.8 && t < 3.5) corridorCx -= sp * dt;
+      else if (t >= 4.5 && t < 5.2) corridorCx -= sp * dt;
+      else if (t >= 5.6 && t < 6.3) corridorCx += sp * dt;
+      else if (t >= 7.2 && t < 7.9) corridorCx += sp * dt;
+      else if (t >= 7.9 && t < 8.6) corridorCx -= sp * dt;
+      else if (t >= 8.6) {
+        /* Increasing sine wave oscillation */
+        const sineT = t - 8.6;
+        const amp = (8 + sineT * 20) * W() / 624;
+        corridorCx = W() / 2 + Math.sin(sineT * 2.7) * amp;
+      }
+
+      /* Clamp to screen */
+      const gh = getCorridorGapHalf();
+      corridorCx = Math.max(gh + 30, Math.min(W() - gh - 30, corridorCx));
+
+      /* Spawn two names (one each side) at ~4 pairs/sec */
+      corridorSpawnTimer += dt;
+      const spawnRate = 0.25;
+      while (corridorSpawnTimer >= spawnRate && nameIdx < totalNames) {
+        corridorSpawnTimer -= spawnRate;
+        const fallSpeed = getCorridorFallSpeed();
+
+        const nameL = nextName();
+        if (nameL) {
+          const { tw, th } = measureName(nameL);
+          projectiles.push(mkProj({
+            id: nextProjId++, text: nameL,
+            x: corridorCx - gh - tw - 30, y: -th - 10,
+            vy: fallSpeed, w: tw, h: th,
+          }));
         }
-        y += heartGap;
+        const nameR = nextName();
+        if (nameR) {
+          const { tw, th } = measureName(nameR);
+          projectiles.push(mkProj({
+            id: nextProjId++, text: nameR,
+            x: corridorCx + gh + 30, y: -th - 10,
+            vy: fallSpeed, w: tw, h: th,
+          }));
+        }
       }
 
-      /* Left wall */
-      for (const yPos of positions) {
-        const name = nextName();
-        if (!name) return;
-        const { tw, th } = measureName(name);
-        projectiles.push(mkProj({
-          id: nextProjId++, text: name,
-          x: -tw - 20, y: yPos,
-          vx: wallSpeed, w: tw, h: th,
-        }));
-      }
-      /* Right wall — same grid positions so they align */
-      for (const yPos of positions) {
-        const name = nextName();
-        if (!name) return;
-        const { tw, th } = measureName(name);
-        projectiles.push(mkProj({
-          id: nextProjId++, text: name,
-          x: w + 20, y: yPos,
-          vx: -wallSpeed, w: tw, h: th,
-        }));
+      /* End corridor after ~14 seconds */
+      if (corridorElapsed >= 14) {
+        corridorActive = false;
       }
     };
 
@@ -777,51 +833,60 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 7: Pinwheel — names radiate from center in 8 directions ── */
-    const spawnPinwheel = () => {
-      const cx = W() / 2;
-      const cy = H() / 2;
-      const arms = 8;
-      const namesPerArm = W() < 640 ? 2 : 3;
-      const outwardSpeed = 110;
-      const nameSpacing = Math.max(40, Math.min(70, W() / 15));
-      const baseRotation = phaseRound * 22.5;
-
-      for (let arm = 0; arm < arms; arm++) {
-        const angleDeg = baseRotation + (arm * 360 / arms);
-        const rad = (angleDeg * Math.PI) / 180;
-
-        for (let i = 0; i < namesPerArm; i++) {
-          const name = nextName();
-          if (!name) return;
-          const { tw, th } = measureName(name);
-          const startDist = 20 + i * nameSpacing;
-
-          projectiles.push(mkProj({
-            id: nextProjId++, text: name,
-            x: cx + Math.cos(rad) * startDist - tw / 2,
-            y: cy + Math.sin(rad) * startDist - th / 2,
-            vx: Math.cos(rad) * outwardSpeed,
-            vy: Math.sin(rad) * outwardSpeed,
-            w: tw, h: th,
-          }));
-        }
-      }
-    };
-
-    /* ── Phase 1: Gravity rain ── */
-    const spawnGravityRain = () => {
+    /* ── Phase 7: Spinning Wheels — two rotating spoke-wheels from opposite sides ── */
+    const spawnSpinningWheels = () => {
       const w = W();
-      const startX = Math.random() * (w - 300);
-      for (let i = 0; i < 4; i++) {
+      const h = H();
+      const spokeRadius = Math.max(70, Math.min(140, W() / 6));
+      const spokes = 10;
+      const baseRotSpeed = 1.5;
+      const driftSpeed = W() * 0.065;
+
+      /* Wheel 1: enters from left, near bottom */
+      const cx1 = -spokeRadius * 2;
+      const cy1 = h * 0.75;
+      const baseAngle1 = phaseRound * 0.7;
+
+      for (let i = 0; i < spokes; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
+        const spokeAngle = baseAngle1 + (i * 2 * Math.PI / spokes);
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: startX + i * 90, y: -th - 40,
-          vy: 20, w: tw, h: th,
-          gravity: 400,
+          x: cx1 + Math.cos(spokeAngle) * spokeRadius - tw / 2,
+          y: cy1 + Math.sin(spokeAngle) * spokeRadius - th / 2,
+          vx: driftSpeed,
+          w: tw, h: th,
+          action: 5,
+          orbitCx: cx1, orbitCy: cy1,
+          orbitR: spokeRadius,
+          orbitAngle: spokeAngle,
+          orbitSpeed: baseRotSpeed,
+        }));
+      }
+
+      /* Wheel 2: enters from right, near top */
+      const cx2 = w + spokeRadius * 2;
+      const cy2 = h * 0.25;
+      const baseAngle2 = phaseRound * 0.7 + Math.PI / spokes;
+
+      for (let i = 0; i < spokes; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        const spokeAngle = baseAngle2 + (i * 2 * Math.PI / spokes);
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: cx2 + Math.cos(spokeAngle) * spokeRadius - tw / 2,
+          y: cy2 + Math.sin(spokeAngle) * spokeRadius - th / 2,
+          vx: -driftSpeed,
+          w: tw, h: th,
+          action: 5,
+          orbitCx: cx2, orbitCy: cy2,
+          orbitR: spokeRadius,
+          orbitAngle: spokeAngle,
+          orbitSpeed: -baseRotSpeed,
         }));
       }
     };
@@ -858,12 +923,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
     const getSpawnInterval = (phase: number): number => {
       switch (phase) {
-        case 0: return 1.2;
-        case 2: return 2.5;
-        case 4: return 2.8;
-        case 7: return 2.8;
-        case 6: return 0.8;
-        case 1: return 0.5;
+        case 0: return 1.2;   // Aimed spreads
+        case 2: return 1.7;   // Crossing streams
+        case 4: return 2.6;   // Vertical rain
+        case 7: return 2.5;   // Spinning wheels
+        case 6: return 0.8;   // Fast aimed spreads
         default: return 1.0;
       }
     };
@@ -914,42 +978,63 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       heart.y = Math.max(hs, Math.min(h - hs, heart.y));
 
       /* ── Phase-based spawning ── */
+      if (corridorActive && nameIdx >= totalNames) {
+        corridorActive = false; // clean up if names exhausted during corridor
+      }
       if (nameIdx < totalNames) {
-        const newPhase = getPhase(nameIdx);
-        if (newPhase !== currentPhase) {
-          currentPhase = newPhase;
-          phaseTimer = 0;
-          phaseRound = 0;
-        }
-        phaseTimer += dt;
-        const interval = getSpawnInterval(currentPhase);
-        if (phaseTimer >= interval) {
-          phaseTimer = 0;
-          switch (currentPhase) {
-            case 0:
-            case 6: {
-              const fromRight = phaseRound % 2 === 0;
-              const yCenter = phaseRound % 4 < 2 ? h * 0.25 : h * 0.65;
-              spawnHomingCluster(fromRight, yCenter);
-              phaseRound++;
-              break;
+        if (corridorActive) {
+          /* Corridor runs autonomously until time expires */
+          updateCorridor(dt);
+          if (!corridorActive && nameIdx < phase3End) {
+            nameIdx = phase3End; // advance past corridor allocation
+          }
+          if (!corridorActive) {
+            currentPhase = getPhase(nameIdx);
+            phaseTimer = 0;
+            phaseRound = 0;
+          }
+        } else {
+          const newPhase = getPhase(nameIdx);
+          if (newPhase !== currentPhase) {
+            currentPhase = newPhase;
+            phaseTimer = 0;
+            phaseRound = 0;
+          }
+
+          if (currentPhase === 3 && !corridorActive) {
+            /* Start corridor */
+            corridorActive = true;
+            corridorCx = W() / 2;
+            corridorElapsed = 0;
+            corridorSpawnTimer = 0;
+          } else {
+            phaseTimer += dt;
+            const interval = getSpawnInterval(currentPhase);
+            if (phaseTimer >= interval) {
+              phaseTimer = 0;
+              switch (currentPhase) {
+                case 0:
+                case 6: {
+                  const fromRight = phaseRound % 2 === 0;
+                  const yCenter = phaseRound % 4 < 2 ? h * 0.25 : h * 0.65;
+                  spawnAimedSpread(fromRight, yCenter);
+                  phaseRound++;
+                  break;
+                }
+                case 2:
+                  spawnCrossingStreams();
+                  phaseRound++;
+                  break;
+                case 4:
+                  spawnVerticalRain(phaseRound % 2 === 0);
+                  phaseRound++;
+                  break;
+                case 7:
+                  spawnSpinningWheels();
+                  phaseRound++;
+                  break;
+              }
             }
-            case 2:
-              spawnWalls();
-              phaseRound++;
-              break;
-            case 4:
-              spawnVerticalRain(phaseRound % 2 === 0);
-              phaseRound++;
-              break;
-            case 7:
-              spawnPinwheel();
-              phaseRound++;
-              break;
-            case 1:
-              spawnGravityRain();
-              phaseRound++;
-              break;
           }
         }
       }
@@ -1016,6 +1101,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             p.vy = Math.sin(p.angle) * speed;
             p.action = 0;
           }
+        } else if (p.action === 5) {
+          /* Spinning wheel spoke — orbit around moving center */
+          p.orbitCx += p.vx * dt;
+          p.orbitAngle += p.orbitSpeed * dt;
+          p.x = p.orbitCx + Math.cos(p.orbitAngle) * p.orbitR - p.w / 2;
+          p.y = p.orbitCy + Math.sin(p.orbitAngle) * p.orbitR - p.h / 2;
+          p.angle = p.orbitAngle;
         } else {
           p.x += p.vx * dt;
           p.y += p.vy * dt;
@@ -1030,9 +1122,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
       }
 
-      projectiles = projectiles.filter(
-        (p) => p.x > -600 && p.x < w + 600 && p.y > -400 && p.y < h + 400,
-      );
+      projectiles = projectiles.filter((p) => {
+        if (p.action === 5) {
+          /* Spinning wheel spokes — cull when wheel center exits screen */
+          return p.orbitCx > -p.orbitR - 300 && p.orbitCx < w + p.orbitR + 300;
+        }
+        return p.x > -600 && p.x < w + 600 && p.y > -400 && p.y < h + 400;
+      });
 
       /* ── Hit detection — batched per frame for mobile perf ── */
       if (hitFlash > 0) hitFlash -= dt;

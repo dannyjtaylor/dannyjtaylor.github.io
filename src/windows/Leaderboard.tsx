@@ -20,8 +20,11 @@ export function Leaderboard() {
         <div style={{ fontWeight: 'bold', marginBottom: 8, fontSize: 14 }}>
           === Last Goodbye Leaderboard ===
         </div>
+        <div style={{ marginBottom: 4, color: '#666' }}>
+          Dodge every name to win! 0 hits is a perfect score.
+        </div>
         <div style={{ marginBottom: 8, color: '#666' }}>
-          Fewer hits = better score
+          Fewer hits = higher rank
         </div>
         <div style={{ fontFamily: 'monospace', fontSize: 12 }}>
           {'#   Name        Hits\n'}

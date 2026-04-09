@@ -449,7 +449,11 @@
 }
 
 .twoColumnEntry {
-  /* grid child — no special rules needed */
+  /* grid child */
+}
+
+.twoColumnEntry:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .role {
@@ -486,8 +490,7 @@
 
 .divider {
   width: 80px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #555, transparent);
+  height: 0;
   margin: 50px auto;
 }
 
@@ -680,6 +683,15 @@
   inset: 0;
   background: #000;
   z-index: 500;
+}
+
+.endScreenFadeIn {
+  animation: endFadeIn 1.5s ease-in forwards;
+}
+
+@keyframes endFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .attackCanvas {

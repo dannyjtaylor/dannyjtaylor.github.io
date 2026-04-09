@@ -129,13 +129,13 @@ const CREDITS_DATA: CreditSection[] = [
     photo: 'rotaract.png',
     entries: [
       { name: 'Aidan Morris' },
-      { name: 'Alex Cam' },
       { name: 'Alyson Smyth' },
+      { name: 'Alex Cam' },
+      { name: 'Brittany Cam' },
       { name: 'Marisa de Comier' },
       { name: 'Ian Lopez' },
       { name: 'Bobby Green' },
       { name: 'Brian Tran' },
-      { name: 'Brittany Cam' },
       { name: 'Bryden Silva' },
       { name: 'Danielle Rivers' },
       { name: 'Domenic Iorfida' },
@@ -238,7 +238,7 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Brianna Pratts' },
       { name: 'Casen Simmons' },
-      { name: 'Connor', needsLastName: true },
+      { name: 'Conor Wilson' },
       { name: 'Danyela Marcelo-Lopez' },
       { name: "Duce D'Anthony Dossey" },
       { name: 'Sean Turnock' },
@@ -328,7 +328,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Kailey Gibbons' },
       { name: 'Kaitlyn Surovy' },
       { name: 'Kody Byrd' },
-      { name: 'Koral', needsLastName: true },
+      { name: 'Koral Ruiz' },
       { name: 'Kyla Harpe' },
       { name: 'Chiara Bottega' },
       { name: 'Kyle Trotter' },
@@ -578,6 +578,7 @@ function mkProj(base: Partial<Projectile> & { id: number; text: string; x: numbe
 interface AttackResult {
   hitCount: number;
   hitNames: string[];
+  audio?: HTMLAudioElement;
 }
 
 function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (result: AttackResult) => void }) {
@@ -634,11 +635,29 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     loadHeartImage().then((img) => { heartImg = img; });
     preloadFonts();
 
-    /* ── Preload logo images (each appears once at natural aspect ratio) ── */
+    /* ── Preload logo images & create yellow silhouette versions ── */
     const logoImages: HTMLImageElement[] = ATTACK_LOGOS.map((logo) => {
       const img = new Image();
       img.src = logo.src;
       return img;
+    });
+    const yellowLogoCanvases: (HTMLCanvasElement | null)[] = new Array(ATTACK_LOGOS.length).fill(null);
+    const createYellowLogo = (img: HTMLImageElement, idx: number) => {
+      if (!img.complete || img.naturalWidth === 0) return;
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const cctx = c.getContext('2d');
+      if (!cctx) return;
+      cctx.drawImage(img, 0, 0);
+      cctx.globalCompositeOperation = 'source-in';
+      cctx.fillStyle = '#FFFF00';
+      cctx.fillRect(0, 0, c.width, c.height);
+      yellowLogoCanvases[idx] = c;
+    };
+    logoImages.forEach((img, i) => {
+      if (img.complete) createYellowLogo(img, i);
+      else img.onload = () => createYellowLogo(img, i);
     });
     const logoSpawned = new Array(ATTACK_LOGOS.length).fill(false) as boolean[];
 
@@ -654,14 +673,17 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const hitNames: string[] = [];
     let gameOver = false;
     let endTimer = 0;
+    let normalFinish = false;
     const HEART_SPEED = 300;
     const getSlotH = () => getFontSize() * 1.15;
-    const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.45));
+    const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.32));
 
     /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
     let currentPhase = 0;
     let phaseTimer = 0;
     let phaseRound = 0;
+    let phaseTransitionDelay = 0;
+    const PHASE_TRANSITION_DURATION = 2.5; /* seconds between phases */
     const totalNames = ALL_NAMES.length * 2;
     const logoSpawnPoints = ATTACK_LOGOS.map((_, i) =>
       Math.floor(totalNames * (i + 1) / (ATTACK_LOGOS.length + 1))
@@ -755,7 +777,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     };
 
     /* ── Phase 3: Corridor — oscillating vertical walls the heart must navigate ── */
-    const getCorridorGapHalf = () => Math.max(45, W() * 0.07);
+    const getCorridorGapHalf = () => Math.max(38, W() * 0.055);
     const getCorridorFallSpeed = () => H() * 0.75;
     const getCorridorMoveSpeed = () => W() * 0.19;
 
@@ -794,7 +816,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           const { tw, th } = measureName(nameL);
           projectiles.push(mkProj({
             id: nextProjId++, text: nameL,
-            x: corridorCx - gh - tw - 30, y: -th - 10,
+            x: corridorCx - gh - tw - 15, y: -th - 10,
             vy: fallSpeed, w: tw, h: th,
           }));
         }
@@ -803,7 +825,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           const { tw, th } = measureName(nameR);
           projectiles.push(mkProj({
             id: nextProjId++, text: nameR,
-            x: corridorCx + gh + 30, y: -th - 10,
+            x: corridorCx + gh + 15, y: -th - 10,
             vy: fallSpeed, w: tw, h: th,
           }));
         }
@@ -819,16 +841,22 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const spawnVerticalRain = (driftRight: boolean) => {
       const w = W();
       const cols = Math.floor(w / 70);
+      /* Align first letters: account for text width under rotation so the
+         leading character of every name enters at the same y coordinate */
+      const rotAngle = driftRight ? Math.PI / 2 : -Math.PI / 2;
       for (let i = 0; i < cols; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
+        /* After rotation, the first letter's y offset from center is ±tw/2.
+           Set y so that first letter starts at the same y (just above screen). */
+        const startY = -tw / 2 - th / 2;
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: i * 70 + 20, y: -th - Math.random() * 200,
+          x: i * 70 + 20, y: startY,
           vx: driftRight ? 80 : -80, vy: 220,
           w: tw, h: th, action: 3,
-          angle: driftRight ? Math.PI / 2 : -Math.PI / 2,
+          angle: rotAngle,
         }));
       }
     };
@@ -841,6 +869,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const spokes = 10;
       const baseRotSpeed = 1.5;
       const driftSpeed = W() * 0.065;
+      /* Fixed inner radius — first letter of every name starts here */
+      const innerR = Math.max(18, spokeRadius * 0.15);
 
       /* Wheel 1: enters from left, near bottom */
       const cx1 = -spokeRadius * 2;
@@ -852,15 +882,18 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         if (!name) return;
         const { tw, th } = measureName(name);
         const spokeAngle = baseAngle1 + (i * 2 * Math.PI / spokes);
+        /* orbitR = innerR + tw/2 so the text-center orbits at (innerR + tw/2),
+           placing the first letter at radius innerR from wheel center */
+        const nameOrbitR = innerR + tw / 2;
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: cx1 + Math.cos(spokeAngle) * spokeRadius - tw / 2,
-          y: cy1 + Math.sin(spokeAngle) * spokeRadius - th / 2,
+          x: cx1 + Math.cos(spokeAngle) * nameOrbitR - tw / 2,
+          y: cy1 + Math.sin(spokeAngle) * nameOrbitR - th / 2,
           vx: driftSpeed,
           w: tw, h: th,
           action: 5,
           orbitCx: cx1, orbitCy: cy1,
-          orbitR: spokeRadius,
+          orbitR: nameOrbitR,
           orbitAngle: spokeAngle,
           orbitSpeed: baseRotSpeed,
         }));
@@ -876,15 +909,16 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         if (!name) return;
         const { tw, th } = measureName(name);
         const spokeAngle = baseAngle2 + (i * 2 * Math.PI / spokes);
+        const nameOrbitR = innerR + tw / 2;
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: cx2 + Math.cos(spokeAngle) * spokeRadius - tw / 2,
-          y: cy2 + Math.sin(spokeAngle) * spokeRadius - th / 2,
+          x: cx2 + Math.cos(spokeAngle) * nameOrbitR - tw / 2,
+          y: cy2 + Math.sin(spokeAngle) * nameOrbitR - th / 2,
           vx: -driftSpeed,
           w: tw, h: th,
           action: 5,
           orbitCx: cx2, orbitCy: cy2,
-          orbitR: spokeRadius,
+          orbitR: nameOrbitR,
           orbitAngle: spokeAngle,
           orbitSpeed: -baseRotSpeed,
         }));
@@ -956,7 +990,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       if (gameOver) {
         endTimer += dt;
         if (endTimer > 3) {
-          onFinishRef.current({ hitCount, hitNames });
+          normalFinish = true;
+          onFinishRef.current({ hitCount, hitNames, audio });
           return;
         }
         ctx.clearRect(0, 0, w, h);
@@ -999,15 +1034,19 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             currentPhase = newPhase;
             phaseTimer = 0;
             phaseRound = 0;
+            phaseTransitionDelay = PHASE_TRANSITION_DURATION;
           }
 
-          if (currentPhase === 3 && !corridorActive) {
+          /* Wait for transition delay before spawning new phase */
+          if (phaseTransitionDelay > 0) {
+            phaseTransitionDelay -= dt;
+          } else if (currentPhase === 3 && !corridorActive) {
             /* Start corridor */
             corridorActive = true;
             corridorCx = W() / 2;
             corridorElapsed = 0;
             corridorSpawnTimer = 0;
-          } else {
+          } else if (currentPhase !== 3) {
             phaseTimer += dt;
             const interval = getSpawnInterval(currentPhase);
             if (phaseTimer >= interval) {
@@ -1039,7 +1078,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         }
       }
 
-      /* ── Spawn logos (each appears exactly once at natural aspect ratio) ── */
+      /* ── Spawn logos (each appears exactly once — yellow silhouette) ── */
       for (let li = 0; li < ATTACK_LOGOS.length; li++) {
         if (!logoSpawned[li] && nameIdx >= (logoSpawnPoints[li] ?? Infinity)) {
           const logoInfo = ATTACK_LOGOS[li];
@@ -1056,6 +1095,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
               x: fromR ? w + lw : -lw, y: yp,
               vx: fromR ? -120 : 120,
               w: lw, h: lh, logoImg: limg,
+              // store yellow canvas index in gravity field (unused for logos)
+              gravity: li,
             }));
           }
         }
@@ -1171,13 +1212,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         if (p.angle) ctx.rotate(p.angle);
         if (p.logoImg && p.logoImg.complete && p.logoImg.naturalWidth > 0) {
           if (p.hit) ctx.globalAlpha = 0.6;
-          ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
-          if (p.hit) {
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = '#FFFF00';
-            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-            ctx.globalAlpha = 1;
+          /* Use pre-rendered yellow silhouette if available */
+          const yellowCanvas = yellowLogoCanvases[Math.round(p.gravity)];
+          if (yellowCanvas) {
+            ctx.drawImage(yellowCanvas, -p.w / 2, -p.h / 2, p.w, p.h);
+          } else {
+            ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
           }
+          if (p.hit) ctx.globalAlpha = 1;
         } else {
           ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
           ctx.fillText(p.text, -p.w / 2, -p.h / 2);
@@ -1234,8 +1276,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
     return () => {
       cancelAnimationFrame(frameId);
-      audio.pause();
-      audio.src = '';
+      /* Only stop music on early exit — keep it playing for the end screen */
+      if (!normalFinish) {
+        audio.pause();
+        audio.src = '';
+      }
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       window.removeEventListener('resize', resize);
@@ -1278,19 +1323,19 @@ function AttackEndScreen({
   };
 
   return (
-    <div className={styles.attackOverlay} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+    <div className={`${styles.attackOverlay} ${styles.endScreenFadeIn}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
       <div style={{ textAlign: 'center', fontFamily: DETERMINATION_SANS, color: '#fff', maxWidth: 480, padding: 24 }}>
         <div style={{ fontSize: 36, color: '#FFFF00', letterSpacing: 3, marginBottom: 24 }}>
-          CREDITS COMPLETE
+          GAME COMPLETE!
         </div>
         <div style={{ fontSize: 22, marginBottom: 8 }}>
-          You were touched by
+          HITS
         </div>
         <div style={{ fontSize: 64, color: result.hitCount === 0 ? '#00ff00' : '#FFFF00', fontWeight: 700, marginBottom: 16 }}>
           {result.hitCount}
         </div>
         <div style={{ fontSize: 18, color: '#aaa', marginBottom: 40 }}>
-          {result.hitCount === 0 ? 'Incredible! You dodged every single name!' : `name${result.hitCount === 1 ? '' : 's'}`}
+          {result.hitCount === 0 ? 'Incredible! You dodged every single name!' : ''}
         </div>
 
         {!submitted ? (
@@ -1368,7 +1413,12 @@ export function Credits() {
 
   const { submitScore } = useLeaderboard();
 
+  /* Preload fonts as early as possible to avoid FOUT hitch */
+  const [fontsReady, setFontsReady] = useState(false);
+  useEffect(() => { preloadFonts().then(() => setFontsReady(true)); }, []);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const attackAudioRef = useRef<HTMLAudioElement | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const scrollPosRef = useRef(0);
   const animFrameRef = useRef(0);
@@ -1399,6 +1449,16 @@ export function Credits() {
     lastFrameRef.current = 0;
     blackPauseRef.current = false;
 
+    /* Fade-in the credits track to mask any loading hitch */
+    if (trackRef.current) {
+      trackRef.current.style.opacity = '0';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (trackRef.current) trackRef.current.style.opacity = '1';
+        });
+      });
+    }
+
     const animate = (time: number) => {
       if (!lastFrameRef.current) lastFrameRef.current = time;
       const dt = Math.min((time - lastFrameRef.current) / 1000, 0.1);
@@ -1415,13 +1475,21 @@ export function Credits() {
         if (scrollPosRef.current <= -contentHeightRef.current) {
           blackPauseRef.current = true;
 
+          /* Fade out the track */
+          if (trackRef.current) trackRef.current.style.opacity = '0';
+
           pauseTimerRef.current = setTimeout(() => {
+            /* Reset position while invisible */
             scrollPosRef.current = window.innerHeight;
             if (trackRef.current) {
               trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
             }
-            blackPauseRef.current = false;
-          }, 3000);
+            /* Wait a frame for position to apply, then fade back in */
+            requestAnimationFrame(() => {
+              if (trackRef.current) trackRef.current.style.opacity = '1';
+              blackPauseRef.current = false;
+            });
+          }, 2000);
         }
       }
 
@@ -1493,17 +1561,28 @@ export function Credits() {
   }, []);
 
   const handleAttackFinish = useCallback((result: AttackResult) => {
+    if (result.audio) attackAudioRef.current = result.audio;
     setAttackResult(result);
     setMode('endscreen');
   }, []);
 
-  const handleScoreSubmit = useCallback((playerName: string) => {
+  const handleScoreSubmit = useCallback(async (playerName: string) => {
     if (attackResult) {
-      submitScore(playerName, attackResult.hitCount);
+      try {
+        await submitScore(playerName, attackResult.hitCount);
+      } catch (err) {
+        console.error('Failed to submit score:', err);
+      }
     }
   }, [attackResult, submitScore]);
 
   const handleExitAttack = useCallback(() => {
+    /* Stop attack music before switching back */
+    if (attackAudioRef.current) {
+      attackAudioRef.current.pause();
+      attackAudioRef.current.src = '';
+      attackAudioRef.current = null;
+    }
     startAudio(selectedTrack);
     setMode('credits');
   }, [selectedTrack, startAudio]);
@@ -1554,8 +1633,13 @@ export function Credits() {
                 </button>
               ))}
             </div>
-            <button className={styles.playButton} onClick={() => handleSongSelect(selectedTrack)}>
-              {'\u25B6\uFE0E'} Play
+            <button
+              className={styles.playButton}
+              onClick={() => handleSongSelect(selectedTrack)}
+              disabled={!fontsReady}
+              style={{ opacity: fontsReady ? 1 : 0.4 }}
+            >
+              {fontsReady ? '\u25B6\uFE0E Play' : 'Loading...'}
             </button>
           </div>
         </div>

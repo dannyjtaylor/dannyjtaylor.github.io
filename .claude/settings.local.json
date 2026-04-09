@@ -78,7 +78,13 @@
       "Read(//c/Program Files/**)",
       "Bash(powershell.exe -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\" 2>&1)",
       "WebFetch(domain:undertale-encyclopedia.tumblr.com)",
-      "Bash(echo \"EXIT_CODE=$?\")"
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(where npm:*)",
+      "Read(//c/Users/dtaylor/AppData/Roaming/**)",
+      "Bash(cmd.exe /c \"npx tsc -b\")",
+      "Bash(powershell.exe -Command \"npx tsc -b 2>&1\")",
+      "Bash(powershell.exe -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object Source\")",
+      "Bash(powershell.exe -Command \"Get-Command npm -ErrorAction SilentlyContinue | Select-Object Source\")"
     ]
   }
 }

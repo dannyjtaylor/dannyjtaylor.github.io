@@ -155,7 +155,8 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Pressley Hendrix' },
       { name: 'Joshua Chase' },
       { name: 'Leonardo Arriaga ' },
-      { name: 'Tyler Reuter' }
+      { name: 'Tyler Reuter' },
+      { name: 'Michael Biggar' }
     ],
   },
   {

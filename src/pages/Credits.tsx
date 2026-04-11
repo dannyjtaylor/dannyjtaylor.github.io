@@ -84,6 +84,8 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Professors/Faculty & Staff',
     entries: [
+      { name: 'Devin Stephenson', role: "Florida Polytechnic President" },
+      { name: 'Jon Pawlecki', role: "Assistant VP of Student Affairs" },
       { name: 'Dr. Austin Anderson', role: "Research Supervisor, Professor I TA'd Differential Equations For"},
       { name: 'Dr. Joshua Drouin', role: "Taught me Computational Linear Algebra" },
       { name: 'Dr. Elisabeth Kames', role: "Taught me SOLIDWORKS" },

@@ -369,7 +369,7 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Colby Mandrodt', role: 'President' },
       { name: 'Nolan Nguyen', role: 'Vice President' },
-      { name: "Ms. Ashley Townsend", role: 'SGA Program Manager, very prominent in Rotaract!'}
+      { name: 'Ms. Ashley Townsend', role: 'SGA Program Manager, very prominent in Rotaract!'}
     ],
   },
   {

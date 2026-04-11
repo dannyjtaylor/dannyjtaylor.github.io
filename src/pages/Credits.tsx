@@ -152,6 +152,10 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Ryan Thomas' },
       { name: 'Tommy Jackson' },
       { name: 'Trenton McCutcheon' },
+      { name: 'Pressley Hendrix' },
+      { name: 'Joshua Chase' },
+      { name: 'Leonardo Arriaga ' },
+      { name: 'Tyler Reuter' }
     ],
   },
   {
@@ -369,7 +373,10 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Colby Mandrodt', role: 'President' },
       { name: 'Nolan Nguyen', role: 'Vice President' },
+      { name: 'Hailey Bauer', role: 'SGA Director of General Operations' },
+      { name: 'Trevor Davidson', role: 'SGA Senator' },
       { name: 'Ms. Ashley Townsend', role: 'SGA Program Manager, very prominent in Rotaract!'}
+
     ],
   },
   {

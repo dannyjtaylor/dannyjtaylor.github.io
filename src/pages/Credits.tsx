@@ -702,7 +702,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let gameOver = false;
     let endTimer = 0;
     let normalFinish = false;
-    const HEART_SPEED = 300;
+    const HEART_SPEED = 350;
     const isMobileDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const MAX_PROJECTILES = isMobileDevice ? 80 : 160;
     const getSlotH = () => getFontSize() * 1.15;
@@ -758,6 +758,9 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const spawnAimedSpread = (fromRight: boolean, yCenter: number) => {
       const w = W();
       const spacing = Math.max(30, W() / 18);
+      /* Scale slide speed with screen width so names travel ~40% of screen width
+         in the slide-in window — ensures they're fully visible on wide PC displays. */
+      const slideVx = Math.max(350, W() * 0.55);
       for (let i = 0; i < 5; i++) {
         const name = nextName();
         if (!name) return;
@@ -766,7 +769,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         const startY = yCenter + (i - 2) * spacing;
         projectiles.push(mkProj({
           id: nextProjId++, text: name, x: startX, y: startY,
-          vx: fromRight ? -350 : 350, w: tw, h: th,
+          vx: fromRight ? -slideVx : slideVx, w: tw, h: th,
           action: 1,
         }));
       }
@@ -777,8 +780,9 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const h = H();
       const w = W();
       const streamSpeed = Math.min(350, w * 0.55);
-      /* Slot height sized so two offset waves tile the screen perfectly */
-      const slotH = Math.max(getFontSize() * 1.5, 30);
+      /* slotH must be >= 2×textHeight so the two interleaved waves don't overlap,
+         plus clearance for the heart to pass between rows (2×heartSize margin). */
+      const slotH = Math.max(getFontSize() * 4.0, 90);
       const count = Math.ceil(h / slotH) + 2;
 
       /* Wave 1 (L→R): rows at y = 0, slotH, 2*slotH, … */
@@ -807,8 +811,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
     /* ── Phase 3: Corridor — predetermined winding path (Undertale-style) ── */
     const getCorridorGapHalf = () => Math.max(38, W() * 0.055);
-    const getCorridorFallSpeed = () => H() * 0.75;
-    const CORRIDOR_TOTAL_PAIRS = 180; /* dense Undertale-style spacing */
+    const getCorridorFallSpeed = () => H() * 0.62;
+    /* Corridor pair count is derived from the phase-3 name budget so that:
+       (a) the path traverses all waypoints exactly once (progress = 0→1), and
+       (b) the corridor never consumes names from phases 4, 7, or 6. */
+    const CORRIDOR_TOTAL_PAIRS = Math.max(20, Math.floor((phase3End - phase2End) / 2));
 
     /* Predetermined gap path — waypoints as fraction of screen width.
        The gap smoothly interpolates between these positions using smoothstep.
@@ -852,8 +859,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       /* Spawn two names (one each side) at ~4 pairs/sec.
          Each pair gets its gap position from the predetermined path. */
       corridorSpawnTimer += dt;
-      const spawnRate = 0.07; /* ~14 pairs/sec — tight Undertale spacing */
-      while (corridorSpawnTimer >= spawnRate && nameIdx < totalNames && corridorSpawnCount < CORRIDOR_TOTAL_PAIRS) {
+      const spawnRate = 0.09; /* tight but not too fast — good density + ~6s duration */
+      while (corridorSpawnTimer >= spawnRate && nameIdx < phase3End && corridorSpawnCount < CORRIDOR_TOTAL_PAIRS) {
         corridorSpawnTimer -= spawnRate;
         const fallSpeed = getCorridorFallSpeed();
         const gh = getCorridorGapHalf();
@@ -882,8 +889,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         }
       }
 
-      /* End corridor after all pairs spawned */
-      if (corridorSpawnCount >= CORRIDOR_TOTAL_PAIRS) {
+      /* End corridor when all pairs are spawned OR the phase-3 name budget is exhausted */
+      if (corridorSpawnCount >= CORRIDOR_TOTAL_PAIRS || nameIdx >= phase3End) {
         corridorActive = false;
       }
     };
@@ -1078,19 +1085,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           ctx.restore();
         }
 
-        /* HITS counter fades out over 0–1.0s */
-        const hitsAlpha = Math.max(0, 1 - endTimer / 1.0);
-        if (hitsAlpha > 0) {
-          ctx.save();
-          ctx.globalAlpha = hitsAlpha;
-          ctx.font = `16px ${DETERMINATION_MONO}`;
-          ctx.fillStyle = '#FFFF00';
-          ctx.textAlign = 'left';
-          ctx.textBaseline = 'top';
-          ctx.fillText(`HITS: ${hitCount}`, 16, 16);
-          ctx.restore();
-        }
-
         /* Phase 2 (1.5–3.5s): "GAME COMPLETE" fades in with gentle scale */
         if (endTimer > 1.5) {
           const textProgress = Math.min(1, (endTimer - 1.5) / 2.0);
@@ -1236,14 +1230,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         p.frame++;
 
         if (p.action === 1) {
-          if (p.frame < 40) {
-            /* Phase 1: Slide in */
+          if (p.frame < 60) {
+            /* Phase 1: Slide in — 60 frames gives enough travel at the scaled vx */
             p.x += p.vx * dt;
             p.y += p.vy * dt;
-          } else if (p.frame === 40) {
+          } else if (p.frame === 60) {
             p.vx = 0;
             p.vy = 0;
-          } else if (p.frame > 40 && p.frame < 85) {
+          } else if (p.frame > 60 && p.frame < 105) {
             /* Phase 2: Aim — rotate text to point toward heart (Undertale-style) */
             const pcx = p.x + p.w / 2;
             const pcy = p.y + p.h / 2;
@@ -1264,7 +1258,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             if (absDiff > deadZone) {
               p.angle += Math.sign(angleDiff) * Math.min(turnSpeed, absDiff);
             }
-          } else if (p.frame === 85) {
+          } else if (p.frame === 105) {
             /* Phase 3: Fire in aimed direction */
             const speed = 280;
             p.vx = Math.cos(p.angle) * speed;
@@ -1428,33 +1422,31 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
       drawHeart(ctx, heart.x, heart.y, getHeartSize(), hitFlash > 0, heartImg);
 
-      /* HUD */
-      ctx.font = `16px ${DETERMINATION_MONO}`;
-      ctx.fillStyle = '#FFFF00';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(`HITS: ${hitCount}`, 16, 16);
-
       if (elapsed < 8) {
         const alpha = elapsed < 6 ? 1 : Math.max(0, 1 - (elapsed - 6) / 2);
         ctx.globalAlpha = alpha;
-        ctx.font = `20px ${DETERMINATION_SANS}`;
+        ctx.font = `32px ${DETERMINATION_SANS}`;
         ctx.fillStyle = '#00ff00';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText('SPECIAL THANKS', w / 2, 20);
+        ctx.fillText('SPECIAL THANKS', w / 2, 24);
         ctx.globalAlpha = 1;
       }
 
-      /* ── Bottom HUD — instruction text ── */
-      ctx.font = `13px ${DETERMINATION_MONO}`;
-      ctx.fillStyle = '#444';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(
-        isMobileDevice ? 'Drag to move \u00B7 Tap \u2715 to exit' : 'Arrow keys / WASD to move \u00B7 ESC to exit',
-        w / 2, h - 12,
-      );
+      /* ── Bottom HUD — instruction text fades out after 10 s ── */
+      const instrAlpha = Math.max(0, Math.min(1, (10 - elapsed) / 2));
+      if (instrAlpha > 0) {
+        ctx.globalAlpha = instrAlpha;
+        ctx.font = `13px ${DETERMINATION_MONO}`;
+        ctx.fillStyle = '#444';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(
+          isMobileDevice ? 'Drag to move \u00B7 Tap \u2715 to exit' : 'Arrow keys / WASD to move \u00B7 ESC to exit',
+          w / 2, h - 12,
+        );
+        ctx.globalAlpha = 1;
+      }
 
       frameId = requestAnimationFrame(gameLoop);
     };

@@ -94,7 +94,8 @@
       "Bash(node node_modules/typescript/bin/tsc -b --noEmit)",
       "Bash(where node:*)",
       "Bash(where tsc:*)",
-      "Bash(cmd.exe /c \"where tsc\")"
+      "Bash(cmd.exe /c \"where tsc\")",
+      "Bash(node:*)"
     ]
   }
 }

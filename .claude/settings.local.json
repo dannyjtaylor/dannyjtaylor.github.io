@@ -95,7 +95,8 @@
       "Bash(where node:*)",
       "Bash(where tsc:*)",
       "Bash(cmd.exe /c \"where tsc\")",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }

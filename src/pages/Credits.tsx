@@ -708,6 +708,22 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const getSlotH = () => getFontSize() * 1.15;
     const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.25));
 
+    /* ════════════════════════════════════════════════════
+       TUNING CONSTANTS — edit here to adjust each phase.
+       ════════════════════════════════════════════════════ */
+    // Ph2 — Crossing Streams: gap between each row = heartDiameter + P2_GAP_EXTRA px
+    const P2_GAP_EXTRA           = 5;    // px of clearance beyond heart diameter
+    // Ph3 — Corridor
+    const P3_FALL_SPEED_FRAC     = 0.62; // fall speed = H × this
+    const P3_SPAWN_RATE          = 0.09; // seconds between each corridor name-pair
+    // Ph4 — Vertical Rain
+    const P4_COL_SPACING_DESKTOP = 60;   // px between rain columns on desktop
+    const P4_COL_SPACING_MOBILE  = 80;   // px between rain columns on mobile
+    const P4_FALL_SPEED          = 200;  // px/sec names fall downward
+    // Ph7 — Spinning Wheels
+    const P7_DRIFT_SPEED_FRAC    = 0.065; // drift speed = W × this
+    const P7_ROT_SPEED           = 1.5;   // radians/sec rotation
+
     /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
     let currentPhase = 0;
     let phaseTimer = 0;
@@ -780,9 +796,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const h = H();
       const w = W();
       const streamSpeed = Math.min(350, w * 0.55);
-      /* slotH must be >= 2×textHeight so the two interleaved waves don't overlap,
-         plus clearance for the heart to pass between rows (2×heartSize margin). */
-      const slotH = Math.max(getFontSize() * 4.0, 90);
+      /* slotH derived so that gap between every adjacent row = heartDiameter + P2_GAP_EXTRA.
+         Layout: W1 at y=0, slotH, 2*slotH… W2 at slotH/2, 3*slotH/2… → gap = slotH/2 - textH */
+      const textH2 = getFontSize() * 1.2;
+      const heartDiam = 2 * getHeartSize();
+      const slotH = 2 * textH2 + 2 * (heartDiam + P2_GAP_EXTRA);
       const count = Math.ceil(h / slotH) + 2;
 
       /* Wave 1 (L→R): rows at y = 0, slotH, 2*slotH, … */
@@ -811,7 +829,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
     /* ── Phase 3: Corridor — predetermined winding path (Undertale-style) ── */
     const getCorridorGapHalf = () => Math.max(38, W() * 0.055);
-    const getCorridorFallSpeed = () => H() * 0.62;
+    const getCorridorFallSpeed = () => H() * P3_FALL_SPEED_FRAC;
     /* Corridor pair count is derived from the phase-3 name budget so that:
        (a) the path traverses all waypoints exactly once (progress = 0→1), and
        (b) the corridor never consumes names from phases 4, 7, or 6. */
@@ -830,10 +848,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       { t: 0.52, x: 0.50 },
       { t: 0.60, x: 0.68 },
       { t: 0.70, x: 0.68 },
-      /* Final sinusoidal swings — gentler amplitude so the heart can keep up */
-      { t: 0.78, x: 0.42 },
-      { t: 0.86, x: 0.55 },
-      { t: 0.94, x: 0.43 },
+      /* Final dramatic swings */
+      { t: 0.78, x: 0.38 },
+      { t: 0.86, x: 0.58 },
+      { t: 0.94, x: 0.35 },
       { t: 1.00, x: 0.50 },
     ];
 
@@ -859,7 +877,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       /* Spawn two names (one each side) at ~4 pairs/sec.
          Each pair gets its gap position from the predetermined path. */
       corridorSpawnTimer += dt;
-      const spawnRate = 0.09; /* tight but not too fast — good density + ~6s duration */
+      const spawnRate = P3_SPAWN_RATE;
       while (corridorSpawnTimer >= spawnRate && nameIdx < phase3End && corridorSpawnCount < CORRIDOR_TOTAL_PAIRS) {
         corridorSpawnTimer -= spawnRate;
         const fallSpeed = getCorridorFallSpeed();
@@ -895,28 +913,24 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 4: Vertical rain — both drift directions interleaved per column, no wrap ── */
+    /* ── Phase 4: Vertical rain — Undertale-style: names fall straight down in columns ── */
     const spawnVerticalRain = () => {
       const w = W();
-      const colSpacing = isMobileDevice ? 90 : 70;
+      const colSpacing = isMobileDevice ? P4_COL_SPACING_MOBILE : P4_COL_SPACING_DESKTOP;
       const cols = Math.floor(w / colSpacing);
       for (let i = 0; i < cols; i++) {
         const name = nextName();
         if (!name) continue;
         const { tw, th } = measureName(name);
-        /* Alternate drift: even columns drift right, odd drift left.
-           This ensures both directions are always present — no gap between "sets". */
-        const driftRight = i % 2 === 0;
-        const rotAngle = driftRight ? Math.PI / 2 : -Math.PI / 2;
-        /* After rotation by ±90°, the rotated text's top visual edge = center_y - tw/2.
-           Set startY so that edge starts at y = -5 (just off screen top). */
-        const startY = tw / 2 - th / 2 - 5;
+        /* Center name within its column slot; clamp so it stays on screen */
+        const x = Math.max(0, Math.min(w - tw, i * colSpacing + (colSpacing - tw) / 2));
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: i * colSpacing + 20, y: startY,
-          vx: driftRight ? 50 : -50, vy: 220,
-          w: tw, h: th, action: 0, /* no wrap — exits naturally */
-          angle: rotAngle,
+          x, y: -th - 5,           /* start just above top of screen */
+          vx: 0, vy: P4_FALL_SPEED, /* straight down, no drift */
+          w: tw, h: th,
+          action: 0,
+          angle: 0,                  /* no rotation — uses fast AABB hitbox */
         }));
       }
     };
@@ -927,18 +941,23 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const h = H();
       const spokeRadius = Math.max(100, Math.min(200, W() / 4));
       const spokes = 8;
-      const baseRotSpeed = 1.5;
-      const driftSpeed = W() * 0.065;
+      const baseRotSpeed = P7_ROT_SPEED;
+      const driftSpeed = W() * P7_DRIFT_SPEED_FRAC;
       /* Fixed inner radius — first letter of every name starts here */
       const innerR = Math.max(28, spokeRadius * 0.2);
 
-      /* Always-full wheels: wrap around ALL_NAMES if nameIdx is exhausted.
-         This guarantees every wheel has exactly `spokes` names — no partial wheels. */
-      const getNameSafe = (): string =>
-        ALL_NAMES[nameIdx++ % ALL_NAMES.length] ?? ALL_NAMES[0] ?? 'Danny';
+      /* Explicit for-loops guarantee exactly `spokes` names per wheel — wraps ALL_NAMES. */
+      const wheel1Names: string[] = [];
+      for (let i = 0; i < spokes; i++) {
+        wheel1Names.push(ALL_NAMES[(nameIdx + i) % ALL_NAMES.length] ?? ALL_NAMES[0] ?? 'Danny');
+      }
+      nameIdx += spokes;
 
-      const wheel1Names = Array.from({ length: spokes }, getNameSafe);
-      const wheel2Names = Array.from({ length: spokes }, getNameSafe);
+      const wheel2Names: string[] = [];
+      for (let i = 0; i < spokes; i++) {
+        wheel2Names.push(ALL_NAMES[(nameIdx + i) % ALL_NAMES.length] ?? ALL_NAMES[0] ?? 'Danny');
+      }
+      nameIdx += spokes;
 
       /* Wheel 1: enters from left, near bottom */
       const cx1 = -spokeRadius * 2;
@@ -1023,7 +1042,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       switch (phase) {
         case 0: return 1.2;   // Aimed spreads
         case 2: return 3.5;   // Crossing streams (full screen per call, both waves)
-        case 4: return isMobileDevice ? 2.0 : 1.4;  // Vertical rain (no wrap, continuous)
+        case 4: return isMobileDevice ? 0.9 : 0.65; // Vertical rain — faster rows = denser rain
         case 7: return 4.5;   // Spinning wheels (fewer, fuller spokes)
         case 6: return 0.8;   // Fast aimed spreads
         default: return 1.0;

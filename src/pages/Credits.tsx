@@ -503,7 +503,8 @@ interface Projectile {
   w: number;
   h: number;
   hit: boolean;
-  action: number;       // 0=normal, 1=homing-lock, 3=wrap, 5=wheel-spoke
+  hitAge: number;       // seconds since hit — used to remove after brief flash
+  action: number;       // 0=normal, 1=homing-lock, 2=fired-bullet, 3=wrap, 5=wheel-spoke
   frame: number;
   gravity: number;
   angle: number;
@@ -587,7 +588,7 @@ function drawHeart(
 
 function mkProj(base: Partial<Projectile> & { id: number; text: string; x: number; y: number; w: number; h: number }): Projectile {
   return {
-    vx: 0, vy: 0, hit: false, action: 0, frame: 0,
+    vx: 0, vy: 0, hit: false, hitAge: 0, action: 0, frame: 0,
     gravity: 0, angle: 0,
     orbitCx: 0, orbitCy: 0, orbitR: 0, orbitAngle: 0, orbitSpeed: 0, logoImg: null,
     ...base,
@@ -716,6 +717,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     // Ph3 — Corridor
     const P3_FALL_SPEED_FRAC     = 0.62; // fall speed = H × this
     const P3_SPAWN_RATE          = 0.09; // seconds between each corridor name-pair
+    const P3_MAX_SWING_PX        = 140;  // max corridor gap deviation from center (keeps pace with heart on PC)
     // Ph4 — Vertical Rain
     const P4_COL_SPACING_DESKTOP = 60;   // px between rain columns on desktop
     const P4_COL_SPACING_MOBILE  = 80;   // px between rain columns on mobile
@@ -828,7 +830,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     };
 
     /* ── Phase 3: Corridor — predetermined winding path (Undertale-style) ── */
-    const getCorridorGapHalf = () => Math.max(38, W() * 0.055);
+    /* Gap is 4× heart radius — consistent feel regardless of screen width */
+    const getCorridorGapHalf = () => getHeartSize() * 4;
     const getCorridorFallSpeed = () => H() * P3_FALL_SPEED_FRAC;
     /* Corridor pair count is derived from the phase-3 name budget so that:
        (a) the path traverses all waypoints exactly once (progress = 0→1), and
@@ -858,17 +861,22 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const getCorridorGapX = (progress: number): number => {
       const w = W();
       const gh = getCorridorGapHalf();
+      const center = w * 0.5;
       for (let i = 0; i < CORRIDOR_WAYPOINTS.length - 1; i++) {
         const a = CORRIDOR_WAYPOINTS[i]!;
         const b = CORRIDOR_WAYPOINTS[i + 1]!;
         if (progress <= b.t) {
           const local = (progress - a.t) / (b.t - a.t);
           const smooth = local * local * (3 - 2 * local); /* smoothstep */
-          const gapX = w * (a.x + (b.x - a.x) * smooth);
-          return Math.max(gh + 30, Math.min(w - gh - 30, gapX));
+          const rawX = w * (a.x + (b.x - a.x) * smooth);
+          /* Clamp how far the gap can swing from center so it never outpaces the heart.
+             On mobile P3_MAX_SWING_PX > natural swing (no clamping).
+             On PC the gap is constrained so the heart can always catch up. */
+          const clampedX = center + Math.max(-P3_MAX_SWING_PX, Math.min(P3_MAX_SWING_PX, rawX - center));
+          return Math.max(gh + 30, Math.min(w - gh - 30, clampedX));
         }
       }
-      return w * 0.5;
+      return center;
     };
 
     let corridorSpawnCount = 0;
@@ -913,26 +921,29 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 4: Vertical rain — Undertale-style: names fall straight down in columns ── */
+    /* ── Phase 4: Vertical rain — Undertale-accurate: one name per spawn, random x ──
+       Names fall straight down in a continuous, organic rain. Spawning one at a time
+       at random x positions (not batched rows) creates the correct dense waterfall.
+       P4_COL_SPACING_DESKTOP / MOBILE control the minimum horizontal spread between
+       consecutive spawns so the rain doesn't cluster in one spot. */
+    let rainLastX = 0;
     const spawnVerticalRain = () => {
       const w = W();
-      const colSpacing = isMobileDevice ? P4_COL_SPACING_MOBILE : P4_COL_SPACING_DESKTOP;
-      const cols = Math.floor(w / colSpacing);
-      for (let i = 0; i < cols; i++) {
-        const name = nextName();
-        if (!name) continue;
-        const { tw, th } = measureName(name);
-        /* Center name within its column slot; clamp so it stays on screen */
-        const x = Math.max(0, Math.min(w - tw, i * colSpacing + (colSpacing - tw) / 2));
-        projectiles.push(mkProj({
-          id: nextProjId++, text: name,
-          x, y: -th - 5,           /* start just above top of screen */
-          vx: 0, vy: P4_FALL_SPEED, /* straight down, no drift */
-          w: tw, h: th,
-          action: 0,
-          angle: 0,                  /* no rotation — uses fast AABB hitbox */
-        }));
-      }
+      const name = nextName();
+      if (!name) return;
+      const { tw, th } = measureName(name);
+      /* Pseudo-distributed x: offset last spawn x by a prime-step to spread evenly */
+      const minSpacing = isMobileDevice ? P4_COL_SPACING_MOBILE : P4_COL_SPACING_DESKTOP;
+      rainLastX = (rainLastX + minSpacing * 3 + (phaseRound * 137)) % Math.max(1, w - tw);
+      const x = Math.max(0, Math.min(w - tw, rainLastX));
+      projectiles.push(mkProj({
+        id: nextProjId++, text: name,
+        x, y: -th - 5,
+        vx: 0, vy: P4_FALL_SPEED,
+        w: tw, h: th,
+        action: 0,
+        angle: 0,
+      }));
     };
 
     /* ── Phase 7: Spinning Wheels — two rotating spoke-wheels from opposite sides ── */
@@ -1042,7 +1053,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       switch (phase) {
         case 0: return 1.2;   // Aimed spreads
         case 2: return 3.5;   // Crossing streams (full screen per call, both waves)
-        case 4: return isMobileDevice ? 0.9 : 0.65; // Vertical rain — faster rows = denser rain
+        case 4: return isMobileDevice ? 0.25 : 0.18; // Vertical rain — single name per call
         case 7: return 4.5;   // Spinning wheels (fewer, fuller spokes)
         case 6: return 0.8;   // Fast aimed spreads
         default: return 1.0;
@@ -1247,6 +1258,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       /* ── Update projectiles ── */
       for (const p of projectiles) {
         p.frame++;
+        if (p.hit) { p.hitAge += dt; continue; } /* skip further updates for hit projectiles */
 
         if (p.action === 1) {
           if (p.frame < 60) {
@@ -1278,11 +1290,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
               p.angle += Math.sign(angleDiff) * Math.min(turnSpeed, absDiff);
             }
           } else if (p.frame === 105) {
-            /* Phase 3: Fire in aimed direction */
+            /* Phase 3: Fire in aimed direction — action:2 for tight off-screen culling */
             const speed = 280;
             p.vx = Math.cos(p.angle) * speed;
             p.vy = Math.sin(p.angle) * speed;
-            p.action = 0;
+            p.action = 2;
           }
         } else if (p.action === 5) {
           /* Spinning wheel spoke — orbit around moving center */
@@ -1309,7 +1321,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
 
       projectiles = projectiles.filter((p) => {
-        /* Keep hit projectiles visible (they turn yellow) — don't cull them early */
+        /* Hit projectiles: keep for a brief yellow flash then remove */
+        if (p.hit) return p.hitAge < 0.35;
+        /* Fired aimed bullets (action:2): tight cull — remove as soon as off-screen */
+        if (p.action === 2) return p.x > -p.w - 60 && p.x < w + 60 && p.y > -p.h - 60 && p.y < h + 60;
         if (p.action === 5) {
           return p.orbitCx > -p.orbitR - 300 && p.orbitCx < w + p.orbitR + 300;
         }

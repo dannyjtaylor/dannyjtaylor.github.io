@@ -692,7 +692,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let endTimer = 0;
     let normalFinish = false;
     const HEART_SPEED = 300;
-    const MAX_PROJECTILES = 120; /* performance cap */
+    const isMobileDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const MAX_PROJECTILES = isMobileDevice ? 60 : 120; /* tighter cap on mobile */
     const getSlotH = () => getFontSize() * 1.15;
     const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.25));
 
@@ -725,7 +726,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
     /* ── Corridor state ── */
     let corridorActive = false;
-    let corridorElapsed = 0;
     let corridorSpawnTimer = 0;
 
     const getFontSize = () => Math.max(20, Math.min(32, W() / 22));
@@ -767,7 +767,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const w = W();
       const streamSpeed = Math.min(350, W() * 0.55);
       const vertSpacing = Math.max(30, h / 14);
-      const count = Math.min(12, Math.floor(h / vertSpacing));
+      const maxPerWave = isMobileDevice ? 8 : 12;
+      const count = Math.min(maxPerWave, Math.floor(h / vertSpacing));
 
       /* Left-to-right wave */
       for (let i = 0; i < count; i++) {
@@ -811,9 +812,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       { t: 0.52, x: 0.50 },
       { t: 0.60, x: 0.68 },
       { t: 0.70, x: 0.68 },
-      { t: 0.78, x: 0.38 },
-      { t: 0.86, x: 0.58 },
-      { t: 0.94, x: 0.35 },
+      /* Final sinusoidal swings — gentler amplitude so the heart can keep up */
+      { t: 0.78, x: 0.42 },
+      { t: 0.86, x: 0.55 },
+      { t: 0.94, x: 0.43 },
       { t: 1.00, x: 0.50 },
     ];
 
@@ -836,8 +838,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let corridorSpawnCount = 0;
 
     const updateCorridor = (dt: number) => {
-      corridorElapsed += dt;
-
       /* Spawn two names (one each side) at ~4 pairs/sec.
          Each pair gets its gap position from the predetermined path. */
       corridorSpawnTimer += dt;
@@ -880,7 +880,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     /* ── Phase 4: Vertical rain with drift and wrap ── */
     const spawnVerticalRain = (driftRight: boolean) => {
       const w = W();
-      const cols = Math.floor(w / 70);
+      const colSpacing = isMobileDevice ? 90 : 70;
+      const cols = Math.floor(w / colSpacing);
       const rotAngle = driftRight ? Math.PI / 2 : -Math.PI / 2;
       for (let i = 0; i < cols; i++) {
         const name = nextName();
@@ -892,7 +893,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         const startY = tw / 2 - th / 2 - 5;
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: i * 70 + 20, y: startY,
+          x: i * colSpacing + 20, y: startY,
           vx: driftRight ? 80 : -80, vy: 220,
           w: tw, h: th, action: 3,
           angle: rotAngle,
@@ -905,62 +906,87 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const w = W();
       const h = H();
       const spokeRadius = Math.max(100, Math.min(200, W() / 4));
-      const spokes = 5;
+      const spokes = 6;
       const baseRotSpeed = 1.5;
       const driftSpeed = W() * 0.065;
       /* Fixed inner radius — first letter of every name starts here */
       const innerR = Math.max(28, spokeRadius * 0.2);
 
-      /* Wheel 1: enters from left, near bottom */
-      const cx1 = -spokeRadius * 2;
-      const cy1 = h * 0.75;
-      const baseAngle1 = phaseRound * 0.7;
-
+      /* Collect names first to avoid spawning incomplete wheels.
+         If not enough names remain for a full wheel, rewind nameIdx
+         so those names aren't lost silently. */
+      const savedIdx = nameIdx;
+      const wheel1Names: string[] = [];
       for (let i = 0; i < spokes; i++) {
-        const name = nextName();
-        if (!name) return;
-        const { tw, th } = measureName(name);
-        const spokeAngle = baseAngle1 + (i * 2 * Math.PI / spokes);
-        /* orbitR = innerR + tw/2 so the text-center orbits at (innerR + tw/2),
-           placing the first letter at radius innerR from wheel center */
-        const nameOrbitR = innerR + tw / 2;
-        projectiles.push(mkProj({
-          id: nextProjId++, text: name,
-          x: cx1 + Math.cos(spokeAngle) * nameOrbitR - tw / 2,
-          y: cy1 + Math.sin(spokeAngle) * nameOrbitR - th / 2,
-          vx: driftSpeed,
-          w: tw, h: th,
-          action: 5,
-          orbitCx: cx1, orbitCy: cy1,
-          orbitR: nameOrbitR,
-          orbitAngle: spokeAngle,
-          orbitSpeed: baseRotSpeed,
-        }));
+        const n = nextName();
+        if (n) wheel1Names.push(n);
+      }
+      if (wheel1Names.length < spokes) {
+        /* Not enough names for wheel 1 — rewind and bail */
+        nameIdx = savedIdx;
+        return;
+      }
+      const savedIdx2 = nameIdx;
+      const wheel2Names: string[] = [];
+      for (let i = 0; i < spokes; i++) {
+        const n = nextName();
+        if (n) wheel2Names.push(n);
+      }
+      if (wheel2Names.length < spokes) {
+        /* Not enough names for wheel 2 — rewind wheel 2 names only */
+        nameIdx = savedIdx2;
+      }
+
+      /* Wheel 1: enters from left, near bottom */
+      if (wheel1Names.length === spokes) {
+        const cx1 = -spokeRadius * 2;
+        const cy1 = h * 0.75;
+        const baseAngle1 = phaseRound * 0.7;
+
+        for (let i = 0; i < wheel1Names.length; i++) {
+          const name = wheel1Names[i]!;
+          const { tw, th } = measureName(name);
+          const spokeAngle = baseAngle1 + (i * 2 * Math.PI / spokes);
+          const nameOrbitR = innerR + tw / 2;
+          projectiles.push(mkProj({
+            id: nextProjId++, text: name,
+            x: cx1 + Math.cos(spokeAngle) * nameOrbitR - tw / 2,
+            y: cy1 + Math.sin(spokeAngle) * nameOrbitR - th / 2,
+            vx: driftSpeed,
+            w: tw, h: th,
+            action: 5,
+            orbitCx: cx1, orbitCy: cy1,
+            orbitR: nameOrbitR,
+            orbitAngle: spokeAngle,
+            orbitSpeed: baseRotSpeed,
+          }));
+        }
       }
 
       /* Wheel 2: enters from right, near top */
-      const cx2 = w + spokeRadius * 2;
-      const cy2 = h * 0.25;
-      const baseAngle2 = phaseRound * 0.7 + Math.PI / spokes;
+      if (wheel2Names.length === spokes) {
+        const cx2 = w + spokeRadius * 2;
+        const cy2 = h * 0.25;
+        const baseAngle2 = phaseRound * 0.7 + Math.PI / spokes;
 
-      for (let i = 0; i < spokes; i++) {
-        const name = nextName();
-        if (!name) return;
-        const { tw, th } = measureName(name);
-        const spokeAngle = baseAngle2 + (i * 2 * Math.PI / spokes);
-        const nameOrbitR = innerR + tw / 2;
-        projectiles.push(mkProj({
-          id: nextProjId++, text: name,
-          x: cx2 + Math.cos(spokeAngle) * nameOrbitR - tw / 2,
-          y: cy2 + Math.sin(spokeAngle) * nameOrbitR - th / 2,
-          vx: -driftSpeed,
-          w: tw, h: th,
-          action: 5,
-          orbitCx: cx2, orbitCy: cy2,
-          orbitR: nameOrbitR,
-          orbitAngle: spokeAngle,
-          orbitSpeed: -baseRotSpeed,
-        }));
+        for (let i = 0; i < wheel2Names.length; i++) {
+          const name = wheel2Names[i]!;
+          const { tw, th } = measureName(name);
+          const spokeAngle = baseAngle2 + (i * 2 * Math.PI / spokes);
+          const nameOrbitR = innerR + tw / 2;
+          projectiles.push(mkProj({
+            id: nextProjId++, text: name,
+            x: cx2 + Math.cos(spokeAngle) * nameOrbitR - tw / 2,
+            y: cy2 + Math.sin(spokeAngle) * nameOrbitR - th / 2,
+            vx: -driftSpeed,
+            w: tw, h: th,
+            action: 5,
+            orbitCx: cx2, orbitCy: cy2,
+            orbitR: nameOrbitR,
+            orbitAngle: spokeAngle,
+            orbitSpeed: -baseRotSpeed,
+          }));
+        }
       }
     };
 
@@ -999,7 +1025,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         case 0: return 1.2;   // Aimed spreads
         case 2: return 1.7;   // Crossing streams
         case 4: return 2.6;   // Vertical rain
-        case 7: return 3.5;   // Spinning wheels
+        case 7: return 4.5;   // Spinning wheels (fewer, fuller spokes)
         case 6: return 0.8;   // Fast aimed spreads
         default: return 1.0;
       }
@@ -1028,16 +1054,97 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
       if (gameOver) {
         endTimer += dt;
-        if (endTimer > 3) {
+        if (endTimer > 5) {
           normalFinish = true;
           onFinishRef.current({ hitCount, hitNames, audio });
           return;
         }
         ctx.clearRect(0, 0, w, h);
-        const fadeAlpha = Math.min(1, endTimer / 2);
-        ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha})`;
+
+        /* Phase 1 (0–1.5s): fade background to black, heart + HP bar fade out */
+        const bgAlpha = Math.min(1, endTimer / 1.5);
+        ctx.fillStyle = `rgba(0, 0, 0, ${bgAlpha})`;
         ctx.fillRect(0, 0, w, h);
-        drawHeart(ctx, heart.x, heart.y, getHeartSize(), false, heartImg);
+
+        /* Heart fades out over 0–1.2s */
+        const heartAlpha = Math.max(0, 1 - endTimer / 1.2);
+        if (heartAlpha > 0) {
+          ctx.save();
+          ctx.globalAlpha = heartAlpha;
+          drawHeart(ctx, heart.x, heart.y, getHeartSize(), false, heartImg);
+          ctx.restore();
+        }
+
+        /* HP bar fades out over 0–1.0s */
+        const hpAlpha = Math.max(0, 1 - endTimer / 1.0);
+        if (hpAlpha > 0) {
+          ctx.save();
+          ctx.globalAlpha = hpAlpha;
+          const barY = h - 38;
+          const hpTotalW = 110;
+          const hpStartX = (w - hpTotalW) / 2;
+          ctx.font = `14px ${DETERMINATION_MONO}`;
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('HP', hpStartX, barY);
+          ctx.fillStyle = '#FFFF00';
+          ctx.font = `18px ${DETERMINATION_SANS}`;
+          ctx.fillText('\u221E', hpStartX + 24, barY);
+          ctx.fillStyle = '#FFFF00';
+          ctx.fillRect(hpStartX + 44, barY - 6, 66, 12);
+          ctx.restore();
+        }
+
+        /* HITS counter fades out over 0–1.0s */
+        const hitsAlpha = Math.max(0, 1 - endTimer / 1.0);
+        if (hitsAlpha > 0) {
+          ctx.save();
+          ctx.globalAlpha = hitsAlpha;
+          ctx.font = `16px ${DETERMINATION_MONO}`;
+          ctx.fillStyle = '#FFFF00';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(`HITS: ${hitCount}`, 16, 16);
+          ctx.restore();
+        }
+
+        /* Phase 2 (1.5–3.5s): "GAME COMPLETE" fades in with gentle scale */
+        if (endTimer > 1.5) {
+          const textProgress = Math.min(1, (endTimer - 1.5) / 2.0);
+          /* Smooth ease-out */
+          const eased = 1 - (1 - textProgress) * (1 - textProgress);
+          ctx.save();
+          ctx.globalAlpha = eased;
+          ctx.font = `36px ${DETERMINATION_SANS}`;
+          ctx.fillStyle = '#FFFF00';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          /* Gentle scale from 1.1 → 1.0 */
+          const scale = 1.1 - 0.1 * eased;
+          ctx.translate(w / 2, h / 2 - 30);
+          ctx.scale(scale, scale);
+          ctx.fillText('GAME COMPLETE!', 0, 0);
+          ctx.restore();
+
+          /* Hit count fades in slightly after */
+          if (endTimer > 2.2) {
+            const scoreProgress = Math.min(1, (endTimer - 2.2) / 1.5);
+            const scoreEased = 1 - (1 - scoreProgress) * (1 - scoreProgress);
+            ctx.save();
+            ctx.globalAlpha = scoreEased;
+            ctx.font = `22px ${DETERMINATION_SANS}`;
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('HITS', w / 2, h / 2 + 15);
+            ctx.font = `64px ${DETERMINATION_SANS}`;
+            ctx.fillStyle = hitCount === 0 ? '#00ff00' : '#FFFF00';
+            ctx.fillText(`${hitCount}`, w / 2, h / 2 + 65);
+            ctx.restore();
+          }
+        }
+
         frameId = requestAnimationFrame(gameLoop);
         return;
       }
@@ -1086,7 +1193,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           } else if (currentPhase === 3 && !corridorActive) {
             /* Start corridor */
             corridorActive = true;
-            corridorElapsed = 0;
             corridorSpawnTimer = 0;
             corridorSpawnCount = 0;
           } else if (currentPhase !== 3) {
@@ -1226,27 +1332,49 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       if (hitFlash > 0) hitFlash -= dt;
       const HR = getHeartSize(); /* exact match to drawn heart bounds */
       let hitsThisFrame = 0;
+
+      /* Circle vs OBB (oriented bounding box) — pixel-perfect for rotated text.
+         Projects the heart center into the rotated rectangle's local space,
+         then checks circle-vs-AABB in that local frame. */
       for (const p of projectiles) {
         if (p.hit) continue;
-        /* Compute axis-aligned bounding box that accounts for rotation.
-           For unrotated text (angle=0), this equals (p.w, p.h).
-           For 90°-rotated text, dimensions swap: width→h, height→w. */
-        const cosA = Math.abs(Math.cos(p.angle));
-        const sinA = Math.abs(Math.sin(p.angle));
-        const aabbW = p.w * cosA + p.h * sinA;
-        const aabbH = p.w * sinA + p.h * cosA;
         const pcx = p.x + p.w / 2;
         const pcy = p.y + p.h / 2;
-        if (
-          heart.x + HR > pcx - aabbW / 2 &&
-          heart.x - HR < pcx + aabbW / 2 &&
-          heart.y + HR > pcy - aabbH / 2 &&
-          heart.y - HR < pcy + aabbH / 2
-        ) {
-          p.hit = true;
-          hitsThisFrame++;
-          hitCount++;
-          hitNames.push(p.text);
+
+        if (p.angle !== 0 && (p.action === 5 || p.action === 3)) {
+          /* OBB test for rotated projectiles (spokes, rain, etc.) */
+          const cosA = Math.cos(-p.angle);
+          const sinA = Math.sin(-p.angle);
+          /* Transform heart into the rectangle's local coordinate system */
+          const dx = heart.x - pcx;
+          const dy = heart.y - pcy;
+          const localX = dx * cosA - dy * sinA;
+          const localY = dx * sinA + dy * cosA;
+          /* Closest point on the unrotated rectangle to the local heart position */
+          const halfW = p.w / 2;
+          const halfH = p.h / 2;
+          const clampX = Math.max(-halfW, Math.min(halfW, localX));
+          const clampY = Math.max(-halfH, Math.min(halfH, localY));
+          const distSq = (localX - clampX) * (localX - clampX) + (localY - clampY) * (localY - clampY);
+          if (distSq < HR * HR) {
+            p.hit = true;
+            hitsThisFrame++;
+            hitCount++;
+            hitNames.push(p.text);
+          }
+        } else {
+          /* AABB test for non-rotated projectiles (fast path) */
+          if (
+            heart.x + HR > pcx - p.w / 2 &&
+            heart.x - HR < pcx + p.w / 2 &&
+            heart.y + HR > pcy - p.h / 2 &&
+            heart.y - HR < pcy + p.h / 2
+          ) {
+            p.hit = true;
+            hitsThisFrame++;
+            hitCount++;
+            hitNames.push(p.text);
+          }
         }
       }
       if (hitsThisFrame > 0) {
@@ -1266,13 +1394,21 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       ctx.font = `${drawFontSize}px ${DETERMINATION_SANS}`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
+      /* Render margin — skip projectiles clearly off screen */
+      const renderMargin = 100;
       for (const p of projectiles) {
-        ctx.save();
-        ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
-        if (p.angle) ctx.rotate(p.angle);
+        /* Fast off-screen cull (saves draw calls on mobile) */
+        const pcx = p.x + p.w / 2;
+        const pcy = p.y + p.h / 2;
+        const extent = Math.max(p.w, p.h);
+        if (pcx + extent < -renderMargin || pcx - extent > w + renderMargin ||
+            pcy + extent < -renderMargin || pcy - extent > h + renderMargin) continue;
+
         if (p.logoImg && p.logoImg.complete && p.logoImg.naturalWidth > 0) {
+          ctx.save();
+          ctx.translate(pcx, pcy);
+          if (p.angle) ctx.rotate(p.angle);
           if (p.hit) {
-            /* Yellow version on hit */
             ctx.globalAlpha = 0.8;
             const logoIdx = ATTACK_LOGOS.findIndex(l => l.name === p.text);
             const yellowCanvas = logoIdx >= 0 ? yellowLogoCanvases[logoIdx] : null;
@@ -1283,14 +1419,22 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             }
             ctx.globalAlpha = 1;
           } else {
-            /* Normal color before hit */
             ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
           }
-        } else {
+          ctx.restore();
+        } else if (p.angle) {
+          /* Rotated text — needs save/restore */
+          ctx.save();
+          ctx.translate(pcx, pcy);
+          ctx.rotate(p.angle);
           ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
           ctx.fillText(p.text, -p.w / 2, -p.h / 2);
+          ctx.restore();
+        } else {
+          /* Non-rotated text — no save/restore needed */
+          ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
+          ctx.fillText(p.text, p.x, p.y);
         }
-        ctx.restore();
       }
 
       drawHeart(ctx, heart.x, heart.y, getHeartSize(), hitFlash > 0, heartImg);
@@ -1318,9 +1462,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       ctx.fillStyle = '#444';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      const isMobile = 'ontouchstart' in window;
       ctx.fillText(
-        isMobile ? 'Drag to move \u00B7 Tap \u2715 to exit' : 'Arrow keys / WASD to move \u00B7 ESC to exit',
+        isMobileDevice ? 'Drag to move \u00B7 Tap \u2715 to exit' : 'Arrow keys / WASD to move \u00B7 ESC to exit',
         w / 2, h - 12,
       );
 

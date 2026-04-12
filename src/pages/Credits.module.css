@@ -686,7 +686,7 @@
 }
 
 .endScreenFadeIn {
-  animation: endFadeIn 1.5s ease-in forwards;
+  animation: endFadeIn 0.8s ease-out forwards;
 }
 
 @keyframes endFadeIn {

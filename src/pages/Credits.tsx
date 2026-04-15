@@ -54,15 +54,17 @@ interface CreditEntry {
 interface CreditSection {
   title: string;
   entries: CreditEntry[];
-  photo?: string | string[];
-  bottomPhotos?: string | string[];
+  photo?: string | string[];   /* centered logo(s) shown above section title */
+  leftPhotos?: string[];       /* personal photos in left side column */
+  rightPhotos?: string[];      /* personal photos in right side column */
 }
 
 const CREDITS_DATA: CreditSection[] = [
   /* ── Top sections ── */
   {
     title: 'My Family',
-    photo: ['family_1.jpg', 'me_and_patricia_taylor.png', 'me_with_grandmapat_and_grandpahoward.jpg', '3DS_everyone_and_family.jpg'],
+    leftPhotos: ['family_1.jpg', 'me_with_grandmapat_and_grandpahoward.jpg', 'family_2.jpg'],
+    rightPhotos: ['me_and_patricia_taylor.png', '3DS_everyone_and_family.jpg'],
     entries: [
       { name: 'Katherine Taylor', role: 'Mother' },
       { name: 'John Taylor', role: 'Father' },
@@ -85,7 +87,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Professors/Faculty & Staff',
-    photo: ['dr_ngo.jpg', 'me_with_rawa_adla_card.jpg', 'friend_group_rawa.jpg'],
+    leftPhotos: ['dr_ngo.jpg', 'friend_group_rawa.jpg'],
+    rightPhotos: ['me_with_rawa_adla_card.jpg'],
     entries: [
       { name: 'Devin Stephenson', role: "Florida Polytechnic President" },
       { name: 'Jon Pawlecki', role: "Assistant VP of Student Affairs" },
@@ -118,7 +121,9 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'SHPE Eboard 2025\u20132026',
-    photo: ['SHPE.png', 'gabo_me_kro.jpg', 'shiraj_and_i_IBM.jpg'],
+    photo: 'SHPE.png',
+    leftPhotos: ['gabo_me_kro.jpg'],
+    rightPhotos: ['shiraj_and_i_IBM.jpg'],
     entries: [
       { name: 'Ines Alonso' },
       { name: 'Naibys "Kro" Alzugaray' },
@@ -131,7 +136,9 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Rotaract',
-    photo: ['rotaract.png', 'rotaract_1.jpg', 'rotaract_2.jpg', 'aidan_morris_and_me.jpg', 'me_domenic_aidan.jpg', 'alex_cam_1.jpg', 'brittany_me_andriana_alex.jpg', 'rotaract_3.jpg', 'rotaract_4.jpg', 'rotaract_5.jpg', 'rotaract_6.jpg', 'rotaract_7.jpg', 'rotaract_8.jpg'],
+    photo: 'rotaract.png',
+    leftPhotos: ['rotaract_1.jpg', 'aidan_morris_and_me.jpg', 'me_domenic_aidan.jpg', 'rotaract_3.jpg', 'rotaract_5.jpg', 'rotaract_7.jpg'],
+    rightPhotos: ['rotaract_2.jpg', 'alex_cam_1.jpg', 'brittany_me_andriana_alex.jpg', 'rotaract_4.jpg', 'rotaract_6.jpg', 'rotaract_8.jpg'],
     entries: [
       { name: 'Aidan Morris' },
       { name: 'Alyson Smyth' },
@@ -166,7 +173,9 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'SHPE',
-    photo: ['SHPE_1.png', 'gabo_louis_me.jpg', 'me_philadelphia.jpg', 'anaheim_1.jpg', 'anaheim_2.jpg', 'me_andrew_louis.png'],
+    photo: 'SHPE_1.png',
+    leftPhotos: ['gabo_louis_me.jpg', 'me_philadelphia.jpg', 'me_andrew_louis.png'],
+    rightPhotos: ['anaheim_1.jpg', 'anaheim_2.jpg', 'maria_roman_1.jpg'],
     entries: [
       { name: 'Benji Guzman' },
       { name: 'Carlos Marillo' },
@@ -184,7 +193,8 @@ const CREDITS_DATA: CreditSection[] = [
   /* ── Alphabetical middle ── */
   {
     title: '2404-1313',
-    photo: ['friend_group_boys.jpg', 'friend_group_1.jpg', 'friend_group_2.jpg', 'friend_group_3.jpg', 'friend_group_4.jpg', 'friend_group_large.jpg'],
+    leftPhotos: ['friend_group_boys.jpg', 'friend_group_2.jpg', 'friend_group_large.jpg'],
+    rightPhotos: ['friend_group_1.jpg', 'friend_group_3.jpg', 'friend_group_4.jpg'],
     entries: [
       { name: 'Bryon Catlin' },
       { name: 'George Mancini' },
@@ -193,7 +203,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Good Mythical Morning Enjoyers',
-    photo: 'me_jaylee_emma.jpg',
+    rightPhotos: ['me_jaylee_emma.jpg'],
     entries: [
       { name: 'Emma Rossi' },
       { name: 'Jaylee Ciaschini' },
@@ -219,7 +229,9 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: "Polk County Sheriff's Office LiDAR Team (Capstone)",
-    photo: ['sheriffsoffice.png', 'lidarteam_1.jpg', 'lidar_2.jpg', 'research_1.jpg', 'friend_group_research.png'],
+    photo: 'sheriffsoffice.png',
+    leftPhotos: ['lidarteam_1.jpg', 'friend_group_research.png'],
+    rightPhotos: ['lidar_2.jpg', 'research_1.jpg'],
     entries: [
       { name: 'James Allegra' },
       { name: 'Gaspar Chayer' },
@@ -248,6 +260,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Lake Placid/Sebring',
+    leftPhotos: ['me_alaska.jpg'],
+    rightPhotos: ['me_random_with_cars.jpg'],
     entries: [
       { name: 'Brianna Pratts' },
       { name: 'Casen Simmons' },
@@ -279,6 +293,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'People I Know Because of Bryon',
+    leftPhotos: ['random_1.jpg', 'friends_target.jpg'],
+    rightPhotos: ['random_2.jpg'],
     entries: [
       { name: 'Bryon Catlin II' },
       { name: 'Carson Elliott', role: "NerdLabz" },
@@ -376,7 +392,8 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Eduardo Jirau'},
       { name: 'Jes Pate'},
     ],
-    bottomPhotos: ['me_and_mo_haddid.jpg', 'clara_1.jpg', 'luis_mata_moreno.jpg', 'NOVA_with_lukas_kelk.jpg', 'escape_room_1.jpg', 'escape_room_2.jpg', 'howl_o_scream.jpg', 'friends_target.jpg', 'rappel_me_random.jpg'],
+    leftPhotos: ['me_and_mo_haddid.jpg', 'clara_1.jpg', 'escape_room_1.jpg', 'rappel_me_random.jpg'],
+    rightPhotos: ['luis_mata_moreno.jpg', 'NOVA_with_lukas_kelk.jpg', 'escape_room_2.jpg', 'howl_o_scream.jpg'],
   },
   {
     title: 'Student Government Association',
@@ -392,6 +409,7 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'VALORANT Varsity',
     photo: ['flpolyesports.png', 'valorant.png'],
+    leftPhotos: ['me_random.jpg'],
     entries: [
       { name: 'Vanessa Korthas' },
       { name: 'Jaden Akers-Atkins' },
@@ -403,7 +421,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Winter Haven Technology Services',
-    photo: ['winter_haven_1.jpg', 'winter_haven_nick.png'],
+    leftPhotos: ['winter_haven_1.jpg'],
+    rightPhotos: ['winter_haven_nick.png'],
     entries: [
       { name: 'Adriana Bottega' },
       { name: 'Aizan "Bobby" Khan' },
@@ -434,6 +453,8 @@ const CREDITS_DATA: CreditSection[] = [
   /* ── End sections ── */
   {
     title: 'Online Friends',
+    leftPhotos: ['cruise_1.jpg', 'cruise_2.jpg'],
+    rightPhotos: ['cruise_3.jpg', 'friend_group_5.png'],
     entries: [
       { name: 'Alibaba' },
       { name: 'Andy Miller', role: 'Lets me carry him in VALORANT' },
@@ -459,7 +480,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Special Thanks',
-    photo: 'me_invincible.jpg',
+    leftPhotos: ['me_invincible.jpg', 'me_presenting.jpg'],
+    rightPhotos: ['me_coca_cola.jpg', 'alex_and_i.png'],
     entries: [
       { name: 'Akira Kurusu' },
       { name: 'Apollo Justice' },
@@ -1404,7 +1426,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       /* ── Update projectiles ── */
       for (const p of projectiles) {
         p.frame++;
-        if (p.hit) { p.hitAge += dt; continue; } /* skip further updates for hit projectiles */
+        if (p.hit) p.hitAge += dt; /* accumulate age but keep updating position — Undertale style */
 
         if (p.action === 1) {
           if (p.frame < 60) {
@@ -1467,8 +1489,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
 
       projectiles = projectiles.filter((p) => {
-        /* Hit projectiles: stay yellow on screen (culled naturally by MAX_PROJECTILES cap) */
-        if (p.hit) return p.hitAge < 9999;
         /* Fired aimed bullets (action:2): tight cull — remove as soon as off-screen */
         if (p.action === 2) return p.x > -p.w - 60 && p.x < w + 60 && p.y > -p.h - 60 && p.y < h + 60;
         if (p.action === 5) {
@@ -1813,6 +1833,12 @@ export function Credits() {
     };
     measure();
     window.addEventListener('resize', measure);
+    /* Re-measure whenever track height changes (images loading in) */
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && trackRef.current) {
+      ro = new ResizeObserver(measure);
+      ro.observe(trackRef.current);
+    }
 
     scrollPosRef.current = 0;
     lastFrameRef.current = 0;
@@ -1869,6 +1895,7 @@ export function Credits() {
     return () => {
       cancelAnimationFrame(animFrameRef.current);
       window.removeEventListener('resize', measure);
+      ro?.disconnect();
       if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
     };
   }, [mode]);
@@ -2103,27 +2130,25 @@ export function Credits() {
       {/* Scrolling credits */}
       <div className={styles.scrollContainer}>
         <div ref={trackRef} className={styles.creditsTrack}>
-          <div className={styles.openingSpace} />
-
-          <div className={styles.universityLogo}>
-            <img src="/credits-photos/flpoly.png" alt="Florida Polytechnic University" />
+          {/* ── Opening (centered) ── */}
+          <div className={styles.creditsCenter}>
+            <div className={styles.openingSpace} />
+            <div className={styles.universityLogo}>
+              <img src="/credits-photos/flpoly.png" alt="Florida Polytechnic University" />
+            </div>
+            <div className={styles.mainTitle}>Daniel J. Taylor</div>
+            <div className={styles.subtitleBlock}>
+              <div className={styles.subtitleUniversity}>Florida Polytechnic University</div>
+              <div className={styles.subtitleDegree}>Computer Engineering</div>
+              <div className={styles.subtitleClass}>Class of 2026 Graduate</div>
+            </div>
+            <div className={styles.sectionPhoto}>
+              <img src="/credits-photos/professional_photo_of_me.png" alt="Daniel Taylor" />
+            </div>
+            <div className={styles.divider} />
           </div>
 
-          <div className={styles.mainTitle}>Daniel J. Taylor</div>
-
-          <div className={styles.subtitleBlock}>
-            <div className={styles.subtitleUniversity}>Florida Polytechnic University</div>
-            <div className={styles.subtitleDegree}>Computer Engineering</div>
-            <div className={styles.subtitleClass}>Class of 2026 Graduate</div>
-          </div>
-
-          {/* Professional photo */}
-          <div className={styles.sectionPhoto} style={{ marginTop: 40, marginBottom: 40 }}>
-            <img src="/credits-photos/professional_photo_of_me.png" alt="Daniel Taylor" />
-          </div>
-
-          <div className={styles.divider} />
-
+          {/* ── Sections (3-column grid: side-photos | text | side-photos) ── */}
           {CREDITS_DATA.map((section) => {
             const useTwoCol = section.entries.length >= TWO_COL_THRESHOLD;
             const nameEntries = section.entries.map((entry) => (
@@ -2141,82 +2166,73 @@ export function Credits() {
               </div>
             ));
             return (
-              <div key={section.title}>
-                {section.photo && renderSectionPhoto(section.photo)}
-                <div className={section.title === 'In Memory Of' ? styles.memorialTitle : styles.sectionTitle}>
-                  {section.title}
+              <div key={section.title} className={styles.sectionGrid}>
+                {/* Left side photos */}
+                <div className={styles.sideColLeft}>
+                  {(section.leftPhotos ?? []).map((p) => (
+                    <img key={p} src={`/credits-photos/${p}`} alt="" className={styles.sidePhoto} />
+                  ))}
                 </div>
-                {useTwoCol ? (
-                  <div className={styles.twoColumnNames}>{nameEntries}</div>
-                ) : (
-                  nameEntries
-                )}
-                {section.bottomPhotos && renderSectionPhoto(section.bottomPhotos)}
-                <div className={styles.divider} />
+
+                {/* Center text */}
+                <div className={styles.creditsCenter}>
+                  {section.photo && renderSectionPhoto(section.photo)}
+                  <div className={section.title === 'In Memory Of' ? styles.memorialTitle : styles.sectionTitle}>
+                    {section.title}
+                  </div>
+                  {useTwoCol ? (
+                    <div className={styles.twoColumnNames}>{nameEntries}</div>
+                  ) : (
+                    nameEntries
+                  )}
+                  <div className={styles.divider} />
+                </div>
+
+                {/* Right side photos */}
+                <div className={styles.sideColRight}>
+                  {(section.rightPhotos ?? []).map((p) => (
+                    <img key={p} src={`/credits-photos/${p}`} alt="" className={styles.sidePhoto} />
+                  ))}
+                </div>
               </div>
             );
           })}
 
-          {/* Random photo gallery before closing */}
-          <div className={styles.sectionPhotoRow} style={{ marginTop: 40 }}>
-            <img src="/credits-photos/me_random.jpg" alt="" />
-            <img src="/credits-photos/me_presenting.jpg" alt="" />
-            <img src="/credits-photos/me_invincible.jpg" alt="" />
-          </div>
-          <div className={styles.sectionPhotoRow}>
-            <img src="/credits-photos/cruise_1.jpg" alt="" />
-            <img src="/credits-photos/cruise_2.jpg" alt="" />
-            <img src="/credits-photos/cruise_3.jpg" alt="" />
-          </div>
-          <div className={styles.sectionPhotoRow}>
-            <img src="/credits-photos/me_alaska.jpg" alt="" />
-            <img src="/credits-photos/me_coca_cola.jpg" alt="" />
-            <img src="/credits-photos/me_random_with_cars.jpg" alt="" />
-          </div>
-          <div className={styles.sectionPhotoRow}>
-            <img src="/credits-photos/random_1.jpg" alt="" />
-            <img src="/credits-photos/random_2.jpg" alt="" />
-            <img src="/credits-photos/friend_group_5.png" alt="" />
-          </div>
-          <div className={styles.sectionPhotoRow}>
-            <img src="/credits-photos/family_2.jpg" alt="" />
-            <img src="/credits-photos/alex_and_i.png" alt="" />
-            <img src="/credits-photos/alex_cam_1.jpg" alt="" />
-          </div>
+          {/* ── Closing (centered) ── */}
+          <div className={styles.creditsCenter}>
+            <div className={styles.closingMessage}>Thank You</div>
+            <div className={styles.closingSubtext}>To everyone who helped me get here.</div>
+            <div className={styles.closingSubtext}>We made it!</div>
 
-          <div className={styles.closingMessage}>Thank You</div>
-          <div className={styles.closingSubtext}>To everyone who helped me get here.</div>
-          <div className={styles.closingSubtext}>We made it!</div>
+            <div className={styles.divider} />
 
-          <div className={styles.divider} />
+            <div className={styles.adventureTitle}>Onto The Next Adventure</div>
 
-          <div className={styles.adventureTitle}>Onto The Next Adventure</div>
-
-          <div className={styles.adventureEntry}>
-            <div className={styles.adventurePhoto}>
-              <img src="/credits-photos/wellsfargo.jpg" alt="Wells Fargo" />
+            <div className={styles.adventureEntry}>
+              <div className={styles.adventurePhoto}>
+                <img src="/credits-photos/wellsfargo.jpg" alt="Wells Fargo" />
+              </div>
+              <div className={styles.adventureCompany}>Wells Fargo</div>
+              <div className={styles.adventureRole}>Cybersecurity Intern</div>
+              <div className={styles.adventureLocation}>Charlotte, NC</div>
             </div>
-            <div className={styles.adventureCompany}>Wells Fargo</div>
-            <div className={styles.adventureRole}>Cybersecurity Intern</div>
-            <div className={styles.adventureLocation}>Charlotte, NC</div>
-          </div>
 
-          <div className={styles.adventureEntry}>
-            <div className={styles.adventurePhoto}>
-              <img src="/credits-photos/IBM.png" alt="IBM" />
+            <div className={styles.adventureEntry}>
+              <div className={styles.adventurePhoto}>
+                <img src="/credits-photos/IBM.png" alt="IBM" />
+              </div>
+              <div className={styles.adventureCompany}>IBM</div>
+              <div className={styles.adventureRole}>IBM Power Systems QA/Test Developer</div>
+              <div className={styles.adventureLocation}>Austin, TX</div>
             </div>
-            <div className={styles.adventureCompany}>IBM</div>
-            <div className={styles.adventureRole}>IBM Power Systems QA/Test Developer</div>
-            <div className={styles.adventureLocation}>Austin, TX</div>
-          </div>
 
-          {/* IBM photo */}
-          <div className={styles.sectionPhotoRow}>
-            <img src="/credits-photos/ibm_1.jpg" alt="IBM" />
-          </div>
+            <div className={styles.sectionPhoto} style={{ marginBottom: 24 }}>
+              <img src="/credits-photos/ibm_1.jpg" alt="IBM internship" />
+            </div>
 
-          <div className={styles.year}>2026</div>
-          <div className={styles.endSpace} />
+            <div className={styles.year}>2026</div>
+            <div className={styles.endSpace} />
+          </div>
         </div>
       </div>
 

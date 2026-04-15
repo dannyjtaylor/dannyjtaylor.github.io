@@ -326,21 +326,78 @@
 .scrollContainer {
   position: absolute;
   inset: 0;
-  display: flex;
-  justify-content: center;
   overflow: hidden;
 }
 
 .creditsTrack {
   position: absolute;
   top: 0;
-  width: 100%;
-  max-width: 700px;
-  text-align: center;
-  padding: 0 24px;
+  left: 0;
+  right: 0;
   will-change: transform;
   transition: opacity 1.5s;
 }
+
+/* Narrow centered column for all text content */
+.creditsCenter {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+/* 3-column grid: [side photos] [text] [side photos] */
+.sectionGrid {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 700px) 1fr;
+  align-items: start;
+  width: 100%;
+}
+
+.sideColLeft,
+.sideColRight {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px 16px 20px;
+}
+
+.sideColLeft {
+  align-items: flex-end;
+}
+
+.sideColRight {
+  align-items: flex-start;
+}
+
+/* Side photos — randomized rotations via nth-child */
+.sidePhoto {
+  max-width: 200px;
+  max-height: 160px;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  transition: transform 0.3s ease;
+}
+
+.sidePhoto:hover {
+  transform: scale(1.05) rotate(0deg) !important;
+  z-index: 1;
+  position: relative;
+}
+
+/* Staggered rotations for a natural, scattered look */
+.sideColLeft .sidePhoto:nth-child(4n+1) { transform: rotate(-3deg) translateY(0px);  }
+.sideColLeft .sidePhoto:nth-child(4n+2) { transform: rotate(2deg)  translateY(30px); }
+.sideColLeft .sidePhoto:nth-child(4n+3) { transform: rotate(-1.5deg) translateY(15px); }
+.sideColLeft .sidePhoto:nth-child(4n+4) { transform: rotate(3.5deg)  translateY(45px); }
+
+.sideColRight .sidePhoto:nth-child(4n+1) { transform: rotate(3deg)  translateY(20px); }
+.sideColRight .sidePhoto:nth-child(4n+2) { transform: rotate(-2deg) translateY(0px);  }
+.sideColRight .sidePhoto:nth-child(4n+3) { transform: rotate(1.5deg)  translateY(40px); }
+.sideColRight .sidePhoto:nth-child(4n+4) { transform: rotate(-3.5deg) translateY(10px); }
 
 .openingSpace {
   height: 30vh;
@@ -732,6 +789,17 @@
    Responsive — Mobile
    ═══════════════════════════════════════════ */
 
+/* Hide side photos when screen is too narrow for them */
+@media (max-width: 900px) {
+  .sectionGrid {
+    display: block;
+  }
+  .sideColLeft,
+  .sideColRight {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .universityLogo {
     width: min(380px, calc(100vw - 24px));
@@ -768,13 +836,13 @@
   }
 
   .sectionPhoto img {
-    max-width: min(480px, calc(100vw - 24px));
+    max-width: min(480px, calc(100vw - 48px));
     max-height: 280px;
   }
 
   .sectionPhotoRow img {
-    max-width: 160px;
-    max-height: 130px;
+    max-width: 140px;
+    max-height: 110px;
   }
 
   .twoColumnNames {

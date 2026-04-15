@@ -55,12 +55,14 @@ interface CreditSection {
   title: string;
   entries: CreditEntry[];
   photo?: string | string[];
+  bottomPhotos?: string | string[];
 }
 
 const CREDITS_DATA: CreditSection[] = [
   /* ── Top sections ── */
   {
     title: 'My Family',
+    photo: ['family_1.jpg', 'me_and_patricia_taylor.png', 'me_with_grandmapat_and_grandpahoward.jpg', '3DS_everyone_and_family.jpg'],
     entries: [
       { name: 'Katherine Taylor', role: 'Mother' },
       { name: 'John Taylor', role: 'Father' },
@@ -83,6 +85,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Professors/Faculty & Staff',
+    photo: ['dr_ngo.jpg', 'me_with_rawa_adla_card.jpg', 'friend_group_rawa.jpg'],
     entries: [
       { name: 'Devin Stephenson', role: "Florida Polytechnic President" },
       { name: 'Jon Pawlecki', role: "Assistant VP of Student Affairs" },
@@ -115,7 +118,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'SHPE Eboard 2025\u20132026',
-    photo: 'SHPE.png',
+    photo: ['SHPE.png', 'gabo_me_kro.jpg', 'shiraj_and_i_IBM.jpg'],
     entries: [
       { name: 'Ines Alonso' },
       { name: 'Naibys "Kro" Alzugaray' },
@@ -128,7 +131,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Rotaract',
-    photo: 'rotaract.png',
+    photo: ['rotaract.png', 'rotaract_1.jpg', 'rotaract_2.jpg', 'aidan_morris_and_me.jpg', 'me_domenic_aidan.jpg', 'alex_cam_1.jpg', 'brittany_me_andriana_alex.jpg', 'rotaract_3.jpg', 'rotaract_4.jpg', 'rotaract_5.jpg', 'rotaract_6.jpg', 'rotaract_7.jpg', 'rotaract_8.jpg'],
     entries: [
       { name: 'Aidan Morris' },
       { name: 'Alyson Smyth' },
@@ -163,6 +166,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'SHPE',
+    photo: ['SHPE_1.png', 'gabo_louis_me.jpg', 'me_philadelphia.jpg', 'anaheim_1.jpg', 'anaheim_2.jpg', 'me_andrew_louis.png'],
     entries: [
       { name: 'Benji Guzman' },
       { name: 'Carlos Marillo' },
@@ -180,6 +184,7 @@ const CREDITS_DATA: CreditSection[] = [
   /* ── Alphabetical middle ── */
   {
     title: '2404-1313',
+    photo: ['friend_group_boys.jpg', 'friend_group_1.jpg', 'friend_group_2.jpg', 'friend_group_3.jpg', 'friend_group_4.jpg', 'friend_group_large.jpg'],
     entries: [
       { name: 'Bryon Catlin' },
       { name: 'George Mancini' },
@@ -188,6 +193,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Good Mythical Morning Enjoyers',
+    photo: 'me_jaylee_emma.jpg',
     entries: [
       { name: 'Emma Rossi' },
       { name: 'Jaylee Ciaschini' },
@@ -213,7 +219,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: "Polk County Sheriff's Office LiDAR Team (Capstone)",
-    photo: 'sheriffsoffice.png',
+    photo: ['sheriffsoffice.png', 'lidarteam_1.jpg', 'lidar_2.jpg', 'research_1.jpg', 'friend_group_research.png'],
     entries: [
       { name: 'James Allegra' },
       { name: 'Gaspar Chayer' },
@@ -370,6 +376,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Eduardo Jirau'},
       { name: 'Jes Pate'},
     ],
+    bottomPhotos: ['me_and_mo_haddid.jpg', 'clara_1.jpg', 'luis_mata_moreno.jpg', 'NOVA_with_lukas_kelk.jpg', 'escape_room_1.jpg', 'escape_room_2.jpg', 'howl_o_scream.jpg', 'friends_target.jpg', 'rappel_me_random.jpg'],
   },
   {
     title: 'Student Government Association',
@@ -396,6 +403,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Winter Haven Technology Services',
+    photo: ['winter_haven_1.jpg', 'winter_haven_nick.png'],
     entries: [
       { name: 'Adriana Bottega' },
       { name: 'Aizan "Bobby" Khan' },
@@ -451,6 +459,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Special Thanks',
+    photo: 'me_invincible.jpg',
     entries: [
       { name: 'Akira Kurusu' },
       { name: 'Apollo Justice' },
@@ -703,6 +712,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let gameOver = false;
     let endTimer = 0;
     let normalFinish = false;
+    /* Cutscene state */
+    let endPhase = 0; /* 0=fade-to-black, 1=touched-credits, 2=scroll-down, 3=thank-you */
+    let touchedScrollOffset = 0;
+    let thankYouY = 0;
+    let skipCutscene = false;
     const HEART_SPEED = 350;
     const isMobileDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const MAX_PROJECTILES = isMobileDevice ? 80 : 160;
@@ -1049,6 +1063,12 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     canvas.addEventListener('touchstart', onTouchStart, { passive: true });
     canvas.addEventListener('touchmove', onTouchMove, { passive: false });
 
+    /* Skip cutscene on click / tap */
+    const onCanvasClick = () => { if (gameOver) skipCutscene = true; };
+    const onCanvasTouchEnd = () => { if (gameOver) skipCutscene = true; };
+    canvas.addEventListener('click', onCanvasClick);
+    canvas.addEventListener('touchend', onCanvasTouchEnd, { passive: true });
+
     const getSpawnInterval = (phase: number): number => {
       switch (phase) {
         case 0: return 1.2;   // Aimed spreads
@@ -1070,84 +1090,210 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const w = W();
       const h = H();
 
-      /* Check game over */
+      /* Check game over — hit names count as "done" for allGone purposes */
       if (nameIdx >= totalNames && !gameOver) {
-        const allGone = projectiles.every(p =>
-          p.x < -300 || p.x > w + 300 || p.y < -300 || p.y > h + 300
+        const allGone = projectiles.length === 0 || projectiles.every(p =>
+          p.hit || p.x < -300 || p.x > w + 300 || p.y < -300 || p.y > h + 300
         );
-        if (projectiles.length === 0 || allGone) {
+        if (allGone) {
           gameOver = true;
           endTimer = 0;
+          endPhase = 0;
         }
       }
 
       if (gameOver) {
-        endTimer += dt;
-        if (endTimer > 5) {
+        /* Any click/tap during cutscene skips to end screen */
+        if (skipCutscene) {
           normalFinish = true;
           onFinishRef.current({ hitCount, hitNames, audio });
           return;
         }
+
+        endTimer += dt;
+
+        /* Phase transitions */
+        if (endPhase === 0 && endTimer >= 1.5) {
+          endPhase = 1;
+          endTimer = 0;
+        } else if (endPhase === 1 && endTimer >= 4.5) {
+          endPhase = 2;
+          endTimer = 0;
+          touchedScrollOffset = 0;
+        } else if (endPhase === 2 && endTimer >= 2.5) {
+          endPhase = 3;
+          endTimer = 0;
+          thankYouY = h + 80;
+        }
+
         ctx.clearRect(0, 0, w, h);
+        const hs = getHeartSize();
 
-        /* Phase 1 (0–1.5s): fade background to black, heart + HP bar fade out */
-        const bgAlpha = Math.min(1, endTimer / 1.5);
-        ctx.fillStyle = `rgba(0, 0, 0, ${bgAlpha})`;
-        ctx.fillRect(0, 0, w, h);
+        /* ── Phase 0: fade game state to black ── */
+        if (endPhase === 0) {
+          const bgAlpha = Math.min(1, endTimer / 1.5);
+          /* Render frozen projectiles under the overlay */
+          const dfs0 = getFontSize();
+          ctx.font = `${dfs0}px ${DETERMINATION_SANS}`;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          for (const p of projectiles) {
+            const pcx = p.x + p.w / 2;
+            const pcy = p.y + p.h / 2;
+            if (p.logoImg && p.logoImg.complete && p.logoImg.naturalWidth > 0) {
+              ctx.save();
+              ctx.translate(pcx, pcy);
+              ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
+              ctx.restore();
+            } else if (p.angle) {
+              ctx.save();
+              ctx.translate(pcx, pcy);
+              ctx.rotate(p.angle);
+              ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
+              ctx.fillText(p.text, -p.w / 2, -p.h / 2);
+              ctx.restore();
+            } else {
+              ctx.fillStyle = p.hit ? '#FFFF00' : '#ffffff';
+              ctx.fillText(p.text, p.x, p.y);
+            }
+          }
+          ctx.fillStyle = `rgba(0,0,0,${bgAlpha})`;
+          ctx.fillRect(0, 0, w, h);
+          const heartAlpha0 = Math.max(0, 1 - bgAlpha);
+          if (heartAlpha0 > 0) {
+            ctx.save();
+            ctx.globalAlpha = heartAlpha0;
+            drawHeart(ctx, heart.x, heart.y, hs, false, heartImg);
+            ctx.restore();
+          }
 
-        /* HP image fades out over 0–1.0s — drawn before heart so heart stays on top */
-        const hpAlpha = Math.max(0, 1 - endTimer / 1.0);
-        if (hpAlpha > 0 && hpBarImg && hpBarImg.complete && hpBarImg.naturalWidth > 0) {
-          ctx.save();
-          ctx.globalAlpha = hpAlpha;
-          const hpImgH = 28;
-          const hpImgW = hpBarImg.naturalWidth * (hpImgH / hpBarImg.naturalHeight);
-          ctx.drawImage(hpBarImg, (w - hpImgW) / 2, h - 46, hpImgW, hpImgH);
-          ctx.restore();
-        }
+        /* ── Phases 1 & 2: TOUCHED CREDITS display (static then scrolling down) ── */
+        } else if (endPhase === 1 || endPhase === 2) {
+          /* Heart movement */
+          if (keys.has('arrowleft') || keys.has('a')) heart.x -= HEART_SPEED * dt;
+          if (keys.has('arrowright') || keys.has('d')) heart.x += HEART_SPEED * dt;
+          if (keys.has('arrowup') || keys.has('w')) heart.y -= HEART_SPEED * dt;
+          if (keys.has('arrowdown') || keys.has('s')) heart.y += HEART_SPEED * dt;
+          heart.x = Math.max(hs, Math.min(w - hs, heart.x));
+          heart.y = Math.max(hs, Math.min(h - hs, heart.y));
 
-        /* Heart fades out over 0–1.2s — drawn after HP image so it renders on top */
-        const heartAlpha = Math.max(0, 1 - endTimer / 1.2);
-        if (heartAlpha > 0) {
-          ctx.save();
-          ctx.globalAlpha = heartAlpha;
-          drawHeart(ctx, heart.x, heart.y, getHeartSize(), false, heartImg);
-          ctx.restore();
-        }
+          if (endPhase === 2) touchedScrollOffset += (h / 2.0) * dt;
+          const yOff = endPhase === 2 ? -touchedScrollOffset : 0;
 
-        /* Phase 2 (1.5–3.5s): "GAME COMPLETE" fades in with gentle scale */
-        if (endTimer > 1.5) {
-          const textProgress = Math.min(1, (endTimer - 1.5) / 2.0);
-          /* Smooth ease-out */
-          const eased = 1 - (1 - textProgress) * (1 - textProgress);
-          ctx.save();
-          ctx.globalAlpha = eased;
-          ctx.font = `36px ${DETERMINATION_SANS}`;
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, w, h);
+
+          /* Title */
+          const titleFS = Math.max(24, Math.min(40, w / 16));
+          ctx.font = `${titleFS}px ${DETERMINATION_SANS}`;
           ctx.fillStyle = '#FFFF00';
           ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          /* Gentle scale from 1.1 → 1.0 */
-          const scale = 1.1 - 0.1 * eased;
-          ctx.translate(w / 2, h / 2 - 30);
-          ctx.scale(scale, scale);
-          ctx.fillText('GAME COMPLETE!', 0, 0);
-          ctx.restore();
+          ctx.textBaseline = 'top';
+          ctx.fillText('* TOUCHED CREDITS *', w / 2, 30 + yOff);
 
-          /* Hit count fades in slightly after */
-          if (endTimer > 2.2) {
-            const scoreProgress = Math.min(1, (endTimer - 2.2) / 1.5);
-            const scoreEased = 1 - (1 - scoreProgress) * (1 - scoreProgress);
-            ctx.save();
-            ctx.globalAlpha = scoreEased;
-            ctx.font = `22px ${DETERMINATION_SANS}`;
-            ctx.fillStyle = '#fff';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('HITS', w / 2, h / 2 + 15);
-            ctx.font = `64px ${DETERMINATION_SANS}`;
-            ctx.fillStyle = hitCount === 0 ? '#00ff00' : '#FFFF00';
-            ctx.fillText(`${hitCount}`, w / 2, h / 2 + 65);
-            ctx.restore();
+          /* Names grid */
+          const uniqueNames = [...new Set(hitNames)];
+          const logoNameSet = new Set(ATTACK_LOGOS.map(l => l.name));
+          const regularNames = uniqueNames.filter(n => !logoNameSet.has(n));
+          const logoHits = uniqueNames.filter(n => logoNameSet.has(n));
+
+          const nameFS = Math.max(11, Math.min(18, w / 30));
+          const nameLineH = nameFS * 1.5;
+          const startY = 30 + titleFS + 20;
+          const availH = h - startY - 80;
+          const maxRows = Math.max(1, Math.floor(availH / nameLineH));
+          const numCols = regularNames.length > 0 ? Math.max(1, Math.ceil(regularNames.length / maxRows)) : 1;
+          const colW = w / numCols;
+
+          ctx.font = `${nameFS}px ${DETERMINATION_SANS}`;
+          ctx.fillStyle = '#FFFF00';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+
+          for (let i = 0; i < regularNames.length; i++) {
+            const col = Math.floor(i / maxRows);
+            const row = i % maxRows;
+            const nx = colW * col + colW / 2;
+            const ny = startY + row * nameLineH + yOff;
+            if (ny > -20 && ny < h + 20) ctx.fillText(regularNames[i] ?? '', nx, ny);
+          }
+
+          /* Logos at normal appearance */
+          if (logoHits.length > 0) {
+            const logoAreaY = startY + Math.ceil(regularNames.length / numCols) * nameLineH + 16 + yOff;
+            let lx = 40;
+            for (const logoName of logoHits) {
+              const logoIdx = ATTACK_LOGOS.findIndex(l => l.name === logoName);
+              const limg = logoImages[logoIdx];
+              if (limg && limg.complete && limg.naturalWidth > 0) {
+                const lh = Math.max(30, Math.min(50, h / 18));
+                const lw = lh * (limg.naturalWidth / limg.naturalHeight);
+                if (logoAreaY > -lh && logoAreaY < h + lh) ctx.drawImage(limg, lx, logoAreaY, lw, lh);
+                lx += lw + 16;
+              }
+            }
+          }
+
+          /* Skip hint */
+          ctx.font = `13px ${DETERMINATION_MONO}`;
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText('Click / tap to skip', w / 2, h - 10);
+
+          drawHeart(ctx, heart.x, heart.y, hs, false, heartImg);
+
+        /* ── Phase 3: thank-you message scrolls up ── */
+        } else if (endPhase === 3) {
+          if (keys.has('arrowleft') || keys.has('a')) heart.x -= HEART_SPEED * dt;
+          if (keys.has('arrowright') || keys.has('d')) heart.x += HEART_SPEED * dt;
+          if (keys.has('arrowup') || keys.has('w')) heart.y -= HEART_SPEED * dt;
+          if (keys.has('arrowdown') || keys.has('s')) heart.y += HEART_SPEED * dt;
+          heart.x = Math.max(hs, Math.min(w - hs, heart.x));
+          heart.y = Math.max(hs, Math.min(h - hs, heart.y));
+
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, w, h);
+
+          thankYouY -= 100 * dt;
+
+          const tyFS = Math.max(16, Math.min(28, w / 24));
+          const tySpacing = tyFS * 2.4;
+          const tyLines = [
+            'Thanks to friends and family supporting me!',
+            'Without you, all of this would be impossible.',
+            '',
+            'Thank you, everyone.',
+            '',
+            "\u2018Til next time!",
+          ];
+
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          for (let i = 0; i < tyLines.length; i++) {
+            const line = tyLines[i];
+            if (!line) continue;
+            const ly = thankYouY + i * tySpacing;
+            if (ly > -40 && ly < h + 40) {
+              ctx.font = `${tyFS}px ${DETERMINATION_SANS}`;
+              ctx.fillStyle = '#FFFF00';
+              ctx.fillText(line, w / 2, ly);
+            }
+          }
+
+          ctx.font = `13px ${DETERMINATION_MONO}`;
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText('Click / tap to skip', w / 2, h - 10);
+
+          drawHeart(ctx, heart.x, heart.y, hs, false, heartImg);
+
+          /* All lines scrolled off top → advance to end screen */
+          if (thankYouY + (tyLines.length - 1) * tySpacing < -60) {
+            normalFinish = true;
+            onFinishRef.current({ hitCount, hitNames, audio });
+            return;
           }
         }
 
@@ -1321,8 +1467,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
 
       projectiles = projectiles.filter((p) => {
-        /* Hit projectiles: keep for a brief yellow flash then remove */
-        if (p.hit) return p.hitAge < 0.35;
+        /* Hit projectiles: stay yellow on screen (culled naturally by MAX_PROJECTILES cap) */
+        if (p.hit) return p.hitAge < 9999;
         /* Fired aimed bullets (action:2): tight cull — remove as soon as off-screen */
         if (p.action === 2) return p.x > -p.w - 60 && p.x < w + 60 && p.y > -p.h - 60 && p.y < h + 60;
         if (p.action === 5) {
@@ -1499,6 +1645,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       window.removeEventListener('resize', resize);
       canvas.removeEventListener('touchstart', onTouchStart);
       canvas.removeEventListener('touchmove', onTouchMove);
+      canvas.removeEventListener('click', onCanvasClick);
+      canvas.removeEventListener('touchend', onCanvasTouchEnd);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1969,6 +2117,11 @@ export function Credits() {
             <div className={styles.subtitleClass}>Class of 2026 Graduate</div>
           </div>
 
+          {/* Professional photo */}
+          <div className={styles.sectionPhoto} style={{ marginTop: 40, marginBottom: 40 }}>
+            <img src="/credits-photos/professional_photo_of_me.png" alt="Daniel Taylor" />
+          </div>
+
           <div className={styles.divider} />
 
           {CREDITS_DATA.map((section) => {
@@ -1998,10 +2151,38 @@ export function Credits() {
                 ) : (
                   nameEntries
                 )}
+                {section.bottomPhotos && renderSectionPhoto(section.bottomPhotos)}
                 <div className={styles.divider} />
               </div>
             );
           })}
+
+          {/* Random photo gallery before closing */}
+          <div className={styles.sectionPhotoRow} style={{ marginTop: 40 }}>
+            <img src="/credits-photos/me_random.jpg" alt="" />
+            <img src="/credits-photos/me_presenting.jpg" alt="" />
+            <img src="/credits-photos/me_invincible.jpg" alt="" />
+          </div>
+          <div className={styles.sectionPhotoRow}>
+            <img src="/credits-photos/cruise_1.jpg" alt="" />
+            <img src="/credits-photos/cruise_2.jpg" alt="" />
+            <img src="/credits-photos/cruise_3.jpg" alt="" />
+          </div>
+          <div className={styles.sectionPhotoRow}>
+            <img src="/credits-photos/me_alaska.jpg" alt="" />
+            <img src="/credits-photos/me_coca_cola.jpg" alt="" />
+            <img src="/credits-photos/me_random_with_cars.jpg" alt="" />
+          </div>
+          <div className={styles.sectionPhotoRow}>
+            <img src="/credits-photos/random_1.jpg" alt="" />
+            <img src="/credits-photos/random_2.jpg" alt="" />
+            <img src="/credits-photos/friend_group_5.png" alt="" />
+          </div>
+          <div className={styles.sectionPhotoRow}>
+            <img src="/credits-photos/family_2.jpg" alt="" />
+            <img src="/credits-photos/alex_and_i.png" alt="" />
+            <img src="/credits-photos/alex_cam_1.jpg" alt="" />
+          </div>
 
           <div className={styles.closingMessage}>Thank You</div>
           <div className={styles.closingSubtext}>To everyone who helped me get here.</div>
@@ -2027,6 +2208,11 @@ export function Credits() {
             <div className={styles.adventureCompany}>IBM</div>
             <div className={styles.adventureRole}>IBM Power Systems QA/Test Developer</div>
             <div className={styles.adventureLocation}>Austin, TX</div>
+          </div>
+
+          {/* IBM photo */}
+          <div className={styles.sectionPhotoRow}>
+            <img src="/credits-photos/ibm_1.jpg" alt="IBM" />
           </div>
 
           <div className={styles.year}>2026</div>

@@ -406,6 +406,8 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Zander Butler' },
       { name: 'Eduardo Jirau'},
       { name: 'Jes Pate'},
+       { name: 'Joseph Wright'},
+       { name: 'Noah SDC'},
     ],
     leftPhotos: [
       'me_and_mo_haddid.jpg',
@@ -540,6 +542,7 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'In Memory Of',
     entries: [
       { name: 'Logan Hewitt' },
+       { name: 'Grandma & Grandpa Taylor'},
     ],
   },
 ];

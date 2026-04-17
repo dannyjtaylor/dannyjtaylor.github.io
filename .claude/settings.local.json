@@ -98,7 +98,8 @@
       "Bash(node:*)",
       "Bash(echo \"EXIT:$?\")",
       "Bash(cmd:*)",
-      "WebFetch(domain:tcrf.net)"
+      "WebFetch(domain:tcrf.net)",
+      "Bash(echo \"EXIT=$?\")"
     ]
   }
 }

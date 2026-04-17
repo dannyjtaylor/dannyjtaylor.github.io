@@ -799,14 +799,25 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const P3_FALL_SPEED_FRAC     = 0.62; // fall speed = H × this
     const P3_SPAWN_RATE          = 0.09; // seconds between each corridor name-pair
     const P3_MAX_SWING_PX        = 140;  // max corridor gap deviation from center (keeps pace with heart on PC)
-    // Ph4 — Falling Walls (Undertale-accurate: rotated vertical columns)
-    const P4_COL_WIDTH_RATIO     = 1.15; // column width = fontSize × ratio (controls density)
-    const P4_COL_WIDTH_MIN_PX    = 22;   // absolute min column width in px
-    const P4_FALL_SPEED_FRAC     = 0.30; // fall speed = H × this (per-column avg)
-    const P4_SPEED_JITTER        = 0.28; // ± this fraction of avg speed per column
+    // Ph4 — Falling Walls (Undertale-accurate: rotated vertical columns at random x)
+    // Authenticity keys per reference /credits-photos/phase4.png:
+    //   • pure vertical motion, UNIFORM fall speed (no per-column jitter)
+    //   • random x-spawn positions (NOT a fixed grid), min-gap enforced
+    //   • staggered column spawning over time (one every ~0.3-0.6s)
+    //   • finite names per column (3-6) — each pillar has a beginning & end
+    //   • 8-14 simultaneously visible; always-passable gaps averaging ~2-3× heart width
+    const P4_FALL_SPEED_FRAC     = 0.15; // fall speed = H × this (uniform across ALL columns)
     const P4_NAME_V_GAP          = 6;    // px gap between stacked names within a column
-    const P4_COLS_DESKTOP_CAP    = 14;   // max columns on desktop
-    const P4_COLS_MOBILE_CAP     = 8;    // max columns on mobile
+    const P4_COLS_DESKTOP_CAP    = 14;   // max simultaneous columns on desktop
+    const P4_COLS_MOBILE_CAP     = 8;    // max simultaneous columns on mobile
+    const P4_MIN_GAP_HEART_MULT  = 2.8;  // min column-center spacing ≥ this × heart width
+    const P4_MIN_GAP_FONT_MULT   = 2.0;  // min column-center spacing ≥ this × fontSize (floor)
+    const P4_NAMES_PER_COL_MIN   = 3;    // min names in a single column pillar
+    const P4_NAMES_PER_COL_MAX   = 6;    // max names in a single column pillar
+    const P4_SPAWN_INTERVAL_MIN  = 0.28; // min seconds between new column spawns
+    const P4_SPAWN_INTERVAL_MAX  = 0.60; // max seconds between new column spawns
+    const P4_INITIAL_SEED_DESKTOP = 7;   // columns pre-seeded on phase entry (desktop)
+    const P4_INITIAL_SEED_MOBILE  = 5;   // columns pre-seeded on phase entry (mobile)
     // Ph7 — Spinning Wheels
     const P7_DRIFT_SPEED_FRAC    = 0.065; // drift speed = W × this
     const P7_ROT_SPEED           = 1.5;   // radians/sec rotation
@@ -1010,72 +1021,146 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     };
 
     /* ── Phase 4: Falling Walls — Undertale-accurate vertical rotated columns ──
-       The screen is divided into N fixed-x columns that tile the viewport.
-       Each column continuously drops names rotated 90° clockwise (text reads top-
-       to-bottom). Adjacent columns use slightly different fall speeds and starting
-       y-offsets so the seams between stacked names form micro-gaps the heart can
-       weave through. Unlike Phase 3 (scripted corridor) there is no single "safe
-       gap" — safety is in the spacing between adjacent columns and between glyphs.
-       Matches reference screenshot at /credits-photos/undertalecredits_howitshouldb3.png */
-    interface WallColumn { x: number; speed: number; topY: number; }
+       Columns are spawned at RANDOM x-positions (not a fixed grid) and STAGGERED
+       over time — one new column every ~0.3-0.6s. All columns fall at the SAME
+       uniform speed (no per-column jitter — matches Undertale's deterministic
+       engine). Each column is a finite pillar of 3-6 names rotated 90° CW; once
+       the pillar is complete the column scrolls off the bottom and is retired.
+       A new candidate x is rejected if it's within P4_MIN_GAP of any existing
+       column center, so the heart always has navigable lanes between pillars.
+       Matches reference screenshots at /credits-photos/phase4.png and
+       /credits-photos/undertalecredits_howitshouldb3.png */
+    interface WallColumn {
+      x: number;
+      topY: number;       // y of the top edge of the top-most name in this column
+      namesLeft: number;  // names still to be dropped in this pillar
+    }
     let wallColumns: WallColumn[] | null = null;
+    let wallSpawnTimer = 0;      // time since last column spawn (seconds)
+    let wallSpawnInterval = 0;   // current randomized interval between spawns
 
-    const initWallColumns = () => {
-      const w = W();
-      const h = H();
+    /* Minimum horizontal separation between column centers.
+       Floor is max(fs×ratio, heartWidth×ratio) so both tiny fonts and big hearts
+       keep a passable lane. */
+    const getWallMinGap = (): number => {
       const fs = getFontSize();
-      const colW = Math.max(P4_COL_WIDTH_MIN_PX, fs * P4_COL_WIDTH_RATIO);
-      const capCols = isMobileDevice ? P4_COLS_MOBILE_CAP : P4_COLS_DESKTOP_CAP;
-      const numCols = Math.max(3, Math.min(capCols, Math.floor(w / colW)));
-      const stepX = w / numCols;
-      const baseSpeed = h * P4_FALL_SPEED_FRAC;
-      wallColumns = [];
-      for (let i = 0; i < numCols; i++) {
-        const jitter = 1 + (Math.random() * 2 - 1) * P4_SPEED_JITTER;
-        /* Stagger initial topY so columns don't all spawn in lockstep.
-           Range (0.85*H .. 1.15*H) — bottom name starts a bit below screen bottom. */
-        const startTopY = h * (0.85 + Math.random() * 0.3);
-        wallColumns.push({
-          x: stepX * (i + 0.5),
-          speed: baseSpeed * jitter,
-          topY: startTopY,
-        });
-      }
-      /* Pre-fill each column upward from its startTopY until names extend above -H.
-         This paints the whole screen with walls on phase entry. */
-      for (const col of wallColumns) {
-        fillColumnUpward(col, -h - 50);
-      }
+      const heartW = getHeartSize() * 2;
+      return Math.max(fs * P4_MIN_GAP_FONT_MULT, heartW * P4_MIN_GAP_HEART_MULT);
     };
 
-    const fillColumnUpward = (col: WallColumn, untilTopY: number) => {
-      while (col.topY > untilTopY && nameIdx < phase4End) {
-        const name = nextName();
-        if (!name) return;
-        const { tw, th } = measureName(name);
-        const nameRotH = tw + P4_NAME_V_GAP;       // vertical extent after 90° rotation
-        const newTopY = col.topY - nameRotH;       // top edge of the new (above) name
-        const cy = newTopY + tw / 2;                // rotated-AABB vertical center
-        projectiles.push(mkProj({
-          id: nextProjId++, text: name,
-          x: col.x - tw / 2,
-          y: cy - th / 2,
-          vy: col.speed,
-          w: tw, h: th,
-          angle: Math.PI / 2,                       // 90° CW — text reads top→bottom
-          action: 6,                                // reuse corridor "fall" movement + cull
-        }));
-        col.topY = newTopY;
+    /* Pick a random x at least `minGap` away from every existing column.
+       Returns null if no valid slot found after `maxAttempts` tries (screen full). */
+    const pickWallX = (minGap: number, maxAttempts = 30): number | null => {
+      if (!wallColumns) return null;
+      const w = W();
+      const fs = getFontSize();
+      const edgeMargin = fs * 0.6; // keep names fully on screen
+      const span = w - 2 * edgeMargin;
+      if (span <= 0) return null;
+      for (let i = 0; i < maxAttempts; i++) {
+        const x = edgeMargin + Math.random() * span;
+        let ok = true;
+        for (const col of wallColumns) {
+          if (Math.abs(col.x - x) < minGap) { ok = false; break; }
+        }
+        if (ok) return x;
       }
+      return null;
+    };
+
+    /* Spawn ONE name at the top of a column's current pillar, extending it upward.
+       Mutates col.topY and col.namesLeft. */
+    const spawnOneNameInColumn = (col: WallColumn, vy: number) => {
+      if (nameIdx >= phase4End || col.namesLeft <= 0) return;
+      const name = nextName();
+      if (!name) return;
+      const { tw, th } = measureName(name);
+      const nameRotH = tw + P4_NAME_V_GAP; // vertical extent after 90° CW rotation
+      const newTopY = col.topY - nameRotH;
+      const cy = newTopY + tw / 2;
+      projectiles.push(mkProj({
+        id: nextProjId++, text: name,
+        x: col.x - tw / 2,
+        y: cy - th / 2,
+        vy,
+        w: tw, h: th,
+        angle: Math.PI / 2, // 90° CW — text reads top→bottom on screen
+        action: 6,          // reuse "straight-fall" movement + cull path
+      }));
+      col.topY = newTopY;
+      col.namesLeft--;
+    };
+
+    /* Try to spawn a single new column at a valid random x.
+       `stagger=true` gives it a random initial topY (used only at phase entry to
+       seed the screen with columns already in mid-fall). Otherwise new columns
+       start just above the top of the screen. */
+    const spawnWallColumn = (stagger: boolean): void => {
+      if (!wallColumns) return;
+      const capCols = isMobileDevice ? P4_COLS_MOBILE_CAP : P4_COLS_DESKTOP_CAP;
+      if (wallColumns.length >= capCols) return;
+      if (nameIdx >= phase4End) return;
+      const x = pickWallX(getWallMinGap());
+      if (x === null) return; // no valid slot right now — skip this spawn
+      const h = H();
+      const vy = h * P4_FALL_SPEED_FRAC;
+      const namesCount = P4_NAMES_PER_COL_MIN +
+        Math.floor(Math.random() * (P4_NAMES_PER_COL_MAX - P4_NAMES_PER_COL_MIN + 1));
+      const col: WallColumn = {
+        x,
+        topY: stagger ? h * (0.15 + Math.random() * 0.65) : 0,
+        namesLeft: namesCount,
+      };
+      wallColumns.push(col);
+      /* Seed the pillar so there's at least one visible name immediately.
+         When stagger=true, seed a majority of the pillar (column is already
+         mid-fall). When stagger=false, seed just one so the column enters
+         the screen head-first like a top-down raindrop. */
+      const seedCount = stagger
+        ? Math.max(1, Math.ceil(namesCount * 0.55))
+        : 1;
+      for (let i = 0; i < seedCount; i++) spawnOneNameInColumn(col, vy);
+    };
+
+    const initWallColumns = () => {
+      wallColumns = [];
+      wallSpawnTimer = 0;
+      wallSpawnInterval = 0; // first new column can spawn on the very next frame
+      const seed = isMobileDevice ? P4_INITIAL_SEED_MOBILE : P4_INITIAL_SEED_DESKTOP;
+      for (let i = 0; i < seed; i++) spawnWallColumn(true);
     };
 
     const updateWalls = (dt: number) => {
       if (!wallColumns) return;
-      /* col.topY falls in lockstep with its names' y-positions.
-         When topY crosses 0, there's visible room above — spawn a new name. */
+      const h = H();
+      const vy = h * P4_FALL_SPEED_FRAC;
+      /* 1) Advance every column in lockstep with its falling names. */
       for (const col of wallColumns) {
-        col.topY += col.speed * dt;
-        fillColumnUpward(col, 0);
+        col.topY += vy * dt;
+        /* If the pillar isn't yet complete and its top edge has slipped below
+           y=0, extend upward with the next name — this keeps the pillar
+           continuous (no mid-pillar gaps). Pillars that have finished all their
+           names simply scroll off the bottom. */
+        while (col.topY > 0 && col.namesLeft > 0 && nameIdx < phase4End) {
+          spawnOneNameInColumn(col, vy);
+        }
+      }
+      /* 2) Retire columns that have placed all names AND fully exited the top
+            of the screen — the projectiles they spawned are still falling on
+            their own via action:6 movement. */
+      wallColumns = wallColumns.filter(col =>
+        col.namesLeft > 0 || col.topY < h + 50
+      );
+      /* 3) Spawn a fresh column at a randomized interval — matches Undertale's
+            staggered waterfall feel. */
+      if (nameIdx < phase4End) {
+        wallSpawnTimer += dt;
+        if (wallSpawnTimer >= wallSpawnInterval) {
+          spawnWallColumn(false);
+          wallSpawnTimer = 0;
+          wallSpawnInterval = P4_SPAWN_INTERVAL_MIN +
+            Math.random() * (P4_SPAWN_INTERVAL_MAX - P4_SPAWN_INTERVAL_MIN);
+        }
       }
     };
 
@@ -1615,7 +1700,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         /* Fired aimed bullets (action:2): tight cull — remove as soon as off-screen */
         if (p.action === 2) return p.x > -p.w - 60 && p.x < w + 60 && p.y > -p.h - 60 && p.y < h + 60;
         if (p.action === 5) {
-          return p.orbitCx > -p.orbitR - 300 && p.orbitCx < w + p.orbitR + 300;
+          /* Spinning-wheel spokes: cull when the entire wheel (center ± its max
+             spoke extent) is fully off screen. The wheel spawns at cx ≈ ±2R, so
+             use the largest possible spoke reach (spokeRadius) as the margin —
+             this guarantees ALL 8 spokes survive the initial off-screen entry
+             regardless of name length. */
+          const entryMargin = Math.max(260, W() * 0.35);
+          return p.orbitCx > -entryMargin - p.orbitR && p.orbitCx < w + entryMargin + p.orbitR;
         }
         if (p.action === 6) {
           /* Corridor + Phase-4 walls fall straight down. Rotated walls have
@@ -1625,9 +1716,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         }
         return p.x > -400 && p.x < w + 400 && p.y > -300 && p.y < h + 300;
       });
-      /* Hard cap for mobile perf — drop oldest projectiles first */
+      /* Hard cap for mobile perf — drop oldest NON-SPOKE projectiles first so
+         spinning-wheel spokes are never sliced mid-rotation (missing-spoke bug). */
       if (projectiles.length > MAX_PROJECTILES) {
-        projectiles = projectiles.slice(projectiles.length - MAX_PROJECTILES);
+        const spokes = projectiles.filter(p => p.action === 5);
+        const others = projectiles.filter(p => p.action !== 5);
+        const keepOthers = Math.max(0, MAX_PROJECTILES - spokes.length);
+        projectiles = [...others.slice(others.length - keepOthers), ...spokes];
       }
 
       /* ── Hit detection — batched per frame for mobile perf ── */

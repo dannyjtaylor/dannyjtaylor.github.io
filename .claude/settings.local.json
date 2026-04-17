@@ -97,7 +97,8 @@
       "Bash(cmd.exe /c \"where tsc\")",
       "Bash(node:*)",
       "Bash(echo \"EXIT:$?\")",
-      "Bash(cmd:*)"
+      "Bash(cmd:*)",
+      "WebFetch(domain:tcrf.net)"
     ]
   }
 }

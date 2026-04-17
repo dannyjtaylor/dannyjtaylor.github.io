@@ -193,8 +193,22 @@ const CREDITS_DATA: CreditSection[] = [
   /* ── Alphabetical middle ── */
   {
     title: '2404-1313',
-    leftPhotos: ['friend_group_boys.jpg', 'friend_group_2.jpg', 'friend_group_large.jpg'],
-    rightPhotos: ['friend_group_1.jpg', 'friend_group_3.jpg', 'friend_group_4.jpg'],
+    leftPhotos: [
+      'friend_group_boys.jpg',
+      'friend_group_2.jpg',
+      'friend_group_large.jpg',
+      'me_bryon_adriana.jpg',
+      'me_bryon_adriana_cruise.jpg',
+      'friend_group_8.jpg',
+    ],
+    rightPhotos: [
+      'friend_group_1.jpg',
+      'friend_group_3.jpg',
+      'friend_group_4.jpg',
+      'me_bryon_adriana_chiara_kyle.jpg',
+      'me_bryon_adrianas_family.jpg',
+      'adrianas_birthday_friend_group.jpg',
+    ],
     entries: [
       { name: 'Bryon Catlin' },
       { name: 'George Mancini' },
@@ -323,6 +337,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Anthony Parinello' },
       { name: 'Brady Lenox' },
       { name: 'Brandon Camacho' },
+      { name: 'Nico Rapp'},
       { name: 'Cameron Willaims' },
       { name: 'Chris Mather' },
       { name: 'Christian Cruz' },
@@ -392,8 +407,21 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Eduardo Jirau'},
       { name: 'Jes Pate'},
     ],
-    leftPhotos: ['me_and_mo_haddid.jpg', 'clara_1.jpg', 'escape_room_1.jpg', 'rappel_me_random.jpg'],
-    rightPhotos: ['luis_mata_moreno.jpg', 'NOVA_with_lukas_kelk.jpg', 'escape_room_2.jpg', 'howl_o_scream.jpg'],
+    leftPhotos: [
+      'me_and_mo_haddid.jpg',
+      'clara_1.jpg',
+      'escape_room_1.jpg',
+      'rappel_me_random.jpg',
+      'friend_group_image_4.jpg',
+      'me_on_dragon.jpg',
+    ],
+    rightPhotos: [
+      'luis_mata_moreno.jpg',
+      'NOVA_with_lukas_kelk.jpg',
+      'escape_room_2.jpg',
+      'howl_o_scream.jpg',
+      'friend_group_normal_camera.jpg',
+    ],
   },
   {
     title: 'Student Government Association',
@@ -742,8 +770,22 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const HEART_SPEED = 350;
     const isMobileDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const MAX_PROJECTILES = isMobileDevice ? 80 : 160;
+
+    /* Safe-area insets from CSS `env(safe-area-inset-*)` — exposed through CSS
+       custom props on the canvas so the canvas-drawn HP bar and HUD can respect
+       iOS notch + home indicator. Falls back to 0 on browsers without support. */
+    const readSafeInset = (side: 'top' | 'bottom'): number => {
+      const v = getComputedStyle(canvas).getPropertyValue(`--sai-${side}`).trim();
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? n : 0;
+    };
     const getSlotH = () => getFontSize() * 1.15;
-    const getHeartSize = () => Math.max(8, Math.floor(getSlotH() * 0.25));
+    /* Heart sprite half-dimension. Mobile needs a larger floor so the heart is
+       both visible under the player's thumb and has a fair hitbox vs phase-4 walls. */
+    const getHeartSize = () => {
+      const floor = isMobileDevice ? 14 : 9;
+      return Math.max(floor, Math.floor(getSlotH() * 0.32));
+    };
 
     /* ════════════════════════════════════════════════════
        TUNING CONSTANTS — edit here to adjust each phase.
@@ -754,10 +796,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const P3_FALL_SPEED_FRAC     = 0.62; // fall speed = H × this
     const P3_SPAWN_RATE          = 0.09; // seconds between each corridor name-pair
     const P3_MAX_SWING_PX        = 140;  // max corridor gap deviation from center (keeps pace with heart on PC)
-    // Ph4 — Vertical Rain
-    const P4_COL_SPACING_DESKTOP = 60;   // px between rain columns on desktop
-    const P4_COL_SPACING_MOBILE  = 80;   // px between rain columns on mobile
-    const P4_FALL_SPEED          = 200;  // px/sec names fall downward
+    // Ph4 — Falling Walls (Undertale-accurate: rotated vertical columns)
+    const P4_COL_WIDTH_RATIO     = 1.15; // column width = fontSize × ratio (controls density)
+    const P4_COL_WIDTH_MIN_PX    = 22;   // absolute min column width in px
+    const P4_FALL_SPEED_FRAC     = 0.30; // fall speed = H × this (per-column avg)
+    const P4_SPEED_JITTER        = 0.28; // ± this fraction of avg speed per column
+    const P4_NAME_V_GAP          = 6;    // px gap between stacked names within a column
+    const P4_COLS_DESKTOP_CAP    = 14;   // max columns on desktop
+    const P4_COLS_MOBILE_CAP     = 8;    // max columns on mobile
     // Ph7 — Spinning Wheels
     const P7_DRIFT_SPEED_FRAC    = 0.065; // drift speed = W × this
     const P7_ROT_SPEED           = 1.5;   // radians/sec rotation
@@ -798,7 +844,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const measureName = (name: string): { tw: number; th: number } => {
       const fontSize = getFontSize();
       ctx.font = `${fontSize}px ${DETERMINATION_SANS}`;
-      return { tw: ctx.measureText(name).width, th: fontSize * 1.2 };
+      /* th = glyph ink height (cap + descender), NOT CSS line-height.
+         Fixes phantom top/bottom hits and aligns hitbox with visible text.
+         Glyphs are drawn with textBaseline='top' at y=-th/2 so ink fills AABB. */
+      return { tw: ctx.measureText(name).width, th: fontSize * 0.85 };
     };
 
     const nextName = (): string => {
@@ -957,29 +1006,74 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 4: Vertical rain — Undertale-accurate: one name per spawn, random x ──
-       Names fall straight down in a continuous, organic rain. Spawning one at a time
-       at random x positions (not batched rows) creates the correct dense waterfall.
-       P4_COL_SPACING_DESKTOP / MOBILE control the minimum horizontal spread between
-       consecutive spawns so the rain doesn't cluster in one spot. */
-    let rainLastX = 0;
-    const spawnVerticalRain = () => {
+    /* ── Phase 4: Falling Walls — Undertale-accurate vertical rotated columns ──
+       The screen is divided into N fixed-x columns that tile the viewport.
+       Each column continuously drops names rotated 90° clockwise (text reads top-
+       to-bottom). Adjacent columns use slightly different fall speeds and starting
+       y-offsets so the seams between stacked names form micro-gaps the heart can
+       weave through. Unlike Phase 3 (scripted corridor) there is no single "safe
+       gap" — safety is in the spacing between adjacent columns and between glyphs.
+       Matches reference screenshot at /credits-photos/undertalecredits_howitshouldb3.png */
+    interface WallColumn { x: number; speed: number; topY: number; }
+    let wallColumns: WallColumn[] | null = null;
+
+    const initWallColumns = () => {
       const w = W();
-      const name = nextName();
-      if (!name) return;
-      const { tw, th } = measureName(name);
-      /* Pseudo-distributed x: offset last spawn x by a prime-step to spread evenly */
-      const minSpacing = isMobileDevice ? P4_COL_SPACING_MOBILE : P4_COL_SPACING_DESKTOP;
-      rainLastX = (rainLastX + minSpacing * 3 + (phaseRound * 137)) % Math.max(1, w - tw);
-      const x = Math.max(0, Math.min(w - tw, rainLastX));
-      projectiles.push(mkProj({
-        id: nextProjId++, text: name,
-        x, y: -th - 5,
-        vx: 0, vy: P4_FALL_SPEED,
-        w: tw, h: th,
-        action: 0,
-        angle: 0,
-      }));
+      const h = H();
+      const fs = getFontSize();
+      const colW = Math.max(P4_COL_WIDTH_MIN_PX, fs * P4_COL_WIDTH_RATIO);
+      const capCols = isMobileDevice ? P4_COLS_MOBILE_CAP : P4_COLS_DESKTOP_CAP;
+      const numCols = Math.max(3, Math.min(capCols, Math.floor(w / colW)));
+      const stepX = w / numCols;
+      const baseSpeed = h * P4_FALL_SPEED_FRAC;
+      wallColumns = [];
+      for (let i = 0; i < numCols; i++) {
+        const jitter = 1 + (Math.random() * 2 - 1) * P4_SPEED_JITTER;
+        /* Stagger initial topY so columns don't all spawn in lockstep.
+           Range (0.85*H .. 1.15*H) — bottom name starts a bit below screen bottom. */
+        const startTopY = h * (0.85 + Math.random() * 0.3);
+        wallColumns.push({
+          x: stepX * (i + 0.5),
+          speed: baseSpeed * jitter,
+          topY: startTopY,
+        });
+      }
+      /* Pre-fill each column upward from its startTopY until names extend above -H.
+         This paints the whole screen with walls on phase entry. */
+      for (const col of wallColumns) {
+        fillColumnUpward(col, -h - 50);
+      }
+    };
+
+    const fillColumnUpward = (col: WallColumn, untilTopY: number) => {
+      while (col.topY > untilTopY && nameIdx < phase4End) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        const nameRotH = tw + P4_NAME_V_GAP;       // vertical extent after 90° rotation
+        const newTopY = col.topY - nameRotH;       // top edge of the new (above) name
+        const cy = newTopY + tw / 2;                // rotated-AABB vertical center
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: col.x - tw / 2,
+          y: cy - th / 2,
+          vy: col.speed,
+          w: tw, h: th,
+          angle: Math.PI / 2,                       // 90° CW — text reads top→bottom
+          action: 6,                                // reuse corridor "fall" movement + cull
+        }));
+        col.topY = newTopY;
+      }
+    };
+
+    const updateWalls = (dt: number) => {
+      if (!wallColumns) return;
+      /* col.topY falls in lockstep with its names' y-positions.
+         When topY crosses 0, there's visible room above — spawn a new name. */
+      for (const col of wallColumns) {
+        col.topY += col.speed * dt;
+        fillColumnUpward(col, 0);
+      }
     };
 
     /* ── Phase 7: Spinning Wheels — two rotating spoke-wheels from opposite sides ── */
@@ -1065,8 +1159,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
+    /* Prevent iOS scroll / pinch / double-tap-zoom from fighting the drag. */
+    canvas.style.touchAction = 'none';
+
     let touchX = 0;
     let touchY = 0;
+    /* Slight boost so players can traverse the canvas without dragging the full
+       screen width on small phones. 1.0 on desktop, 1.35 on coarse pointers. */
+    const TOUCH_SENSITIVITY = isMobileDevice ? 1.35 : 1.0;
     const onTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
       if (!touch) return;
@@ -1077,8 +1177,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       e.preventDefault();
       const touch = e.touches[0];
       if (!touch) return;
-      heart.x += touch.clientX - touchX;
-      heart.y += touch.clientY - touchY;
+      heart.x += (touch.clientX - touchX) * TOUCH_SENSITIVITY;
+      heart.y += (touch.clientY - touchY) * TOUCH_SENSITIVITY;
+      /* Clamp immediately so finger movement past a wall doesn't build up an
+         un-tracked delta (prevents "dead zone" where heart lags the finger). */
+      const hsTouch = getHeartSize();
+      heart.x = Math.max(hsTouch, Math.min(W() - hsTouch, heart.x));
+      heart.y = Math.max(hsTouch, Math.min(H() - hsTouch, heart.y));
       touchX = touch.clientX;
       touchY = touch.clientY;
     };
@@ -1095,7 +1200,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       switch (phase) {
         case 0: return 1.2;   // Aimed spreads
         case 2: return 3.5;   // Crossing streams (full screen per call, both waves)
-        case 4: return isMobileDevice ? 0.25 : 0.18; // Vertical rain — single name per call
         case 7: return 4.5;   // Spinning wheels (fewer, fuller spokes)
         case 6: return 0.8;   // Fast aimed spreads
         default: return 1.0;
@@ -1261,7 +1365,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           ctx.fillStyle = 'rgba(255,255,255,0.3)';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
-          ctx.fillText('Click / tap to skip', w / 2, h - 10);
+          ctx.fillText('Click / tap to skip', w / 2, h - 10 - readSafeInset('bottom'));
 
           drawHeart(ctx, heart.x, heart.y, hs, false, heartImg);
 
@@ -1280,8 +1384,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           thankYouY -= 100 * dt;
 
           const tyFS = Math.max(16, Math.min(28, w / 24));
-          const tySpacing = tyFS * 2.4;
-          const tyLines = [
+          const tySpacing = tyFS * 1.6;
+          ctx.font = `${tyFS}px ${DETERMINATION_SANS}`;
+          /* Word-wrap each logical line so narrow phones don't clip the copy. */
+          const maxWidth = w - 32;
+          const rawLines = [
             'Thanks to friends and family supporting me!',
             'Without you, all of this would be impossible.',
             '',
@@ -1289,6 +1396,18 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             '',
             "\u2018Til next time!",
           ];
+          const tyLines: string[] = [];
+          for (const raw of rawLines) {
+            if (!raw) { tyLines.push(''); continue; }
+            const words = raw.split(' ');
+            let current = '';
+            for (const word of words) {
+              const test = current ? `${current} ${word}` : word;
+              if (ctx.measureText(test).width <= maxWidth) current = test;
+              else { if (current) tyLines.push(current); current = word; }
+            }
+            if (current) tyLines.push(current);
+          }
 
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
@@ -1297,7 +1416,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             if (!line) continue;
             const ly = thankYouY + i * tySpacing;
             if (ly > -40 && ly < h + 40) {
-              ctx.font = `${tyFS}px ${DETERMINATION_SANS}`;
               ctx.fillStyle = '#FFFF00';
               ctx.fillText(line, w / 2, ly);
             }
@@ -1307,7 +1425,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           ctx.fillStyle = 'rgba(255,255,255,0.3)';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
-          ctx.fillText('Click / tap to skip', w / 2, h - 10);
+          ctx.fillText('Click / tap to skip', w / 2, h - 10 - readSafeInset('bottom'));
 
           drawHeart(ctx, heart.x, heart.y, hs, false, heartImg);
 
@@ -1351,6 +1469,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         } else {
           const newPhase = getPhase(nameIdx);
           if (newPhase !== currentPhase) {
+            /* Tear down phase-specific state when leaving a phase. */
+            if (currentPhase === 4 && newPhase !== 4) wallColumns = null;
             currentPhase = newPhase;
             phaseTimer = 0;
             phaseRound = 0;
@@ -1369,6 +1489,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             corridorActive = true;
             corridorSpawnTimer = 0;
             corridorSpawnCount = 0;
+          } else if (currentPhase === 4) {
+            /* Falling walls: init on entry, continuously top up each frame. */
+            if (!wallColumns) initWallColumns();
+            updateWalls(dt);
           } else if (currentPhase !== 3) {
             phaseTimer += dt;
             const interval = getSpawnInterval(currentPhase);
@@ -1385,10 +1509,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
                 }
                 case 2:
                   spawnCrossingStreams();
-                  phaseRound++;
-                  break;
-                case 4:
-                  spawnVerticalRain();
                   phaseRound++;
                   break;
                 case 7:
@@ -1495,7 +1615,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           return p.orbitCx > -p.orbitR - 300 && p.orbitCx < w + p.orbitR + 300;
         }
         if (p.action === 6) {
-          return p.y < h + 100; /* corridor names: cull past bottom */
+          /* Corridor + Phase-4 walls fall straight down. Rotated walls have
+             visual extent = p.w (original text width), so add the max extent so
+             rotated glyphs fully clear the screen before cull. */
+          return p.y < h + 100 + Math.max(p.w, p.h);
         }
         return p.x > -400 && p.x < w + 400 && p.y > -300 && p.y < h + 300;
       });
@@ -1506,7 +1629,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
       /* ── Hit detection — batched per frame for mobile perf ── */
       if (hitFlash > 0) hitFlash -= dt;
-      const HR = getHeartSize(); /* exact match to drawn heart bounds */
+      /* Heart sprite is size*2 × size*2 but the heart shape fills only ~70% of that
+         square (top notches + bottom tip are transparent). A circle radius = size*0.70
+         matches the visible heart pixels — Undertale-accurate grazing. */
+      const HR = getHeartSize() * 0.70;
       let hitsThisFrame = 0;
 
       /* Circle vs OBB (oriented bounding box) — pixel-perfect for rotated text.
@@ -1613,11 +1739,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         }
       }
 
-      /* HP image — drawn BEFORE heart so heart renders on top */
+      /* HP image — drawn BEFORE heart so heart renders on top.
+         Offset above safe-area-inset-bottom so the home indicator / iOS bottom
+         bar doesn't clip it. */
+      const saiBottom = readSafeInset('bottom');
       if (hpBarImg && hpBarImg.complete && hpBarImg.naturalWidth > 0) {
         const hpImgH = 28;
         const hpImgW = hpBarImg.naturalWidth * (hpImgH / hpBarImg.naturalHeight);
-        ctx.drawImage(hpBarImg, (w - hpImgW) / 2, h - 46, hpImgW, hpImgH);
+        ctx.drawImage(hpBarImg, (w - hpImgW) / 2, h - 46 - saiBottom, hpImgW, hpImgH);
       }
 
       drawHeart(ctx, heart.x, heart.y, getHeartSize(), hitFlash > 0, heartImg);
@@ -1643,7 +1772,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         ctx.textBaseline = 'bottom';
         ctx.fillText(
           isMobileDevice ? 'Drag to move \u00B7 Tap \u2715 to exit' : 'Arrow keys / WASD to move \u00B7 ESC to exit',
-          w / 2, h - 12,
+          w / 2, h - 12 - saiBottom,
         );
         ctx.globalAlpha = 1;
       }

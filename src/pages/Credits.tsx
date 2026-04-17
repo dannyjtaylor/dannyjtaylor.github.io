@@ -576,6 +576,9 @@ interface Projectile {
   orbitAngle: number;
   orbitSpeed: number;
   logoImg: HTMLImageElement | null;
+  /* For logo projectiles — index into ATTACK_LOGOS. -1 for non-logos.
+     Cached at spawn so the render loop doesn't need to findIndex every frame. */
+  logoIdx: number;
 }
 
 let nextProjId = 0;
@@ -653,6 +656,7 @@ function mkProj(base: Partial<Projectile> & { id: number; text: string; x: numbe
     vx: 0, vy: 0, hit: false, hitAge: 0, action: 0, frame: 0,
     gravity: 0, angle: 0,
     orbitCx: 0, orbitCy: 0, orbitR: 0, orbitAngle: 0, orbitSpeed: 0, logoImg: null,
+    logoIdx: -1,
     ...base,
   };
 }
@@ -677,6 +681,19 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    /* Safe-area insets cached per-resize — reading `getComputedStyle(canvas)` on
+       every frame of the render loop forces a style recalc which is a known
+       mobile jank trigger. These only change on resize / orientation. */
+    let cachedSaiTop = 0;
+    let cachedSaiBottom = 0;
+    const refreshSafeInsets = () => {
+      const cs = getComputedStyle(canvas);
+      const tTop = parseFloat(cs.getPropertyValue('--sai-top').trim());
+      const tBot = parseFloat(cs.getPropertyValue('--sai-bottom').trim());
+      cachedSaiTop = Number.isFinite(tTop) ? tTop : 0;
+      cachedSaiBottom = Number.isFinite(tBot) ? tBot : 0;
+    };
+
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
@@ -684,6 +701,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      refreshSafeInsets();
     };
     resize();
     window.addEventListener('resize', resize);
@@ -697,6 +715,28 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     audio.volume = 0.7;
     audio.play().catch(() => {});
 
+    /* ── Hit sound: WebAudio (preferred) with HTMLAudio fallback ──
+       iOS HTMLAudioElement cannot layer/overlap sounds (single-channel limit —
+       every rapid hit must wait for the previous to settle), causing perceptible
+       lag when multiple names are hit at once. WebAudio's AudioBufferSourceNode
+       plays instantly, non-blocking, and supports unlimited layering — which
+       eliminates the multi-hit stutter reported on phones. */
+    let hitAudioBuffer: AudioBuffer | null = null;
+    let hitAudioCtx: AudioContext | null = null;
+    try {
+      const AC = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
+              ?? (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AC) {
+        hitAudioCtx = new AC();
+        fetch('/deltarune_hit.mp3')
+          .then(r => r.arrayBuffer())
+          .then(buf => hitAudioCtx!.decodeAudioData(buf))
+          .then(decoded => { hitAudioBuffer = decoded; })
+          .catch(() => { /* silent — HTMLAudio fallback will take over */ });
+      }
+    } catch { /* no WebAudio support — HTMLAudio fallback is used */ }
+
+    /* Fallback pool: 6 pre-loaded Audio elements for browsers without WebAudio. */
     const hitSounds: HTMLAudioElement[] = [];
     for (let i = 0; i < 6; i++) {
       const s = new Audio('/deltarune_hit.mp3');
@@ -707,8 +747,24 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let lastHitSoundTime = 0;
     const playHitSound = () => {
       const now = performance.now();
+      /* Cooldown — prevents audio overlap stacking into a distorted roar when
+         the heart is dragged continuously through a wall. */
       if (now - lastHitSoundTime < 50) return;
       lastHitSoundTime = now;
+      /* Fast path — WebAudio is zero-latency on iOS and doesn't block the main
+         thread. Resume suspended context (iOS auto-suspends in background). */
+      if (hitAudioCtx && hitAudioBuffer) {
+        if (hitAudioCtx.state === 'suspended') hitAudioCtx.resume().catch(() => {});
+        const src = hitAudioCtx.createBufferSource();
+        src.buffer = hitAudioBuffer;
+        const gain = hitAudioCtx.createGain();
+        gain.gain.value = 0.5;
+        src.connect(gain);
+        gain.connect(hitAudioCtx.destination);
+        src.start(0);
+        return;
+      }
+      /* Slow path — HTMLAudio fallback. */
       const s = hitSounds[hitSoundIdx % hitSounds.length];
       if (s) { s.currentTime = 0; s.play().catch(() => {}); }
       hitSoundIdx++;
@@ -774,14 +830,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const isMobileDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const MAX_PROJECTILES = isMobileDevice ? 80 : 160;
 
-    /* Safe-area insets from CSS `env(safe-area-inset-*)` — exposed through CSS
-       custom props on the canvas so the canvas-drawn HP bar and HUD can respect
-       iOS notch + home indicator. Falls back to 0 on browsers without support. */
-    const readSafeInset = (side: 'top' | 'bottom'): number => {
-      const v = getComputedStyle(canvas).getPropertyValue(`--sai-${side}`).trim();
-      const n = parseFloat(v);
-      return Number.isFinite(n) ? n : 0;
-    };
+    /* Safe-area insets from CSS `env(safe-area-inset-*)` — cached via
+       `refreshSafeInsets()` on mount / resize (above). Re-reading them every
+       frame forces a style recalc which is a known mobile jank trigger. */
+    const readSafeInset = (side: 'top' | 'bottom'): number =>
+      side === 'bottom' ? cachedSaiBottom : cachedSaiTop;
     const getSlotH = () => getFontSize() * 1.15;
     /* Heart sprite half-dimension. Mobile needs a larger floor so the heart is
        both visible under the player's thumb and has a fair hitbox vs phase-4 walls. */
@@ -1626,6 +1679,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
               x: fromR ? w + lw : -lw, y: yp,
               vx: fromR ? -120 : 120,
               w: lw, h: lh, logoImg: limg,
+              logoIdx: li,
             }));
           }
         }
@@ -1810,8 +1864,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           if (p.angle) ctx.rotate(p.angle);
           if (p.hit) {
             ctx.globalAlpha = 0.8;
-            const logoIdx = ATTACK_LOGOS.findIndex(l => l.name === p.text);
-            const yellowCanvas = logoIdx >= 0 ? yellowLogoCanvases[logoIdx] : null;
+            /* Use cached logoIdx from spawn — avoids a linear scan per frame. */
+            const yellowCanvas = p.logoIdx >= 0 ? yellowLogoCanvases[p.logoIdx] : null;
             if (yellowCanvas) {
               ctx.drawImage(yellowCanvas, -p.w / 2, -p.h / 2, p.w, p.h);
             } else {
@@ -1886,6 +1940,10 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       if (!normalFinish) {
         audio.pause();
         audio.src = '';
+      }
+      /* Release the WebAudio context so it doesn't linger between game sessions. */
+      if (hitAudioCtx && hitAudioCtx.state !== 'closed') {
+        hitAudioCtx.close().catch(() => {});
       }
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);

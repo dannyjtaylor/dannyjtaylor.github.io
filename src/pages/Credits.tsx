@@ -223,6 +223,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Jaylee Ciaschini' },
       { name: 'Gabby Martin'},
       { name: 'Manny Yousif'},
+      { name: 'Julianna Ross'},
     ],
   },
   {

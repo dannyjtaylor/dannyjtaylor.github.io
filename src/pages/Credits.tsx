@@ -584,6 +584,9 @@ interface Projectile {
   /* For logo projectiles — index into ATTACK_LOGOS. -1 for non-logos.
      Cached at spawn so the render loop doesn't need to findIndex every frame. */
   logoIdx: number;
+  /* Accumulated seconds for action:1 slide/aim/fire — replaces frame-count
+     gates so slide distance is FPS-independent (fixes mobile off-screen bug). */
+  slideT: number;
 }
 
 let nextProjId = 0;
@@ -661,7 +664,7 @@ function mkProj(base: Partial<Projectile> & { id: number; text: string; x: numbe
     vx: 0, vy: 0, hit: false, hitAge: 0, action: 0, frame: 0,
     gravity: 0, angle: 0,
     orbitCx: 0, orbitCy: 0, orbitR: 0, orbitAngle: 0, orbitSpeed: 0, logoImg: null,
-    logoIdx: -1,
+    logoIdx: -1, slideT: 0,
     ...base,
   };
 }
@@ -841,10 +844,11 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const readSafeInset = (side: 'top' | 'bottom'): number =>
       side === 'bottom' ? cachedSaiBottom : cachedSaiTop;
     const getSlotH = () => getFontSize() * 1.15;
-    /* Heart sprite half-dimension. Mobile needs a larger floor so the heart is
-       both visible under the player's thumb and has a fair hitbox vs phase-4 walls. */
+    /* Heart sprite half-dimension. Mobile floor is slightly above desktop so the
+       heart remains visible under a fingertip, but not so large that it dominates
+       narrow screens. */
     const getHeartSize = () => {
-      const floor = isMobileDevice ? 14 : 9;
+      const floor = isMobileDevice ? 11 : 9;
       return Math.max(floor, Math.floor(getSlotH() * 0.32));
     };
 
@@ -857,21 +861,19 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const P3_FALL_SPEED_FRAC     = 0.62; // fall speed = H × this
     const P3_SPAWN_RATE          = 0.09; // seconds between each corridor name-pair
     const P3_MAX_SWING_PX        = 140;  // max corridor gap deviation from center (keeps pace with heart on PC)
-    // Ph4 — Falling Walls (Undertale-accurate: rotated vertical columns at random x)
+    // Ph4 — Falling Walls (Undertale-accurate: continuous vertical streams of rotated names)
     // Authenticity keys per reference /credits-photos/phase4.png:
     //   • pure vertical motion, UNIFORM fall speed (no per-column jitter)
     //   • random x-spawn positions (NOT a fixed grid), min-gap enforced
-    //   • staggered column spawning over time (one every ~0.3-0.6s)
-    //   • finite names per column (3-6) — each pillar has a beginning & end
-    //   • 8-14 simultaneously visible; always-passable gaps averaging ~2-3× heart width
-    const P4_FALL_SPEED_FRAC     = 0.15; // fall speed = H × this (uniform across ALL columns)
-    const P4_NAME_V_GAP          = 6;    // px gap between stacked names within a column
+    //   • columns are CONTINUOUS infinite streams that only retire when the
+    //     phase-4 name budget is exhausted — names butt flush with zero v-gap
+    //   • staggered column spawning over time to vary lane density
+    const P4_FALL_SPEED_FRAC     = 0.10; // fall speed = H × this (uniform across ALL columns)
+    const P4_NAME_V_GAP          = 0;    // px gap between stacked names — 0 = butted flush
     const P4_COLS_DESKTOP_CAP    = 14;   // max simultaneous columns on desktop
     const P4_COLS_MOBILE_CAP     = 8;    // max simultaneous columns on mobile
     const P4_MIN_GAP_HEART_MULT  = 2.8;  // min column-center spacing ≥ this × heart width
-    const P4_MIN_GAP_FONT_MULT   = 2.0;  // min column-center spacing ≥ this × fontSize (floor)
-    const P4_NAMES_PER_COL_MIN   = 3;    // min names in a single column pillar
-    const P4_NAMES_PER_COL_MAX   = 6;    // max names in a single column pillar
+    const P4_MIN_GAP_FONT_MULT   = 1.4;  // min column-center spacing ≥ this × fontSize (floor)
     const P4_SPAWN_INTERVAL_MIN  = 0.28; // min seconds between new column spawns
     const P4_SPAWN_INTERVAL_MAX  = 0.60; // max seconds between new column spawns
     const P4_INITIAL_SEED_DESKTOP = 7;   // columns pre-seeded on phase entry (desktop)
@@ -933,9 +935,15 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const spawnAimedSpread = (fromRight: boolean, yCenter: number) => {
       const w = W();
       const spacing = Math.max(30, W() / 18);
-      /* Scale slide speed with screen width so names travel ~40% of screen width
-         in the slide-in window — ensures they're fully visible on wide PC displays. */
-      const slideVx = Math.max(350, W() * 0.55);
+      /* Scale slide speed with screen width. Travel distance over the fixed
+         1 s slide window = slideVx × 1 s, so keeping slideVx ≲ W keeps names
+         on-screen. Mobile drops the 350 px/s desktop floor — with 30 fps +
+         frame-count gates it forced 2× overshoot and flung names off the
+         left edge of small phones. Time-based gates now bound travel, but we
+         still cap mobile slideVx to ~55 % of screen width. */
+      const slideVx = isMobileDevice
+        ? Math.max(180, W() * 0.55)
+        : Math.max(350, W() * 0.55);
       for (let i = 0; i < 5; i++) {
         const name = nextName();
         if (!name) return;
@@ -1078,20 +1086,20 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 4: Falling Walls — Undertale-accurate vertical rotated columns ──
+    /* ── Phase 4: Falling Walls — Undertale-accurate continuous vertical streams ──
        Columns are spawned at RANDOM x-positions (not a fixed grid) and STAGGERED
        over time — one new column every ~0.3-0.6s. All columns fall at the SAME
        uniform speed (no per-column jitter — matches Undertale's deterministic
-       engine). Each column is a finite pillar of 3-6 names rotated 90° CW; once
-       the pillar is complete the column scrolls off the bottom and is retired.
-       A new candidate x is rejected if it's within P4_MIN_GAP of any existing
-       column center, so the heart always has navigable lanes between pillars.
+       engine). Each column is a CONTINUOUS stream that keeps topping up with
+       the next phase-4 name whenever its top edge slips below y=0, so names
+       butt flush (P4_NAME_V_GAP=0). Columns only retire once the phase-4 name
+       budget is exhausted AND the last-placed name has scrolled fully off the
+       bottom of the screen.
        Matches reference screenshots at /credits-photos/phase4.png and
        /credits-photos/undertalecredits_howitshouldb3.png */
     interface WallColumn {
       x: number;
-      topY: number;       // y of the top edge of the top-most name in this column
-      namesLeft: number;  // names still to be dropped in this pillar
+      topY: number;     // y of the top edge of the top-most name in this column
     }
     let wallColumns: WallColumn[] | null = null;
     let wallSpawnTimer = 0;      // time since last column spawn (seconds)
@@ -1126,12 +1134,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       return null;
     };
 
-    /* Spawn ONE name at the top of a column's current pillar, extending it upward.
-       Mutates col.topY and col.namesLeft. */
-    const spawnOneNameInColumn = (col: WallColumn, vy: number) => {
-      if (nameIdx >= phase4End || col.namesLeft <= 0) return;
+    /* Spawn ONE name at the top of a column's continuous stream, extending it
+       upward. Mutates col.topY. Returns false once the phase-4 budget is
+       exhausted or no more names remain. */
+    const spawnOneNameInColumn = (col: WallColumn, vy: number): boolean => {
+      if (nameIdx >= phase4End) return false;
       const name = nextName();
-      if (!name) return;
+      if (!name) return false;
       const { tw, th } = measureName(name);
       const nameRotH = tw + P4_NAME_V_GAP; // vertical extent after 90° CW rotation
       const newTopY = col.topY - nameRotH;
@@ -1146,13 +1155,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         action: 6,          // reuse "straight-fall" movement + cull path
       }));
       col.topY = newTopY;
-      col.namesLeft--;
+      return true;
     };
 
     /* Try to spawn a single new column at a valid random x.
-       `stagger=true` gives it a random initial topY (used only at phase entry to
-       seed the screen with columns already in mid-fall). Otherwise new columns
-       start just above the top of the screen. */
+       `stagger=true` gives it a random initial topY between 0-100% of screen
+       height (used only at phase entry so the screen is pre-seeded with streams
+       already in mid-fall). Otherwise new columns start just above the top of
+       the screen and stream downward from there. */
     const spawnWallColumn = (stagger: boolean): void => {
       if (!wallColumns) return;
       const capCols = isMobileDevice ? P4_COLS_MOBILE_CAP : P4_COLS_DESKTOP_CAP;
@@ -1162,22 +1172,20 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       if (x === null) return; // no valid slot right now — skip this spawn
       const h = H();
       const vy = h * P4_FALL_SPEED_FRAC;
-      const namesCount = P4_NAMES_PER_COL_MIN +
-        Math.floor(Math.random() * (P4_NAMES_PER_COL_MAX - P4_NAMES_PER_COL_MIN + 1));
       const col: WallColumn = {
         x,
-        topY: stagger ? h * (0.15 + Math.random() * 0.65) : 0,
-        namesLeft: namesCount,
+        topY: stagger ? h * Math.random() : 0,
       };
       wallColumns.push(col);
-      /* Seed the pillar so there's at least one visible name immediately.
-         When stagger=true, seed a majority of the pillar (column is already
-         mid-fall). When stagger=false, seed just one so the column enters
-         the screen head-first like a top-down raindrop. */
-      const seedCount = stagger
-        ? Math.max(1, Math.ceil(namesCount * 0.55))
-        : 1;
-      for (let i = 0; i < seedCount; i++) spawnOneNameInColumn(col, vy);
+      /* Seed the stream so it's visible immediately. When staggered, keep
+         topping up until topY <= 0 (i.e. the full visible height above
+         `col.topY` is filled with names). When not staggered, just one seed
+         name so the column enters head-first like a raindrop. */
+      if (stagger) {
+        while (col.topY > 0 && spawnOneNameInColumn(col, vy)) { /* fill upward */ }
+      } else {
+        spawnOneNameInColumn(col, vy);
+      }
     };
 
     const initWallColumns = () => {
@@ -1192,22 +1200,22 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       if (!wallColumns) return;
       const h = H();
       const vy = h * P4_FALL_SPEED_FRAC;
-      /* 1) Advance every column in lockstep with its falling names. */
+      /* 1) Advance every column in lockstep with its falling names, and keep
+            topping up the top with the next phase-4 name so the stream is
+            continuous (no mid-stream gaps). */
       for (const col of wallColumns) {
         col.topY += vy * dt;
-        /* If the pillar isn't yet complete and its top edge has slipped below
-           y=0, extend upward with the next name — this keeps the pillar
-           continuous (no mid-pillar gaps). Pillars that have finished all their
-           names simply scroll off the bottom. */
-        while (col.topY > 0 && col.namesLeft > 0 && nameIdx < phase4End) {
-          spawnOneNameInColumn(col, vy);
+        while (col.topY > 0 && nameIdx < phase4End) {
+          if (!spawnOneNameInColumn(col, vy)) break;
         }
       }
-      /* 2) Retire columns that have placed all names AND fully exited the top
-            of the screen — the projectiles they spawned are still falling on
-            their own via action:6 movement. */
+      /* 2) Retire columns once the phase-4 name budget is exhausted AND the
+            top of the stream has fully exited below the bottom of the screen —
+            the projectiles they spawned are still falling on their own via
+            action:6 movement. Streams whose names are still being topped up
+            always survive. */
       wallColumns = wallColumns.filter(col =>
-        col.namesLeft > 0 || col.topY < h + 50
+        nameIdx < phase4End || col.topY < h + 50
       );
       /* 3) Spawn a fresh column at a randomized interval — matches Undertale's
             staggered waterfall feel. */
@@ -1226,12 +1234,15 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const spawnSpinningWheels = () => {
       const w = W();
       const h = H();
-      const spokeRadius = Math.max(100, Math.min(200, W() / 4));
-      const spokes = 8;
+      /* Fewer, longer spokes on mobile — gives each name room to sweep around
+         without overlapping its neighbor. Desktop keeps the classic 8-spoke
+         wheel. */
+      const spokes = isMobileDevice ? 6 : 8;
+      /* Spoke radius floor is bigger on mobile so the arc between adjacent
+         spokes is long enough to fit the longest name. */
+      const spokeRadius = Math.max(isMobileDevice ? 180 : 160, Math.min(240, W() / 3.5));
       const baseRotSpeed = P7_ROT_SPEED;
       const driftSpeed = W() * P7_DRIFT_SPEED_FRAC;
-      /* Fixed inner radius — first letter of every name starts here */
-      const innerR = Math.max(28, spokeRadius * 0.2);
 
       /* Explicit for-loops guarantee exactly `spokes` names per wheel — wraps ALL_NAMES. */
       const wheel1Names: string[] = [];
@@ -1245,6 +1256,24 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         wheel2Names.push(ALL_NAMES[(nameIdx + i) % ALL_NAMES.length] ?? ALL_NAMES[0] ?? 'Danny');
       }
       nameIdx += spokes;
+
+      /* Inner radius (where the first letter of each name begins) is computed
+         so that adjacent name-boxes can't overlap at their outer tips. The
+         chord length between spoke tips of length L is 2·L·sin(π/n), so each
+         name of width tw fits without overlap when the mid-name radius
+         satisfies `2·r_mid·sin(π/n) ≥ tw + pad`. Since r_mid = innerR + tw/2,
+         solving gives innerR ≥ tw · (1/(2·sin(π/n)) − 1/2) + pad. */
+      const allWheelNames = wheel1Names.concat(wheel2Names);
+      const maxTw = allWheelNames.reduce(
+        (m, n) => Math.max(m, measureName(n).tw), 0
+      );
+      const pad = 12;
+      const chordFactor = 1 / (2 * Math.sin(Math.PI / spokes));
+      const innerR = Math.max(
+        28,
+        spokeRadius * 0.2,
+        maxTw * (chordFactor - 0.5) + pad
+      );
 
       /* Wheel 1: enters from left, near bottom */
       const cx1 = -spokeRadius * 2;
@@ -1343,13 +1372,18 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     canvas.addEventListener('touchend', onCanvasTouchEnd, { passive: true });
 
     const getSpawnInterval = (phase: number): number => {
+      /* Mobile devices get a 25 % slower pacing so the credits don't feel
+         rushed on small screens where each wave has less room to breathe. */
+      const mobilePace = isMobileDevice ? 1.25 : 1.0;
+      let base: number;
       switch (phase) {
-        case 0: return 1.2;   // Aimed spreads
-        case 2: return 3.5;   // Crossing streams (full screen per call, both waves)
-        case 7: return 4.5;   // Spinning wheels (fewer, fuller spokes)
-        case 6: return 0.8;   // Fast aimed spreads
-        default: return 1.0;
+        case 0: base = 1.2; break;   // Aimed spreads
+        case 2: base = 3.5; break;   // Crossing streams (full screen per call, both waves)
+        case 7: base = 4.5; break;   // Spinning wheels (fewer, fuller spokes)
+        case 6: base = 0.8; break;   // Fast aimed spreads
+        default: base = 1.0;
       }
+      return base * mobilePace;
     };
 
     /* ── Main game loop ── */
@@ -1696,14 +1730,29 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         if (p.hit) p.hitAge += dt; /* accumulate age but keep updating position — Undertale style */
 
         if (p.action === 1) {
-          if (p.frame < 60) {
-            /* Phase 1: Slide in — 60 frames gives enough travel at the scaled vx */
-            p.x += p.vx * dt;
-            p.y += p.vy * dt;
-          } else if (p.frame === 60) {
-            p.vx = 0;
-            p.vy = 0;
-          } else if (p.frame > 60 && p.frame < 105) {
+          /* Time-based phases (FPS-independent) — matches 60 fps Undertale
+             feel on any device. Replaces the old frame-count gates which
+             overshot by 2× on 30 fps mobile and pushed names off-screen. */
+          const SLIDE_DUR = 1.0;   // slide in for 1 s
+          const AIM_DUR   = 0.75;  // aim at heart for 0.75 s
+          const prevT = p.slideT;
+          p.slideT += dt;
+
+          if (prevT < SLIDE_DUR) {
+            if (p.slideT < SLIDE_DUR) {
+              /* Phase 1: Slide in */
+              p.x += p.vx * dt;
+              p.y += p.vy * dt;
+            } else {
+              /* Crossed the slide→aim boundary this frame — travel the
+                 remaining slice then stop cleanly on the boundary. */
+              const partial = SLIDE_DUR - prevT;
+              p.x += p.vx * partial;
+              p.y += p.vy * partial;
+              p.vx = 0;
+              p.vy = 0;
+            }
+          } else if (p.slideT < SLIDE_DUR + AIM_DUR) {
             /* Phase 2: Aim — rotate text to point toward heart (Undertale-style) */
             const pcx = p.x + p.w / 2;
             const pcy = p.y + p.h / 2;
@@ -1724,8 +1773,9 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             if (absDiff > deadZone) {
               p.angle += Math.sign(angleDiff) * Math.min(turnSpeed, absDiff);
             }
-          } else if (p.frame === 105) {
-            /* Phase 3: Fire in aimed direction — action:2 for tight off-screen culling */
+          } else if (prevT < SLIDE_DUR + AIM_DUR) {
+            /* Phase 3 (one-shot boundary crossing): Fire in aimed direction —
+               action:2 for tight off-screen culling. */
             const speed = 280;
             p.vx = Math.cos(p.angle) * speed;
             p.vy = Math.sin(p.angle) * speed;
@@ -1762,7 +1812,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           /* Spinning-wheel spokes: cull when the entire wheel (center ± its max
              spoke extent) is fully off screen. The wheel spawns at cx ≈ ±2R, so
              use the largest possible spoke reach (spokeRadius) as the margin —
-             this guarantees ALL 8 spokes survive the initial off-screen entry
+             this guarantees every spoke (6 on mobile, 8 on desktop) survives the initial off-screen entry
              regardless of name length. */
           const entryMargin = Math.max(260, W() * 0.35);
           return p.orbitCx > -entryMargin - p.orbitR && p.orbitCx < w + entryMargin + p.orbitR;

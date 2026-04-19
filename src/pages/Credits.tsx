@@ -557,6 +557,7 @@ const CREDITS_DATA: CreditSection[] = [
 const ALL_NAMES = CREDITS_DATA.flatMap((s) => s.entries.map((e) => e.name)).filter(Boolean);
 const BASE_DURATION = 180;
 const TWO_COL_THRESHOLD = 10;
+const MOBILE_GROUP_SIZE = 3;  // names per inline photo group on mobile
 
 /* ═══════════════════════════════════════════
    Attack Mode — Undertale "Last Goodbye"
@@ -573,15 +574,10 @@ interface Projectile {
   h: number;
   hit: boolean;
   hitAge: number;       // seconds since hit — used to remove after brief flash
-  action: number;       // 0=normal, 1=homing-lock, 2=fired-bullet, 3=wrap, 5=wheel-spoke
+  action: number;       // 0=normal, 1=homing-lock, 2=fired-bullet, 3=wrap
   frame: number;
   gravity: number;
   angle: number;
-  orbitCx: number;
-  orbitCy: number;
-  orbitR: number;
-  orbitAngle: number;
-  orbitSpeed: number;
   logoImg: HTMLImageElement | null;
   /* For logo projectiles — index into ATTACK_LOGOS. -1 for non-logos.
      Cached at spawn so the render loop doesn't need to findIndex every frame. */
@@ -665,7 +661,7 @@ function mkProj(base: Partial<Projectile> & { id: number; text: string; x: numbe
   return {
     vx: 0, vy: 0, hit: false, hitAge: 0, action: 0, frame: 0,
     gravity: 0, angle: 0,
-    orbitCx: 0, orbitCy: 0, orbitR: 0, orbitAngle: 0, orbitSpeed: 0, logoImg: null,
+    logoImg: null,
     logoIdx: -1, slideT: 0,
     ...base,
   };
@@ -880,9 +876,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const P4_SPAWN_INTERVAL_MAX  = 0.60; // max seconds between new column spawns
     const P4_INITIAL_SEED_DESKTOP = 7;   // columns pre-seeded on phase entry (desktop)
     const P4_INITIAL_SEED_MOBILE  = 5;   // columns pre-seeded on phase entry (mobile)
-    // Ph7 — Spinning Wheels
-    const P7_DRIFT_SPEED_FRAC    = 0.065; // drift speed = W × this
-    const P7_ROT_SPEED           = 1.5;   // radians/sec rotation
+    // Ph4 — Sub-phase alternation (vertical ↔ horizontal)
+    const P4_VERT_DURATION      = isMobileDevice ? 2.8 : 3.5;  // s per vertical sub-phase
+    const P4_HORIZ_DURATION     = isMobileDevice ? 2.2 : 3.0;  // s per horizontal sub-phase
+    const P4_MAX_SUBPHASES      = isMobileDevice ? 4  : 6;     // total sub-phases before drain
+    const P4_HORIZ_BATCH_SIZE   = isMobileDevice ? 5  : 8;     // names per horizontal batch
+    const P4_HORIZ_BATCH_RATE   = 0.9;                         // s between horizontal batches
+    const P4_HORIZ_SPEED_FRAC   = 0.50;                        // vx = W × this
 
     /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
     let currentPhase = 0;
@@ -899,15 +899,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const phase0End = Math.floor(totalNames * 0.07);
     const phase2End = Math.floor(totalNames * 0.29);
     const phase3End = Math.floor(totalNames * 0.53);
-    const phase4End = Math.floor(totalNames * 0.68);
-    const phase7End = Math.floor(totalNames * 0.82);
+    const phase4End = Math.floor(totalNames * 0.82);
 
     const getPhase = (idx: number): number => {
       if (idx < phase0End) return 0;  // Aimed spreads
       if (idx < phase2End) return 2;  // Crossing streams
       if (idx < phase3End) return 3;  // Corridor
-      if (idx < phase4End) return 4;  // Vertical rain
-      if (idx < phase7End) return 7;  // Spinning wheels
+      if (idx < phase4End) return 4;  // Alternating rain
       return 6;                       // Fast aimed spreads
     };
 
@@ -1107,6 +1105,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let wallSpawnTimer = 0;      // time since last column spawn (seconds)
     let wallSpawnInterval = 0;   // current randomized interval between spawns
 
+    /* Phase 4 alternating sub-phase state */
+    let p4SubPhase: 'vertical' | 'horizontal' = 'vertical';
+    let p4SubPhaseTimer  = 0;   // s elapsed in current sub-phase
+    let p4SubPhaseCount  = 0;   // completed sub-phases
+    let p4HorizDirection = 1;   // +1 = L→R, -1 = R→L
+    let p4HorizBatchTimer = 0;  // s since last horizontal batch spawn
+
     /* Minimum horizontal separation between column centers.
        Floor is max(fs×ratio, heartWidth×ratio) so both tiny fonts and big hearts
        keep a passable lane. */
@@ -1149,7 +1154,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const cy = newTopY + tw / 2;
       projectiles.push(mkProj({
         id: nextProjId++, text: name,
-        x: col.x - tw / 2,
+        x: col.x,           // left-align: first letter at column x
         y: cy - th / 2,
         vy,
         w: tw, h: th,
@@ -1232,96 +1237,25 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 7: Spinning Wheels — two rotating spoke-wheels from opposite sides ── */
-    const spawnSpinningWheels = () => {
-      const w = W();
-      const h = H();
-      /* Fewer, longer spokes on mobile — gives each name room to sweep around
-         without overlapping its neighbor. Desktop keeps the classic 8-spoke
-         wheel. */
-      const spokes = isMobileDevice ? 6 : 8;
-      /* Spoke radius floor is bigger on mobile so the arc between adjacent
-         spokes is long enough to fit the longest name. */
-      const spokeRadius = Math.max(isMobileDevice ? 180 : 160, Math.min(240, W() / 3.5));
-      const baseRotSpeed = P7_ROT_SPEED;
-      const driftSpeed = W() * P7_DRIFT_SPEED_FRAC;
-
-      /* Explicit for-loops guarantee exactly `spokes` names per wheel — wraps ALL_NAMES. */
-      const wheel1Names: string[] = [];
-      for (let i = 0; i < spokes; i++) {
-        wheel1Names.push(ALL_NAMES[(nameIdx + i) % ALL_NAMES.length] ?? ALL_NAMES[0] ?? 'Danny');
-      }
-      nameIdx += spokes;
-
-      const wheel2Names: string[] = [];
-      for (let i = 0; i < spokes; i++) {
-        wheel2Names.push(ALL_NAMES[(nameIdx + i) % ALL_NAMES.length] ?? ALL_NAMES[0] ?? 'Danny');
-      }
-      nameIdx += spokes;
-
-      /* Inner radius (where the first letter of each name begins) is computed
-         so that adjacent name-boxes can't overlap at their outer tips. The
-         chord length between spoke tips of length L is 2·L·sin(π/n), so each
-         name of width tw fits without overlap when the mid-name radius
-         satisfies `2·r_mid·sin(π/n) ≥ tw + pad`. Since r_mid = innerR + tw/2,
-         solving gives innerR ≥ tw · (1/(2·sin(π/n)) − 1/2) + pad. */
-      const allWheelNames = wheel1Names.concat(wheel2Names);
-      const maxTw = allWheelNames.reduce(
-        (m, n) => Math.max(m, measureName(n).tw), 0
-      );
-      const pad = 12;
-      const chordFactor = 1 / (2 * Math.sin(Math.PI / spokes));
-      const innerR = Math.max(
-        28,
-        spokeRadius * 0.2,
-        maxTw * (chordFactor - 0.5) + pad
-      );
-
-      /* Wheel 1: enters from left, near bottom */
-      const cx1 = -spokeRadius * 2;
-      const cy1 = h * 0.75;
-      const baseAngle1 = phaseRound * 0.7;
-
-      for (let i = 0; i < spokes; i++) {
-        const name = wheel1Names[i]!;
+    /* ── Phase 4 horizontal sub-phase: batch of names flying across screen ── */
+    const spawnHorizBatch = () => {
+      if (nameIdx >= phase4End) return;
+      const w = W(), h = H();
+      const speed = w * P4_HORIZ_SPEED_FRAC * p4HorizDirection;
+      const startX = p4HorizDirection > 0 ? -300 : w + 300;
+      const count = P4_HORIZ_BATCH_SIZE;
+      for (let i = 0; i < count; i++) {
+        const name = nextName();
+        if (!name) return;
         const { tw, th } = measureName(name);
-        const spokeAngle = baseAngle1 + (i * 2 * Math.PI / spokes);
-        const nameOrbitR = innerR + tw / 2;
+        /* Spread evenly from 10%–90% of screen height, ±20px jitter */
+        const yFrac = 0.10 + 0.80 * (i / Math.max(1, count - 1));
+        const y = h * yFrac + (Math.random() - 0.5) * 40;
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: cx1 + Math.cos(spokeAngle) * nameOrbitR - tw / 2,
-          y: cy1 + Math.sin(spokeAngle) * nameOrbitR - th / 2,
-          vx: driftSpeed,
-          w: tw, h: th,
-          action: 5,
-          orbitCx: cx1, orbitCy: cy1,
-          orbitR: nameOrbitR,
-          orbitAngle: spokeAngle,
-          orbitSpeed: baseRotSpeed,
-        }));
-      }
-
-      /* Wheel 2: enters from right, near top */
-      const cx2 = w + spokeRadius * 2;
-      const cy2 = h * 0.25;
-      const baseAngle2 = phaseRound * 0.7 + Math.PI / spokes;
-
-      for (let i = 0; i < spokes; i++) {
-        const name = wheel2Names[i]!;
-        const { tw, th } = measureName(name);
-        const spokeAngle = baseAngle2 + (i * 2 * Math.PI / spokes);
-        const nameOrbitR = innerR + tw / 2;
-        projectiles.push(mkProj({
-          id: nextProjId++, text: name,
-          x: cx2 + Math.cos(spokeAngle) * nameOrbitR - tw / 2,
-          y: cy2 + Math.sin(spokeAngle) * nameOrbitR - th / 2,
-          vx: -driftSpeed,
-          w: tw, h: th,
-          action: 5,
-          orbitCx: cx2, orbitCy: cy2,
-          orbitR: nameOrbitR,
-          orbitAngle: spokeAngle,
-          orbitSpeed: -baseRotSpeed,
+          x: startX, y: y - th / 2,
+          vx: speed, w: tw, h: th,
+          /* angle: 0 — no rotation, text reads naturally */
         }));
       }
     };
@@ -1381,7 +1315,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       switch (phase) {
         case 0: base = 1.2; break;   // Aimed spreads
         case 2: base = 3.5; break;   // Crossing streams (full screen per call, both waves)
-        case 7: base = 4.5; break;   // Spinning wheels (fewer, fuller spokes)
         case 6: base = 0.8; break;   // Fast aimed spreads
         default: base = 1.0;
       }
@@ -1657,24 +1590,60 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             phaseTimer = 0;
             phaseRound = 0;
             phaseTransitionDelay = PHASE_TRANSITION_DURATION;
+            /* Reset Phase 4 sub-phase state on entry */
+            if (newPhase === 4) {
+              p4SubPhase = 'vertical';
+              p4SubPhaseTimer = 0;
+              p4SubPhaseCount = 0;
+              p4HorizDirection = 1;
+              p4HorizBatchTimer = 0;
+            }
           }
 
-          /* Wait for transition delay before spawning new phase.
-             Phase 6 also waits for all spinning wheel spokes to exit. */
-          const spokesStillAlive = currentPhase === 6 && projectiles.some(p => p.action === 5);
           if (phaseTransitionDelay > 0) {
             phaseTransitionDelay -= dt;
-          } else if (spokesStillAlive) {
-            /* Hold phase 6 spawning until spokes are gone */
           } else if (currentPhase === 3 && !corridorActive) {
             /* Start corridor */
             corridorActive = true;
             corridorSpawnTimer = 0;
             corridorSpawnCount = 0;
           } else if (currentPhase === 4) {
-            /* Falling walls: init on entry, continuously top up each frame. */
-            if (!wallColumns) initWallColumns();
-            updateWalls(dt);
+            /* Alternating vertical + horizontal rain sub-phases */
+            if (p4SubPhaseCount < P4_MAX_SUBPHASES && nameIdx < phase4End) {
+              if (p4SubPhase === 'vertical') {
+                if (!wallColumns) initWallColumns();
+                updateWalls(dt);
+                p4SubPhaseTimer += dt;
+                if (p4SubPhaseTimer >= P4_VERT_DURATION) {
+                  /* Switch to horizontal */
+                  wallColumns = null;
+                  p4SubPhase = 'horizontal';
+                  p4SubPhaseTimer = 0;
+                  p4HorizBatchTimer = 0;
+                  p4SubPhaseCount++;
+                  spawnHorizBatch(); /* first batch immediately */
+                }
+              } else {
+                /* Horizontal sub-phase */
+                p4HorizBatchTimer += dt;
+                if (p4HorizBatchTimer >= P4_HORIZ_BATCH_RATE) {
+                  p4HorizBatchTimer = 0;
+                  spawnHorizBatch();
+                }
+                p4SubPhaseTimer += dt;
+                if (p4SubPhaseTimer >= P4_HORIZ_DURATION) {
+                  /* Switch back to vertical */
+                  p4HorizDirection *= -1;
+                  p4SubPhase = 'vertical';
+                  p4SubPhaseTimer = 0;
+                  p4SubPhaseCount++;
+                  wallColumns = null;
+                  wallSpawnTimer = 0;
+                  wallSpawnInterval = 0;
+                }
+              }
+            }
+            /* After cap: drain existing projectiles — no new spawns */
           } else if (currentPhase !== 3) {
             phaseTimer += dt;
             const interval = getSpawnInterval(currentPhase);
@@ -1691,10 +1660,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
                 }
                 case 2:
                   spawnCrossingStreams();
-                  phaseRound++;
-                  break;
-                case 7:
-                  spawnSpinningWheels();
                   phaseRound++;
                   break;
               }
@@ -1783,13 +1748,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             p.vy = Math.sin(p.angle) * speed;
             p.action = 2;
           }
-        } else if (p.action === 5) {
-          /* Spinning wheel spoke — orbit around moving center */
-          p.orbitCx += p.vx * dt;
-          p.orbitAngle += p.orbitSpeed * dt;
-          p.x = p.orbitCx + Math.cos(p.orbitAngle) * p.orbitR - p.w / 2;
-          p.y = p.orbitCy + Math.sin(p.orbitAngle) * p.orbitR - p.h / 2;
-          p.angle = p.orbitAngle;
         } else if (p.action === 6) {
           /* Corridor wall — just fall straight down (x is fixed at spawn) */
           p.y += p.vy * dt;
@@ -1810,15 +1768,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       projectiles = projectiles.filter((p) => {
         /* Fired aimed bullets (action:2): tight cull — remove as soon as off-screen */
         if (p.action === 2) return p.x > -p.w - 60 && p.x < w + 60 && p.y > -p.h - 60 && p.y < h + 60;
-        if (p.action === 5) {
-          /* Spinning-wheel spokes: cull when the entire wheel (center ± its max
-             spoke extent) is fully off screen. The wheel spawns at cx ≈ ±2R, so
-             use the largest possible spoke reach (spokeRadius) as the margin —
-             this guarantees every spoke (6 on mobile, 8 on desktop) survives the initial off-screen entry
-             regardless of name length. */
-          const entryMargin = Math.max(260, W() * 0.35);
-          return p.orbitCx > -entryMargin - p.orbitR && p.orbitCx < w + entryMargin + p.orbitR;
-        }
         if (p.action === 6) {
           /* Corridor + Phase-4 walls fall straight down. Rotated walls have
              visual extent = p.w (original text width), so add the max extent so
@@ -1827,13 +1776,9 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         }
         return p.x > -400 && p.x < w + 400 && p.y > -300 && p.y < h + 300;
       });
-      /* Hard cap for mobile perf — drop oldest NON-SPOKE projectiles first so
-         spinning-wheel spokes are never sliced mid-rotation (missing-spoke bug). */
+      /* Hard cap for mobile perf — drop oldest projectiles first. */
       if (projectiles.length > MAX_PROJECTILES) {
-        const spokes = projectiles.filter(p => p.action === 5);
-        const others = projectiles.filter(p => p.action !== 5);
-        const keepOthers = Math.max(0, MAX_PROJECTILES - spokes.length);
-        projectiles = [...others.slice(others.length - keepOthers), ...spokes];
+        projectiles = projectiles.slice(projectiles.length - MAX_PROJECTILES);
       }
 
       /* ── Hit detection — batched per frame for mobile perf ── */
@@ -2331,6 +2276,58 @@ export function Credits() {
     }
   }, []);
 
+  /* ── Mobile layout: photos interleaved with name groups ── */
+  const buildMobileLayout = (section: CreditSection) => {
+    const photoPool = [
+      ...(section.leftPhotos ?? []),
+      ...(section.rightPhotos ?? []),
+    ];
+    const result: React.ReactNode[] = [];
+    let photoIdx = 0;
+    const isMemorial = section.title === 'In Memory Of';
+
+    for (let i = 0; i < section.entries.length; i += MOBILE_GROUP_SIZE) {
+      const group = section.entries.slice(i, i + MOBILE_GROUP_SIZE);
+      const photo = photoPool[photoIdx];
+      const isLeft = photoIdx % 2 === 0;
+
+      const nameNodes = group.map((entry) => (
+        <div key={`${section.title}-${entry.name}-mob`}>
+          <div className={isMemorial ? styles.memorialName : styles.name}>
+            {entry.name}
+          </div>
+          {entry.role && <div className={styles.role}>{entry.role}</div>}
+          {entry.needsLastName && (
+            <div className={styles.placeholder}>[INSERT LAST NAME]</div>
+          )}
+        </div>
+      ));
+
+      if (photo) {
+        result.push(
+          <div
+            key={`mob-group-${i}`}
+            className={`${styles.mobilePhotoGroup}${!isLeft ? ` ${styles.mobilePhotoGroupReverse}` : ''}`}
+          >
+            <img
+              className={styles.mobileGroupPhoto}
+              src={`/credits-photos/${photo}`}
+              alt=""
+            />
+            <div className={styles.mobileGroupNames}>{nameNodes}</div>
+          </div>
+        );
+        photoIdx++;
+      } else {
+        result.push(
+          <div key={`mob-group-${i}`}>{nameNodes}</div>
+        );
+      }
+    }
+
+    return result;
+  };
+
   /* ═══════════════════════════════════════════
      Render helpers
      ═══════════════════════════════════════════ */
@@ -2522,11 +2519,19 @@ export function Credits() {
                   <div className={section.title === 'In Memory Of' ? styles.memorialTitle : styles.sectionTitle}>
                     {section.title}
                   </div>
-                  {useTwoCol ? (
-                    <div className={styles.twoColumnNames}>{nameEntries}</div>
-                  ) : (
-                    nameEntries
-                  )}
+                  {/* Desktop layout */}
+                  <div className={styles.desktopNames}>
+                    {useTwoCol ? (
+                      <div className={styles.twoColumnNames}>{nameEntries}</div>
+                    ) : (
+                      nameEntries
+                    )}
+                  </div>
+
+                  {/* Mobile layout — photos interleaved with name groups */}
+                  <div className={styles.mobileNames}>
+                    {buildMobileLayout(section)}
+                  </div>
                   <div className={styles.divider} />
                 </div>
 

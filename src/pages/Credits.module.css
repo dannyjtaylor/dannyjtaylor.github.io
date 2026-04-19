@@ -799,6 +799,50 @@
 }
 
 /* ═══════════════════════════════════════════
+   Mobile Inline Photo Layout
+   ═══════════════════════════════════════════ */
+
+/* Desktop names — hidden on mobile */
+.desktopNames {
+  display: block;
+}
+
+/* Mobile names with inline photos — hidden on desktop */
+.mobileNames {
+  display: none;
+}
+
+/* Flex row: photo (42%) + names (flex:1), reversed for right-side photos */
+.mobilePhotoGroup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.mobilePhotoGroupReverse {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.mobileGroupPhoto {
+  width: 42%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.mobileGroupNames {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ═══════════════════════════════════════════
    Responsive — Mobile
    ═══════════════════════════════════════════ */
 
@@ -811,6 +855,8 @@
   .sideColRight {
     display: none;
   }
+  .desktopNames { display: none; }
+  .mobileNames  { display: block; }
 }
 
 @media (max-width: 640px) {

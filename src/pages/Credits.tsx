@@ -859,30 +859,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const P3_FALL_SPEED_FRAC     = 0.62; // fall speed = H × this
     const P3_SPAWN_RATE          = 0.09; // seconds between each corridor name-pair
     const P3_MAX_SWING_PX        = 140;  // max corridor gap deviation from center (keeps pace with heart on PC)
-    // Ph4 — Falling Walls (Undertale-accurate: continuous vertical streams of rotated names)
-    // Authenticity keys per reference /credits-photos/phase4.png:
-    //   • pure vertical motion, UNIFORM fall speed (no per-column jitter)
-    //   • random x-spawn positions (NOT a fixed grid), min-gap enforced
-    //   • columns are CONTINUOUS infinite streams that only retire when the
-    //     phase-4 name budget is exhausted — names butt flush with zero v-gap
-    //   • staggered column spawning over time to vary lane density
-    const P4_FALL_SPEED_FRAC     = 0.10; // fall speed = H × this (uniform across ALL columns)
-    const P4_NAME_V_GAP          = 0;    // px gap between stacked names — 0 = butted flush
-    const P4_COLS_DESKTOP_CAP    = 14;   // max simultaneous columns on desktop
-    const P4_COLS_MOBILE_CAP     = 8;    // max simultaneous columns on mobile
-    const P4_MIN_GAP_HEART_MULT  = 2.8;  // min column-center spacing ≥ this × heart width
-    const P4_MIN_GAP_FONT_MULT   = 1.4;  // min column-center spacing ≥ this × fontSize (floor)
-    const P4_SPAWN_INTERVAL_MIN  = 0.28; // min seconds between new column spawns
-    const P4_SPAWN_INTERVAL_MAX  = 0.60; // max seconds between new column spawns
-    const P4_INITIAL_SEED_DESKTOP = 7;   // columns pre-seeded on phase entry (desktop)
-    const P4_INITIAL_SEED_MOBILE  = 5;   // columns pre-seeded on phase entry (mobile)
-    // Ph4 — Sub-phase alternation (vertical ↔ horizontal)
-    const P4_VERT_DURATION      = isMobileDevice ? 2.8 : 3.5;  // s per vertical sub-phase
-    const P4_HORIZ_DURATION     = isMobileDevice ? 2.2 : 3.0;  // s per horizontal sub-phase
-    const P4_MAX_SUBPHASES      = isMobileDevice ? 4  : 6;     // total sub-phases before drain
-    const P4_HORIZ_BATCH_SIZE   = isMobileDevice ? 5  : 8;     // names per horizontal batch
-    const P4_HORIZ_BATCH_RATE   = 0.9;                         // s between horizontal batches
-    // Horizontal names travel at same px/s as vertical (H × P4_FALL_SPEED_FRAC)
+    // Ph4 — Matrix Rain (names fall straight down from the top, no rotation)
+    const P4_MATRIX_SPEED_FRAC  = isMobileDevice ? 0.14 : 0.12; // vy = H × this
+    const P4_BURST_SIZE         = isMobileDevice ? 2 : 3;        // names per burst
+    const P4_BURST_RATE         = isMobileDevice ? 0.35 : 0.22;  // s between bursts
+    // Ph5 — Side Blitz (names fly across screen left ↔ right in rows)
+    const P5_BLITZ_ROWS         = isMobileDevice ? 3 : 5;        // names per wave
+    const P5_BLITZ_RATE         = isMobileDevice ? 0.95 : 0.70;  // s between waves
+    const P5_BLITZ_SPEED_FRAC   = isMobileDevice ? 0.25 : 0.20;  // vx = W × this
 
     /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
     let currentPhase = 0;
@@ -899,13 +883,15 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const phase0End = Math.floor(totalNames * 0.07);
     const phase2End = Math.floor(totalNames * 0.29);
     const phase3End = Math.floor(totalNames * 0.53);
-    const phase4End = Math.floor(totalNames * 0.82);
+    const phase4End = Math.floor(totalNames * 0.68);  // Matrix rain
+    const phase5End = Math.floor(totalNames * 0.82);  // Side blitz
 
     const getPhase = (idx: number): number => {
       if (idx < phase0End) return 0;  // Aimed spreads
       if (idx < phase2End) return 2;  // Crossing streams
       if (idx < phase3End) return 3;  // Corridor
-      if (idx < phase4End) return 4;  // Alternating rain
+      if (idx < phase4End) return 4;  // Matrix rain
+      if (idx < phase5End) return 5;  // Side blitz
       return 6;                       // Fast aimed spreads
     };
 
@@ -934,22 +920,18 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     /* ── Phase 0 & 6: Aimed Spreads — groups of 5, stop, aim at heart, fire ── */
     const spawnAimedSpread = (fromRight: boolean, yCenter: number) => {
       const w = W();
-      const spacing = Math.max(30, W() / 18);
-      /* Scale slide speed with screen width. Travel distance over the fixed
-         1 s slide window = slideVx × 1 s, so keeping slideVx ≲ W keeps names
-         on-screen. Mobile drops the 350 px/s desktop floor — with 30 fps +
-         frame-count gates it forced 2× overshoot and flung names off the
-         left edge of small phones. Time-based gates now bound travel, but we
-         still cap mobile slideVx to ~55 % of screen width. */
+      /* Wider spacing and only 3 names per spread → easier to dodge on both
+         phases 0 (opening) and 6 (finale), while still feeling like a spread */
+      const spacing = Math.max(45, W() / 13);
       const slideVx = isMobileDevice
         ? Math.max(180, W() * 0.55)
         : Math.max(350, W() * 0.55);
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 3; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
         const startX = fromRight ? w + 50 + i * spacing : -tw - 50 - i * spacing;
-        const startY = yCenter + (i - 2) * spacing;
+        const startY = yCenter + (i - 1) * spacing; // center 3-name spread around yCenter
         projectiles.push(mkProj({
           id: nextProjId++, text: name, x: startX, y: startY,
           vx: fromRight ? -slideVx : slideVx, w: tw, h: th,
@@ -1086,183 +1068,50 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 4: Falling Walls — Undertale-accurate continuous vertical streams ──
-       Columns are spawned at RANDOM x-positions (not a fixed grid) and STAGGERED
-       over time — one new column every ~0.3-0.6s. All columns fall at the SAME
-       uniform speed (no per-column jitter — matches Undertale's deterministic
-       engine). Each column is a CONTINUOUS stream that keeps topping up with
-       the next phase-4 name whenever its top edge slips below y=0, so names
-       butt flush (P4_NAME_V_GAP=0). Columns only retire once the phase-4 name
-       budget is exhausted AND the last-placed name has scrolled fully off the
-       bottom of the screen.
-       Matches reference screenshots at /credits-photos/phase4.png and
-       /credits-photos/undertalecredits_howitshouldb3.png */
-    interface WallColumn {
-      x: number;
-      topY: number;     // y of the top edge of the top-most name in this column
-    }
-    let wallColumns: WallColumn[] | null = null;
-    let wallSpawnTimer = 0;      // time since last column spawn (seconds)
-    let wallSpawnInterval = 0;   // current randomized interval between spawns
+    /* Phase 5 blitz direction state */
+    let p5FromRight = false;
 
-    /* Phase 4 alternating sub-phase state */
-    let p4SubPhase: 'vertical' | 'horizontal' = 'vertical';
-    let p4SubPhaseTimer  = 0;   // s elapsed in current sub-phase
-    let p4SubPhaseCount  = 0;   // completed sub-phases
-    let p4HorizDirection = 1;   // +1 = L→R, -1 = R→L
-    let p4HorizBatchTimer = 0;  // s since last horizontal batch spawn
-
-    /* Minimum horizontal separation between column centers.
-       Floor is max(fs×ratio, heartWidth×ratio) so both tiny fonts and big hearts
-       keep a passable lane. */
-    const getWallMinGap = (): number => {
-      const fs = getFontSize();
-      const heartW = getHeartSize() * 2;
-      return Math.max(fs * P4_MIN_GAP_FONT_MULT, heartW * P4_MIN_GAP_HEART_MULT);
-    };
-
-    /* Pick a random x at least `minGap` away from every existing column.
-       Returns null if no valid slot found after `maxAttempts` tries (screen full). */
-    const pickWallX = (minGap: number, maxAttempts = 30): number | null => {
-      if (!wallColumns) return null;
-      const w = W();
-      const fs = getFontSize();
-      const edgeMargin = fs * 0.6; // keep names fully on screen
-      const span = w - 2 * edgeMargin;
-      if (span <= 0) return null;
-      for (let i = 0; i < maxAttempts; i++) {
-        const x = edgeMargin + Math.random() * span;
-        let ok = true;
-        for (const col of wallColumns) {
-          if (Math.abs(col.x - x) < minGap) { ok = false; break; }
-        }
-        if (ok) return x;
-      }
-      return null;
-    };
-
-    /* Spawn ONE name at the top of a column's continuous stream, extending it
-       upward. Mutates col.topY. Returns false once the phase-4 budget is
-       exhausted or no more names remain. */
-    const spawnOneNameInColumn = (col: WallColumn, vy: number): boolean => {
-      if (nameIdx >= phase4End) return false;
-      const name = nextName();
-      if (!name) return false;
-      const { tw, th } = measureName(name);
-      const nameRotH = tw + P4_NAME_V_GAP; // vertical extent after 90° CW rotation
-      const newTopY = col.topY - nameRotH;
-      const cy = newTopY + tw / 2;
-      projectiles.push(mkProj({
-        id: nextProjId++, text: name,
-        x: col.x - tw / 2,  // center column on col.x so names align visually
-        y: cy - th / 2,
-        vy,
-        w: tw, h: th,
-        angle: Math.PI / 2, // 90° CW — text reads top→bottom on screen
-        action: 6,          // reuse "straight-fall" movement + cull path
-      }));
-      col.topY = newTopY;
-      return true;
-    };
-
-    /* Try to spawn a single new column at a valid random x.
-       `stagger=true` gives it a random initial topY between 0-100% of screen
-       height (used only at phase entry so the screen is pre-seeded with streams
-       already in mid-fall). Otherwise new columns start just above the top of
-       the screen and stream downward from there. */
-    const spawnWallColumn = (stagger: boolean): void => {
-      if (!wallColumns) return;
-      const capCols = isMobileDevice ? P4_COLS_MOBILE_CAP : P4_COLS_DESKTOP_CAP;
-      if (wallColumns.length >= capCols) return;
-      if (nameIdx >= phase4End) return;
-      const x = pickWallX(getWallMinGap());
-      if (x === null) return; // no valid slot right now — skip this spawn
-      const h = H();
-      const vy = h * P4_FALL_SPEED_FRAC;
-      const col: WallColumn = {
-        x,
-        topY: stagger ? h * Math.random() : 0,
-      };
-      wallColumns.push(col);
-      /* Seed the stream so it's visible immediately. When staggered, keep
-         topping up until topY <= 0 (i.e. the full visible height above
-         `col.topY` is filled with names). When not staggered, just one seed
-         name so the column enters head-first like a raindrop. */
-      if (stagger) {
-        while (col.topY > 0 && spawnOneNameInColumn(col, vy)) { /* fill upward */ }
-      } else {
-        spawnOneNameInColumn(col, vy);
-      }
-    };
-
-    const initWallColumns = () => {
-      wallColumns = [];
-      wallSpawnTimer = 0;
-      wallSpawnInterval = 0; // first new column can spawn on the very next frame
-      const seed = isMobileDevice ? P4_INITIAL_SEED_MOBILE : P4_INITIAL_SEED_DESKTOP;
-      // stagger=false: columns always enter from above the screen (never mid-screen)
-      for (let i = 0; i < seed; i++) spawnWallColumn(false);
-    };
-
-    const updateWalls = (dt: number) => {
-      if (!wallColumns) return;
-      const h = H();
-      const vy = h * P4_FALL_SPEED_FRAC;
-      /* 1) Advance every column in lockstep with its falling names, and keep
-            topping up the top with the next phase-4 name so the stream is
-            continuous (no mid-stream gaps). */
-      for (const col of wallColumns) {
-        col.topY += vy * dt;
-        while (col.topY > 0 && nameIdx < phase4End) {
-          if (!spawnOneNameInColumn(col, vy)) break;
-        }
-      }
-      /* 2) Retire columns once the phase-4 name budget is exhausted AND the
-            top of the stream has fully exited below the bottom of the screen —
-            the projectiles they spawned are still falling on their own via
-            action:6 movement. Streams whose names are still being topped up
-            always survive. */
-      wallColumns = wallColumns.filter(col =>
-        nameIdx < phase4End || col.topY < h + 50
-      );
-      /* 3) Spawn a fresh column at a randomized interval — matches Undertale's
-            staggered waterfall feel. */
-      if (nameIdx < phase4End) {
-        wallSpawnTimer += dt;
-        if (wallSpawnTimer >= wallSpawnInterval) {
-          spawnWallColumn(false);
-          wallSpawnTimer = 0;
-          wallSpawnInterval = P4_SPAWN_INTERVAL_MIN +
-            Math.random() * (P4_SPAWN_INTERVAL_MAX - P4_SPAWN_INTERVAL_MIN);
-        }
-      }
-    };
-
-    /* ── Phase 4 horizontal sub-phase: batch of names flying across screen ── */
-    const spawnHorizBatch = () => {
+    /* ── Phase 4: Matrix Rain — names fall straight down from the top ── */
+    const spawnMatrixBurst = () => {
       if (nameIdx >= phase4End) return;
       const w = W(), h = H();
-      /* Use same px/s as vertical rain (H × P4_FALL_SPEED_FRAC) so both
-         sub-phases feel equally fast to dodge */
-      const speed = h * P4_FALL_SPEED_FRAC * p4HorizDirection;
-      const count = P4_HORIZ_BATCH_SIZE;
-      for (let i = 0; i < count; i++) {
+      const vy = h * P4_MATRIX_SPEED_FRAC;
+      for (let i = 0; i < P4_BURST_SIZE; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
-        /* Per-name startX: guarantee the name is fully off-screen regardless of
-           text width. L→R enters from left (-tw-200), R→L from right (w+200). */
-        const startX = p4HorizDirection > 0 ? -tw - 200 : w + 200;
-        /* Spread evenly from 10%–90% of screen height, ±20px jitter */
-        const yFrac = 0.10 + 0.80 * (i / Math.max(1, count - 1));
-        const y = h * yFrac + (Math.random() - 0.5) * 40;
+        /* Clamp so names never clip off the right edge */
+        const x = Math.max(4, Math.random() * Math.max(1, w - tw - 8));
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x, y: -th - 10,
+          vy, w: tw, h: th,
+          /* action: 0 (default) — standard x+y movement; only vy is set */
+        }));
+      }
+    };
+
+    /* ── Phase 5: Side Blitz — rows of names fly across from alternating sides ── */
+    const spawnBlitzWave = () => {
+      if (nameIdx >= phase5End) return;
+      const w = W(), h = H();
+      const vx = w * P5_BLITZ_SPEED_FRAC * (p5FromRight ? -1 : 1);
+      const rows = P5_BLITZ_ROWS;
+      for (let i = 0; i < rows; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        /* Guaranteed off-screen start for each direction */
+        const startX = p5FromRight ? w + 60 : -tw - 60;
+        /* Evenly spread rows: 15%–85% of screen height */
+        const y = h * (0.15 + 0.70 * (i / Math.max(1, rows - 1)));
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
           x: startX, y: y - th / 2,
-          vx: speed, w: tw, h: th,
-          action: 8, /* distinct action: horizontal Phase-4 names */
+          vx, w: tw, h: th,
         }));
       }
+      p5FromRight = !p5FromRight;
     };
 
     /* ── Input ── */
@@ -1589,19 +1438,15 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         } else {
           const newPhase = getPhase(nameIdx);
           if (newPhase !== currentPhase) {
-            /* Tear down phase-specific state when leaving a phase. */
-            if (currentPhase === 4 && newPhase !== 4) wallColumns = null;
+            /* Clear all active projectiles for a clean transition */
+            projectiles = [];
             currentPhase = newPhase;
             phaseTimer = 0;
             phaseRound = 0;
             phaseTransitionDelay = PHASE_TRANSITION_DURATION;
-            /* Reset Phase 4 sub-phase state on entry */
-            if (newPhase === 4) {
-              p4SubPhase = 'vertical';
-              p4SubPhaseTimer = 0;
-              p4SubPhaseCount = 0;
-              p4HorizDirection = 1;
-              p4HorizBatchTimer = 0;
+            /* Reset phase-specific entry state */
+            if (newPhase === 5) {
+              p5FromRight = false;
             }
           }
 
@@ -1613,51 +1458,19 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             corridorSpawnTimer = 0;
             corridorSpawnCount = 0;
           } else if (currentPhase === 4) {
-            /* Alternating vertical + horizontal rain sub-phases */
-            if (p4SubPhaseCount >= P4_MAX_SUBPHASES) {
-              /* Cap reached — flush remaining Phase-4 projectiles and advance
-                 nameIdx so getPhase() returns 6 on the next frame. */
-              if (nameIdx < phase4End) {
-                wallColumns = null;
-                projectiles = projectiles.filter(p => p.action !== 6 && p.action !== 8);
-                nameIdx = phase4End;
-              }
-              /* else: drain naturally — existing projectiles exit on their own */
-            } else if (p4SubPhase === 'vertical') {
-              if (!wallColumns) initWallColumns();
-              updateWalls(dt);
-              p4SubPhaseTimer += dt;
-              if (p4SubPhaseTimer >= P4_VERT_DURATION || nameIdx >= phase4End) {
-                /* Switch to horizontal — clear vertical names so screen is clean */
-                wallColumns = null;
-                projectiles = projectiles.filter(p => p.action !== 6);
-                p4SubPhase = 'horizontal';
-                p4SubPhaseTimer = 0;
-                p4HorizBatchTimer = 0;
-                p4SubPhaseCount++;
-                if (nameIdx < phase4End) spawnHorizBatch(); /* first batch immediately */
-              }
-            } else {
-              /* Horizontal sub-phase */
-              p4SubPhaseTimer += dt;
-              p4HorizBatchTimer += dt;
-              if (p4HorizBatchTimer >= P4_HORIZ_BATCH_RATE && nameIdx < phase4End) {
-                p4HorizBatchTimer = 0;
-                spawnHorizBatch();
-              }
-              if (p4SubPhaseTimer >= P4_HORIZ_DURATION || nameIdx >= phase4End) {
-                /* Switch back to vertical — clear horizontal names so screen is clean */
-                projectiles = projectiles.filter(p => p.action !== 8);
-                p4HorizDirection *= -1;
-                p4SubPhase = 'vertical';
-                p4SubPhaseTimer = 0;
-                p4SubPhaseCount++;
-                wallColumns = null;
-                wallSpawnTimer = 0;
-                wallSpawnInterval = 0;
-              }
+            /* Matrix rain — names fall from the top in small random bursts */
+            phaseTimer += dt;
+            if (phaseTimer >= P4_BURST_RATE && nameIdx < phase4End) {
+              phaseTimer = 0;
+              spawnMatrixBurst();
             }
-            /* After cap: drain existing projectiles — no new spawns */
+          } else if (currentPhase === 5) {
+            /* Side blitz — rows of names fly across from alternating sides */
+            phaseTimer += dt;
+            if (phaseTimer >= P5_BLITZ_RATE && nameIdx < phase5End) {
+              phaseTimer = 0;
+              spawnBlitzWave();
+            }
           } else if (currentPhase !== 3) {
             phaseTimer += dt;
             const interval = getSpawnInterval(currentPhase);
@@ -1787,10 +1600,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
              have visual extent = p.w (original text width), so add the max extent
              so rotated glyphs fully clear the screen before cull. */
           return p.y < h + 100 + Math.max(p.w, p.h);
-        }
-        if (p.action === 8) {
-          /* Phase-4 horizontal names — cull when fully off the screen horizontally */
-          return p.x + p.w > -200 && p.x < w + 200;
         }
         return p.x > -400 && p.x < w + 400 && p.y > -300 && p.y < h + 300;
       });
@@ -2111,6 +1920,10 @@ export function Credits() {
   const [fontsReady, setFontsReady] = useState(false);
   useEffect(() => { preloadFonts().then(() => setFontsReady(true)); }, []);
 
+  /* Song preview state */
+  const [previewTrack, setPreviewTrack] = useState<number | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const attackAudioRef = useRef<HTMLAudioElement | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -2129,6 +1942,37 @@ export function Credits() {
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume / 100;
   }, [volume]);
+
+  /* Preload all credits photos on mount so they appear instantly when scrolled to */
+  useEffect(() => {
+    const urls: string[] = [
+      '/credits-photos/flpoly.png',
+      '/credits-photos/professional_photo_of_me.png',
+      '/credits-photos/wellsfargo.jpg',
+      '/credits-photos/IBM.png',
+      '/credits-photos/ibm_1.jpg',
+    ];
+    for (const section of CREDITS_DATA) {
+      if (section.photo) {
+        const photos = Array.isArray(section.photo) ? section.photo : [section.photo];
+        photos.forEach(p => urls.push(`/credits-photos/${p}`));
+      }
+      (section.leftPhotos ?? []).forEach(p => urls.push(`/credits-photos/${p}`));
+      (section.rightPhotos ?? []).forEach(p => urls.push(`/credits-photos/${p}`));
+      section.entries.forEach(e => { if (e.photo) urls.push(`/credits-photos/${e.photo}`); });
+    }
+    [...new Set(urls)].forEach(src => { const img = new Image(); img.src = src; });
+  }, []);
+
+  /* Stop preview audio when switching away from song-select screen */
+  useEffect(() => {
+    if (mode !== 'select' && previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current.src = '';
+      previewAudioRef.current = null;
+      setPreviewTrack(null);
+    }
+  }, [mode]);
 
   useEffect(() => {
     if (mode !== 'credits') return;
@@ -2215,6 +2059,41 @@ export function Credits() {
   }, []);
 
   /* ── Audio helpers ── */
+
+  const togglePreview = useCallback((trackIdx: number) => {
+    /* If already previewing this track, stop it */
+    if (previewTrack === trackIdx) {
+      if (previewAudioRef.current) {
+        previewAudioRef.current.pause();
+        previewAudioRef.current.src = '';
+        previewAudioRef.current = null;
+      }
+      setPreviewTrack(null);
+      return;
+    }
+    /* Stop any running preview */
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current.src = '';
+    }
+    const track = TRACKS[trackIdx];
+    if (!track) return;
+    const a = new Audio(track.file);
+    a.volume = 0.6;
+    a.play().catch(() => {});
+    previewAudioRef.current = a;
+    setPreviewTrack(trackIdx);
+    /* Auto-stop after 30 seconds */
+    const timer = setTimeout(() => {
+      if (previewAudioRef.current === a) {
+        a.pause();
+        a.src = '';
+        previewAudioRef.current = null;
+        setPreviewTrack(null);
+      }
+    }, 30000);
+    a.addEventListener('ended', () => clearTimeout(timer));
+  }, [previewTrack]);
 
   const startAudio = useCallback((trackIdx: number) => {
     if (audioRef.current) {
@@ -2374,13 +2253,21 @@ export function Credits() {
             <div className={styles.songSelectSubtitle}>Select the music for the credits</div>
             <div className={styles.songList}>
               {TRACKS.map((t, i) => (
-                <button
-                  key={t.file}
-                  className={`${styles.songItem} ${selectedTrack === i ? styles.songItemActive : ''}`}
-                  onClick={() => setSelectedTrack(i)}
-                >
-                  {t.name}
-                </button>
+                <div key={t.file} className={styles.songItemRow}>
+                  <button
+                    className={`${styles.songItem} ${selectedTrack === i ? styles.songItemActive : ''}`}
+                    onClick={() => setSelectedTrack(i)}
+                  >
+                    {t.name}
+                  </button>
+                  <button
+                    className={`${styles.previewBtn} ${previewTrack === i ? styles.previewBtnActive : ''}`}
+                    onClick={() => togglePreview(i)}
+                    title={previewTrack === i ? 'Stop preview' : 'Preview'}
+                  >
+                    {previewTrack === i ? '\u23F8\uFE0E' : '\u25B6\uFE0E'}
+                  </button>
+                </div>
               ))}
             </div>
             <button

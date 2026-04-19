@@ -882,7 +882,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const P4_MAX_SUBPHASES      = isMobileDevice ? 4  : 6;     // total sub-phases before drain
     const P4_HORIZ_BATCH_SIZE   = isMobileDevice ? 5  : 8;     // names per horizontal batch
     const P4_HORIZ_BATCH_RATE   = 0.9;                         // s between horizontal batches
-    const P4_HORIZ_SPEED_FRAC   = 0.50;                        // vx = W × this
+    // Horizontal names travel at same px/s as vertical (H × P4_FALL_SPEED_FRAC)
 
     /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
     let currentPhase = 0;
@@ -1154,7 +1154,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       const cy = newTopY + tw / 2;
       projectiles.push(mkProj({
         id: nextProjId++, text: name,
-        x: col.x,           // left-align: first letter at column x
+        x: col.x - tw / 2,  // center column on col.x so names align visually
         y: cy - th / 2,
         vy,
         w: tw, h: th,
@@ -1200,7 +1200,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       wallSpawnTimer = 0;
       wallSpawnInterval = 0; // first new column can spawn on the very next frame
       const seed = isMobileDevice ? P4_INITIAL_SEED_MOBILE : P4_INITIAL_SEED_DESKTOP;
-      for (let i = 0; i < seed; i++) spawnWallColumn(true);
+      // stagger=false: columns always enter from above the screen (never mid-screen)
+      for (let i = 0; i < seed; i++) spawnWallColumn(false);
     };
 
     const updateWalls = (dt: number) => {
@@ -1241,13 +1242,17 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const spawnHorizBatch = () => {
       if (nameIdx >= phase4End) return;
       const w = W(), h = H();
-      const speed = w * P4_HORIZ_SPEED_FRAC * p4HorizDirection;
-      const startX = p4HorizDirection > 0 ? -300 : w + 300;
+      /* Use same px/s as vertical rain (H × P4_FALL_SPEED_FRAC) so both
+         sub-phases feel equally fast to dodge */
+      const speed = h * P4_FALL_SPEED_FRAC * p4HorizDirection;
       const count = P4_HORIZ_BATCH_SIZE;
       for (let i = 0; i < count; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
+        /* Per-name startX: guarantee the name is fully off-screen regardless of
+           text width. L→R enters from left (-tw-200), R→L from right (w+200). */
+        const startX = p4HorizDirection > 0 ? -tw - 200 : w + 200;
         /* Spread evenly from 10%–90% of screen height, ±20px jitter */
         const yFrac = 0.10 + 0.80 * (i / Math.max(1, count - 1));
         const y = h * yFrac + (Math.random() - 0.5) * 40;
@@ -1255,7 +1260,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           id: nextProjId++, text: name,
           x: startX, y: y - th / 2,
           vx: speed, w: tw, h: th,
-          /* angle: 0 — no rotation, text reads naturally */
+          action: 8, /* distinct action: horizontal Phase-4 names */
         }));
       }
     };
@@ -1609,38 +1614,47 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             corridorSpawnCount = 0;
           } else if (currentPhase === 4) {
             /* Alternating vertical + horizontal rain sub-phases */
-            if (p4SubPhaseCount < P4_MAX_SUBPHASES && nameIdx < phase4End) {
-              if (p4SubPhase === 'vertical') {
-                if (!wallColumns) initWallColumns();
-                updateWalls(dt);
-                p4SubPhaseTimer += dt;
-                if (p4SubPhaseTimer >= P4_VERT_DURATION) {
-                  /* Switch to horizontal */
-                  wallColumns = null;
-                  p4SubPhase = 'horizontal';
-                  p4SubPhaseTimer = 0;
-                  p4HorizBatchTimer = 0;
-                  p4SubPhaseCount++;
-                  spawnHorizBatch(); /* first batch immediately */
-                }
-              } else {
-                /* Horizontal sub-phase */
-                p4HorizBatchTimer += dt;
-                if (p4HorizBatchTimer >= P4_HORIZ_BATCH_RATE) {
-                  p4HorizBatchTimer = 0;
-                  spawnHorizBatch();
-                }
-                p4SubPhaseTimer += dt;
-                if (p4SubPhaseTimer >= P4_HORIZ_DURATION) {
-                  /* Switch back to vertical */
-                  p4HorizDirection *= -1;
-                  p4SubPhase = 'vertical';
-                  p4SubPhaseTimer = 0;
-                  p4SubPhaseCount++;
-                  wallColumns = null;
-                  wallSpawnTimer = 0;
-                  wallSpawnInterval = 0;
-                }
+            if (p4SubPhaseCount >= P4_MAX_SUBPHASES) {
+              /* Cap reached — flush remaining Phase-4 projectiles and advance
+                 nameIdx so getPhase() returns 6 on the next frame. */
+              if (nameIdx < phase4End) {
+                wallColumns = null;
+                projectiles = projectiles.filter(p => p.action !== 6 && p.action !== 8);
+                nameIdx = phase4End;
+              }
+              /* else: drain naturally — existing projectiles exit on their own */
+            } else if (p4SubPhase === 'vertical') {
+              if (!wallColumns) initWallColumns();
+              updateWalls(dt);
+              p4SubPhaseTimer += dt;
+              if (p4SubPhaseTimer >= P4_VERT_DURATION || nameIdx >= phase4End) {
+                /* Switch to horizontal — clear vertical names so screen is clean */
+                wallColumns = null;
+                projectiles = projectiles.filter(p => p.action !== 6);
+                p4SubPhase = 'horizontal';
+                p4SubPhaseTimer = 0;
+                p4HorizBatchTimer = 0;
+                p4SubPhaseCount++;
+                if (nameIdx < phase4End) spawnHorizBatch(); /* first batch immediately */
+              }
+            } else {
+              /* Horizontal sub-phase */
+              p4SubPhaseTimer += dt;
+              p4HorizBatchTimer += dt;
+              if (p4HorizBatchTimer >= P4_HORIZ_BATCH_RATE && nameIdx < phase4End) {
+                p4HorizBatchTimer = 0;
+                spawnHorizBatch();
+              }
+              if (p4SubPhaseTimer >= P4_HORIZ_DURATION || nameIdx >= phase4End) {
+                /* Switch back to vertical — clear horizontal names so screen is clean */
+                projectiles = projectiles.filter(p => p.action !== 8);
+                p4HorizDirection *= -1;
+                p4SubPhase = 'vertical';
+                p4SubPhaseTimer = 0;
+                p4SubPhaseCount++;
+                wallColumns = null;
+                wallSpawnTimer = 0;
+                wallSpawnInterval = 0;
               }
             }
             /* After cap: drain existing projectiles — no new spawns */
@@ -1769,10 +1783,14 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         /* Fired aimed bullets (action:2): tight cull — remove as soon as off-screen */
         if (p.action === 2) return p.x > -p.w - 60 && p.x < w + 60 && p.y > -p.h - 60 && p.y < h + 60;
         if (p.action === 6) {
-          /* Corridor + Phase-4 walls fall straight down. Rotated walls have
-             visual extent = p.w (original text width), so add the max extent so
-             rotated glyphs fully clear the screen before cull. */
+          /* Corridor + Phase-4 vertical walls fall straight down. Rotated walls
+             have visual extent = p.w (original text width), so add the max extent
+             so rotated glyphs fully clear the screen before cull. */
           return p.y < h + 100 + Math.max(p.w, p.h);
+        }
+        if (p.action === 8) {
+          /* Phase-4 horizontal names — cull when fully off the screen horizontally */
+          return p.x + p.w > -200 && p.x < w + 200;
         }
         return p.x > -400 && p.x < w + 400 && p.y > -300 && p.y < h + 300;
       });

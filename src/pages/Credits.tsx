@@ -625,10 +625,6 @@ interface Projectile {
   frame: number;
   gravity: number;
   angle: number;
-  logoImg: HTMLImageElement | null;
-  /* For logo projectiles — index into ATTACK_LOGOS. -1 for non-logos.
-     Cached at spawn so the render loop doesn't need to findIndex every frame. */
-  logoIdx: number;
   /* Accumulated seconds for action:1 slide/aim/fire — replaces frame-count
      gates so slide distance is FPS-independent (fixes mobile off-screen bug). */
   slideT: number;
@@ -638,14 +634,6 @@ let nextProjId = 0;
 
 const DETERMINATION_MONO = "'DeterminationMono', monospace";
 const DETERMINATION_SANS = "'DeterminationSans', sans-serif";
-
-const ATTACK_LOGOS = [
-  { src: '/credits-photos/rotaract.png', name: 'Rotaract' },
-  { src: '/credits-photos/SHPE.png', name: 'SHPE' },
-  { src: '/credits-photos/IEEE.png', name: 'IEEE' },
-  { src: '/credits-photos/wellsfargo.jpg', name: 'Wells Fargo' },
-  { src: '/credits-photos/IBM.png', name: 'IBM' },
-];
 
 function loadHeartImage(): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
@@ -707,9 +695,7 @@ function drawHeart(
 function mkProj(base: Partial<Projectile> & { id: number; text: string; x: number; y: number; w: number; h: number }): Projectile {
   return {
     vx: 0, vy: 0, hit: false, hitAge: 0, action: 0, frame: 0,
-    gravity: 0, angle: 0,
-    logoImg: null,
-    logoIdx: -1, slideT: 0,
+    gravity: 0, angle: 0, slideT: 0,
     ...base,
   };
 }
@@ -829,38 +815,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     loadHpInfiniteImage().then((img) => { hpBarImg = img; });
     preloadFonts();
 
-    /* ── Preload logo images & create yellow silhouette versions ── */
-    const logoImages: HTMLImageElement[] = ATTACK_LOGOS.map((logo) => {
-      const img = new Image();
-      img.src = logo.src;
-      return img;
-    });
-    /* Pre-render yellow hit versions of each logo */
-    const yellowLogoCanvases: (HTMLCanvasElement | null)[] = new Array(ATTACK_LOGOS.length).fill(null);
-    const createYellowLogo = (img: HTMLImageElement, idx: number) => {
-      if (!img.complete || img.naturalWidth === 0) return;
-      const logoInfo = ATTACK_LOGOS[idx];
-      if (!logoInfo) return;
-      const c = document.createElement('canvas');
-      c.width = img.naturalWidth;
-      c.height = img.naturalHeight;
-      const cctx = c.getContext('2d');
-      if (!cctx) return;
-      cctx.drawImage(img, 0, 0);
-      /* JPGs have no alpha so source-in turns them into a solid block.
-         Use multiply instead, which preserves detail and tints yellow. */
-      const isJpg = /\.jpe?g$/i.test(logoInfo.src);
-      cctx.globalCompositeOperation = isJpg ? 'multiply' : 'source-in';
-      cctx.fillStyle = '#FFFF00';
-      cctx.fillRect(0, 0, c.width, c.height);
-      yellowLogoCanvases[idx] = c;
-    };
-    logoImages.forEach((img, i) => {
-      if (img.complete) createYellowLogo(img, i);
-      else img.onload = () => createYellowLogo(img, i);
-    });
-    const logoSpawned = new Array(ATTACK_LOGOS.length).fill(false) as boolean[];
-
     /* ── Game state ── */
     const heart = { x: W() / 2, y: H() * 0.7 };
     let projectiles: Projectile[] = [];
@@ -875,8 +829,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let endTimer = 0;
     let normalFinish = false;
     /* Cutscene state */
-    let endPhase = 0; /* 0=fade-to-black, 1=touched-credits, 2=scroll-down, 3=thank-you */
-    let touchedScrollOffset = 0;
+    let endPhase = 0; /* 0=fade-to-black, 1=touched-credits-scroll, 2=thank-you */
+    let touchedScrollY = 0; /* y anchor of the touched-credits block; starts below screen */
     let thankYouY = 0;
     let skipCutscene = false;
     const HEART_SPEED = 350;
@@ -904,16 +858,15 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const P2_GAP_EXTRA           = 5;    // px of clearance beyond heart diameter
     // Ph3 — Corridor
     const P3_FALL_SPEED_FRAC     = 0.62; // fall speed = H × this
-    const P3_SPAWN_RATE          = 0.09; // seconds between each corridor name-pair
+    const P3_SPAWN_RATE          = 0.30; // seconds between each corridor name-pair
     const P3_MAX_SWING_PX        = 140;  // max corridor gap deviation from center (keeps pace with heart on PC)
-    // Ph4 — Matrix Rain (names fall straight down from the top, no rotation)
-    const P4_MATRIX_SPEED_FRAC  = isMobileDevice ? 0.14 : 0.12; // vy = H × this
-    const P4_BURST_SIZE         = isMobileDevice ? 2 : 3;        // names per burst
-    const P4_BURST_RATE         = isMobileDevice ? 0.35 : 0.22;  // s between bursts
-    // Ph5 — Side Blitz (names fly across screen left ↔ right in rows)
-    const P5_BLITZ_ROWS         = isMobileDevice ? 3 : 5;        // names per wave
-    const P5_BLITZ_RATE         = isMobileDevice ? 0.95 : 0.70;  // s between waves
-    const P5_BLITZ_SPEED_FRAC   = isMobileDevice ? 0.25 : 0.20;  // vx = W × this
+    // Ph4 — Column Rain (3 columns, one always has a gap to dodge into)
+    const P4_WAVE_RATE           = isMobileDevice ? 0.70 : 0.55; // s between column waves
+    const P4_FALL_SPEED_FRAC     = 0.28;                          // vy = H × this
+    // Ph5 — Fan Burst (3 names in a fan from alternating sides)
+    const P5_BURST_RATE          = isMobileDevice ? 1.45 : 1.15; // s between fan bursts
+    const P5_FAN_SPEED_FRAC      = 0.60;                          // speed = min(W,H) × this
+    const P5_FAN_ANGLE_DEG       = 25;                            // spread angle from horizontal
 
     /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
     let currentPhase = 0;
@@ -921,24 +874,21 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let phaseRound = 0;
     let phaseTransitionDelay = 0;
     const PHASE_TRANSITION_DURATION = 2.5; /* seconds between phases */
-    const totalNames = ALL_NAMES.length * 2;
-    const logoSpawnPoints = ATTACK_LOGOS.map((_, i) =>
-      Math.floor(totalNames * (i + 1) / (ATTACK_LOGOS.length + 1))
-    );
+    const totalNames = 170;
 
-    /* Phase thresholds (proportional to Undertale's ~881-name distribution) */
-    const phase0End = Math.floor(totalNames * 0.07);
-    const phase2End = Math.floor(totalNames * 0.29);
-    const phase3End = Math.floor(totalNames * 0.53);
-    const phase4End = Math.floor(totalNames * 0.68);  // Matrix rain
-    const phase5End = Math.floor(totalNames * 0.82);  // Side blitz
+    /* Phase thresholds — fixed budgets for ~1-minute total runtime */
+    const phase0End = 20;   // Aimed spreads: ~8s
+    const phase2End = 56;   // Crossing streams: ~8s
+    const phase3End = 106;  // Corridor: ~8s
+    const phase4End = 130;  // Column Rain: ~7s
+    const phase5End = 150;  // Fan Burst: ~7s
 
     const getPhase = (idx: number): number => {
       if (idx < phase0End) return 0;  // Aimed spreads
       if (idx < phase2End) return 2;  // Crossing streams
       if (idx < phase3End) return 3;  // Corridor
-      if (idx < phase4End) return 4;  // Matrix rain
-      if (idx < phase5End) return 5;  // Side blitz
+      if (idx < phase4End) return 4;  // Column Rain
+      if (idx < phase5End) return 5;  // Fan Burst
       return 6;                       // Fast aimed spreads
     };
 
@@ -1115,50 +1065,53 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* Phase 5 blitz direction state */
-    let p5FromRight = false;
-
-    /* ── Phase 4: Matrix Rain — names fall straight down from the top ── */
-    const spawnMatrixBurst = () => {
+    /* ── Phase 4: Column Rain — 3 columns falling, one column always has a gap ── */
+    let p4GapCol = 0;
+    const spawnColumnWave = () => {
       if (nameIdx >= phase4End) return;
       const w = W(), h = H();
-      const vy = h * P4_MATRIX_SPEED_FRAC;
-      for (let i = 0; i < P4_BURST_SIZE; i++) {
+      const vy = h * P4_FALL_SPEED_FRAC;
+      for (let col = 0; col < 3; col++) {
+        if (col === p4GapCol) continue; /* gap column — always safe to stand in */
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
-        /* Clamp so names never clip off the right edge */
-        const x = Math.max(4, Math.random() * Math.max(1, w - tw - 8));
+        const colW = w / 3;
+        const x = colW * col + (colW - tw) / 2;
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x, y: -th - 10,
+          x, y: -th - 20,
           vy, w: tw, h: th,
-          /* action: 0 (default) — standard x+y movement; only vy is set */
         }));
       }
+      p4GapCol = (p4GapCol + 1) % 3;
     };
 
-    /* ── Phase 5: Side Blitz — rows of names fly across from alternating sides ── */
-    const spawnBlitzWave = () => {
+    /* ── Phase 5: Fan Burst — 3 names spread in a fan from alternating sides ── */
+    let p5FanFromRight = false;
+    const spawnFanBurst = () => {
       if (nameIdx >= phase5End) return;
       const w = W(), h = H();
-      const vx = w * P5_BLITZ_SPEED_FRAC * (p5FromRight ? -1 : 1);
-      const rows = P5_BLITZ_ROWS;
-      for (let i = 0; i < rows; i++) {
+      const speed = Math.min(w, h) * P5_FAN_SPEED_FRAC;
+      const angleRad = (P5_FAN_ANGLE_DEG * Math.PI) / 180;
+      const vxDir = p5FanFromRight ? -1 : 1;
+      const startX = p5FanFromRight ? w + 60 : -60;
+      /* Three fan angles: upper, center, lower */
+      const angles = [-angleRad, 0, angleRad];
+      for (const a of angles) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
-        /* Guaranteed off-screen start for each direction */
-        const startX = p5FromRight ? w + 60 : -tw - 60;
-        /* Evenly spread rows: 15%–85% of screen height */
-        const y = h * (0.15 + 0.70 * (i / Math.max(1, rows - 1)));
+        const vx = vxDir * speed * Math.cos(a);
+        const vy = speed * Math.sin(a);
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
-          x: startX, y: y - th / 2,
-          vx, w: tw, h: th,
+          x: p5FanFromRight ? startX - tw : startX,
+          y: h / 2 - th / 2,
+          vx, vy, w: tw, h: th,
         }));
       }
-      p5FromRight = !p5FromRight;
+      p5FanFromRight = !p5FanFromRight;
     };
 
     /* ── Input ── */
@@ -1258,14 +1211,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         if (endPhase === 0 && endTimer >= 1.5) {
           endPhase = 1;
           endTimer = 0;
-        } else if (endPhase === 1 && endTimer >= 4.5) {
-          endPhase = 2;
-          endTimer = 0;
-          touchedScrollOffset = 0;
-        } else if (endPhase === 2 && endTimer >= 2.5) {
-          endPhase = 3;
-          endTimer = 0;
-          thankYouY = h + 80;
+          touchedScrollY = h + 50; /* start below screen, scroll up */
         }
 
         ctx.clearRect(0, 0, w, h);
@@ -1282,12 +1228,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           for (const p of projectiles) {
             const pcx = p.x + p.w / 2;
             const pcy = p.y + p.h / 2;
-            if (p.logoImg && p.logoImg.complete && p.logoImg.naturalWidth > 0) {
-              ctx.save();
-              ctx.translate(pcx, pcy);
-              ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
-              ctx.restore();
-            } else if (p.angle) {
+            if (p.angle) {
               ctx.save();
               ctx.translate(pcx, pcy);
               ctx.rotate(p.angle);
@@ -1310,8 +1251,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           }
 
         /* ── Phases 1 & 2: TOUCHED CREDITS display (static then scrolling down) ── */
-        } else if (endPhase === 1 || endPhase === 2) {
-          /* Heart movement */
+        } else if (endPhase === 1) {
           if (keys.has('arrowleft') || keys.has('a')) heart.x -= HEART_SPEED * dt;
           if (keys.has('arrowright') || keys.has('d')) heart.x += HEART_SPEED * dt;
           if (keys.has('arrowup') || keys.has('w')) heart.y -= HEART_SPEED * dt;
@@ -1319,8 +1259,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           heart.x = Math.max(hs, Math.min(w - hs, heart.x));
           heart.y = Math.max(hs, Math.min(h - hs, heart.y));
 
-          if (endPhase === 2) touchedScrollOffset += (h / 2.0) * dt;
-          const yOff = endPhase === 2 ? -touchedScrollOffset : 0;
+          touchedScrollY -= h * 0.38 * dt;
 
           ctx.fillStyle = '#000';
           ctx.fillRect(0, 0, w, h);
@@ -1331,20 +1270,17 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           ctx.fillStyle = '#FFFF00';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-          ctx.fillText('* TOUCHED CREDITS *', w / 2, 30 + yOff);
+          const titleY = touchedScrollY;
+          ctx.fillText('* TOUCHED CREDITS *', w / 2, titleY);
 
-          /* Names grid */
+          /* Names grid — all hit names */
           const uniqueNames = [...new Set(hitNames)];
-          const logoNameSet = new Set(ATTACK_LOGOS.map(l => l.name));
-          const regularNames = uniqueNames.filter(n => !logoNameSet.has(n));
-          const logoHits = uniqueNames.filter(n => logoNameSet.has(n));
-
           const nameFS = Math.max(11, Math.min(18, w / 30));
           const nameLineH = nameFS * 1.5;
-          const startY = 30 + titleFS + 20;
-          const availH = h - startY - 80;
+          const gridStartY = titleY + titleFS + 20;
+          const availH = h - 80;
           const maxRows = Math.max(1, Math.floor(availH / nameLineH));
-          const numCols = regularNames.length > 0 ? Math.max(1, Math.ceil(regularNames.length / maxRows)) : 1;
+          const numCols = uniqueNames.length > 0 ? Math.max(1, Math.ceil(uniqueNames.length / maxRows)) : 1;
           const colW = w / numCols;
 
           ctx.font = `${nameFS}px ${DETERMINATION_SANS}`;
@@ -1352,28 +1288,12 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
 
-          for (let i = 0; i < regularNames.length; i++) {
+          for (let i = 0; i < uniqueNames.length; i++) {
             const col = Math.floor(i / maxRows);
             const row = i % maxRows;
             const nx = colW * col + colW / 2;
-            const ny = startY + row * nameLineH + yOff;
-            if (ny > -20 && ny < h + 20) ctx.fillText(regularNames[i] ?? '', nx, ny);
-          }
-
-          /* Logos at normal appearance */
-          if (logoHits.length > 0) {
-            const logoAreaY = startY + Math.ceil(regularNames.length / numCols) * nameLineH + 16 + yOff;
-            let lx = 40;
-            for (const logoName of logoHits) {
-              const logoIdx = ATTACK_LOGOS.findIndex(l => l.name === logoName);
-              const limg = logoImages[logoIdx];
-              if (limg && limg.complete && limg.naturalWidth > 0) {
-                const lh = Math.max(30, Math.min(50, h / 18));
-                const lw = lh * (limg.naturalWidth / limg.naturalHeight);
-                if (logoAreaY > -lh && logoAreaY < h + lh) ctx.drawImage(limg, lx, logoAreaY, lw, lh);
-                lx += lw + 16;
-              }
-            }
+            const ny = gridStartY + row * nameLineH;
+            if (ny > -20 && ny < h + 20) ctx.fillText(uniqueNames[i] ?? '', nx, ny);
           }
 
           /* Skip hint */
@@ -1385,8 +1305,17 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
 
           drawHeart(ctx, heart.x, heart.y, hs, false, heartImg);
 
+          /* Block scrolled entirely off top → advance to thank-you */
+          const gridRows = Math.ceil(uniqueNames.length / numCols);
+          const blockBottom = gridStartY + gridRows * nameLineH;
+          if (blockBottom < -40) {
+            endPhase = 2;
+            endTimer = 0;
+            thankYouY = h + 80;
+          }
+
         /* ── Phase 3: thank-you message scrolls up ── */
-        } else if (endPhase === 3) {
+        } else if (endPhase === 2) {
           if (keys.has('arrowleft') || keys.has('a')) heart.x -= HEART_SPEED * dt;
           if (keys.has('arrowright') || keys.has('d')) heart.x += HEART_SPEED * dt;
           if (keys.has('arrowup') || keys.has('w')) heart.y -= HEART_SPEED * dt;
@@ -1410,7 +1339,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             '',
             'Thank you, everyone.',
             '',
-            "\u2018Til next time!",
+            "'Til next time!",
           ];
           const tyLines: string[] = [];
           for (const raw of rawLines) {
@@ -1491,10 +1420,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             phaseTimer = 0;
             phaseRound = 0;
             phaseTransitionDelay = PHASE_TRANSITION_DURATION;
-            /* Reset phase-specific entry state */
-            if (newPhase === 5) {
-              p5FromRight = false;
-            }
           }
 
           if (phaseTransitionDelay > 0) {
@@ -1505,18 +1430,18 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             corridorSpawnTimer = 0;
             corridorSpawnCount = 0;
           } else if (currentPhase === 4) {
-            /* Matrix rain — names fall from the top in small random bursts */
+            /* Column Rain — 2 of 3 columns fall, gap rotates each wave */
             phaseTimer += dt;
-            if (phaseTimer >= P4_BURST_RATE && nameIdx < phase4End) {
+            if (phaseTimer >= P4_WAVE_RATE && nameIdx < phase4End) {
               phaseTimer = 0;
-              spawnMatrixBurst();
+              spawnColumnWave();
             }
           } else if (currentPhase === 5) {
-            /* Side blitz — rows of names fly across from alternating sides */
+            /* Fan Burst — 3 names in a fan from alternating sides */
             phaseTimer += dt;
-            if (phaseTimer >= P5_BLITZ_RATE && nameIdx < phase5End) {
+            if (phaseTimer >= P5_BURST_RATE && nameIdx < phase5End) {
               phaseTimer = 0;
-              spawnBlitzWave();
+              spawnFanBurst();
             }
           } else if (currentPhase !== 3) {
             phaseTimer += dt;
@@ -1538,29 +1463,6 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
                   break;
               }
             }
-          }
-        }
-      }
-
-      /* ── Spawn logos (each appears exactly once — yellow silhouette) ── */
-      for (let li = 0; li < ATTACK_LOGOS.length; li++) {
-        if (!logoSpawned[li] && nameIdx >= (logoSpawnPoints[li] ?? Infinity)) {
-          const logoInfo = ATTACK_LOGOS[li];
-          const limg = logoImages[li];
-          if (logoInfo && limg && limg.complete && limg.naturalWidth > 0) {
-            logoSpawned[li] = true;
-            const fromR = li % 2 === 0;
-            const ar = limg.naturalWidth / limg.naturalHeight;
-            const lh = 70;
-            const lw = lh * ar;
-            const yp = Math.random() * (h - lh * 2) + lh;
-            projectiles.push(mkProj({
-              id: nextProjId++, text: logoInfo.name,
-              x: fromR ? w + lw : -lw, y: yp,
-              vx: fromR ? -120 : 120,
-              w: lw, h: lh, logoImg: limg,
-              logoIdx: li,
-            }));
           }
         }
       }
@@ -1630,7 +1532,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           p.y += p.vy * dt;
         }
 
-        if (p.gravity && !p.logoImg) p.vy += p.gravity * dt;
+        if (p.gravity) p.vy += p.gravity * dt;
 
         if (p.action === 3) {
           if (p.x < -80) p.x = w + 60;
@@ -1734,25 +1636,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         if (pcx + extent < -renderMargin || pcx - extent > w + renderMargin ||
             pcy + extent < -renderMargin || pcy - extent > h + renderMargin) continue;
 
-        if (p.logoImg && p.logoImg.complete && p.logoImg.naturalWidth > 0) {
-          ctx.save();
-          ctx.translate(pcx, pcy);
-          if (p.angle) ctx.rotate(p.angle);
-          if (p.hit) {
-            ctx.globalAlpha = 0.8;
-            /* Use cached logoIdx from spawn — avoids a linear scan per frame. */
-            const yellowCanvas = p.logoIdx >= 0 ? yellowLogoCanvases[p.logoIdx] : null;
-            if (yellowCanvas) {
-              ctx.drawImage(yellowCanvas, -p.w / 2, -p.h / 2, p.w, p.h);
-            } else {
-              ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
-            }
-            ctx.globalAlpha = 1;
-          } else {
-            ctx.drawImage(p.logoImg, -p.w / 2, -p.h / 2, p.w, p.h);
-          }
-          ctx.restore();
-        } else if (p.angle) {
+        if (p.angle) {
           /* Rotated text — needs save/restore */
           ctx.save();
           ctx.translate(pcx, pcy);
@@ -1874,11 +1758,8 @@ function AttackEndScreen({
         <div style={{ fontSize: 22, marginBottom: 8 }}>
           HITS
         </div>
-        <div style={{ fontSize: 64, color: result.hitCount === 0 ? '#00ff00' : '#FFFF00', fontWeight: 700, marginBottom: 16 }}>
+        <div style={{ fontSize: 64, color: '#FFFF00', fontWeight: 700, marginBottom: 40 }}>
           {result.hitCount}
-        </div>
-        <div style={{ fontSize: 18, color: '#aaa', marginBottom: 40 }}>
-          {result.hitCount === 0 ? 'Incredible! You dodged every single name!' : ''}
         </div>
 
         {submitState === 'idle' || submitState === 'submitting' ? (

@@ -363,6 +363,67 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Tommy Jackson' },
     ],
   },
+ 
+  {
+    title: 'Student Government Association',
+    entries: [
+      { name: 'Colby Mandrodt', role: 'President' },
+      { name: 'Nolan Nguyen', role: 'Vice President' },
+      { name: 'Hailey Bauer', role: 'SGA Director of General Operations' },
+      { name: 'Trevor Davidson', role: 'SGA Senator' },
+      { name: 'Ms. Ashley Townsend', role: 'SGA Program Manager, very prominent in Rotaract!'}
+
+    ],
+  },
+  {
+    title: 'The Internationals',
+    entries: [
+      { name: 'Ines Alonso' },
+      { name: 'Mohammad Hadid' },
+      { name: 'Tugba Guneysu' },
+    ],
+  },
+  {
+    title: 'VALORANT Varsity',
+    photo: ['flpolyesports.png', 'valorant.png'],
+    leftPhotos: ['me_random.jpg'],
+    entries: [
+      { name: 'Vanessa Korthas' },
+      { name: 'Jaden Akers-Atkins' },
+      { name: 'Johnathan Nguyen', role: "Duelist" },
+      { name: 'Julian Amato', role: "cool guy to play with and gym with, sorry for 1-tapping you so much" },
+      { name: 'Ryan Trinh', role: "aeri, Duelist" },
+      { name: 'Wack', role: "ThatsWack, Team Captain & Omen Player" },
+    ],
+  },
+  {
+    title: 'Winter Haven Technology Services',
+    leftPhotos: ['winter_haven_1.jpg'],
+    rightPhotos: ['winter_haven_nick.png'],
+    entries: [
+      { name: 'Aizan "Bobby" Khan' },
+      { name: 'Angel Trinidad' },
+      { name: 'Blake Cervone' },
+      { name: 'Connor Cervone' },
+      { name: 'Christopher Duclos' },
+      { name: 'Christopher Taylor' },
+      { name: 'Esteban Suarez' },
+      { name: 'Hiep Nguyen' },
+      { name: 'Jeremiah Joseph' },
+      { name: 'Jose Vega' },
+      { name: 'Joshua Stone' },
+      { name: 'Katiya Taylor' },
+      { name: 'Michael Adams' },
+      { name: 'Mikey LaFollette' },
+      { name: 'Nickolas Phan' },
+      { name: 'Pickleball John' },
+      { name: 'Prathyusha Bhuma' },
+      { name: 'Raul Gonzales' },
+      { name: 'Robert van Druten' },
+      { name: 'The Winter Haven Librarians' },
+      { name: 'Wen Zhang' },
+    ],
+  },
   {
     title: "Honorable Mentions",
     entries: [
@@ -459,67 +520,6 @@ const CREDITS_DATA: CreditSection[] = [
       'friend_group_normal_camera.jpg',
     ],
   },
-  {
-    title: 'Student Government Association',
-    entries: [
-      { name: 'Colby Mandrodt', role: 'President' },
-      { name: 'Nolan Nguyen', role: 'Vice President' },
-      { name: 'Hailey Bauer', role: 'SGA Director of General Operations' },
-      { name: 'Trevor Davidson', role: 'SGA Senator' },
-      { name: 'Ms. Ashley Townsend', role: 'SGA Program Manager, very prominent in Rotaract!'}
-
-    ],
-  },
-  {
-    title: 'The Internationals',
-    entries: [
-      { name: 'Ines Alonso' },
-      { name: 'Mohammad Hadid' },
-      { name: 'Tugba Guneysu' },
-    ],
-  },
-  {
-    title: 'VALORANT Varsity',
-    photo: ['flpolyesports.png', 'valorant.png'],
-    leftPhotos: ['me_random.jpg'],
-    entries: [
-      { name: 'Vanessa Korthas' },
-      { name: 'Jaden Akers-Atkins' },
-      { name: 'Johnathan Nguyen', role: "Duelist" },
-      { name: 'Julian Amato', role: "cool guy to play with and gym with, sorry for 1-tapping you so much" },
-      { name: 'Ryan Trinh', role: "aeri, Duelist" },
-      { name: 'Wack', role: "ThatsWack, Team Captain & Omen Player" },
-    ],
-  },
-  {
-    title: 'Winter Haven Technology Services',
-    leftPhotos: ['winter_haven_1.jpg'],
-    rightPhotos: ['winter_haven_nick.png'],
-    entries: [
-      { name: 'Aizan "Bobby" Khan' },
-      { name: 'Angel Trinidad' },
-      { name: 'Blake Cervone' },
-      { name: 'Connor Cervone' },
-      { name: 'Christopher Duclos' },
-      { name: 'Christopher Taylor' },
-      { name: 'Esteban Suarez' },
-      { name: 'Hiep Nguyen' },
-      { name: 'Jeremiah Joseph' },
-      { name: 'Jose Vega' },
-      { name: 'Joshua Stone' },
-      { name: 'Katiya Taylor' },
-      { name: 'Michael Adams' },
-      { name: 'Mikey LaFollette' },
-      { name: 'Nickolas Phan' },
-      { name: 'Pickleball John' },
-      { name: 'Prathyusha Bhuma' },
-      { name: 'Raul Gonzales' },
-      { name: 'Robert van Druten' },
-      { name: 'The Winter Haven Librarians' },
-      { name: 'Wen Zhang' },
-    ],
-  },
-
   {
     title: 'The Big Back Spots',
     entries: [

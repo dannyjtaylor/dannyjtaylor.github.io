@@ -83,6 +83,10 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Katheryn Livingston', role: 'Cousin' },
       { name: 'Robert Livingston', role: 'Uncle' },
       { name: 'Randy Livingston', role: 'Uncle' },
+      { name: 'Bobby' },
+      { name: 'Uncle Jim' },
+      { name: 'Uncle Tom' },
+      { name: 'Grandpa Livingston', role: 'Papa' },
     ],
   },
   {
@@ -168,7 +172,8 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Joshua Chase' },
       { name: 'Leonardo Arriaga ' },
       { name: 'Tyler Reuter' },
-      { name: 'Michael Biggar' }
+      { name: 'Michael Biggar' },
+      { name: 'Keith Cowie' },
     ],
   },
   {
@@ -414,7 +419,10 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Cyler Gabel' },
       { name: 'John Sengchanh'},
       { name: 'Daniel Freer'},
-      { name: 'Adrian Santos' },
+      { name: 'Adrian Sanchez' },
+      { name: 'Robert Martell', role: 'Cool cybersecurity engineer, great guy to talk to & spoke at Rotaract!' },
+      { name: 'Matthew Omongus' },
+      { name: 'Esmerelda Collazo' },
     ],
     leftPhotos: [
       'me_and_mo_haddid.jpg',
@@ -479,11 +487,25 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Mikey LaFollette' },
       { name: 'Nickolas Phan' },
       { name: 'Pickleball John' },
-      { name: 'Praythusa Bhuma' },
+      { name: 'Prathyusha Bhuma' },
       { name: 'Raul Gonzales' },
       { name: 'Robert van Druten' },
       { name: 'The Winter Haven Librarians' },
       { name: 'Wen Zhang' },
+    ],
+  },
+
+  {
+    title: 'The Big Back Spots',
+    entries: [
+      { name: 'The Pantry: Modern Diner', role: 'Auburndale' },
+      { name: 'The Joinery', role: 'Lakeland' },
+      { name: 'Palace Pizza', role: 'Lakeland' },
+      { name: 'Bowen Yard', role: 'Winter Haven' },
+      { name: 'Polk City Ice Cream/BBQ', role: 'Polk City' },
+      { name: "Huey Magoo's", role: 'Auburndale' },
+      { name: 'Chick-fil-A', role: 'Lakeland' },
+      { name: 'Hibachi Express', role: 'Lakeland, Always good right before a Publix cookie' },
     ],
   },
 
@@ -1943,7 +1965,9 @@ export function Credits() {
     if (audioRef.current) audioRef.current.volume = volume / 100;
   }, [volume]);
 
-  /* Preload all credits photos on mount so they appear instantly when scrolled to */
+  /* Preload all credits photos during song selection, top-to-bottom, so images
+     are ready before the user reaches them. Uses a small concurrency limit so
+     the browser loads in order rather than racing all images at once on mobile. */
   useEffect(() => {
     const urls: string[] = [
       '/credits-photos/flpoly.png',
@@ -1961,7 +1985,18 @@ export function Credits() {
       (section.rightPhotos ?? []).forEach(p => urls.push(`/credits-photos/${p}`));
       section.entries.forEach(e => { if (e.photo) urls.push(`/credits-photos/${e.photo}`); });
     }
-    [...new Set(urls)].forEach(src => { const img = new Image(); img.src = src; });
+    const queue = [...new Set(urls)];
+    let idx = 0;
+    const CONCURRENCY = 3;
+    const loadNext = () => {
+      if (idx >= queue.length) return;
+      const src = queue[idx++]!;
+      const img = new Image();
+      img.onload = loadNext;
+      img.onerror = loadNext;
+      img.src = src;
+    };
+    for (let c = 0; c < CONCURRENCY; c++) loadNext();
   }, []);
 
   /* Stop preview audio when switching away from song-select screen */

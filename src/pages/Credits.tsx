@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+﻿import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './Credits.module.css';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { ref as dbRef, increment, update } from 'firebase/database';
@@ -71,12 +71,12 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'My Family',
     leftPhotos: [
-      { src: 'my_family_1.jpg' },
-      { src: 'my_family_grandmapat_grandpahoward.jpg' },
-      { src: 'my_family_2.jpg' },
+      { src: 'my_family_1.jpg', caption: '[Insert Caption Here]' },
+      { src: 'my_family_grandmapat_grandpahoward.jpg', caption: '[Insert Caption Here]' },
+      { src: 'my_family_2.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'myfamily_me_and_patricia_taylor.png' },
+      { src: 'myfamily_me_and_patricia_taylor.png', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Katherine Taylor', role: 'Mother' },
@@ -84,6 +84,8 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Patricia Taylor', role: 'Sister' },
       { name: 'Johnny Taylor', role: 'Brother' },
       { name: 'Forrest Taylor', role: 'Brother' },
+      { name: 'Howard Gordon', role: 'Grandpa'},
+      { name: 'Patricia Livingston', role: 'Grandma'},
       { name: 'Caroline Livingston', role: 'Aunt' },
       { name: 'Silvia Livingston', role: 'Aunt' },
       { name: 'Clagget Taylor', role: 'Uncle' },
@@ -105,11 +107,11 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Professors/Faculty & Staff',
     leftPhotos: [
-      { src: 'FPUfaculty_dr_hoan_ngo.jpg' },
-      { src: 'faculty_dr_rawa.jpg' },
+      { src: 'FPUfaculty_dr_hoan_ngo.jpg', caption: '[Insert Caption Here]' },
+      { src: 'faculty_dr_rawa.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'faculty_dr_adla.jpg' },
+      { src: 'faculty_dr_adla.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Devin Stephenson', role: "Florida Polytechnic President" },
@@ -120,11 +122,10 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Dr. Emadelden Fouad', role: "Taught me Physics 1 and 2" },
       { name: 'Dr. Mohammad Farmani', role: "Taught me Verilog & Cybersecurity" },
       { name: 'Dr. Hoan Ngo', role: "Taught me Embedded Operating Systems" },
-      { name: 'Dr. Jared Bunn', role: "Taught me Topology & Discrete Math" },
+      { name: 'Dr. Jared Bunn', role: "Taught me Topology & Discrete Math. Loves Overwatch and Fortnite" },
       { name: 'Dr. Manoj Lamichhane', role: "Taught me Differential Equations and Calculus 3" },
-      { name: 'Dr. Muhammad Ullah', role: "Taught me Circuits 1, Circuits 2, breadboards, oscilloscopes, Digital Electronics, and VLSI Design, 'We know these things'" },
+      { name: 'Dr. Muhammad Ullah', role: "Taught me Circuits 1, Circuits 2, breadboards, oscilloscopes, Digital Electronics, and VLSI Design, 'We know these things!'" },
       { name: 'Dr. Tracy Olin', role: "Chemistry Lab"},
-      { name: 'Dr. Onur Toker', role: "Best Capstone professor ever" },
       { name: 'Dr. Rawa Adla', role: "Taught me about Autonomous Vehicles, Electric and Hybrid Vehicles, Microprocessors, and Computer Architecture. Bowled with her, went to SunTrax with her, went to IMSA with her, went to Chick-fil-A with her"},
       { name: 'Dr. Ashiq Sakib', role: "Taught me Digital Logic Design, 'Gone are the days of Plugging and Chugging'"},
       { name: 'Dr. Venkata Sista', role: "Taught me Chemistry"},
@@ -140,8 +141,8 @@ const CREDITS_DATA: CreditSection[] = [
       { name: "Ms. Martha Seney", role: "Career Services Director, Rotaract & SHPE member, taught me a lot about professional development"},
       { name: "Ms. Noelia Sanchez", role: "Nicest person alive & Rotaract's advisor!"},
       { name: 'Robert Martell', role: 'Cool cybersecurity engineer, great guy to talk to & spoke at Rotaract!' },
-      { name: 'Hat', role: 'Police Officer' },
-      { name: 'Jean', role: 'Police Officer' },
+      { name: 'Hat', role: 'Police Officer & Supra enjoyer' },
+      { name: 'Jean', role: 'Police Officer & vibe coder' },
       { name: 'Arron Murray', role: 'Police Chief' },
     ],
   },
@@ -149,10 +150,10 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'SHPE Eboard 2025\u20132026',
     photo: 'SHPE.png',
     leftPhotos: [
-      { src: 'SHPE_eboard_0.png' },
+      { src: 'SHPE_eboard_0.png', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'SHPE_eboard_1.jpg' },
+      { src: 'SHPE_eboard_1.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Naibys "Kro" Alzugaray' },
@@ -163,34 +164,34 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'Rotaract',
     photo: 'rotaract.png',
     leftPhotos: [
-      { src: 'aidan_morris.jpg' },
-      { src: 'rotaract_aidan_domenic.jpg' },
-      { src: 'rotaract_near_izzy.jpg' },
-      { src: 'rotaract_3.jpg' },
-      { src: 'rotaract_5.jpg' },
-      { src: 'rotaract_7.jpg' },
+      { src: 'aidan_morris.jpg', caption: '[Insert Caption Here]' },
+      { src: 'rotaract_aidan_domenic.jpg', caption: '[Insert Caption Here]' },
+      { src: 'rotaract_near_izzy.jpg', caption: '[Insert Caption Here]' },
+      { src: 'rotaract_3.jpg', caption: '[Insert Caption Here]' },
+      { src: 'rotaract_5.jpg', caption: '[Insert Caption Here]' },
+      { src: 'rotaract_7.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'rotaract_2.jpg' },
-      { src: 'alex_cam.png' },
-      { src: 'alex_cam_2.jpg' },
-      { src: 'brittany_cam_alex_cam_adriana.jpg' },
-      { src: 'rotaract_4.jpg' },
-      { src: 'rotaract_6.jpg' },
-      { src: 'rotaract_8.jpg' },
+      { src: 'rotaract_2.jpg', caption: '[Insert Caption Here]' },
+      { src: 'alex_cam.png', caption: '[Insert Caption Here]' },
+      { src: 'alex_cam_2.jpg', caption: '[Insert Caption Here]' },
+      { src: 'brittany_cam_alex_cam_adriana.jpg', caption: '[Insert Caption Here]' },
+      { src: 'rotaract_4.jpg', caption: '[Insert Caption Here]' },
+      { src: 'rotaract_6.jpg', caption: '[Insert Caption Here]' },
+      { src: 'rotaract_8.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
-      { name: 'Aidan Morris' },
-      { name: 'Alyson Smyth' },
-      { name: 'Alex Cam' },
-      { name: 'Brittany Cam' },
-      { name: 'Marisa de Comier' },
-      { name: 'Ian Lopez' },
-      { name: 'Bobby Green' },
-      { name: 'Brian Tran' },
-      { name: 'Bryden Silva' },
-      { name: 'Danielle Rivers' },
-      { name: 'Izzy Greer' },
+      { name: 'Aidan Morris', role: 'Amazing guy. Rotaract is left in great hands with him. Super smart, super well-spoken, goodness personified.'},
+      { name: 'Alyson Smyth', role: 'Super nice, and from Sebring too! Duke Energy is lucky to have her' },
+      { name: 'Alex Cam', role: "Auburndale Mayor & Vice President of Cam's Catering! Amazing mentor to have. So glad to have met you." },
+      { name: 'Brittany Cam', role: "Alex's wife! Super sweet English teacher, very down to earth, and hates AI text almost as much as I do"},
+      { name: 'Marisa de Comier', role: "Very sweet, one of the nicest people I've met. Congrats to you and Ian!" },
+      { name: 'Ian Lopez', role: "Cool guy, better at IT than me for sure. Congrats to you and Marisa!! Florida Poly's IT will be lost without you" },
+      { name: 'Bobby Green', role: 'Rotaract Rotary Advisor, contributed so much to the club. Youngest Mayor in Florida history, very kind, very wise!'},
+      { name: 'Brian Tran', role: 'Very nice guy, jealous of how much he travels'},
+      { name: 'Bryden Silva', role: 'Fellow Persona 3 Reload fan, always brings good energy to Rotaract!'},
+      { name: 'Danielle Rivers', role: 'Cool mentor, she has awesome earrings for any occasion'},
+      { name: 'Izzy Greer'},
       { name: 'Jack Everheart' },
       { name: 'Jeff Tillman' },
       { name: 'Jeremy Casanova' },
@@ -214,14 +215,14 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'SHPE',
     photo: 'SHPE_1.png',
     leftPhotos: [
-      { src: 'SHPE_1.jpg' },
-      { src: 'SHPE_2.jpg' },
-      { src: 'SHPE_the_city_of_philly.jpg', caption: 'The City of Philly' },
+      { src: 'SHPE_1.jpg', caption: '[Insert Caption Here]' },
+      { src: 'SHPE_2.jpg', caption: '[Insert Caption Here]' },
+      { src: 'SHPE_the_city_of_philly.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'SHPE_3.jpg' },
-      { src: 'SHPE_4.jpg' },
-      { src: 'maria_roman_1.jpg', caption: 'Maria Roman' },
+      { src: 'SHPE_3.jpg', caption: '[Insert Caption Here]' },
+      { src: 'SHPE_4.jpg', caption: '[Insert Caption Here]' },
+      { src: 'maria_roman_1.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Benji Guzman' },
@@ -238,15 +239,15 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: '#1 Gubbies',
     leftPhotos: [
-      { src: 'number_one_gubbies_0.jpg' },
-      { src: 'number_1_gubbies_1.jpg' },
-      { src: 'number_1_gubbies_2.jpg' },
-      { src: 'number_1_gubbies_3.jpg' },
+      { src: 'number_one_gubbies_0.jpg', caption: '[Insert Caption Here]' },
+      { src: 'number_1_gubbies_1.jpg', caption: '[Insert Caption Here]' },
+      { src: 'number_1_gubbies_2.jpg', caption: '[Insert Caption Here]' },
+      { src: 'number_1_gubbies_3.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'number_1_gubbies.jpg' },
-      { src: 'number_1_gubbies_5.jpg' },
-      { src: 'number_1_gubbies_7.jpg' },
+      { src: 'number_1_gubbies.jpg', caption: '[Insert Caption Here]' },
+      { src: 'number_1_gubbies_5.jpg', caption: '[Insert Caption Here]' },
+      { src: 'number_1_gubbies_7.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Adriana Bottega' },
@@ -267,11 +268,11 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: "Christian's Peak",
     leftPhotos: [
-      { src: 'christians_peak_1.png' },
-      { src: 'christians_peak_luis_mata_moreno.jpg', caption: 'Luis Mata-Moreno' },
+      { src: 'christians_peak_1.png', caption: '[Insert Caption Here]' },
+      { src: 'christians_peak_luis_mata_moreno.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'christians_peak_2.png' },
+      { src: 'christians_peak_2.png', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Albert Ubieta' },
@@ -284,10 +285,10 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Did He Watch 2',
     leftPhotos: [
-      { src: 'did_he_watch_shiraj_and_i_IBM.jpg', caption: 'Shriraj & Me at IBM' },
+      { src: 'did_he_watch_shiraj_and_i_IBM.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'ibm_1.jpg' },
+      { src: 'ibm_1.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Alex Meert' },
@@ -307,11 +308,11 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Good Mythical Morning Enjoyers',
     leftPhotos: [
-      { src: 'good_mythical_morning_enjoyers.jpg' },
-      { src: 'good_mythical_morning_enjoyers1.jpg' },
+      { src: 'good_mythical_morning_enjoyers.jpg', caption: '[Insert Caption Here]' },
+      { src: 'good_mythical_morning_enjoyers1.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'good_mythical_morning_enjoyers2.jpg' },
+      { src: 'good_mythical_morning_enjoyers2.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Emma Rossi' },
@@ -342,10 +343,10 @@ const CREDITS_DATA: CreditSection[] = [
     title: "Polk County Sheriff's Office LiDAR Team (Capstone)",
     photo: 'sheriffsoffice.png',
     leftPhotos: [
-      { src: 'capstone_1.jpg' },
+      { src: 'capstone_1.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'capstone_2.jpg' },
+      { src: 'capstone_2.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'James Allegra' },
@@ -355,6 +356,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Leon Harry' },
       { name: 'Lillian Wright' },
       { name: 'Michael Stevenson' },
+      { name: 'Dr. Onur Toker', role: "Capstone Advisor & the GOAT" },
       { name: 'Michael Kennon', role: 'Sponsor' },
       { name: 'Jeremy Webb', role: 'Sponsor' },
     ],
@@ -368,8 +370,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Lake Placid/Sebring',
-    leftPhotos: [{ src: 'me_alaska.jpg' }],
-    rightPhotos: [{ src: 'me_random_with_cars.jpg' }],
+    leftPhotos: [{ src: 'me_alaska.jpg', caption: '[Insert Caption Here]' }],
+    rightPhotos: [{ src: 'me_random_with_cars.jpg', caption: '[Insert Caption Here]' }],
     entries: [
       { name: 'Brianna Pratts' },
       { name: 'Casen Simmons' },
@@ -377,7 +379,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Danyela Marcelo-Lopez' },
       { name: "Duce D'Anthony Dossey" },
       { name: 'Sean Turnock' },
-      { name: 'Esperansa', needsLastName: true },
+      { name: 'Esperansa Cerebello' },
       { name: 'Gavin Higgs' },
       { name: 'Jacob Sueppel' },
       { name: 'James Swaford' },
@@ -399,8 +401,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'People I Know Because of Bryon',
-    leftPhotos: [{ src: 'random_1.jpg' }],
-    rightPhotos: [{ src: 'random_2.jpg' }],
+    leftPhotos: [{ src: 'random_1.jpg', caption: '[Insert Caption Here]' }],
+    rightPhotos: [{ src: 'random_2.jpg', caption: '[Insert Caption Here]' }],
     entries: [
       { name: 'Bryon Catlin II' },
       { name: 'Carson Elliott', role: "NerdLabz" },
@@ -416,8 +418,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Party Animals',
-    leftPhotos: [{ src: 'party_animals_1.jpg' }],
-    rightPhotos: [{ src: 'party_animals_2.jpg' }],
+    leftPhotos: [{ src: 'party_animals_1.jpg', caption: '[Insert Caption Here]' }],
+    rightPhotos: [{ src: 'party_animals_2.jpg', caption: '[Insert Caption Here]' }],
     entries: [
       { name: 'Aliyah Schouten' },
       { name: 'Chris Mather' },
@@ -442,7 +444,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'The Internationals',
-    leftPhotos: [{ src: 'mohammad_hadid.jpg', caption: 'Mohammad Hadid' }],
+    leftPhotos: [{ src: 'mohammad_hadid.jpg', caption: '[Insert Caption Here]' }],
     entries: [
       { name: 'Ines Alonso' },
       { name: 'Mohammad Hadid' },
@@ -463,8 +465,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Winter Haven Technology Services',
-    leftPhotos: [{ src: 'winter_haven_1.jpg' }],
-    rightPhotos: [{ src: 'winter_haven_nick.png', caption: 'Nickolas Phan' }],
+    leftPhotos: [{ src: 'winter_haven_1.jpg', caption: '[Insert Caption Here]' }],
+    rightPhotos: [{ src: 'winter_haven_nick.png', caption: '[Insert Caption Here]' }],
     entries: [
       { name: 'Aizan "Bobby" Khan' },
       
@@ -532,7 +534,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Kaitlyn Surovy' },
       { name: 'Kody Byrd' },
       { name: 'Koral Ruiz' },
-      { name: 'Christopher', needsLastName: true },
+      { name: 'Christopher Colon'},
       { name: 'Kyla Harpe' },
       { name: 'Chiara Bottega' },
       { name: 'Kyle Trotter' },
@@ -571,21 +573,21 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Esmerelda Collazo' },
     ],
     leftPhotos: [
-      { src: 'honorable_mentions.jpg' },
-      { src: 'honorable_mentions_2.jpg' },
-      { src: 'honorable_mentions_3.jpg' },
-      { src: 'honorable_mentions_4.jpg' },
-      { src: 'honorable_mentions_5.jpg' },
-      { src: 'honorable_mentions_6.jpg' },
+      { src: 'honorable_mentions.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_2.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_3.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_4.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_5.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_6.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'honorable_mentions_lukas_kelk.jpg', caption: 'Lukas Kelk' },
-      { src: 'honorable_mentions_clara.jpg', caption: 'Clara Satterfield' },
-      { src: 'honorable_mentions_chiara_bottega_kyle_trotter.jpg', caption: 'Chiara Bottega & Kyle Trotter' },
-      { src: 'honorable_mentions_near_chiara_bottega.jpg' },
-      { src: 'honorable_mentions_7.png' },
-      { src: 'honorable_mentions_8.jpg' },
-      { src: 'honorable_mentions_9.jpg' },
+      { src: 'honorable_mentions_lukas_kelk.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_clara.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_chiara_bottega_kyle_trotter.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_near_chiara_bottega.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_7.png', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_8.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_9.jpg', caption: '[Insert Caption Here]' },
     ],
   },
   {
@@ -609,7 +611,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Alibaba' },
       { name: 'Andy Miller', role: 'Lets me carry him in VALORANT' },
       { name: 'Nicole Curatolo', role: 'athena, Best Sage main' },
-      { name: 'Bruno', needsLastName: true },
+      { name: 'Bruno Cirilo' },
       { name: 'Daichi' },
       { name: 'Daniela Mazurevich', role: 'LatvianOccupier' },
       { name: 'Elysha' },
@@ -631,12 +633,12 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Special Thanks',
     leftPhotos: [
-      { src: 'me_presenting.jpg' },
-      { src: 'special_thanks_mark_grayson.jpg', caption: 'Mark Grayson' },
+      { src: 'me_presenting.jpg', caption: '[Insert Caption Here]' },
+      { src: 'special_thanks_mark_grayson.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
-      { src: 'me_coca_cola.jpg' },
-      { src: 'special_thanks_hornet.jpg', caption: 'Hornet' },
+      { src: 'me_coca_cola.jpg', caption: '[Insert Caption Here]' },
+      { src: 'special_thanks_hornet.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'A-Train' },
@@ -2122,6 +2124,7 @@ export function Credits() {
     a.play().catch(() => {});
     previewAudioRef.current = a;
     setPreviewTrack(trackIdx);
+    setSelectedTrack(trackIdx);
     /* Auto-stop after 30 seconds */
     const timer = setTimeout(() => {
       if (previewAudioRef.current === a) {

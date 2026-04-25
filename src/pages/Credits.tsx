@@ -402,6 +402,7 @@ const CREDITS_DATA: CreditSection[] = [
     rightPhotos: ['winter_haven_nick.png'],
     entries: [
       { name: 'Aizan "Bobby" Khan' },
+      
       { name: 'Angel Trinidad' },
       { name: 'Blake Cervone' },
       { name: 'Connor Cervone' },

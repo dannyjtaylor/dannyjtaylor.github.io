@@ -404,7 +404,15 @@
   align-items: flex-start;
 }
 
-/* Side photos — randomized rotations via nth-child */
+/* Side photos — wrapped in photoWithCaption for caption support */
+.photoWithCaption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.3s ease;
+}
+
 .sidePhoto {
   max-width: 200px;
   max-height: 160px;
@@ -413,25 +421,35 @@
   object-fit: cover;
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-  transition: transform 0.3s ease;
 }
 
-.sidePhoto:hover {
+.photoCaption {
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+.sideColLeft .photoWithCaption:hover,
+.sideColRight .photoWithCaption:hover {
   transform: scale(1.05) rotate(0deg) !important;
   z-index: 1;
   position: relative;
 }
 
 /* Staggered rotations for a natural, scattered look */
-.sideColLeft .sidePhoto:nth-child(4n+1) { transform: rotate(-3deg) translateY(0px);  }
-.sideColLeft .sidePhoto:nth-child(4n+2) { transform: rotate(2deg)  translateY(30px); }
-.sideColLeft .sidePhoto:nth-child(4n+3) { transform: rotate(-1.5deg) translateY(15px); }
-.sideColLeft .sidePhoto:nth-child(4n+4) { transform: rotate(3.5deg)  translateY(45px); }
+.sideColLeft .photoWithCaption:nth-child(4n+1) { transform: rotate(-3deg) translateY(0px);  }
+.sideColLeft .photoWithCaption:nth-child(4n+2) { transform: rotate(2deg)  translateY(30px); }
+.sideColLeft .photoWithCaption:nth-child(4n+3) { transform: rotate(-1.5deg) translateY(15px); }
+.sideColLeft .photoWithCaption:nth-child(4n+4) { transform: rotate(3.5deg)  translateY(45px); }
 
-.sideColRight .sidePhoto:nth-child(4n+1) { transform: rotate(3deg)  translateY(20px); }
-.sideColRight .sidePhoto:nth-child(4n+2) { transform: rotate(-2deg) translateY(0px);  }
-.sideColRight .sidePhoto:nth-child(4n+3) { transform: rotate(1.5deg)  translateY(40px); }
-.sideColRight .sidePhoto:nth-child(4n+4) { transform: rotate(-3.5deg) translateY(10px); }
+.sideColRight .photoWithCaption:nth-child(4n+1) { transform: rotate(3deg)  translateY(20px); }
+.sideColRight .photoWithCaption:nth-child(4n+2) { transform: rotate(-2deg) translateY(0px);  }
+.sideColRight .photoWithCaption:nth-child(4n+3) { transform: rotate(1.5deg)  translateY(40px); }
+.sideColRight .photoWithCaption:nth-child(4n+4) { transform: rotate(-3.5deg) translateY(10px); }
 
 .openingSpace {
   height: 30vh;
@@ -518,7 +536,7 @@
 }
 
 .sectionTitle {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 400;
   letter-spacing: 8px;
   text-transform: uppercase;
@@ -860,13 +878,21 @@
   text-align: right;
 }
 
-.mobileGroupPhoto {
+.mobileGroupPhotoBlock {
   width: 42%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.mobileGroupPhoto {
+  width: 100%;
   max-height: 180px;
   object-fit: cover;
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  flex-shrink: 0;
 }
 
 .mobileGroupNames {
@@ -922,7 +948,7 @@
 
   .sectionTitle,
   .memorialTitle {
-    font-size: 13px;
+    font-size: 16px;
     letter-spacing: 5px;
     margin-top: 50px;
     margin-bottom: 20px;

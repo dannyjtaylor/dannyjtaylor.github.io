@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './Credits.module.css';
 import { useLeaderboard } from '../hooks/useLeaderboard';
+import { ref as dbRef, increment, update } from 'firebase/database';
+import { db } from '../lib/firebase';
 
 /* ═══════════════════════════════════════════
    Track & Credits Data
@@ -51,20 +53,31 @@ interface CreditEntry {
   needsLastName?: boolean;
 }
 
+interface CreditPhoto {
+  src: string;
+  caption?: string;
+}
+
 interface CreditSection {
   title: string;
   entries: CreditEntry[];
   photo?: string | string[];   /* centered logo(s) shown above section title */
-  leftPhotos?: string[];       /* personal photos in left side column */
-  rightPhotos?: string[];      /* personal photos in right side column */
+  leftPhotos?: CreditPhoto[];
+  rightPhotos?: CreditPhoto[];
 }
 
 const CREDITS_DATA: CreditSection[] = [
   /* ── Top sections ── */
   {
     title: 'My Family',
-    leftPhotos: ['family_1.jpg', 'me_with_grandmapat_and_grandpahoward.jpg', 'family_2.jpg'],
-    rightPhotos: ['me_and_patricia_taylor.png', '3DS_everyone_and_family.jpg'],
+    leftPhotos: [
+      { src: 'my_family_1.jpg' },
+      { src: 'my_family_grandmapat_grandpahoward.jpg' },
+      { src: 'my_family_2.jpg' },
+    ],
+    rightPhotos: [
+      { src: 'myfamily_me_and_patricia_taylor.png' },
+    ],
     entries: [
       { name: 'Katherine Taylor', role: 'Mother' },
       { name: 'John Taylor', role: 'Father' },
@@ -91,8 +104,13 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Professors/Faculty & Staff',
-    leftPhotos: ['dr_ngo.jpg', 'friend_group_rawa.jpg'],
-    rightPhotos: ['me_with_rawa_adla_card.jpg'],
+    leftPhotos: [
+      { src: 'FPUfaculty_dr_hoan_ngo.jpg' },
+      { src: 'faculty_dr_rawa.jpg' },
+    ],
+    rightPhotos: [
+      { src: 'faculty_dr_adla.jpg' },
+    ],
     entries: [
       { name: 'Devin Stephenson', role: "Florida Polytechnic President" },
       { name: 'Jon Pawlecki', role: "Assistant VP of Student Affairs" },
@@ -130,8 +148,12 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'SHPE Eboard 2025\u20132026',
     photo: 'SHPE.png',
-    leftPhotos: ['gabo_me_kro.jpg'],
-    rightPhotos: ['shiraj_and_i_IBM.jpg'],
+    leftPhotos: [
+      { src: 'SHPE_eboard_0.png' },
+    ],
+    rightPhotos: [
+      { src: 'SHPE_eboard_1.jpg' },
+    ],
     entries: [
       { name: 'Naibys "Kro" Alzugaray' },
       { name: 'Nicolas Izquierdo' },
@@ -140,8 +162,23 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Rotaract',
     photo: 'rotaract.png',
-    leftPhotos: ['rotaract_1.jpg', 'aidan_morris_and_me.jpg', 'me_domenic_aidan.jpg', 'rotaract_3.jpg', 'rotaract_5.jpg', 'rotaract_7.jpg'],
-    rightPhotos: ['rotaract_2.jpg', 'alex_cam_1.jpg', 'brittany_me_andriana_alex.jpg', 'rotaract_4.jpg', 'rotaract_6.jpg', 'rotaract_8.jpg'],
+    leftPhotos: [
+      { src: 'aidan_morris.jpg' },
+      { src: 'rotaract_aidan_domenic.jpg' },
+      { src: 'rotaract_near_izzy.jpg' },
+      { src: 'rotaract_3.jpg' },
+      { src: 'rotaract_5.jpg' },
+      { src: 'rotaract_7.jpg' },
+    ],
+    rightPhotos: [
+      { src: 'rotaract_2.jpg' },
+      { src: 'alex_cam.png' },
+      { src: 'alex_cam_2.jpg' },
+      { src: 'brittany_cam_alex_cam_adriana.jpg' },
+      { src: 'rotaract_4.jpg' },
+      { src: 'rotaract_6.jpg' },
+      { src: 'rotaract_8.jpg' },
+    ],
     entries: [
       { name: 'Aidan Morris' },
       { name: 'Alyson Smyth' },
@@ -176,8 +213,16 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'SHPE',
     photo: 'SHPE_1.png',
-    leftPhotos: ['gabo_louis_me.jpg', 'me_philadelphia.jpg', 'me_andrew_louis.png'],
-    rightPhotos: ['anaheim_1.jpg', 'anaheim_2.jpg', 'maria_roman_1.jpg'],
+    leftPhotos: [
+      { src: 'SHPE_1.jpg' },
+      { src: 'SHPE_2.jpg' },
+      { src: 'SHPE_the_city_of_philly.jpg', caption: 'The City of Philly' },
+    ],
+    rightPhotos: [
+      { src: 'SHPE_3.jpg' },
+      { src: 'SHPE_4.jpg' },
+      { src: 'maria_roman_1.jpg', caption: 'Maria Roman' },
+    ],
     entries: [
       { name: 'Benji Guzman' },
       { name: 'Gabriel Sanchez' },
@@ -192,6 +237,17 @@ const CREDITS_DATA: CreditSection[] = [
   /* ── Alphabetical middle ── */
   {
     title: '#1 Gubbies',
+    leftPhotos: [
+      { src: 'number_one_gubbies_0.jpg' },
+      { src: 'number_1_gubbies_1.jpg' },
+      { src: 'number_1_gubbies_2.jpg' },
+      { src: 'number_1_gubbies_3.jpg' },
+    ],
+    rightPhotos: [
+      { src: 'number_1_gubbies.jpg' },
+      { src: 'number_1_gubbies_5.jpg' },
+      { src: 'number_1_gubbies_7.jpg' },
+    ],
     entries: [
       { name: 'Adriana Bottega' },
       { name: 'Brandon Camacho', role: '#1 Spinjitzu Master'},
@@ -201,22 +257,6 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: '2404-1313',
-    leftPhotos: [
-      'friend_group_boys.jpg',
-      'friend_group_2.jpg',
-      'friend_group_large.jpg',
-      'me_bryon_adriana.jpg',
-      'me_bryon_adriana_cruise.jpg',
-      'friend_group_8.jpg',
-    ],
-    rightPhotos: [
-      'friend_group_1.jpg',
-      'friend_group_3.jpg',
-      'friend_group_4.jpg',
-      'me_bryon_adriana_chiara_kyle.jpg',
-      'me_bryon_adrianas_family.jpg',
-      'adrianas_birthday_friend_group.jpg',
-    ],
     entries: [
       { name: 'Bryon Catlin' },
       { name: 'Domenic Iorfida' },
@@ -226,6 +266,13 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: "Christian's Peak",
+    leftPhotos: [
+      { src: 'christians_peak_1.png' },
+      { src: 'christians_peak_luis_mata_moreno.jpg', caption: 'Luis Mata-Moreno' },
+    ],
+    rightPhotos: [
+      { src: 'christians_peak_2.png' },
+    ],
     entries: [
       { name: 'Albert Ubieta' },
       { name: 'Andrew Piasecki' },
@@ -236,6 +283,12 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Did He Watch 2',
+    leftPhotos: [
+      { src: 'did_he_watch_shiraj_and_i_IBM.jpg', caption: 'Shriraj & Me at IBM' },
+    ],
+    rightPhotos: [
+      { src: 'ibm_1.jpg' },
+    ],
     entries: [
       { name: 'Alex Meert' },
       { name: 'Andrew Graham' },
@@ -253,7 +306,13 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Good Mythical Morning Enjoyers',
-    rightPhotos: ['me_jaylee_emma.jpg'],
+    leftPhotos: [
+      { src: 'good_mythical_morning_enjoyers.jpg' },
+      { src: 'good_mythical_morning_enjoyers1.jpg' },
+    ],
+    rightPhotos: [
+      { src: 'good_mythical_morning_enjoyers2.jpg' },
+    ],
     entries: [
       { name: 'Emma Rossi' },
       { name: 'Jaylee Ciaschini' },
@@ -282,8 +341,12 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: "Polk County Sheriff's Office LiDAR Team (Capstone)",
     photo: 'sheriffsoffice.png',
-    leftPhotos: ['lidarteam_1.jpg', 'friend_group_research.png'],
-    rightPhotos: ['lidar_2.jpg', 'research_1.jpg'],
+    leftPhotos: [
+      { src: 'capstone_1.jpg' },
+    ],
+    rightPhotos: [
+      { src: 'capstone_2.jpg' },
+    ],
     entries: [
       { name: 'James Allegra' },
       { name: 'Gaspar Chayer' },
@@ -305,8 +368,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Lake Placid/Sebring',
-    leftPhotos: ['me_alaska.jpg'],
-    rightPhotos: ['me_random_with_cars.jpg'],
+    leftPhotos: [{ src: 'me_alaska.jpg' }],
+    rightPhotos: [{ src: 'me_random_with_cars.jpg' }],
     entries: [
       { name: 'Brianna Pratts' },
       { name: 'Casen Simmons' },
@@ -336,8 +399,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'People I Know Because of Bryon',
-    leftPhotos: ['random_1.jpg', 'friends_target.jpg'],
-    rightPhotos: ['random_2.jpg'],
+    leftPhotos: [{ src: 'random_1.jpg' }],
+    rightPhotos: [{ src: 'random_2.jpg' }],
     entries: [
       { name: 'Bryon Catlin II' },
       { name: 'Carson Elliott', role: "NerdLabz" },
@@ -353,6 +416,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Party Animals',
+    leftPhotos: [{ src: 'party_animals_1.jpg' }],
+    rightPhotos: [{ src: 'party_animals_2.jpg' }],
     entries: [
       { name: 'Aliyah Schouten' },
       { name: 'Chris Mather' },
@@ -377,6 +442,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'The Internationals',
+    leftPhotos: [{ src: 'mohammad_hadid.jpg', caption: 'Mohammad Hadid' }],
     entries: [
       { name: 'Ines Alonso' },
       { name: 'Mohammad Hadid' },
@@ -386,7 +452,6 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'VALORANT Varsity',
     photo: ['flpolyesports.png', 'valorant.png'],
-    leftPhotos: ['me_random.jpg'],
     entries: [
       { name: 'Vanessa Korthas' },
       { name: 'Jaden Akers-Atkins' },
@@ -398,8 +463,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Winter Haven Technology Services',
-    leftPhotos: ['winter_haven_1.jpg'],
-    rightPhotos: ['winter_haven_nick.png'],
+    leftPhotos: [{ src: 'winter_haven_1.jpg' }],
+    rightPhotos: [{ src: 'winter_haven_nick.png', caption: 'Nickolas Phan' }],
     entries: [
       { name: 'Aizan "Bobby" Khan' },
       
@@ -506,19 +571,21 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Esmerelda Collazo' },
     ],
     leftPhotos: [
-      'me_and_mo_haddid.jpg',
-      'clara_1.jpg',
-      'escape_room_1.jpg',
-      'rappel_me_random.jpg',
-      'friend_group_image_4.jpg',
-      'me_on_dragon.jpg',
+      { src: 'honorable_mentions.jpg' },
+      { src: 'honorable_mentions_2.jpg' },
+      { src: 'honorable_mentions_3.jpg' },
+      { src: 'honorable_mentions_4.jpg' },
+      { src: 'honorable_mentions_5.jpg' },
+      { src: 'honorable_mentions_6.jpg' },
     ],
     rightPhotos: [
-      'luis_mata_moreno.jpg',
-      'NOVA_with_lukas_kelk.jpg',
-      'escape_room_2.jpg',
-      'howl_o_scream.jpg',
-      'friend_group_normal_camera.jpg',
+      { src: 'honorable_mentions_lukas_kelk.jpg', caption: 'Lukas Kelk' },
+      { src: 'honorable_mentions_clara.jpg', caption: 'Clara Satterfield' },
+      { src: 'honorable_mentions_chiara_bottega_kyle_trotter.jpg', caption: 'Chiara Bottega & Kyle Trotter' },
+      { src: 'honorable_mentions_near_chiara_bottega.jpg' },
+      { src: 'honorable_mentions_7.png' },
+      { src: 'honorable_mentions_8.jpg' },
+      { src: 'honorable_mentions_9.jpg' },
     ],
   },
   {
@@ -538,8 +605,6 @@ const CREDITS_DATA: CreditSection[] = [
   /* ── End sections ── */
   {
     title: 'Online Friends',
-    leftPhotos: ['cruise_1.jpg', 'cruise_2.jpg'],
-    rightPhotos: ['cruise_3.jpg', 'friend_group_5.png'],
     entries: [
       { name: 'Alibaba' },
       { name: 'Andy Miller', role: 'Lets me carry him in VALORANT' },
@@ -565,32 +630,49 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Special Thanks',
-    leftPhotos: ['me_invincible.jpg', 'me_presenting.jpg'],
-    rightPhotos: ['me_coca_cola.jpg', 'alex_and_i.png'],
+    leftPhotos: [
+      { src: 'me_presenting.jpg' },
+      { src: 'special_thanks_mark_grayson.jpg', caption: 'Mark Grayson' },
+    ],
+    rightPhotos: [
+      { src: 'me_coca_cola.jpg' },
+      { src: 'special_thanks_hornet.jpg', caption: 'Hornet' },
+    ],
     entries: [
+      { name: 'A-Train' },
       { name: 'Akira Kurusu' },
       { name: 'Apollo Justice' },
       { name: 'Arataka Reigen' },
+      { name: 'Atom Eve' },
       { name: 'Clairo' },
       { name: 'Edward Elric' },
       { name: 'Hideo Kojima' },
       { name: 'Hornet' },
       { name: 'Itadori Yuji' },
+      { name: 'Johnny Joestar' },
+      { name: 'Jolyne Kujo' },
+      { name: 'Jonathan Joestar' },
+      { name: 'Joseph Joestar' },
+      { name: 'Josuke Higashikata' },
       { name: 'Jotaro Kujo' },
       { name: 'Kasane Teto' },
       { name: 'Lucy MacLean' },
       { name: 'Makoto Yuki' },
       { name: 'MAPPA' },
+      { name: 'Mark Grayson' },
       { name: 'Maya Fey' },
       { name: 'ONE' },
       { name: 'Phoenix Wright' },
       { name: 'Roy Mustang' },
+      { name: 'Saitama' },
       { name: 'Shigeo Kageyama' },
+      { name: 'Stark' },
       { name: 'Team Cherry' },
       { name: 'The Knight' },
       { name: 'Thorfinn, son of Thors' },
       { name: 'Toby Fox' },
       { name: 'Yu Narukami' },
+      { name: 'Yuta Okkotsu' },
     ],
   },
   {
@@ -874,15 +956,15 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let phaseTimer = 0;
     let phaseRound = 0;
     let phaseTransitionDelay = 0;
-    const PHASE_TRANSITION_DURATION = 2.5; /* seconds between phases */
-    const totalNames = 170;
+    const PHASE_TRANSITION_DURATION = 1.2; /* seconds between phases */
+    const totalNames = 220;
 
     /* Phase thresholds — fixed budgets for ~1-minute total runtime */
-    const phase0End = 20;   // Aimed spreads: ~8s
-    const phase2End = 56;   // Crossing streams: ~8s
-    const phase3End = 106;  // Corridor: ~8s
-    const phase4End = 130;  // Column Rain: ~7s
-    const phase5End = 150;  // Fan Burst: ~7s
+    const phase0End = 24;   // Aimed spreads (~8 spreads)
+    const phase2End = 82;   // Crossing streams (~3-4 full-screen waves)
+    const phase3End = 152;  // Corridor (35 pairs)
+    const phase4End = 175;  // Column Rain
+    const phase5End = 200;  // Fan Burst
 
     const getPhase = (idx: number): number => {
       if (idx < phase0End) return 0;  // Aimed spreads
@@ -1066,26 +1148,33 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 4: Column Rain — 3 columns falling, one column always has a gap ── */
+    /* ── Phase 4: Column Rain — columns fall, one always has a gap ── */
+    /* Mobile uses 2 columns (wider = fits longer names); desktop uses 3. */
     let p4GapCol = 0;
     const spawnColumnWave = () => {
       if (nameIdx >= phase4End) return;
       const w = W(), h = H();
       const vy = h * P4_FALL_SPEED_FRAC;
-      for (let col = 0; col < 3; col++) {
-        if (col === p4GapCol) continue; /* gap column — always safe to stand in */
+      const numCols = isMobileDevice ? 2 : 3;
+      const colW = w / numCols;
+      const gapCol = p4GapCol % numCols;
+      for (let col = 0; col < numCols; col++) {
+        if (col === gapCol) continue; /* gap column — always safe to stand in */
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
-        const colW = w / 3;
-        const x = colW * col + (colW - tw) / 2;
+        /* Clamp x so text stays within its column; clamp hitbox too so the
+           gap column is always safe even for very long names on narrow screens. */
+        const rawX = colW * col + (colW - tw) / 2;
+        const x = Math.max(colW * col, Math.min(colW * (col + 1) - tw, rawX));
+        const hitW = Math.min(tw, colW * (col + 1) - x);
         projectiles.push(mkProj({
           id: nextProjId++, text: name,
           x, y: -th - 20,
-          vy, w: tw, h: th,
+          vy, w: hitW, h: th,
         }));
       }
-      p4GapCol = (p4GapCol + 1) % 3;
+      p4GapCol++;
     };
 
     /* ── Phase 5: Fan Burst — 3 names spread in a fan from alternating sides ── */
@@ -1415,8 +1504,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         } else {
           const newPhase = getPhase(nameIdx);
           if (newPhase !== currentPhase) {
-            /* Clear all active projectiles for a clean transition */
-            projectiles = [];
+            /* Let old projectiles coast off-screen naturally — no instant clear,
+               no flash, no velocity change. Prevents jarring black screen. */
             currentPhase = newPhase;
             phaseTimer = 0;
             phaseRound = 0;
@@ -1845,6 +1934,14 @@ export function Credits() {
 
   const { submitScore } = useLeaderboard();
 
+  /* ── Grad-cap visit counter (Firebase) ──
+     Increment once per page load. Reset to 0 the day before graduation.
+     View count at: Firebase console → Realtime Database → stats/creditsViews */
+  useEffect(() => {
+    if (!db) return;
+    update(dbRef(db, 'stats'), { creditsViews: increment(1) }).catch(() => {});
+  }, []);
+
   /* Preload fonts as early as possible to avoid FOUT hitch */
   const [fontsReady, setFontsReady] = useState(false);
   useEffect(() => { preloadFonts().then(() => setFontsReady(true)); }, []);
@@ -2117,7 +2214,7 @@ export function Credits() {
 
   /* ── Mobile layout: photos interleaved with name groups ── */
   const buildMobileLayout = (section: CreditSection) => {
-    const photoPool = [
+    const photoPool: CreditPhoto[] = [
       ...(section.leftPhotos ?? []),
       ...(section.rightPhotos ?? []),
     ];
@@ -2148,11 +2245,14 @@ export function Credits() {
             key={`mob-group-${i}`}
             className={`${styles.mobilePhotoGroup}${!isLeft ? ` ${styles.mobilePhotoGroupReverse}` : ''}`}
           >
-            <img
-              className={styles.mobileGroupPhoto}
-              src={`/credits-photos/${photo}`}
-              alt=""
-            />
+            <div className={styles.mobileGroupPhotoBlock}>
+              <img
+                className={styles.mobileGroupPhoto}
+                src={`/credits-photos/${photo.src}`}
+                alt=""
+              />
+              {photo.caption && <div className={styles.photoCaption}>{photo.caption}</div>}
+            </div>
             <div className={styles.mobileGroupNames}>{nameNodes}</div>
           </div>
         );
@@ -2356,7 +2456,10 @@ export function Credits() {
                 {/* Left side photos */}
                 <div className={styles.sideColLeft}>
                   {(section.leftPhotos ?? []).map((p) => (
-                    <img key={p} src={`/credits-photos/${p}`} alt="" className={styles.sidePhoto} />
+                    <div key={p.src} className={styles.photoWithCaption}>
+                      <img src={`/credits-photos/${p.src}`} alt="" className={styles.sidePhoto} />
+                      {p.caption && <div className={styles.photoCaption}>{p.caption}</div>}
+                    </div>
                   ))}
                 </div>
 
@@ -2385,7 +2488,10 @@ export function Credits() {
                 {/* Right side photos */}
                 <div className={styles.sideColRight}>
                   {(section.rightPhotos ?? []).map((p) => (
-                    <img key={p} src={`/credits-photos/${p}`} alt="" className={styles.sidePhoto} />
+                    <div key={p.src} className={styles.photoWithCaption}>
+                      <img src={`/credits-photos/${p.src}`} alt="" className={styles.sidePhoto} />
+                      {p.caption && <div className={styles.photoCaption}>{p.caption}</div>}
+                    </div>
                   ))}
                 </div>
               </div>

@@ -40,6 +40,7 @@ const PNG_ICONS: Record<string, string> = {
   recyclebinfull: '/icons/recycle-full.png',
   recyclebinempty: '/icons/recycle-empty.png',
   credits: '/icons/credits.svg',
+  cake: '/icons/cake.svg',
 };
 
 /* ── Canvas Pixel Art Component ── */

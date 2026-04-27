@@ -154,6 +154,7 @@ export function DesktopIcon({ id, label, icon, windowId, externalUrl }: DesktopI
                   'icon-musicplayer': { label: 'Music Player', icon: 'musicplayer', windowId: 'musicplayer' },
                   'icon-credits': { label: 'Credits', icon: 'credits', windowId: 'credits' },
                   'icon-leaderboard': { label: 'Leaderboard.txt', icon: 'notepad', windowId: 'leaderboard' },
+                  'icon-birthdays': { label: 'Birthdays', icon: 'cake', windowId: 'birthdays' },
                 };
                 const staticInfo = staticIconMap[id];
                 if (staticInfo) {

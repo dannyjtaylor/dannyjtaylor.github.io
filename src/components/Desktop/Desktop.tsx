@@ -37,6 +37,7 @@ import { DynamicNotepad } from '../../windows/DynamicNotepad';
 import { CookieClicker } from '../../windows/CookieClicker';
 import { NYTGames } from '../../windows/NYTGames';
 import { Leaderboard } from '../../windows/Leaderboard';
+import { Birthdays } from '../../windows/Birthdays';
 import type { DesktopIconConfig, WindowConfig, MenuConfig } from '../../types';
 import styles from './Desktop.module.css';
 
@@ -194,6 +195,7 @@ const ICONS: DesktopIconConfig[] = [
   { id: 'icon-nytgames', label: 'NYT Games', icon: 'document', windowId: 'nytgames' },
   { id: 'icon-credits', label: 'Credits', icon: 'credits', windowId: 'credits', externalUrl: '/credits' },
   { id: 'icon-leaderboard', label: 'Leaderboard.txt', icon: 'notepad', windowId: 'leaderboard' },
+  { id: 'icon-birthdays',   label: 'Birthdays',        icon: 'cake',    windowId: 'birthdays' },
 ];
 
 const WINDOWS: WindowConfig[] = [
@@ -222,6 +224,7 @@ const WINDOWS: WindowConfig[] = [
   { id: 'cookieclicker', title: 'Cookie Clicker',       icon: 'file',       defaultWidth: 640, defaultHeight: 480, defaultX: 80,  defaultY: 20 },
   { id: 'nytgames', title: 'NYT Games',                  icon: 'document',  defaultWidth: 500, defaultHeight: 520, defaultX: 100, defaultY: 30 },
   { id: 'leaderboard', title: 'Leaderboard.txt - Notepad', icon: 'notepad', defaultWidth: 380, defaultHeight: 420, defaultX: 160, defaultY: 60 },
+  { id: 'birthdays',   title: 'Birthdays',                 icon: 'cake',   defaultWidth: 500, defaultHeight: 440, defaultX: 140, defaultY: 55 },
 ];
 
 const WINDOW_CONTENT: Record<string, React.ComponentType> = {
@@ -250,6 +253,7 @@ const WINDOW_CONTENT: Record<string, React.ComponentType> = {
   cookieclicker: CookieClicker,
   nytgames: NYTGames,
   leaderboard: Leaderboard,
+  birthdays: Birthdays,
 };
 
 export function Desktop() {

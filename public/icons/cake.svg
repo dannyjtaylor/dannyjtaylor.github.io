@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges">
+  <!-- Candle flames -->
+  <rect x="4" y="0" width="1" height="1" fill="#FFD700"/>
+  <rect x="10" y="0" width="1" height="1" fill="#FFD700"/>
+  <!-- Candles -->
+  <rect x="4" y="1" width="1" height="3" fill="#FF4444"/>
+  <rect x="10" y="1" width="1" height="3" fill="#4488FF"/>
+  <!-- Frosting layer (white base + pink surface) -->
+  <rect x="1" y="4" width="14" height="3" fill="#FFFFFF"/>
+  <rect x="2" y="4" width="12" height="2" fill="#FFE4E8"/>
+  <!-- Red berries on frosting -->
+  <rect x="3" y="5" width="2" height="1" fill="#CC0000"/>
+  <rect x="7" y="4" width="2" height="2" fill="#CC0000"/>
+  <rect x="11" y="5" width="2" height="1" fill="#CC0000"/>
+  <!-- Frosting drips onto cake body -->
+  <rect x="4" y="7" width="1" height="1" fill="#FFFFFF"/>
+  <rect x="9" y="7" width="1" height="1" fill="#FFFFFF"/>
+  <!-- Cake body (brown exterior) -->
+  <rect x="1" y="7" width="14" height="8" fill="#7B4100"/>
+  <!-- Cream filling interior -->
+  <rect x="2" y="8" width="12" height="6" fill="#FFF8DC"/>
+  <!-- White cream stripe in middle -->
+  <rect x="2" y="10" width="12" height="1" fill="#FFFFFF"/>
+  <!-- Dark brown left/right edges -->
+  <rect x="1" y="7" width="1" height="8" fill="#5C3000"/>
+  <rect x="14" y="7" width="1" height="8" fill="#5C3000"/>
+  <!-- Bottom edge -->
+  <rect x="1" y="14" width="14" height="1" fill="#5C3000"/>
+</svg>

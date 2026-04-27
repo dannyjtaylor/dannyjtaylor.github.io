@@ -1,0 +1,51 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "rooms": {
+      "$roomId": {
+        "messages": {
+          ".read": true,
+          ".write": true,
+          "$messageId": {
+            ".validate": "newData.hasChildren(['text', 'from', 'color']) && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 500 && newData.child('from').isString() && newData.child('from').val().length >= 1 && newData.child('from').val().length <= 30 && newData.child('color').isString() && newData.child('color').val().length <= 20"
+          }
+        },
+        "users": {
+          ".read": true,
+          ".write": true,
+          "$userId": {
+            ".validate": "newData.hasChildren(['name', 'color']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 30 && newData.child('color').isString() && newData.child('color').val().length <= 20"
+          }
+        }
+      }
+    },
+
+    "leaderboard": {
+      ".read": true,
+      ".write": true,
+      "$entryId": {
+        ".validate": "newData.hasChildren(['name', 'hits']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 10 && newData.child('hits').isNumber() && newData.child('hits').val() >= 0 && newData.child('hits').val() <= 1000000"
+      }
+    },
+
+    "birthdays": {
+      ".read": true,
+      ".write": true,
+      "$birthdayId": {
+        ".validate": "newData.hasChildren(['name', 'month', 'day']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 100 && newData.child('month').isNumber() && newData.child('month').val() >= 1 && newData.child('month').val() <= 12 && newData.child('day').isNumber() && newData.child('day').val() >= 1 && newData.child('day').val() <= 31"
+      }
+    },
+
+    "cookieclicker": {
+      "users": {
+        "$username": {
+          ".read": true,
+          ".write": true,
+          ".validate": "newData.hasChildren(['cookies', 'totalBaked', 'lastSaved']) && newData.child('cookies').isNumber() && newData.child('cookies').val() >= 0 && newData.child('totalBaked').isNumber() && newData.child('totalBaked').val() >= 0 && newData.child('totalClicks').isNumber() && newData.child('totalClicks').val() >= 0 && newData.child('lastSaved').isNumber()"
+        }
+      }
+    }
+  }
+}

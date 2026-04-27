@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useCookieSave } from '../hooks/useCookieSave';
 
 /* ═══════════════════════════════════════════════════════════════════
    Cookie Clicker — Full implementation inspired by Orteil's game
@@ -1010,6 +1011,24 @@ export function CookieClicker() {
   const cookieRef = useRef<HTMLDivElement>(null);
   const goldenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ─── Username & Save ───
+  const [username, setUsername] = useState<string | null>(() => {
+    try { return localStorage.getItem('cc_username'); } catch { return null; }
+  });
+  const [usernameInput, setUsernameInput] = useState('');
+  const [showUsernameDialog, setShowUsernameDialog] = useState(() => {
+    try { return !localStorage.getItem('cc_username'); } catch { return true; }
+  });
+  const { saveData, loading: saveLoading, saving, lastSaveTime, save } = useCookieSave(username);
+  const [gameInitialized, setGameInitialized] = useState(false);
+  const saveStateRef = useRef({
+    cookies: 0, totalBaked: 0, totalClicks: 0, handmadeClicks: 0,
+    buildings: {} as Record<string, number>,
+    purchasedUpgrades: new Set<string>(),
+    unlockedAchievements: new Set<string>(),
+    goldenClicks: 0, frenzyActivations: 0, clickFrenzyActivations: 0, playTimeSeconds: 0,
+  });
+
   // ─── Compute CpS ───
   const cps = useMemo(() => {
     let total = 0;
@@ -1095,11 +1114,12 @@ export function CookieClicker() {
 
   // ─── Play Time Counter ───
   useEffect(() => {
+    if (!gameInitialized) return;
     const interval = setInterval(() => {
       setPlayTimeSeconds(t => t + 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [gameInitialized]);
 
   // ─── Frenzy Timers ───
   useEffect(() => {
@@ -1292,6 +1312,58 @@ export function CookieClicker() {
     return bCps;
   }, [purchasedUpgrades]);
 
+  // ─── Game Initialization from Save ───
+  useEffect(() => {
+    if (saveLoading || gameInitialized) return;
+    if (saveData) {
+      setCookies(saveData.cookies);
+      setTotalBaked(saveData.totalBaked);
+      setTotalClicks(saveData.totalClicks);
+      setHandmadeClicks(saveData.handmadeClicks);
+      setBuildings(saveData.buildings ?? {});
+      setPurchasedUpgrades(new Set(saveData.purchasedUpgrades ?? []));
+      setUnlockedAchievements(new Set(saveData.unlockedAchievements ?? []));
+      setGoldenClicks(saveData.goldenClicks ?? 0);
+      setFrenzyActivations(saveData.frenzyActivations ?? 0);
+      setClickFrenzyActivations(saveData.clickFrenzyActivations ?? 0);
+      setPlayTimeSeconds(saveData.playTimeSeconds ?? 0);
+    }
+    setGameInitialized(true);
+  }, [saveData, saveLoading, gameInitialized]);
+
+  // ─── Sync saveStateRef with current game state ───
+  useEffect(() => {
+    saveStateRef.current = {
+      cookies, totalBaked, totalClicks, handmadeClicks, buildings,
+      purchasedUpgrades, unlockedAchievements, goldenClicks,
+      frenzyActivations, clickFrenzyActivations, playTimeSeconds,
+    };
+  }, [cookies, totalBaked, totalClicks, handmadeClicks, buildings,
+    purchasedUpgrades, unlockedAchievements, goldenClicks,
+    frenzyActivations, clickFrenzyActivations, playTimeSeconds]);
+
+  // ─── Auto-save every 30 seconds ───
+  useEffect(() => {
+    if (!username || !gameInitialized) return;
+    const id = setInterval(() => {
+      const s = saveStateRef.current;
+      save({
+        cookies: s.cookies,
+        totalBaked: s.totalBaked,
+        totalClicks: s.totalClicks,
+        handmadeClicks: s.handmadeClicks,
+        buildings: s.buildings,
+        purchasedUpgrades: Array.from(s.purchasedUpgrades),
+        unlockedAchievements: Array.from(s.unlockedAchievements),
+        goldenClicks: s.goldenClicks,
+        frenzyActivations: s.frenzyActivations,
+        clickFrenzyActivations: s.clickFrenzyActivations,
+        playTimeSeconds: s.playTimeSeconds,
+      });
+    }, 30000);
+    return () => clearInterval(id);
+  }, [username, gameInitialized, save]);
+
   // ─── Styles ───
   const bg = '#1e0f00';
   const panelBg = '#2a1a0a';
@@ -1300,6 +1372,85 @@ export function CookieClicker() {
   const textColor = '#fff8e7';
   const textDim = '#b09060';
   const borderColor = '#4a3520';
+
+  function handleSetUsername() {
+    const trimmed = usernameInput.trim().slice(0, 40);
+    if (!trimmed) return;
+    try { localStorage.setItem('cc_username', trimmed); } catch {}
+    setUsername(trimmed);
+    setShowUsernameDialog(false);
+  }
+
+  function handlePlayAsGuest() {
+    setShowUsernameDialog(false);
+    setGameInitialized(true);
+  }
+
+  const dialogBtnStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-system)', fontSize: 11, background: 'var(--win-gray)',
+    height: 23, borderTop: '1px solid var(--win-btn-hilight)',
+    borderLeft: '1px solid var(--win-btn-hilight)',
+    borderBottom: '1px solid var(--win-btn-dk-shadow)',
+    borderRight: '1px solid var(--win-btn-dk-shadow)',
+    cursor: 'default', padding: '0 12px', outline: 'none', color: 'var(--win-black)',
+  };
+
+  if (showUsernameDialog) {
+    return (
+      <div style={{
+        width: '100%', height: '100%', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', background: '#1e0f00', fontFamily: 'var(--font-system)',
+      }}>
+        <div style={{
+          background: 'var(--win-gray)', padding: 20, minWidth: 320,
+          border: '2px solid',
+          borderColor: 'var(--win-btn-hilight) var(--win-btn-dk-shadow) var(--win-btn-dk-shadow) var(--win-btn-hilight)',
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: 10, fontSize: 13, color: 'var(--win-black)' }}>
+            Cookie Clicker
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--win-black)', marginBottom: 10 }}>
+            Enter a username to save your progress:
+          </div>
+          <input
+            type="text"
+            value={usernameInput}
+            onChange={e => setUsernameInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSetUsername()}
+            maxLength={40}
+            autoFocus
+            placeholder="Username"
+            style={{
+              width: '100%', height: 22, fontFamily: 'var(--font-system)', fontSize: 11,
+              background: 'var(--win-white)', color: 'var(--win-black)',
+              borderTop: '1px solid var(--win-btn-shadow)', borderLeft: '1px solid var(--win-btn-shadow)',
+              borderBottom: '1px solid var(--win-btn-hilight)', borderRight: '1px solid var(--win-btn-hilight)',
+              padding: '0 4px', marginBottom: 8, boxSizing: 'border-box', outline: 'none',
+            }}
+          />
+          <div style={{ fontSize: 10, color: 'var(--win-btn-shadow)', marginBottom: 14 }}>
+            No password needed — anyone who knows your username can access your save.
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button style={dialogBtnStyle} onClick={handleSetUsername}>OK</button>
+            <button style={{ ...dialogBtnStyle, minWidth: 110 }} onClick={handlePlayAsGuest}>Play as Guest</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (username && !gameInitialized) {
+    return (
+      <div style={{
+        width: '100%', height: '100%', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', background: '#1e0f00', color: '#c89632',
+        fontFamily: 'var(--font-system)', fontSize: 11,
+      }}>
+        Loading save...
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -1439,7 +1590,14 @@ export function CookieClicker() {
           display: 'flex', justifyContent: 'space-between', fontSize: 9, color: textDim,
         }}>
           <span>Baked all time: {formatNumber(totalBaked)}</span>
-          <span>Clicks: {handmadeClicks.toLocaleString()}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {username && (
+              <span style={{ color: saving ? '#ffd700' : lastSaveTime ? '#80c080' : textDim }}>
+                {saving ? 'Saving...' : lastSaveTime ? 'Saved' : username}
+              </span>
+            )}
+            <span>Clicks: {handmadeClicks.toLocaleString()}</span>
+          </span>
         </div>
       </div>
 

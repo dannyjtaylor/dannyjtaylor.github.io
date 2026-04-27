@@ -414,6 +414,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Sam Critchlow' },
       { name: 'Stephanie Catlin' },
       { name: 'Tyler Critchlow' },
+      { name: 'Kora'},
     ],
   },
   {
@@ -570,7 +571,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Daniel Freer'},
       { name: 'Adrian Sanchez' },
       { name: 'Matthew Omongus' },
-      { name: 'Esmerelda Collazo' },
+      { name: 'Esmeralda Collazo' },
     ],
     leftPhotos: [
       { src: 'honorable_mentions.jpg', caption: '[Insert Caption Here]' },
@@ -917,6 +918,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     let endPhase = 0; /* 0=fade-to-black, 1=touched-credits-scroll, 2=thank-you */
     let touchedScrollY = 0; /* y anchor of the touched-credits block; starts below screen */
     let thankYouY = 0;
+    let thankYouHoldTimer = 0; /* seconds since thank-you appeared — hold 4.5 s then scroll */
     let skipCutscene = false;
     const HEART_SPEED = 350;
     const isMobileDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -943,30 +945,37 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     const P2_GAP_EXTRA           = 5;    // px of clearance beyond heart diameter
     // Ph3 — Corridor
     const P3_FALL_SPEED_FRAC     = 0.62; // fall speed = H × this
-    const P3_SPAWN_RATE          = 0.30; // seconds between each corridor name-pair
+    const P3_SPAWN_RATE          = 0.22; // seconds between each corridor name-pair (tighter)
     const P3_MAX_SWING_PX        = 140;  // max corridor gap deviation from center (keeps pace with heart on PC)
     // Ph4 — Column Rain (3 columns, one always has a gap to dodge into)
-    const P4_WAVE_RATE           = isMobileDevice ? 0.70 : 0.55; // s between column waves
-    const P4_FALL_SPEED_FRAC     = 0.28;                          // vy = H × this
+    const P4_WAVE_RATE           = isMobileDevice ? 0.65 : 0.50; // s between column waves
+    const P4_FALL_SPEED_FRAC     = 0.30;                          // vy = H × this
     // Ph5 — Fan Burst (3 names in a fan from alternating sides)
-    const P5_BURST_RATE          = isMobileDevice ? 1.45 : 1.15; // s between fan bursts
-    const P5_FAN_SPEED_FRAC      = 0.60;                          // speed = min(W,H) × this
-    const P5_FAN_ANGLE_DEG       = 25;                            // spread angle from horizontal
+    const P5_BURST_RATE          = isMobileDevice ? 1.20 : 0.95; // s between fan bursts
+    const P5_FAN_SPEED_FRAC      = 0.62;                          // speed = min(W,H) × this
+    const P5_FAN_ANGLE_DEG       = 28;                            // spread angle from horizontal
+    // Ph7 — Rapid Streams (crossing streams at ~2× speed)
+    const P7_RAPID_RATE          = isMobileDevice ? 2.20 : 1.70; // s between rapid stream waves
+    // Ph8 — Chaos Rain (random-x vertical names, dense)
+    const P8_RAIN_RATE           = isMobileDevice ? 0.50 : 0.36; // s between chaos rain waves
+    const P8_RAIN_COUNT          = isMobileDevice ? 3 : 5;        // names per chaos wave
 
-    /* ── Phase system — matches Undertale's exact 6-phase sequence ── */
+    /* ── Phase system ── */
     let currentPhase = 0;
     let phaseTimer = 0;
     let phaseRound = 0;
     let phaseTransitionDelay = 0;
     const PHASE_TRANSITION_DURATION = 1.2; /* seconds between phases */
-    const totalNames = 220;
+    const totalNames = 400;
 
-    /* Phase thresholds — fixed budgets for ~1-minute total runtime */
-    const phase0End = 24;   // Aimed spreads (~8 spreads)
-    const phase2End = 82;   // Crossing streams (~3-4 full-screen waves)
-    const phase3End = 152;  // Corridor (35 pairs)
-    const phase4End = 175;  // Column Rain
-    const phase5End = 200;  // Fan Burst
+    /* Phase thresholds — ~90-second runtime with 8 distinct phases */
+    const phase0End = 35;   // Aimed spreads (7 × 5 names)
+    const phase2End = 105;  // Crossing streams (~3 waves)
+    const phase3End = 195;  // Corridor (45 tight pairs)
+    const phase4End = 230;  // Column Rain
+    const phase5End = 275;  // Fan Burst
+    const phase7End = 325;  // Rapid Streams (NEW)
+    const phase8End = 365;  // Chaos Rain (NEW)
 
     const getPhase = (idx: number): number => {
       if (idx < phase0End) return 0;  // Aimed spreads
@@ -974,7 +983,9 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       if (idx < phase3End) return 3;  // Corridor
       if (idx < phase4End) return 4;  // Column Rain
       if (idx < phase5End) return 5;  // Fan Burst
-      return 6;                       // Fast aimed spreads
+      if (idx < phase7End) return 7;  // Rapid Streams
+      if (idx < phase8End) return 8;  // Chaos Rain
+      return 6;                       // Fast aimed spreads (finale)
     };
 
     /* ── Corridor state ── */
@@ -1002,18 +1013,16 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     /* ── Phase 0 & 6: Aimed Spreads — groups of 5, stop, aim at heart, fire ── */
     const spawnAimedSpread = (fromRight: boolean, yCenter: number) => {
       const w = W();
-      /* Wider spacing and only 3 names per spread → easier to dodge on both
-         phases 0 (opening) and 6 (finale), while still feeling like a spread */
-      const spacing = Math.max(45, W() / 13);
+      const spacing = Math.max(42, W() / 14);
       const slideVx = isMobileDevice
         ? Math.max(180, W() * 0.55)
         : Math.max(350, W() * 0.55);
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 5; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
         const startX = fromRight ? w + 50 + i * spacing : -tw - 50 - i * spacing;
-        const startY = yCenter + (i - 1) * spacing; // center 3-name spread around yCenter
+        const startY = yCenter + (i - 2) * spacing; // center 5-name spread around yCenter
         projectiles.push(mkProj({
           id: nextProjId++, text: name, x: startX, y: startY,
           vx: fromRight ? -slideVx : slideVx, w: tw, h: th,
@@ -1204,6 +1213,43 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         }));
       }
       p5FanFromRight = !p5FanFromRight;
+    };
+
+    /* ── Phase 7: Rapid Streams — crossing streams at ~2× speed ── */
+    const spawnRapidStreams = () => {
+      if (nameIdx >= phase7End) return;
+      const h = H(), w = W();
+      const streamSpeed = Math.min(640, w * 0.95);
+      const textH = getFontSize() * 1.2;
+      const heartDiam = 2 * getHeartSize();
+      const slotH = 2 * textH + 2 * (heartDiam + P2_GAP_EXTRA);
+      const count = Math.ceil(h / slotH) + 2;
+      for (let i = 0; i < count; i++) {
+        const name = nextName();
+        if (!name) continue;
+        const { tw, th } = measureName(name);
+        projectiles.push(mkProj({ id: nextProjId++, text: name, x: -tw - 40, y: i * slotH, vx: streamSpeed, w: tw, h: th }));
+      }
+      for (let i = 0; i < count; i++) {
+        const name = nextName();
+        if (!name) continue;
+        const { tw, th } = measureName(name);
+        projectiles.push(mkProj({ id: nextProjId++, text: name, x: w + 40, y: slotH / 2 + i * slotH, vx: -streamSpeed, w: tw, h: th }));
+      }
+    };
+
+    /* ── Phase 8: Chaos Rain — names fall from random x positions ── */
+    const spawnChaosRain = () => {
+      if (nameIdx >= phase8End) return;
+      const w = W(), h = H();
+      const vy = h * 0.38;
+      for (let i = 0; i < P8_RAIN_COUNT; i++) {
+        const name = nextName();
+        if (!name) return;
+        const { tw, th } = measureName(name);
+        const x = Math.random() * Math.max(1, w - tw);
+        projectiles.push(mkProj({ id: nextProjId++, text: name, x, y: -th - 20, vy, w: tw, h: th }));
+      }
     };
 
     /* ── Input ── */
@@ -1403,7 +1449,8 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           if (blockBottom < -40) {
             endPhase = 2;
             endTimer = 0;
-            thankYouY = h + 80;
+            thankYouY = h * 0.22; /* start on-screen; fade in, hold, then scroll up */
+            thankYouHoldTimer = 0;
           }
 
         /* ── Phase 3: thank-you message scrolls up ── */
@@ -1418,8 +1465,13 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           ctx.fillStyle = '#000';
           ctx.fillRect(0, 0, w, h);
 
-          thankYouY -= 100 * dt;
+          if (thankYouHoldTimer < 4.5) {
+            thankYouHoldTimer += dt;
+          } else {
+            thankYouY -= 75 * dt;
+          }
 
+          const tyAlpha = Math.min(1, thankYouHoldTimer / 0.6);
           const tyFS = Math.max(16, Math.min(28, w / 24));
           const tySpacing = tyFS * 1.6;
           ctx.font = `${tyFS}px ${DETERMINATION_SANS}`;
@@ -1453,7 +1505,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             if (!line) continue;
             const ly = thankYouY + i * tySpacing;
             if (ly > -40 && ly < h + 40) {
-              ctx.fillStyle = '#FFFF00';
+              ctx.fillStyle = `rgba(255,255,0,${tyAlpha})`;
               ctx.fillText(line, w / 2, ly);
             }
           }
@@ -1467,7 +1519,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
           drawHeart(ctx, heart.x, heart.y, hs, false, heartImg);
 
           /* All lines scrolled off top → advance to end screen */
-          if (thankYouY + (tyLines.length - 1) * tySpacing < -60) {
+          if (thankYouHoldTimer >= 4.5 && thankYouY + (tyLines.length - 1) * tySpacing < -60) {
             normalFinish = true;
             onFinishRef.current({ hitCount, hitNames, audio });
             return;
@@ -1534,6 +1586,20 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
             if (phaseTimer >= P5_BURST_RATE && nameIdx < phase5End) {
               phaseTimer = 0;
               spawnFanBurst();
+            }
+          } else if (currentPhase === 7) {
+            /* Rapid Streams — crossing streams at ~2× speed */
+            phaseTimer += dt;
+            if (phaseTimer >= P7_RAPID_RATE && nameIdx < phase7End) {
+              phaseTimer = 0;
+              spawnRapidStreams();
+            }
+          } else if (currentPhase === 8) {
+            /* Chaos Rain — random-x vertical names */
+            phaseTimer += dt;
+            if (phaseTimer >= P8_RAIN_RATE && nameIdx < phase8End) {
+              phaseTimer = 0;
+              spawnChaosRain();
             }
           } else if (currentPhase !== 3) {
             phaseTimer += dt;
@@ -1987,13 +2053,13 @@ export function Credits() {
         const photos = Array.isArray(section.photo) ? section.photo : [section.photo];
         photos.forEach(p => urls.push(`/credits-photos/${p}`));
       }
-      (section.leftPhotos ?? []).forEach(p => urls.push(`/credits-photos/${p}`));
-      (section.rightPhotos ?? []).forEach(p => urls.push(`/credits-photos/${p}`));
+      (section.leftPhotos ?? []).forEach(p => urls.push(`/credits-photos/${p.src}`));
+      (section.rightPhotos ?? []).forEach(p => urls.push(`/credits-photos/${p.src}`));
       section.entries.forEach(e => { if (e.photo) urls.push(`/credits-photos/${e.photo}`); });
     }
     const queue = [...new Set(urls)];
     let idx = 0;
-    const CONCURRENCY = 3;
+    const CONCURRENCY = 6;
     const loadNext = () => {
       if (idx >= queue.length) return;
       const src = queue[idx++]!;
@@ -2004,6 +2070,18 @@ export function Credits() {
     };
     for (let c = 0; c < CONCURRENCY; c++) loadNext();
   }, []);
+
+  /* Preload the selected track into the browser's HTTP cache so playback starts
+     instantly when the user clicks Play. Relies on browser cache — we don't
+     reuse the element, just trigger the network fetch early. */
+  useEffect(() => {
+    const track = TRACKS[selectedTrack];
+    if (!track) return;
+    const a = new Audio();
+    a.preload = 'auto';
+    a.src = track.file;
+    return () => { a.src = ''; };
+  }, [selectedTrack]);
 
   /* Stop preview audio when switching away from song-select screen */
   useEffect(() => {
@@ -2065,7 +2143,8 @@ export function Credits() {
 
           pauseTimerRef.current = setTimeout(() => {
             /* Reset position while invisible */
-            scrollPosRef.current = window.innerHeight;
+            const pxPerSec = contentHeightRef.current > 0 ? contentHeightRef.current / BASE_DURATION : 100;
+            scrollPosRef.current = pxPerSec * 0.4 * 10; /* ≈10 s to scroll into view at 0.4× speed */
             if (trackRef.current) {
               trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
             }

@@ -279,7 +279,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Andrew Piasecki' },
       { name: 'Louis Irias' },
       { name: 'Luis Mata-Moreno' },
-      { name: 'Triton Kiko' },
+      { name: 'Christian Cruz', role: 'Triton Kiko' },
     ],
   },
   {
@@ -396,6 +396,7 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'Paul Patullo',
     entries: [
       { name: 'Joe Patullo' },
+
       { name: 'Natasha Patullo' },
     ],
   },
@@ -504,7 +505,6 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Anthony Parinello' },
       { name: 'Brady Lenox' },
       { name: 'Nico Rapp'},
-      { name: 'Christian Cruz' },
       { name: 'Clara Satterfield' },
       { name: 'Dylan Sturdivant' },
       { name: 'Connor Anderson' },

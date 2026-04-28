@@ -330,6 +330,29 @@
   color: #ff4444;
 }
 
+.pauseBtn {
+  background: none;
+  border: 1px solid #555;
+  color: #888;
+  font-size: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+
+.pauseBtn:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
 .resetBtn {
   background: none;
   border: 1px solid #555;

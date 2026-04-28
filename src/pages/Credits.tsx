@@ -1997,6 +1997,7 @@ export function Credits() {
   const [selectedTrack, setSelectedTrack] = useState(0);
   const [volume, setVolume] = useState(60);
   const [speed, setSpeed] = useState(0.4);
+  const [isPaused, setIsPaused] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [attackResult, setAttackResult] = useState<AttackResult | null>(null);
 
@@ -2028,9 +2029,11 @@ export function Credits() {
   const blackPauseRef = useRef(false);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef(0.4);
+  const isPausedRef = useRef(false);
   const volumeRef = useRef(60);
 
   useEffect(() => { speedRef.current = speed; }, [speed]);
+  useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { volumeRef.current = volume; }, [volume]);
 
   useEffect(() => {
@@ -2127,9 +2130,12 @@ export function Credits() {
       const dt = Math.min((time - lastFrameRef.current) / 1000, 0.1);
       lastFrameRef.current = time;
 
-      if (!blackPauseRef.current && contentHeightRef.current > 0) {
+      if (!blackPauseRef.current && !isPausedRef.current && contentHeightRef.current > 0) {
         const pxPerSec = contentHeightRef.current / BASE_DURATION;
         scrollPosRef.current -= pxPerSec * speedRef.current * dt;
+
+        /* Clamp at top when rewinding past the start */
+        if (scrollPosRef.current > 0) scrollPosRef.current = 0;
 
         if (trackRef.current) {
           trackRef.current.style.transform = `translateY(${scrollPosRef.current}px)`;
@@ -2288,10 +2294,15 @@ export function Credits() {
   const handleReset = useCallback(() => {
     scrollPosRef.current = 0;
     blackPauseRef.current = false;
+    setIsPaused(false);
     if (pauseTimerRef.current) { clearTimeout(pauseTimerRef.current); pauseTimerRef.current = null; }
     if (trackRef.current) {
       trackRef.current.style.transform = 'translateY(0)';
     }
+  }, []);
+
+  const handlePause = useCallback(() => {
+    setIsPaused(prev => !prev);
   }, []);
 
   /* ── Mobile layout: photos interleaved with name groups ── */
@@ -2472,7 +2483,7 @@ export function Credits() {
           <input
             type="range"
             className={styles.speedSlider}
-            min={0.1}
+            min={-2}
             max={3}
             step={0.1}
             value={speed}
@@ -2481,6 +2492,9 @@ export function Credits() {
           <span className={styles.sliderValue}>{formatSpeed(speed)}x</span>
         </div>
 
+        <button className={styles.pauseBtn} onClick={handlePause} title={isPaused ? 'Resume' : 'Pause'}>
+          {isPaused ? '▶' : '⏸'}
+        </button>
         <button className={styles.resetBtn} onClick={handleReset} title="Reset to beginning">
           &#x21BA;
         </button>

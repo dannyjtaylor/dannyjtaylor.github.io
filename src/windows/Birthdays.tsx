@@ -154,7 +154,7 @@ export function Birthdays() {
                 )}
               </div>
               <div style={{ width: 100, color: 'var(--win-btn-shadow)' }}>
-                {MONTHS[entry.month - 1].slice(0, 3)} {entry.day}
+                {(MONTHS[entry.month - 1] ?? '').slice(0, 3)} {entry.day}
                 {entry.year !== undefined ? `, ${entry.year}` : ''}
               </div>
               <div style={{

@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './Credits.module.css';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { ref as dbRef, increment, update } from 'firebase/database';
@@ -229,11 +229,11 @@ const CREDITS_DATA: CreditSection[] = [
       { src: 'maria_roman_1.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
-      { name: 'Benji Guzman' },
-      { name: 'Gabriel Sanchez' },
-      { name: 'Maria Roman' },
-      { name: 'Samuel Marillo' },
-      { name: 'Sebastian Anzola' },
+      { name: 'Benji Guzman', role: "My ECOLAB goat, got the job, great to talk to, likes the same things as me. Super cool, embodies familia." },
+      { name: 'Gabriel Sanchez', role: "Good in Rotaract AND SHPE!!"},
+      { name: 'Maria Roman', role: "Nicest girl on the planet, fun to hang out with you in LA"},
+      { name: 'Samuel Marillo', role: "Good guy, will rep SHPE well next semester" },
+      { name: 'Sebastian Anzola', role: "Amazing guy. Smart, great to talk with, also went to ECOLAB with me. Super cool."},
       { name: 'The City of Philadelphia', role: 'for stealing my wallet' },
     ],
   },

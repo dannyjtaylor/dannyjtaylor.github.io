@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+﻿import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './Credits.module.css';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { ref as dbRef, increment, update } from 'firebase/database';
@@ -219,14 +219,14 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'SHPE',
     photo: 'SHPE_1.png',
     leftPhotos: [
-      { src: 'SHPE_1.jpg', caption: '[Insert Caption Here]' },
-      { src: 'SHPE_2.jpg', caption: '[Insert Caption Here]' },
-      { src: 'SHPE_the_city_of_philly.jpg', caption: '[Insert Caption Here]' },
+      { src: 'SHPE_1.jpg', caption: 'Us at Santa Monica Pier after Convention' },
+      { src: 'SHPE_2.jpg', caption: 'First night of Convention' },
+      { src: 'SHPE_the_city_of_philly.jpg', caption: 'Last day in Philly' },
     ],
     rightPhotos: [
-      { src: 'SHPE_3.jpg', caption: '[Insert Caption Here]' },
-      { src: 'SHPE_4.jpg', caption: '[Insert Caption Here]' },
-      { src: 'maria_roman_1.jpg', caption: '[Insert Caption Here]' },
+      { src: 'SHPE_3.jpg', caption: 'Louis Gabo and I' },
+      { src: 'SHPE_4.jpg', caption: 'Me, Bryon, Adriana' },
+      { src: 'maria_roman_1.jpg', caption: 'Maria and I at Santa Monica Pier ' },
     ],
     entries: [
       { name: 'Benji Guzman', role: "My ECOLAB goat, got the job, great to talk to, likes the same things as me. Super cool, embodies familia." },
@@ -243,29 +243,29 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: '#1 Gubbies',
     leftPhotos: [
-      { src: 'number_one_gubbies_0.jpg', caption: '[Insert Caption Here]' },
-      { src: 'number_1_gubbies_1.jpg', caption: '[Insert Caption Here]' },
-      { src: 'number_1_gubbies_2.jpg', caption: '[Insert Caption Here]' },
-      { src: 'number_1_gubbies_3.jpg', caption: '[Insert Caption Here]' },
+      { src: 'number_one_gubbies_0.jpg', caption: 'Us at the Orlando Escapeventures escape room' },
+      { src: 'number_1_gubbies_1.jpg', caption: 'Us on the beach in the Caribbean' },
+      { src: 'number_1_gubbies_2.jpg', caption: 'Me, Bryon, Adriana, Kristina after the heist escape room' },
+      { src: 'number_1_gubbies_3.jpg', caption: 'Dragons Lair escape room' },
     ],
     rightPhotos: [
-      { src: 'number_1_gubbies.jpg', caption: '[Insert Caption Here]' },
-      { src: 'number_1_gubbies_5.jpg', caption: '[Insert Caption Here]' },
-      { src: 'number_1_gubbies_7.jpg', caption: '[Insert Caption Here]' },
+      { src: 'number_1_gubbies.jpg', caption: 'Beach in the Caribbean, such a W cruise' },
+      { src: 'number_1_gubbies_5.jpg', caption: 'Noah, Paul, Bryon, and I on the Alaska cruise' },
+      { src: 'number_1_gubbies_7.jpg', caption: 'Us after Research Day, we got our poster displayed!' },
     ],
     entries: [
-      { name: 'Adriana Bottega' },
-      { name: 'Brandon Camacho', role: '#1 Spinjitzu Master'},
-      { name: 'Kristina Smith' },
-      { name: 'Paul Patullo' },
+      { name: 'Adriana Bottega', role: 'One of my best friends of all time. Great coworker, same interests as me, dating my best friend. Same major, keeps me on my toes. Amazing person and very driven. I know she will go on to do amazing things, and Im glad to be her friend.'},
+      { name: 'Brandon Camacho', role: "#1 Spinjitzu Master, amazing and honest guy. Might have some health issues now and then but he's still a great guy. Super smart as well"},
+      { name: 'Kristina Smith', role: "Really cool and super nice. Great coworker and fellow volunteer at Winter Haven Technology Services. Always loves going to escape rooms with us. A great friend to be around."},
+      { name: 'Paul Patullo', role: "Super tall and loves to party. Great guy to hang out with. Loves Frisbee and Battle Cats — he got me into Battle Cats. We love the same animes even though he only cares about the fights, not the story. Same taste in video games too. Came to Alaska with us. Really glad I got to meet him." },
     ],
   },
   {
     title: '2404-1313',
     entries: [
-      { name: 'Bryon Catlin' },
-      { name: 'Domenic Iorfida' },
-      { name: 'George Mancini' },
+      { name: 'Bryon Catlin', role: "Hands down my #1 best friend. The person who has had the most impact on my entire life. He's pushed me professionally and personally — gave me the referral for IBM and always gives me great advice that makes me a better person. We went to Alaska and the Caribbean together. His entire family has been incredible to me. I am so glad to have met him." },
+      { name: 'Domenic Iorfida', role: "President of Rotaract and one of the most dedicated, prominent Rotaractors I know. Has SJ at lot 2. Super involved and truly committed to service. Amazing guy and a great roommate." },
+      { name: 'George Mancini', role: "The GOAT. W roommate — loved living with him and he's my current roommate at the house. One of my other best friends. Really good at Brawlhalla. Great guy to talk to. Naruto, Nook, and Peezy. Went to Alaska together and did cruises together. Super involved with IEEE and Frisbee at school. Probably one of the smartest guys I know — the king of CS. Really cool guy." },
       { name: 'Noah Campise' },
     ],
   },
@@ -279,8 +279,8 @@ const CREDITS_DATA: CreditSection[] = [
       { src: 'christians_peak_2.png', caption: '[Insert Caption Here]' },
     ],
     entries: [
-      { name: 'Albert Ubieta' },
-      { name: 'Andrew Piasecki' },
+      { name: 'Albert Ubieta', role: "Super funny and super cool to talk to. Always loved speaking with him. Really good guy." },
+      { name: 'Andrew Piasecki', role: "Super cool and super smart — younger than me somehow. Uses AI for LinkedIn. Throws awesome parties and is great to talk to. Love playing golf with him. Super good guy." },
       { name: 'Louis Irias' },
       { name: 'Luis Mata-Moreno' },
       { name: 'Christian Cruz', role: 'Triton Kiko' },

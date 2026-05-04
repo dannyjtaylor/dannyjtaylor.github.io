@@ -154,6 +154,7 @@ const CREDITS_DATA: CreditSection[] = [
     photo: 'SHPE.png',
     leftPhotos: [
       { src: 'SHPE_eboard_0.png', caption: 'Nova Awards, SHPE Eboard 24-25/25-26' },
+      { src: 'me_presenting.jpg', caption: '[Insert Caption Here]' },
     ],
     rightPhotos: [
       { src: 'SHPE_eboard_1.jpg', caption: 'Gabo, Me, & Kro' },
@@ -308,11 +309,11 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Good Mythical Morning Enjoyers',
     leftPhotos: [
-      { src: 'good_mythical_morning_enjoyers.jpg', caption: '[Insert Caption Here]' },
-      { src: 'good_mythical_morning_enjoyers1.jpg', caption: '[Insert Caption Here]' },
+      { src: 'good_mythical_morning_enjoyers.jpg', caption: 'Me, Emma, Jaylee on the cruise' },
+      { src: 'good_mythical_morning_enjoyers1.jpg', caption: 'Jaylee, Emma, me, Domenic on the cruise' },
     ],
     rightPhotos: [
-      { src: 'good_mythical_morning_enjoyers2.jpg', caption: '[Insert Caption Here]' },
+      { src: 'good_mythical_morning_enjoyers2.jpg', caption: 'Domenic, me, Emma, Jaylee' },
     ],
     entries: [
       { name: 'Emma Rossi', role: "Great person. Went on the Royal Caribbean cruise together. Love playing Mario Kart with her. Really cool to talk to and a good friend." },
@@ -343,10 +344,10 @@ const CREDITS_DATA: CreditSection[] = [
     title: "Polk County Sheriff's Office LiDAR Team (Capstone)",
     photo: 'sheriffsoffice.png',
     leftPhotos: [
-      { src: 'capstone_1.jpg', caption: '[Insert Caption Here]' },
+      { src: 'capstone_1.jpg', caption: 'Lilly and Michael in front of our LiDAR live going off' },
     ],
     rightPhotos: [
-      { src: 'capstone_2.jpg', caption: '[Insert Caption Here]' },
+      { src: 'capstone_2.jpg', caption: 'Me holding our first prototype' },
       { src: 'capstone_whole_group_win.jpg', caption: 'The team on the stage with Dr. Toker after we won' },
     ],
     entries: [
@@ -371,8 +372,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Lake Placid/Sebring',
-    leftPhotos: [{ src: 'me_alaska.jpg', caption: '[Insert Caption Here]' }],
-    rightPhotos: [{ src: 'me_random_with_cars.jpg', caption: '[Insert Caption Here]' }],
+    leftPhotos: [{ src: 'me_alaska.jpg', caption: '' }],
+    rightPhotos: [{ src: 'me_random_with_cars.jpg', caption: '' }],
     entries: [
       { name: 'Brianna Pratts' },
       { name: 'Casen Simmons' },
@@ -398,14 +399,13 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Joe Patullo', role: "Paul's brother. Really cool guy — also went to Poly and works at NVIDIA. Great to talk to." },
       { name: 'Natasha Patullo', role: "Went on a cruise with her. Really funny and nice to speak to." },
-      { name: "Paul's Dad", role: "Really nice. Thanks for raising such a great guy." },
-      { name: "Paul's Mom", role: "Really nice. Thanks for raising such a great guy." },
+      { name: "Paul's Dad & Paul's Mom", role: "Really nice. Thanks for raising such a great guy." },
     ],
   },
   {
     title: 'People I Know Because of Bryon',
-    leftPhotos: [{ src: 'random_1.jpg', caption: '[Insert Caption Here]' }],
-    rightPhotos: [{ src: 'random_2.jpg', caption: '[Insert Caption Here]' }],
+    leftPhotos: [{ src: 'random_1.jpg', caption: '' }],
+    rightPhotos: [{ src: 'random_2.jpg', caption: '' }],
     entries: [
       { name: 'Bryon Catlin II', role: "Bryon's dad. Cool guy to speak to. Works IT for the Port Charlotte Sheriff's Office. Smart, great father figure, and someone I genuinely look up to. Has definitely inspired me." },
       { name: 'Carson Elliott', role: "NerdLabz. Cool guy to speak to. We've played Siege, Valorant, and Overwatch together — always fun hanging out with him. We played Smash for hours during the last hurricane. Really good times." },
@@ -422,8 +422,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Party Animals',
-    leftPhotos: [{ src: 'party_animals_1.jpg', caption: '[Insert Caption Here]' }],
-    rightPhotos: [{ src: 'party_animals_2.jpg', caption: '[Insert Caption Here]' }],
+    leftPhotos: [{ src: 'party_animals_1.jpg', caption: 'The AirBNB Party' }],
+    rightPhotos: [{ src: 'party_animals_2.jpg', caption: 'One of my many house parties' }],
     entries: [
       { name: 'Aliyah Schouten', role: "Really funny and great to be around." },
       { name: 'Chris Mather', role: "Really funny. Went camping with him. Really cool guy to be around. WW guy." },
@@ -448,7 +448,7 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'The Internationals',
-    leftPhotos: [{ src: 'mohammad_hadid.jpg', caption: '[Insert Caption Here]' }],
+    leftPhotos: [{ src: 'mohammad_hadid.jpg', caption: 'Me and Mo' }],
     entries: [
       { name: 'Mohammad Hadid', role: "Good friend of mine, known him for a long time. I actually took him to his interview for his current job. He's been to my parties. One of the greatest friends I've made at Poly. Really, really good guy to speak to. Super cool guy." },
       { name: 'Tugba Guneysu', role: "Super nice. From Germany as far as I know. Went to Philly with us. Her resume is absolutely crazy — IBM, Mercedes, the list goes on. She is stacked. Was a pleasure getting to know her this year. Super cool." },
@@ -468,8 +468,8 @@ const CREDITS_DATA: CreditSection[] = [
   },
   {
     title: 'Winter Haven Technology Services',
-    leftPhotos: [{ src: 'winter_haven_1.jpg', caption: '[Insert Caption Here]' }],
-    rightPhotos: [{ src: 'winter_haven_nick.png', caption: '[Insert Caption Here]' }],
+    leftPhotos: [{ src: 'winter_haven_1.jpg', caption: 'Nick and Hiep' }],
+    rightPhotos: [{ src: 'winter_haven_nick.png', caption: 'Nick eating the butter thrown at him at Sakura' }],
     entries: [
       { name: 'Aizan "Bobby" Khan', role: "Super nice guy. Always a pleasure speaking with him — love getting lunch with him. He really believes in me. Works on the dark fiber team and does a lot of great work for the city." },
       { name: 'Angel Trinidad' },
@@ -575,25 +575,28 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Esmeralda Collazo' },
     ],
     leftPhotos: [
-      { src: 'honorable_mentions.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_2.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_3.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_4.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_5.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_6.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions.jpg', caption: "Adriana's Birthday" },
+      { src: 'honorable_mentions_2.jpg', caption: 'Post Arcade Monsters DS Photo' },
+      { src: 'honorable_mentions_3.jpg', caption: 'Escape Room' },
+      { src: 'honorable_mentions_4.jpg', caption: 'Escape Room #2' },
+      { src: 'honorable_mentions_5.jpg', caption: "Noah's Birthday" },
+      { src: 'honorable_mentions_6.jpg', caption: "The Bahamas Cruise Dinner" },
     ],
     rightPhotos: [
-      { src: 'honorable_mentions_lukas_kelk.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_clara.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_chiara_bottega_kyle_trotter.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_near_chiara_bottega.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_7.png', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_8.jpg', caption: '[Insert Caption Here]' },
-      { src: 'honorable_mentions_9.jpg', caption: '[Insert Caption Here]' },
+      { src: 'honorable_mentions_lukas_kelk.jpg', caption: 'NOVA Awards Last Year' },
+      { src: 'honorable_mentions_clara.jpg', caption: 'Clara at the Gacha place' },
+      { src: 'honorable_mentions_chiara_bottega_kyle_trotter.jpg', caption: 'Bahamas Cruise' },
+      { src: 'honorable_mentions_near_chiara_bottega.jpg', caption: 'Busch Gardens w Adrianas Family' },
+      { src: 'honorable_mentions_7.png', caption: 'Research Day 2025' },
+      { src: 'honorable_mentions_8.jpg', caption: 'Pre-Alaska Target run' },
+      { src: 'honorable_mentions_9.jpg', caption: 'Howl o Scream with the gang' },
     ],
   },
   {
     title: 'The Big Back Spots',
+    rightPhotos: [
+      { src: 'me_coca_cola.jpg', caption: '[Insert Caption Here]' },
+    ],
     entries: [
       { name: 'The Pantry: Modern Diner', role: 'Auburndale' },
       { name: 'The Joinery', role: 'Lakeland' },
@@ -635,12 +638,10 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Special Thanks',
     leftPhotos: [
-      { src: 'me_presenting.jpg', caption: '[Insert Caption Here]' },
-      { src: 'special_thanks_mark_grayson.jpg', caption: '[Insert Caption Here]' },
+      { src: 'special_thanks_mark_grayson.jpg', caption: '' },
     ],
     rightPhotos: [
-      { src: 'me_coca_cola.jpg', caption: '[Insert Caption Here]' },
-      { src: 'special_thanks_hornet.jpg', caption: '[Insert Caption Here]' },
+      { src: 'special_thanks_hornet.jpg', caption: 'AWA in Atlanta, I found Hornet and The Hollow Knight' },
     ],
     entries: [
       { name: 'A-Train' },

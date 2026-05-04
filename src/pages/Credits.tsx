@@ -268,40 +268,40 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Bryon Catlin', role: "Hands down my #1 best friend. The person who has had the most impact on my entire life. He's pushed me professionally and personally — gave me the referral for IBM and always gives me great advice that makes me a better person. We went to Alaska and the Caribbean together. His entire family has been incredible to me. I am so glad to have met him." },
       { name: 'Domenic Iorfida', role: "President of Rotaract and one of the most dedicated, prominent Rotaractors I know. Has SJ at lot 2. Super involved and truly committed to service. Amazing guy and a great roommate." },
-      { name: 'George Mancini', role: "The GOAT. W roommate — loved living with him and he's my current roommate at the house. One of my other best friends. Really good at Brawlhalla. Great guy to talk to. Naruto, Nook, and Peezy. Went to Alaska together and did cruises together. Super involved with IEEE and Frisbee at school. Probably one of the smartest guys I know — the king of CS. Really cool guy." },
-      { name: 'Noah Campise' },
+      { name: 'George Mancini', role: "The GOAT. W roommate, loved living with him. One of my other best friends. Really good at Brawlhalla. Great guy to talk to." },
+      { name: 'Noah Campise', role: "Also W roommate, currently living with him at the Animosh house. Went to Alaska together and did cruises together. Super involved with IEEE and Frisbee at school. Probably one of the smartest guys I know. The king of CS. Really cool guy." },
     ],
   },
   {
     title: "Christian's Peak",
     leftPhotos: [
       { src: 'christians_peak_1.png', caption: '[Insert Caption Here]' },
-      { src: 'christians_peak_luis_mata_moreno.jpg', caption: '[Insert Caption Here]' },
+      { src: 'christians_peak_luis_mata_moreno.jpg', caption: 'Luis and his interesting shirts' },
     ],
     rightPhotos: [
       { src: 'christians_peak_2.png', caption: '[Insert Caption Here]' },
     ],
     entries: [
       { name: 'Albert Ubieta', role: "Super funny and super cool to talk to. Always loved speaking with him. Really good guy." },
-      { name: 'Andrew Piasecki', role: "Super cool and super smart — younger than me somehow. Uses AI for LinkedIn. Throws awesome parties and is great to talk to. Love playing golf with him. Super good guy." },
-      { name: 'Louis Irias' },
-      { name: 'Luis Mata-Moreno' },
-      { name: 'Christian Cruz', role: 'Triton Kiko' },
+      { name: 'Andrew Piasecki', role: "Super cool and super smart, younger than me somehow. Uses AI for LinkedIn. Throws awesome parties and is great to talk to. Love playing golf with him. Super good guy. Atlanta was amazing with you." },
+      { name: 'Louis Irias', role: "One of my best friends I've made in college. Went to Atlanta with him, many parties and photos together. Many games played together. Amazing guy." },
+      { name: 'Luis Mata-Moreno', role: "One of the first friends I made at college. Super cool and funny guy."},
+      { name: 'Christian Cruz', role: 'Triton Kiko, amazing guy. Very down to earth and good to talk to. Love playing games with him and beating him in  those games.' },
     ],
   },
   {
     title: 'Did He Watch 2',
     leftPhotos: [
-      { src: 'did_he_watch_shiraj_and_i_IBM.jpg', caption: '[Insert Caption Here]' },
+      { src: 'did_he_watch_shiraj_and_i_IBM.jpg', caption: 'Shriraj and I at the IBM Student Dev Day' },
     ],
     rightPhotos: [
       { src: 'ibm_1.jpg', caption: '[Insert Caption Here]' },
     ],
     entries: [
-      { name: 'Andrew Graham' },
-      { name: 'Cameron Williams' },
-      { name: 'Carlos Marillo' },
-      { name: 'David Tarbox' },
+      { name: 'Andrew Graham', role: "WOOOTECH! Funny guy, great to speak to." },
+      { name: 'Cameron Williams', role: "SEELE, W Overwatch Varsity player, smart and good to talk to."},
+      { name: 'Carlos Marillo', role: "Very good guy, amazing style, baggy pants and cool fits. "},
+      { name: 'David Tarbox', role: ""},
       { name: 'Jordan Hall' },
       { name: 'Matthew Segarra' },
       { name: 'Raul Lopez III' },

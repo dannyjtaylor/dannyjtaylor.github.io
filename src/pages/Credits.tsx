@@ -262,13 +262,13 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Adriana Bottega', role: 'One of my best friends of all time. Great coworker, same interests as me, dating my best friend. Same major, keeps me on my toes. Amazing person and very driven. I know she will go on to do amazing things, and Im glad to be her friend.'},
       { name: 'Brandon Camacho', role: "#1 Spinjitzu Master, amazing and honest guy. Might have some health issues now and then but he's still a great guy. Super smart as well"},
       { name: 'Kristina Smith', role: "Really cool and super nice. Great coworker and fellow volunteer at Winter Haven Technology Services. Always loves going to escape rooms with us. A great friend to be around."},
-      { name: 'Paul Patullo', role: "Super tall and loves to party. Great guy to hang out with. Loves Frisbee and Battle Cats — he got me into Battle Cats. We love the same animes even though he only cares about the fights, not the story. Same taste in video games too. Came to Alaska with us. Really glad I got to meet him." },
+      { name: 'Paul Patullo', role: "Super tall and loves to party. Great guy to hang out with. Loves Frisbee and Battle Cats, and he actually got me into Battle Cats. We love the same animes even though he only cares about the fights, not the story. Same taste in video games too. Came to Alaska with us. Really glad I got to meet him." },
     ],
   },
   {
     title: '2404-1313',
     entries: [
-      { name: 'Bryon Catlin', role: "Hands down my #1 best friend. The person who has had the most impact on my entire life. He's pushed me professionally and personally — gave me the referral for IBM and always gives me great advice that makes me a better person. We went to Alaska and the Caribbean together. His entire family has been incredible to me. I am so glad to have met him." },
+      { name: 'Bryon Catlin', role: "Hands down my #1 best friend. The person who has had the most impact on my entire life. He's pushed me professionally and personally. He gave me the referral for IBM and always gives me great advice that makes me a better person. We went to Alaska and the Caribbean together. His entire family has been incredible to me. I am so glad to have met him." },
       { name: 'Domenic Iorfida', role: "President of Rotaract and one of the most dedicated, prominent Rotaractors I know. Has SJ at lot 2. Super involved and truly committed to service. Amazing guy and a great roommate." },
       { name: 'George Mancini', role: "The GOAT. W roommate, loved living with him. One of my other best friends. Really good at Brawlhalla. Great guy to talk to." },
       { name: 'Noah Campise', role: "Also W roommate, currently living with him at the Animosh house. Went to Alaska together and did cruises together. Super involved with IEEE and Frisbee at school. Probably one of the smartest guys I know. The king of CS. Really cool guy." },
@@ -301,9 +301,9 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Cameron Williams', role: "SEELE, W Overwatch Varsity player, smart and good to talk to."},
       { name: 'Carlos Marillo', role: "Very good guy, amazing style, baggy pants and cool fits. "},
       { name: 'David Tarbox', role: "Really good at CS and Val. Love watching BCT with him. Went to Philly with him. Super cool, Emmy. Amazing guy to talk to and play games and cards with. Great guy." },
-      { name: 'Jordan Hall', role: "Probably one of the smartest guys I know. Really good at AI — he's chopped. Went to Philly with him. Landed an internship at USAA. Amazing guy." },
-      { name: 'Matthew Segarra', role: "Basically one of my best friends right now. Went to Philly with him. My main gym buddy — we go all the time and I wouldn't consider anyone else for the role. Hang out with him a lot, play games together, like the same shows, animes, and games. Amazing guy." },
-      { name: 'Raul Lopez III', role: "Loves Valorant, PCT, and Overwatch just like me. Got a Bank of America offer — so good on him. Amazing guy. Love speaking with him." },
+      { name: 'Jordan Hall', role: "Probably one of the smartest guys I know. Really good at AI, he's chopped. Went to Philly with him. Landed an internship at USAA. Amazing guy." },
+      { name: 'Matthew Segarra', role: "Basically one of my best friends right now. Went to Philly with him. My main gym buddy, we go all the time and I wouldn't consider anyone else for the role. Hang out with him a lot, play games together, like the same shows, animes, and games. Amazing guy." },
+      { name: 'Raul Lopez III', role: "Loves Valorant, PCT, and Overwatch just like me. Got a Bank of America offer, so good on him. Amazing guy. Love speaking with him." },
       { name: 'Robert Grant', role: "Deputy Rob. On the Overwatch team, played Valorant together in the esports room. Super smart and a really good guy to talk to." },
     ],
   },
@@ -319,7 +319,7 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Emma Rossi', role: "Great person. Went on the Royal Caribbean cruise together. Love playing Mario Kart with her. Really cool to talk to and a good friend." },
       { name: 'Jaylee Ciaschini', role: "Domenic's girlfriend, but I've known her for a long time. We're both into FNAF and Good Mythical Morning. Also on the cruise together. Really cool to talk to." },
-      { name: 'Gabby Martin', role: "Works at Universal for Halloween Horror Nights — great tour guide. Super nice and a good time to hang out with." },
+      { name: 'Gabby Martin', role: "Works at Universal for Halloween Horror Nights and is a great tour guide. Super nice and a good time to hang out with." },
       { name: 'Manny Yousif', role: "Pretty funny. Does a lot of film and theater. Cool guy." },
       { name: 'Julianna Ross', role: "Really cool. Love playing games and card games with her." },
       { name: 'Chloe Reilly', role: "Pretty cool. Likes the Granny Bazooka song." },
@@ -334,10 +334,10 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Raymond Walker', role: "Really cool guy. Congrats to him for getting engaged!" },
       { name: 'Sahil Tahwalker', role: "Pretty cool guy. Became a realtor which is pretty funny but also really cool. One of the first friends I made at Poly." },
       { name: 'Sterling Peters', role: "One of my good friends at Poly. We were actually roommates in the summer dorm. Super cool, those were really good parties. Good guy to speak to. Congrats for winning the large team award at Capstone showcase!" },
-      { name: 'Thomas Cook', role: "Good friend of mine this semester. Went to Philly with us. Got a job at Morrison — really impressive. Super funny. Always good studying with him. Also HKN." },
+      { name: 'Thomas Cook', role: "Good friend of mine this semester. Went to Philly with us. Got a job at Morrison, which is really impressive. Super funny. Always good studying with him. Also HKN." },
       { name: 'Will Carroll', role: "Super funny guy. Love playing Brawlhalla with him." },
       { name: 'Fabian Bosneanu', role: "Super smart. He's a vet who got real work experience before coming to Poly, and it shows. Also my neighbor, which is pretty funny. Super cool guy. Also HKN." },
-      { name: 'Jacob Brescia', role: "Super smart. We worked on the microprocessors project together and built a little autonomous car — that was really cool. Great to talk to. Involved with both IEEE and HKN." },
+      { name: 'Jacob Brescia', role: "Super smart. We worked on the microprocessors project together and built a little autonomous car, which was really cool. Great to talk to. Involved with both IEEE and HKN." },
       { name: 'Aidan Flynn', role: "Cool guy, super smart, really good at EE. Great to talk to." }
     ],
   },
@@ -354,13 +354,13 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'James Allegra', role: "Good guy. Handled the stitching for us. Super smart and came to all the meetings. Really solid teammate." },
       { name: 'Gerardo Claudio', role: "The GOAT. Knew the CS side inside and out. Great at explaining things and really good to talk to. Came to every meeting and put in extra overtime with me. Really cool guy." },
-      { name: 'Gaspar Chayer', role: "Amazing guy and one of the better friends I've made at Poly. Knew him since freshman year. Went to Philly and Anaheim with us. Really smart — from Buenos Aires, Argentina. Knew exactly how our project worked, could explain it clearly, and kept track of everything. Really cool guy." },
+      { name: 'Gaspar Chayer', role: "Amazing guy and one of the better friends I've made at Poly. Knew him since freshman year. Went to Philly and Anaheim with us. Really smart, and he's from Buenos Aires, Argentina. Knew exactly how our project worked, could explain it clearly, and kept track of everything. Really cool guy." },
       { name: 'Jackson Giles', role: "Smart guy who really knew the power side and how everything connected. Cool guy." },
       { name: 'Leon Harry', role: "Super smart. Built the backend diagram for how everything worked, knew our system inside and out, built the UI we used, and designed the infrastructure architecture. We would not have done this project without him." },
       { name: 'Lillian Wright', role: "Our communications and EE lead. Set up the meetings with the sponsors, took notes, and kept everything organized. Really cool." },
       { name: 'Michael Stevenson', role: "Did the CAD work for us. Good friend of mine from classes. Got food together with our friends sometimes. Cool dude." },
       { name: 'Dr. Onur Toker', role: "Our Capstone advisor and the GOAT. He believed in us, really liked our team, and I think he's part of why we won." },
-      { name: 'Michael Kennon', role: "Sergeant from the Polk County Sheriff's Office — one of our project sponsors. Really smart and a great guy to work with." },
+      { name: 'Michael Kennon', role: "Sergeant from the Polk County Sheriff's Office and one of our project sponsors. Really smart and a great guy to work with." },
       { name: 'Jeremy Webb', role: "Sponsor from an insurance office. Does AI work for them. Cool guy." },
     ],
   },
@@ -398,7 +398,7 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Paul Patullo',
     entries: [
-      { name: 'Joe Patullo', role: "Paul's brother. Really cool guy — also went to Poly and works at NVIDIA. Great to talk to." },
+      { name: 'Joe Patullo', role: "Paul's brother. Really cool guy who also went to Poly and works at NVIDIA. Great to talk to." },
       { name: 'Natasha Patullo', role: "Went on a cruise with her. Really funny and nice to speak to." },
       { name: "Paul's Dad & Paul's Mom", role: "Really nice. Thanks for raising such a great guy." },
     ],
@@ -409,7 +409,7 @@ const CREDITS_DATA: CreditSection[] = [
     rightPhotos: [{ src: 'random_2.jpg', caption: '' }],
     entries: [
       { name: 'Bryon Catlin II', role: "Bryon's dad. Cool guy to speak to. Works IT for the Port Charlotte Sheriff's Office. Smart, great father figure, and someone I genuinely look up to. Has definitely inspired me." },
-      { name: 'Carson Elliott', role: "NerdLabz. Cool guy to speak to. We've played Siege, Valorant, and Overwatch together — always fun hanging out with him. We played Smash for hours during the last hurricane. Really good times." },
+      { name: 'Carson Elliott', role: "NerdLabz. Cool guy to speak to. We've played Siege, Valorant, and Overwatch together, and it's always fun hanging out with him. We played Smash for hours during the last hurricane. Really good times." },
       { name: 'Dylan Catlin', role: "Bryon's younger brother. Super funny. If you say the word 'wet' to him, he'll know exactly what that means. Very brain rotted." },
       { name: 'Jackson Bopp', role: "One of the better friends I've made at Poly. Good friend of Bryon's, and met him through Bryon. Fellow computer engineer. Volunteered at Winter Haven once. We've done a lot together. Very cool guy." },
       { name: 'Karmichael Realina', role: "Also known as Karl. Really funny and good to be around. Played games and Valorant with him. Came to the hurricane party. Really cool guy." },
@@ -431,7 +431,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Jorgeandres Alvarez', role: "Really funny and loves Sonic. He's going to be our commencement speaker. Really good friend of mine. Love Jorge." },
       { name: 'Maya Stuhlman', role: "Very smart and funny. Does environmental engineering. Great to be around." },
       { name: 'Mikala Yin-Furiato', role: "Tommy's girlfriend. Had me do a survey for her research. Really nice and great to be around." },
-      { name: 'Quentin Lockwood', role: "Also known as John. Really funny and a good friend — known him for a long time. Been to so many parties together, mine and his. Play a lot of Smash and games together. He has yet to beat me in Smash, of course. Really great to be around." },
+      { name: 'Quentin Lockwood', role: "Also known as John. Really funny and a good friend, and I've known him for a long time. Been to so many parties together, mine and his. Play a lot of Smash and games together. He has yet to beat me in Smash, of course. Really great to be around." },
       { name: 'Tommy Jackson', role: "Also known as Joseph. Known him for a long time, same as Quentin. Played a bunch of games together. Will definitely miss him. Good guy." },
     ],
   },
@@ -439,8 +439,8 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'Student Government Association',
     entries: [
-      { name: 'Colby Mandrodt', role: 'SGA President — Really smart and great to be around.' },
-      { name: 'Nolan Nguyen', role: "SGA Vice President — One of my good friends this semester. Fellow intern at the same company. We always get sunnies together. Love being around him. Really good guy and definitely one of the best people I've met at Poly." },
+      { name: 'Colby Mandrodt', role: 'SGA President. Really smart and great to be around.' },
+      { name: 'Nolan Nguyen', role: "SGA Vice President. One of my good friends this semester. Fellow intern at the same company. We always get sunnies together. Love being around him. Really good guy and definitely one of the best people I've met at Poly." },
       { name: 'Hailey Bauer', role: "SGA Director of General Operations. Really cool. Nolan's girlfriend and a good friend of mine." },
       { name: 'Trevor Davidson', role: "SGA Senator. Really cool to speak to. Came out to the Habitat community event." },
       { name: 'Ms. Ashley Townsend', role: "SGA Program Manager. Does a ton for Rotaract, SGA, CAB, and a bunch of other things. Really cool." }
@@ -452,7 +452,7 @@ const CREDITS_DATA: CreditSection[] = [
     leftPhotos: [{ src: 'mohammad_hadid.jpg', caption: 'Me and Mo' }],
     entries: [
       { name: 'Mohammad Hadid', role: "Good friend of mine, known him for a long time. I actually took him to his interview for his current job. He's been to my parties. One of the greatest friends I've made at Poly. Really, really good guy to speak to. Super cool guy.", mobilePhoto: 'mohammad_hadid.jpg' },
-      { name: 'Tugba Guneysu', role: "Super nice. From Germany as far as I know. Went to Philly with us. Her resume is absolutely crazy — IBM, Mercedes, the list goes on. She is stacked. Was a pleasure getting to know her this year. Super cool." },
+      { name: 'Tugba Guneysu', role: "Super nice. From Germany as far as I know. Went to Philly with us. Her resume is absolutely crazy, with IBM, Mercedes, and the list goes on. She is stacked. Was a pleasure getting to know her this year. Super cool." },
     ],
   },
   {
@@ -472,11 +472,11 @@ const CREDITS_DATA: CreditSection[] = [
     leftPhotos: [{ src: 'winter_haven_1.jpg', caption: 'Nick and Hiep' }],
     rightPhotos: [{ src: 'winter_haven_nick.png', caption: 'Nick eating the butter thrown at him at Sakura' }],
     entries: [
-      { name: 'Aizan "Bobby" Khan', role: "Super nice guy. Always a pleasure speaking with him — love getting lunch with him. He really believes in me. Works on the dark fiber team and does a lot of great work for the city." },
+      { name: 'Aizan "Bobby" Khan', role: "Super nice guy. Always a pleasure speaking with him, and I love getting lunch with him. He really believes in me. Works on the dark fiber team and does a lot of great work for the city." },
       { name: 'Angel Trinidad' },
       { name: 'Blake Cervone', role: "Friend of a friend I met through Mikey. Pretty funny. Likes a lot of the same animes and games as me." },
       { name: 'Connor Cervone', role: "Volunteer and Blake's younger brother. Pretty funny. Knows how to code and really liked the slash-gather bot. Good to speak to." },
-      { name: 'Christopher Duclos', role: "Our smart city computer scientist. Nice to get lunch with and great to talk to. Knows a lot more about code than I do — super smart guy." },
+      { name: 'Christopher Duclos', role: "Our smart city computer scientist. Nice to get lunch with and great to talk to. Knows a lot more about code than I do. Super smart guy." },
       { name: 'Christopher Taylor', role: "Does a lot of drone work. Fellow computer engineer. Really cool." },
       { name: 'Esteban Suarez', role: "From the help desk. Super cool." },
       { name: 'Hiep Nguyen' },

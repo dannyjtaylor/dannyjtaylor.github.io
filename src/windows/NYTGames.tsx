@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, type ReactNode } from 'react';
 
 /* ═══════════════════════════════════════════════════════════════════
    NYT Games — Windows 95 styled games hub
@@ -643,8 +643,26 @@ function shuffleArray<T>(arr: T[]): T[] {
 // MAIN MENU
 // ═══════════════════════════════════════════════
 function GameMenu({ onSelect }: { onSelect: (g: GameScreen) => void }) {
-  const tiles: { id: GameScreen; name: string; icon: string }[] = [
-    { id: 'wordle', name: 'Wordle', icon: '🟩' },
+  const tiles: { id: GameScreen; name: string; icon: ReactNode }[] = [
+    { id: 'wordle', name: 'Wordle', icon: (
+      <svg width="33" height="21" viewBox="0 0 33 21" fill="none" aria-hidden>
+        <rect x="0"    y="0"    width="5" height="5" rx="0.8" fill="#787c7e"/>
+        <rect x="7"    y="0"    width="5" height="5" rx="0.8" fill="#787c7e"/>
+        <rect x="14"   y="0"    width="5" height="5" rx="0.8" fill="#787c7e"/>
+        <rect x="21"   y="0"    width="5" height="5" rx="0.8" fill="#787c7e"/>
+        <rect x="28"   y="0"    width="5" height="5" rx="0.8" fill="#787c7e"/>
+        <rect x="0"    y="8"    width="5" height="5" rx="0.8" fill="#c9b458"/>
+        <rect x="7"    y="8"    width="5" height="5" rx="0.8" fill="#787c7e"/>
+        <rect x="14"   y="8"    width="5" height="5" rx="0.8" fill="#c9b458"/>
+        <rect x="21"   y="8"    width="5" height="5" rx="0.8" fill="#c9b458"/>
+        <rect x="28"   y="8"    width="5" height="5" rx="0.8" fill="#787c7e"/>
+        <rect x="0"    y="16"   width="5" height="5" rx="0.8" fill="#6aaa64"/>
+        <rect x="7"    y="16"   width="5" height="5" rx="0.8" fill="#6aaa64"/>
+        <rect x="14"   y="16"   width="5" height="5" rx="0.8" fill="#6aaa64"/>
+        <rect x="21"   y="16"   width="5" height="5" rx="0.8" fill="#6aaa64"/>
+        <rect x="28"   y="16"   width="5" height="5" rx="0.8" fill="#6aaa64"/>
+      </svg>
+    )},
     { id: 'connections', name: 'Connections', icon: '🔗' },
     { id: 'crossword', name: 'Crossword Mini', icon: '✏️' },
     { id: 'spellingbee', name: 'Spelling Bee', icon: '🐝' },

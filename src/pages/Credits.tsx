@@ -547,6 +547,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Emma Foley'},
       { name: 'Dad & Mom Foley'},
       { name: 'Liam' },
+      { name: 'Raden'},
       { name: 'Lucas Batista', role: "GOAT"},
       { name: 'Luis Silva' },
       { name: 'Lukas Kelk', role: "Really great friend, you guys gotta checkout lukaskelk.com"},

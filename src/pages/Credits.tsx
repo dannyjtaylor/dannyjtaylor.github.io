@@ -637,6 +637,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Shin', role: "FINISH FULLMETAL" },
       { name: 'Tim Lee', role: "My #1 Valorant and Fortnite duo. Going to Pennsylvania for nursing, I know he'll go on to do amazing stuff. So smart and tries very hard." },
       { name: 'Xitlally Serrano', role: 'athena or Z, my best gekko and KJ ever'},
+      { name: 'Sofia Ortiz', role: "Pretty, cool girl. Likes the same things as I do, trying to get her into Mob Psycho and valorant."}
     ],
   },
   {

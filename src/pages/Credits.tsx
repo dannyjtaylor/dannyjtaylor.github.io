@@ -1888,7 +1888,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       if (hpBarImg && hpBarImg.complete && hpBarImg.naturalWidth > 0) {
         const hpImgH = 28;
         const hpImgW = hpBarImg.naturalWidth * (hpImgH / hpBarImg.naturalHeight);
-        ctx.drawImage(hpBarImg, (w - hpImgW) / 2, h - 46 - saiBottom, hpImgW, hpImgH);
+        ctx.drawImage(hpBarImg, (w - hpImgW) / 2, h - 62 - saiBottom, hpImgW, hpImgH);
       }
 
       drawHeart(ctx, heart.x, heart.y, getHeartSize(), hitFlash > 0, heartImg);
@@ -1914,7 +1914,7 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
         ctx.textBaseline = 'bottom';
         ctx.fillText(
           isMobileDevice ? 'Drag to move \u00B7 Tap \u2715 to exit' : 'Arrow keys / WASD to move \u00B7 ESC to exit',
-          w / 2, h - 12 - saiBottom,
+          w / 2, h - 8 - saiBottom,
         );
         ctx.globalAlpha = 1;
       }

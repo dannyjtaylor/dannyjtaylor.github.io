@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback } from 'react';
+﻿import { useState, useRef, useEffect, useCallback, type ReactElement } from 'react';
 import styles from './Credits.module.css';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { ref as dbRef, increment, update } from 'firebase/database';
@@ -2313,7 +2313,7 @@ export function Credits() {
       ...(section.leftPhotos ?? []),
       ...(section.rightPhotos ?? []),
     ];
-    const result: JSX.Element[] = [];
+    const result: ReactElement[] = [];
     let photoIdx = 0;
     const isMemorial = section.title === 'In Memory Of';
 

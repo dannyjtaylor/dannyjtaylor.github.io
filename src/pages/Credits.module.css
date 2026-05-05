@@ -881,7 +881,7 @@
   display: block;
 }
 
-/* Mobile names with inline photos — hidden on desktop */
+/* Mobile names with inline section photos — hidden on desktop */
 .mobileNames {
   display: none;
 }
@@ -922,23 +922,6 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.mobileEntryWithPhoto {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
-}
-
-.mobileEntryPhoto {
-  width: 54px;
-  height: 54px;
-  object-fit: cover;
-  border-radius: 50%;
-  flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 /* ═══════════════════════════════════════════

@@ -53,7 +53,6 @@ interface CreditEntry {
   name: string;
   role?: string;
   photo?: string;
-  mobilePhoto?: string;
   needsLastName?: boolean;
 }
 
@@ -167,7 +166,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Ines Alonso', role: "VP of Internal & the sweetest person I have had the pleasure of getting to know. One of my great friends, IBM Dev Day & quantum GOAT, puts up with our 67 handshake" },
       { name: 'Naibys "Kro" Alzugaray', role: "SHPE President & GOAT at Canva and graphic design. Believed in me since the start, loves JJBA like me, but don't let make a drink for you" },
       { name: 'Nicolas Izquierdo', role: "SHPE Treasurer & the most involved person I know. SGA, Senate, SHPE, RA for the dorms, research. He always puts in 110% in everything he does, and he's only a sophomore. Next year's SHPE president, so I already know they'll do amazing with him."},
-      { name: 'Shriraj Mandulapalli', role: "VP of Technology, GOAT at CS/Overwatch/VALORANT/Marathon. Hands down the smartest person I know. Good at technical, good at behavioral, definitely played a huge role in making me who I am today. My IBM Student Dev Day GOAT, Oracle is lucky to have him. Will be a CEO one day, I just know it", mobilePhoto: 'did_he_watch_shiraj_and_i_IBM.jpg'},
+      { name: 'Shriraj Mandulapalli', role: "VP of Technology, GOAT at CS/Overwatch/VALORANT/Marathon. Hands down the smartest person I know. Good at technical, good at behavioral, definitely played a huge role in making me who I am today. My IBM Student Dev Day GOAT, Oracle is lucky to have him. Will be a CEO one day, I just know it"},
     ],
   },
   {
@@ -190,10 +189,10 @@ const CREDITS_DATA: CreditSection[] = [
       { src: 'rotaract_8.jpg', caption: 'Mellow Mushroom, Spring 2025' },
     ],
     entries: [
-      { name: 'Aidan Morris', role: 'Amazing guy. Rotaract Secretary & Adopt-a-Road Chair. Now hes the President. Rotaract is left in great hands with him. Works in IT like me! Super smart, super well-spoken, goodness personified.', mobilePhoto: 'aidan_morris.jpg'},
+      { name: 'Aidan Morris', role: 'Amazing guy. Rotaract Secretary & Adopt-a-Road Chair. Now hes the President. Rotaract is left in great hands with him. Works in IT like me! Super smart, super well-spoken, goodness personified.'},
       { name: 'Alyson Smyth', role: 'Super nice, and from Sebring too! Duke Energy is lucky to have her' },
-      { name: 'Alex Cam', role: "Auburndale Mayor & Vice President of Cam's Catering! Amazing mentor to have. So glad to have met you.", mobilePhoto: 'alex_cam.png' },
-      { name: 'Brittany Cam', role: "Alex's wife! Super sweet English teacher, very down to earth, and hates AI text almost as much as I do", mobilePhoto: 'brittany_cam_alex_cam_adriana.jpg'},
+      { name: 'Alex Cam', role: "Auburndale Mayor & Vice President of Cam's Catering! Amazing mentor to have. So glad to have met you." },
+      { name: 'Brittany Cam', role: "Alex's wife! Super sweet English teacher, very down to earth, and hates AI text almost as much as I do"},
       { name: 'Marisa de Comier', role: "Very sweet, one of the nicest people I've met. Congrats to you and Ian!" },
       { name: 'Ian Lopez', role: "Cool guy, better at IT than me for sure. Congrats to you and Marisa!! Florida Poly's IT will be lost without you" },
       { name: 'Bobby Green', role: 'Rotaract Rotary Advisor, contributed so much to the club. Youngest Mayor in Florida history, very kind, very wise!'},
@@ -451,7 +450,7 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'The Internationals',
     leftPhotos: [{ src: 'mohammad_hadid.jpg', caption: 'Me and Mo' }],
     entries: [
-      { name: 'Mohammad Hadid', role: "Good friend of mine, known him for a long time. I actually took him to his interview for his current job. He's been to my parties. One of the greatest friends I've made at Poly. Really, really good guy to speak to. Super cool guy.", mobilePhoto: 'mohammad_hadid.jpg' },
+      { name: 'Mohammad Hadid', role: "Good friend of mine, known him for a long time. I actually took him to his interview for his current job. He's been to my parties. One of the greatest friends I've made at Poly. Really, really good guy to speak to. Super cool guy." },
       { name: 'Tugba Guneysu', role: "Super nice. From Germany as far as I know. Went to Philly with us. Her resume is absolutely crazy, with IBM, Mercedes, and the list goes on. She is stacked. Was a pleasure getting to know her this year. Super cool." },
     ],
   },
@@ -506,7 +505,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Anthony Parinello' },
       { name: 'Brady Lenox' },
       { name: 'Nico Rapp'},
-      { name: 'Clara Satterfield', mobilePhoto: 'honorable_mentions_clara.jpg' },
+      { name: 'Clara Satterfield' },
       { name: 'Dylan Sturdivant' },
       { name: 'Connor Anderson' },
       { name: 'Dante Marin-Villanueva' },
@@ -547,7 +546,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Logan Morrison' },
       { name: 'Lucas Batista' },
       { name: 'Luis Silva' },
-      { name: 'Lukas Kelk', mobilePhoto: 'honorable_mentions_lukas_kelk.jpg' },
+      { name: 'Lukas Kelk' },
       { name: 'Meleena Scott' },
       { name: 'Melanie Morenson' },
       { name: 'Michael Carlson' },
@@ -2308,13 +2307,13 @@ export function Credits() {
     setIsPaused(prev => !prev);
   }, []);
 
-  /* ── Mobile layout: photos interleaved with name groups ── */
+  /* ── Mobile layout: section photos interleaved with name groups ── */
   const buildMobileLayout = (section: CreditSection) => {
     const photoPool: CreditPhoto[] = [
       ...(section.leftPhotos ?? []),
       ...(section.rightPhotos ?? []),
     ];
-    const result: React.ReactNode[] = [];
+    const result: JSX.Element[] = [];
     let photoIdx = 0;
     const isMemorial = section.title === 'In Memory Of';
 
@@ -2324,23 +2323,14 @@ export function Credits() {
       const isLeft = photoIdx % 2 === 0;
 
       const nameNodes = group.map((entry) => (
-        <div key={`${section.title}-${entry.name}-mob`} className={entry.mobilePhoto ? styles.mobileEntryWithPhoto : undefined}>
-          {entry.mobilePhoto && (
-            <img
-              className={styles.mobileEntryPhoto}
-              src={`/credits-photos/${entry.mobilePhoto}`}
-              alt={entry.name}
-            />
-          )}
-          <div>
-            <div className={isMemorial ? styles.memorialName : styles.name}>
-              {entry.name}
-            </div>
-            {entry.role && <div className={styles.role}>{entry.role}</div>}
-            {entry.needsLastName && (
-              <div className={styles.placeholder}>[INSERT LAST NAME]</div>
-            )}
+        <div key={`${section.title}-${entry.name}-mob`}>
+          <div className={isMemorial ? styles.memorialName : styles.name}>
+            {entry.name}
           </div>
+          {entry.role && <div className={styles.role}>{entry.role}</div>}
+          {entry.needsLastName && (
+            <div className={styles.placeholder}>[INSERT LAST NAME]</div>
+          )}
         </div>
       ));
 

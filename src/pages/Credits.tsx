@@ -1241,55 +1241,83 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
     };
 
     /* ── Phase 8: Chaos Rain — names fall from random x positions ──
-       Rejection-sample x so names in a wave never share a vertical column,
-       and stagger y into rows above the screen if a row fills up. Also
-       avoid the trailing tail of the previous wave still near the top. */
+       Greedy AABB gap-enumeration packing GUARANTEES no within-wave
+       overlap on any screen width. For each name we compute the
+       actual non-overlapping gaps in row 0, place into a random valid
+       gap; if none fits, stagger up a row. Inter-wave: previous-wave
+       projectiles still near the top are seeded into row 0 as
+       obstacles so the next wave never spawns on top of them. */
     const spawnChaosRain = () => {
       if (nameIdx >= phase8End) return;
       const w = W(), h = H();
       const vy = h * 0.38;
-      const padX = 16;
-      const MAX_ROWS = 4;
-      const ATTEMPTS_PER_ROW = 20;
+      const padX = isMobileDevice ? 18 : 14;
+      const MAX_ROWS = 6;
 
-      type Span = { x1: number; x2: number; row: number };
-      const occupied: Span[] = [];
+      const wave: { name: string; tw: number; th: number }[] = [];
+      for (let i = 0; i < P8_RAIN_COUNT; i++) {
+        const name = nextName();
+        if (!name) break;
+        const m = measureName(name);
+        wave.push({ name, tw: m.tw, th: m.th });
+      }
+      if (wave.length === 0) return;
+
+      for (let i = wave.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = wave[i]!;
+        wave[i] = wave[j]!;
+        wave[j] = tmp;
+      }
+
+      type Span = { x1: number; x2: number };
+      const rows: Span[][] = Array.from({ length: MAX_ROWS }, () => []);
 
       for (const p of projectiles) {
-        if (p.y < 80) {
-          occupied.push({ x1: p.x - padX, x2: p.x + p.w + padX, row: 0 });
+        if (p.y < 100) {
+          rows[0]!.push({ x1: p.x - padX, x2: p.x + p.w + padX });
         }
       }
 
-      for (let i = 0; i < P8_RAIN_COUNT; i++) {
-        const name = nextName();
-        if (!name) return;
-        const { tw, th } = measureName(name);
-        const rowGap = th * 1.6;
-        let x = Math.random() * Math.max(1, w - tw);
-        let row = 0;
-        let placed = false;
+      for (const { name, tw, th } of wave) {
+        const rowGap = th * 1.7;
+        let placedRow = -1;
+        let placedX = 0;
 
-        for (let r = 0; r < MAX_ROWS && !placed; r++) {
-          for (let a = 0; a < ATTEMPTS_PER_ROW; a++) {
-            const candidate = Math.random() * Math.max(1, w - tw);
-            const c1 = candidate - padX;
-            const c2 = candidate + tw + padX;
-            const conflict = occupied.some(
-              o => o.row === r && !(c2 <= o.x1 || c1 >= o.x2),
-            );
-            if (!conflict) {
-              x = candidate;
-              row = r;
-              placed = true;
-              break;
+        for (let r = 0; r < MAX_ROWS; r++) {
+          const sorted = [...rows[r]!].sort((a, b) => a.x1 - b.x1);
+          const gaps: { start: number; end: number }[] = [];
+          const maxStart = w - tw;
+          let cursor = 0;
+          for (const s of sorted) {
+            if (cursor + tw <= s.x1) {
+              gaps.push({ start: cursor, end: Math.min(maxStart, s.x1 - tw) });
             }
+            if (s.x2 > cursor) cursor = s.x2;
+          }
+          if (cursor <= maxStart) {
+            gaps.push({ start: cursor, end: maxStart });
+          }
+          const valid = gaps.filter((g) => g.start <= g.end);
+          if (valid.length > 0) {
+            const g = valid[Math.floor(Math.random() * valid.length)]!;
+            placedX = g.start + Math.random() * (g.end - g.start);
+            placedRow = r;
+            break;
           }
         }
 
-        occupied.push({ x1: x - padX, x2: x + tw + padX, row });
-        const y = -th - 20 - row * rowGap;
-        projectiles.push(mkProj({ id: nextProjId++, text: name, x, y, vy, w: tw, h: th }));
+        if (placedRow < 0) {
+          placedRow = MAX_ROWS - 1;
+          placedX = Math.random() * Math.max(1, w - tw);
+        }
+
+        rows[placedRow]!.push({ x1: placedX - padX, x2: placedX + tw + padX });
+        const y = -th - 20 - placedRow * rowGap;
+        projectiles.push(mkProj({
+          id: nextProjId++, text: name,
+          x: placedX, y, vy, w: tw, h: th,
+        }));
       }
     };
 

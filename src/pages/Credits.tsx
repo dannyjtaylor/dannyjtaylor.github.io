@@ -2113,8 +2113,12 @@ export function Credits() {
   }, [volume]);
 
   /* Preload all credits photos during song selection, top-to-bottom, so images
-     are ready before the user reaches them. Uses a small concurrency limit so
-     the browser loads in order rather than racing all images at once on mobile. */
+     are ready before the user reaches them. Uses img.decode() so decode work
+     is done up-front (not on first paint), preventing scroll jank on mobile.
+     Tracks loaded count so we can gate the Play button on the top 80% being
+     decoded and ready. */
+  const [imgsLoaded, setImgsLoaded] = useState(0);
+  const [imgsTotal, setImgsTotal] = useState(0);
   useEffect(() => {
     const urls: string[] = [
       '/credits-photos/flpoly.png',
@@ -2133,29 +2137,67 @@ export function Credits() {
       section.entries.forEach(e => { if (e.photo) urls.push(`/credits-photos/${e.photo}`); });
     }
     const queue = [...new Set(urls)];
+    setImgsTotal(queue.length);
+    /* Browsers cap to 6 concurrent connections per origin on HTTP/1.1; HTTP/2
+       multiplexes, so 8 is a safe upper bound that doesn't starve other req's. */
+    const CONCURRENCY = 8;
+    /* Top of the queue gets high fetch priority so the first thing the user
+       sees on the credits roll is already painted. */
+    const HIGH_PRIORITY_COUNT = 16;
     let idx = 0;
-    const CONCURRENCY = 6;
+    let loaded = 0;
+    const markDone = () => {
+      loaded++;
+      setImgsLoaded(loaded);
+      loadNext();
+    };
     const loadNext = () => {
       if (idx >= queue.length) return;
-      const src = queue[idx++]!;
+      const myIdx = idx++;
+      const src = queue[myIdx]!;
       const img = new Image();
-      img.onload = loadNext;
-      img.onerror = loadNext;
+      img.decoding = 'async';
+      if ('fetchPriority' in img) {
+        (img as HTMLImageElement & { fetchPriority: string }).fetchPriority =
+          myIdx < HIGH_PRIORITY_COUNT ? 'high' : 'low';
+      }
+      img.onload = () => {
+        /* decode() ensures the bitmap is decoded off-thread before we count
+           the image as ready — eliminates the decode-on-first-paint hitch. */
+        if (typeof img.decode === 'function') {
+          img.decode().then(markDone, markDone);
+        } else {
+          markDone();
+        }
+      };
+      img.onerror = markDone;
       img.src = src;
     };
     for (let c = 0; c < CONCURRENCY; c++) loadNext();
   }, []);
 
-  /* Preload the selected track into the browser's HTTP cache so playback starts
-     instantly when the user clicks Play. Relies on browser cache — we don't
-     reuse the element, just trigger the network fetch early. */
+  /* Preload the selected track and track its readiness. canplaythrough fires
+     when the browser estimates the entire file can play without buffering;
+     canplay is a mobile fallback (some mobile browsers never fire through). */
+  const [songReady, setSongReady] = useState(false);
   useEffect(() => {
+    setSongReady(false);
     const track = TRACKS[selectedTrack];
     if (!track) return;
     const a = new Audio();
     a.preload = 'auto';
+    const onReady = () => setSongReady(true);
+    a.addEventListener('canplaythrough', onReady);
+    a.addEventListener('canplay', onReady);
+    a.addEventListener('loadeddata', onReady);
     a.src = track.file;
-    return () => { a.src = ''; };
+    a.load();
+    return () => {
+      a.removeEventListener('canplaythrough', onReady);
+      a.removeEventListener('canplay', onReady);
+      a.removeEventListener('loadeddata', onReady);
+      a.src = '';
+    };
   }, [selectedTrack]);
 
   /* Stop preview audio when switching away from song-select screen */
@@ -2415,6 +2457,8 @@ export function Credits() {
                 className={styles.mobileGroupPhoto}
                 src={`/credits-photos/${photo.src}`}
                 alt=""
+                decoding="async"
+                loading="eager"
               />
               {photo.caption && <div className={styles.photoCaption}>{photo.caption}</div>}
             </div>
@@ -2441,7 +2485,7 @@ export function Credits() {
     return (
       <div className={photos.length > 1 ? styles.sectionPhotoRow : styles.sectionPhoto}>
         {photos.map((p) => (
-          <img key={p} src={`/credits-photos/${p}`} alt="" />
+          <img key={p} src={`/credits-photos/${p}`} alt="" decoding="async" loading="eager" />
         ))}
       </div>
     );
@@ -2452,6 +2496,17 @@ export function Credits() {
      ═══════════════════════════════════════════ */
 
   if (mode === 'select') {
+    /* Gate Play on top-80% of images decoded + selected song ready + fonts.
+       This guarantees the credits roll opens with images already painted
+       (no pop-in) and music starts instantly with no buffering hitch. */
+    const imgGateTarget = Math.max(1, Math.ceil(imgsTotal * 0.8));
+    const imgsGateMet = imgsTotal > 0 && imgsLoaded >= imgGateTarget;
+    const playReady = fontsReady && imgsGateMet && songReady;
+    const imgPct = imgsTotal === 0 ? 0 : Math.min(100, Math.floor((imgsLoaded / imgGateTarget) * 100));
+    let loadingLabel = 'Loading...';
+    if (!fontsReady) loadingLabel = 'Loading fonts...';
+    else if (!imgsGateMet) loadingLabel = `Loading photos ${imgPct}%`;
+    else if (!songReady) loadingLabel = 'Loading song...';
     return (
       <div className={styles.creditsPage}>
         <div className={styles.songSelectOverlay}>
@@ -2480,10 +2535,10 @@ export function Credits() {
             <button
               className={styles.playButton}
               onClick={() => handleSongSelect(selectedTrack)}
-              disabled={!fontsReady}
-              style={{ opacity: fontsReady ? 1 : 0.4 }}
+              disabled={!playReady}
+              style={{ opacity: playReady ? 1 : 0.4, cursor: playReady ? 'pointer' : 'wait' }}
             >
-              {fontsReady ? '\u25B6\uFE0E Play' : 'Loading...'}
+              {playReady ? '\u25B6\uFE0E Play' : loadingLabel}
             </button>
           </div>
         </div>
@@ -2597,7 +2652,7 @@ export function Credits() {
           <div className={styles.creditsCenter}>
             <div className={styles.openingSpace} />
             <div className={styles.universityLogo}>
-              <img src="/credits-photos/flpoly.png" alt="Florida Polytechnic University" />
+              <img src="/credits-photos/flpoly.png" alt="Florida Polytechnic University" decoding="async" loading="eager" />
             </div>
             <div className={styles.mainTitle}>Daniel J. Taylor</div>
             <div className={styles.subtitleBlock}>
@@ -2606,7 +2661,7 @@ export function Credits() {
               <div className={styles.subtitleClass}>Class of 2026 Graduate</div>
             </div>
             <div className={styles.sectionPhoto}>
-              <img src="/credits-photos/professional_photo_of_me.png" alt="Daniel Taylor" />
+              <img src="/credits-photos/professional_photo_of_me.png" alt="Daniel Taylor" decoding="async" loading="eager" />
             </div>
             <div className={styles.divider} />
           </div>
@@ -2618,7 +2673,7 @@ export function Credits() {
               <div key={`${section.title}-${entry.name}`} className={useTwoCol ? styles.twoColumnEntry : undefined}>
                 {entry.photo && (
                   <div className={styles.photoSlot}>
-                    <img src={`/credits-photos/${entry.photo}`} alt={entry.name} />
+                    <img src={`/credits-photos/${entry.photo}`} alt={entry.name} decoding="async" loading="eager" />
                   </div>
                 )}
                 <div className={section.title === 'In Memory Of' ? styles.memorialName : styles.name}>
@@ -2634,7 +2689,7 @@ export function Credits() {
                 <div className={styles.sideColLeft}>
                   {(section.leftPhotos ?? []).map((p) => (
                     <div key={p.src} className={styles.photoWithCaption}>
-                      <img src={`/credits-photos/${p.src}`} alt="" className={styles.sidePhoto} />
+                      <img src={`/credits-photos/${p.src}`} alt="" className={styles.sidePhoto} decoding="async" loading="eager" />
                       {p.caption && <div className={styles.photoCaption}>{p.caption}</div>}
                     </div>
                   ))}
@@ -2666,7 +2721,7 @@ export function Credits() {
                 <div className={styles.sideColRight}>
                   {(section.rightPhotos ?? []).map((p) => (
                     <div key={p.src} className={styles.photoWithCaption}>
-                      <img src={`/credits-photos/${p.src}`} alt="" className={styles.sidePhoto} />
+                      <img src={`/credits-photos/${p.src}`} alt="" className={styles.sidePhoto} decoding="async" loading="eager" />
                       {p.caption && <div className={styles.photoCaption}>{p.caption}</div>}
                     </div>
                   ))}
@@ -2687,7 +2742,7 @@ export function Credits() {
 
             <div className={styles.adventureEntry}>
               <div className={styles.adventurePhoto}>
-                <img src="/credits-photos/wellsfargo.jpg" alt="Wells Fargo" />
+                <img src="/credits-photos/wellsfargo.jpg" alt="Wells Fargo" decoding="async" loading="eager" />
               </div>
               <div className={styles.adventureCompany}>Wells Fargo</div>
               <div className={styles.adventureRole}>Cybersecurity Intern</div>
@@ -2696,7 +2751,7 @@ export function Credits() {
 
             <div className={styles.adventureEntry}>
               <div className={styles.adventurePhoto}>
-                <img src="/credits-photos/IBM.png" alt="IBM" />
+                <img src="/credits-photos/IBM.png" alt="IBM" decoding="async" loading="eager" />
               </div>
               <div className={styles.adventureCompany}>IBM</div>
               <div className={styles.adventureRole}>IBM Power Systems QA/Test Developer</div>
@@ -2704,7 +2759,7 @@ export function Credits() {
             </div>
 
             <div className={styles.sectionPhoto} style={{ marginBottom: 24 }}>
-              <img src="/credits-photos/ibm_1.jpg" alt="IBM internship" />
+              <img src="/credits-photos/ibm_1.jpg" alt="IBM internship" decoding="async" loading="eager" />
             </div>
 
             <div className={styles.year}>2026</div>

@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback, type ReactElement } from 'react';
+import { useState, useRef, useEffect, useCallback, type ReactElement } from 'react';
 import styles from './Credits.module.css';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { ref as dbRef, increment, update } from 'firebase/database';
@@ -444,7 +444,7 @@ const CREDITS_DATA: CreditSection[] = [
     title: 'Student Government Association',
     entries: [
       { name: 'Colby Mandrodt', role: 'SGA President. Really smart and great to be around.' },
-      { name: 'Nolan Nguyen', role: "SGA Vice President. One of my good friends this semester. Fellow intern at the same company. We always get sunnies together. Love being around him. Really good guy and definitely one of the best people I've met at Poly." },
+      { name: 'Nolan Nguyen', role: "SGA Vice President. One of my good friends this semester. Fellow intern at the same company. We always get Sonny's together. Love being around him. Really good guy and definitely one of the best people I've met at Poly." },
       { name: 'Hailey Bauer', role: "SGA Director of General Operations. Really cool. Nolan's girlfriend and a good friend of mine." },
       { name: 'Trevor Davidson', role: "SGA Senator. Really cool to speak to. Came out to the Habitat community event." },
       { name: 'Ms. Ashley Townsend', role: "SGA Program Manager. Does a ton for Rotaract, SGA, CAB, and a bunch of other things. Really cool." }

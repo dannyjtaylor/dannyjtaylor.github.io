@@ -1240,17 +1240,56 @@ function AttackGame({ onExit, onFinish }: { onExit: () => void; onFinish: (resul
       }
     };
 
-    /* ── Phase 8: Chaos Rain — names fall from random x positions ── */
+    /* ── Phase 8: Chaos Rain — names fall from random x positions ──
+       Rejection-sample x so names in a wave never share a vertical column,
+       and stagger y into rows above the screen if a row fills up. Also
+       avoid the trailing tail of the previous wave still near the top. */
     const spawnChaosRain = () => {
       if (nameIdx >= phase8End) return;
       const w = W(), h = H();
       const vy = h * 0.38;
+      const padX = 16;
+      const MAX_ROWS = 4;
+      const ATTEMPTS_PER_ROW = 20;
+
+      type Span = { x1: number; x2: number; row: number };
+      const occupied: Span[] = [];
+
+      for (const p of projectiles) {
+        if (p.y < 80) {
+          occupied.push({ x1: p.x - padX, x2: p.x + p.w + padX, row: 0 });
+        }
+      }
+
       for (let i = 0; i < P8_RAIN_COUNT; i++) {
         const name = nextName();
         if (!name) return;
         const { tw, th } = measureName(name);
-        const x = Math.random() * Math.max(1, w - tw);
-        projectiles.push(mkProj({ id: nextProjId++, text: name, x, y: -th - 20, vy, w: tw, h: th }));
+        const rowGap = th * 1.6;
+        let x = Math.random() * Math.max(1, w - tw);
+        let row = 0;
+        let placed = false;
+
+        for (let r = 0; r < MAX_ROWS && !placed; r++) {
+          for (let a = 0; a < ATTEMPTS_PER_ROW; a++) {
+            const candidate = Math.random() * Math.max(1, w - tw);
+            const c1 = candidate - padX;
+            const c2 = candidate + tw + padX;
+            const conflict = occupied.some(
+              o => o.row === r && !(c2 <= o.x1 || c1 >= o.x2),
+            );
+            if (!conflict) {
+              x = candidate;
+              row = r;
+              placed = true;
+              break;
+            }
+          }
+        }
+
+        occupied.push({ x1: x - padX, x2: x + tw + padX, row });
+        const y = -th - 20 - row * rowGap;
+        projectiles.push(mkProj({ id: nextProjId++, text: name, x, y, vy, w: tw, h: th }));
       }
     };
 

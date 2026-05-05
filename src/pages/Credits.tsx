@@ -261,7 +261,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Adriana Bottega', role: 'One of my best friends of all time. Great coworker, same interests as me, dating my best friend. Same major, keeps me on my toes. Amazing person and very driven. I know she will go on to do amazing things, and Im glad to be her friend.'},
       { name: 'Brandon Camacho', role: "#1 Spinjitzu Master, amazing and honest guy. Might have some health issues now and then but he's still a great guy. Super smart as well"},
       { name: 'Kristina Smith', role: "Really cool and super nice. Great coworker and fellow volunteer at Winter Haven Technology Services. Always loves going to escape rooms with us. A great friend to be around."},
-      { name: 'Paul Patullo', role: "Super tall and loves to party. Great guy to hang out with. Loves Frisbee and Battle Cats, and he actually got me into Battle Cats. We love the same animes even though he only cares about the fights, not the story. Same taste in video games too. Came to Alaska with us. Really glad I got to meet him." },
+      { name: 'Paul Patullo', role: "Super tall and loves to party. Great guy to hang out with. Loves Frisbee and Battle Cats. We love the same animes even though he only cares about the fights, not the story. Same taste in video games too. Came to Alaska with us. Really glad I got to meet him." },
     ],
   },
   {

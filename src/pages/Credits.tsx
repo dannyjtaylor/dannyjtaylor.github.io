@@ -409,10 +409,10 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Bryon Catlin II', role: "Bryon's dad. Cool guy to speak to. Works IT for the Port Charlotte Sheriff's Office. Smart, great father figure, and someone I genuinely look up to. Has definitely inspired me." },
       { name: 'Carson Elliott', role: "NerdLabz. Cool guy to speak to. We've played Siege, Valorant, and Overwatch together, and it's always fun hanging out with him. We played Smash for hours during the last hurricane. Really good times." },
-      { name: 'Dylan Catlin', role: "Bryon's younger brother. Super funny. If you say the word 'wet' to him, he'll know exactly what that means. Very brain rotted." },
+      { name: 'Dylan Catlin', role: "Bryon's younger brother. Super funny. If you say the phrase 'wet ticket' to him, he'll know exactly what that means. Very brain rotted." },
       { name: 'Jackson Bopp', role: "One of the better friends I've made at Poly. Good friend of Bryon's, and met him through Bryon. Fellow computer engineer. Volunteered at Winter Haven once. We've done a lot together. Very cool guy." },
       { name: 'Karmichael Realina', role: "Also known as Karl. Really funny and good to be around. Played games and Valorant with him. Came to the hurricane party. Really cool guy." },
-      { name: 'Leona Catlin', role: "Super nice. Likes Vocaloid and MQ just like me." },
+      { name: 'Leona Catlin', role: "Bryon's younger sister. Super nice. Likes Vocaloid and Miku just like me." },
       { name: 'Michael Testa', role: "Really funny. Met him through Jackson. Plays the same games as me." },
       { name: 'Sam Critchlow', role: "Bryon's older sister. Super nice and really cool to be around." },
       { name: 'Stephanie Catlin', role: "Bryon's mom. Honestly one of the nicest people on the entire planet. I love being around her. She's really aware when it comes to social situations and adulting, so she's a great resource and has helped me a lot." },

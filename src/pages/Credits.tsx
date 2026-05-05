@@ -595,7 +595,7 @@ const CREDITS_DATA: CreditSection[] = [
   {
     title: 'The Big Back Spots',
     rightPhotos: [
-      { src: 'me_coca_cola.jpg', caption: '[Insert Caption Here]' },
+      { src: 'me_coca_cola.jpg', caption: '' },
     ],
     entries: [
       { name: 'The Pantry: Modern Diner', role: 'Auburndale' },

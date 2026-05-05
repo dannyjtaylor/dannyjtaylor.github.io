@@ -456,7 +456,7 @@ const CREDITS_DATA: CreditSection[] = [
     leftPhotos: [{ src: 'mohammad_hadid.jpg', caption: 'Me and Mo' }],
     entries: [
       { name: 'Mohammad Hadid', role: "Good friend of mine, known him for a long time. I actually took him to his interview for his current job. He's been to my parties. One of the greatest friends I've made at Poly. Really, really good guy to speak to. Super cool guy." },
-      { name: 'Tugba Guneysu', role: "Super nice. From Germany as far as I know. Went to Philly with us. Her resume is absolutely crazy, with IBM, Mercedes, and the list goes on. She is stacked. Was a pleasure getting to know her this year. Super cool." },
+      { name: 'Tugba Guneysu', role: "Super nice and from Germany!! Went to Philly with us. Her resume is absolutely crazy, with IBM, Mercedes, and the list goes on. She is stacked. Was a pleasure getting to know her this year. Super cool." },
     ],
   },
   {

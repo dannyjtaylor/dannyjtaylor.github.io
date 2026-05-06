@@ -334,7 +334,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Raymond Walker', role: "Really cool guy. Congrats to him for getting engaged!" },
       { name: 'Sahil Tahwalker', role: "Pretty cool guy. Became a realtor which is pretty funny but also really cool. One of the first friends I made at Poly." },
       { name: 'Sterling Peters', role: "One of my good friends at Poly. We were actually roommates in the summer dorm. Super cool, those were really good parties. Good guy to speak to. Congrats for winning the large team award at Capstone showcase!" },
-      { name: 'Thomas Cook', role: "Good friend of mine this semester. Went to Philly with us. Got a job at Morrison, which is really impressive. Super funny. Always good studying with him. Also HKN." },
+      { name: 'Thomas Cook', role: "Good friend of mine this semester. Went to Philly with us. Got a job at Mortenson, which is really impressive. Super funny. Always good studying with him. Also HKN." },
       { name: 'Will Carroll', role: "Super funny guy. Love playing Brawlhalla with him." },
       { name: 'Fabian Bosneanu', role: "Super smart. He's a vet who got real work experience before coming to Poly, and it shows. Also my neighbor, which is pretty funny. Super cool guy. Also HKN." },
       { name: 'Jacob Brescia', role: "Super smart. We worked on the microprocessors project together and built a little autonomous car, which was really cool. Great to talk to. Involved with both IEEE and HKN." },

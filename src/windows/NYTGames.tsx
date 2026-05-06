@@ -663,9 +663,52 @@ function GameMenu({ onSelect }: { onSelect: (g: GameScreen) => void }) {
         <rect x="28"   y="16"   width="5" height="5" rx="0.8" fill="#6aaa64"/>
       </svg>
     )},
-    { id: 'connections', name: 'Connections', icon: '🔗' },
-    { id: 'crossword', name: 'Crossword Mini', icon: '✏️' },
-    { id: 'spellingbee', name: 'Spelling Bee', icon: '🐝' },
+    { id: 'connections', name: 'Connections', icon: (
+      <svg width="33" height="33" viewBox="0 0 33 33" fill="none" aria-hidden>
+        {(['#f9df6d','#a0c35a','#b0c4ef','#ba81c5'] as const).flatMap((color, row) =>
+          [0,1,2,3].map(col => (
+            <rect key={`${row}-${col}`} x={1 + col * 8} y={1 + row * 8} width={7} height={7} rx={1} fill={color}/>
+          ))
+        )}
+      </svg>
+    )},
+    { id: 'crossword', name: 'Crossword Mini', icon: (
+      <svg width="33" height="33" viewBox="0 0 33 33" fill="none" aria-hidden>
+        {[0,1,2,3,4].flatMap(row =>
+          [0,1,2,3,4].map(col => {
+            const isBlack = (row === 1 && col === 1) || (row === 1 && col === 3) ||
+                            (row === 3 && col === 1) || (row === 3 && col === 3);
+            return (
+              <rect
+                key={`${row}-${col}`}
+                x={2 + col * 6} y={2 + row * 6}
+                width={5} height={5}
+                fill={isBlack ? '#000' : '#fff'}
+                stroke="#808080" strokeWidth={0.5}
+              />
+            );
+          })
+        )}
+        <text x={2.5} y={5.8} fontSize={4} fill="#555" fontFamily="inherit">1</text>
+      </svg>
+    )},
+    { id: 'spellingbee', name: 'Spelling Bee', icon: (
+      <svg width="33" height="33" viewBox="0 0 33 33" fill="none" aria-hidden>
+        <polygon points={hexPoints(16.5, 16.5, 5)} fill="#f7da21" stroke="#808080" strokeWidth={0.5}/>
+        {[270,330,30,90,150,210].map((angle, i) => {
+          const rad = angle * Math.PI / 180;
+          return (
+            <polygon
+              key={i}
+              points={hexPoints(16.5 + 11 * Math.cos(rad), 16.5 + 11 * Math.sin(rad), 5)}
+              fill="#e6e6e6"
+              stroke="#808080"
+              strokeWidth={0.5}
+            />
+          );
+        })}
+      </svg>
+    )},
   ];
 
   return (

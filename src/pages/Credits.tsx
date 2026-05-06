@@ -555,7 +555,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Lucas Batista', role: "GOAT"},
       { name: 'Luis Silva' },
       { name: 'Lukas Kelk', role: "Really great friend, you guys gotta checkout lukaskelk.com"},
-      { name: 'Meleena Scott', role: "Genuinely the nicest person I know. Amazing friend, always puts herself first before others, very smart and funny"},
+      { name: 'Meleena Scott', role: "Genuinely the nicest person I know. Amazing friend, always puts others first before her, very smart and funny"},
       { name: 'Melanie Morenson' },
       { name: 'Michael Carlson', role: "GOAT" },
       { name: 'Miguel Mondragon' },

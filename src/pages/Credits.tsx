@@ -206,6 +206,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Henry Casanova', role: "Very cool twin Rotaract member"},
       { name: 'Jesus Sanchez', role: "Very involved with SGA and SHPE. Cool guy, thanks for coming to the events and meetings!"},
       { name: 'Larry Walker', role: "Domenic's mentor and incredible Rotarian. Good stories, works with State Farm"},
+      { name: 'Tim Pospichal', role: "Amazing Auburndale Rotarian, had so much impact on our Rotaract club. Amazing and genuine person."},
       { name: 'Lawrence Drake', role: "Unfortunately dropped out of school & Rotaract, still a great guy though. Was once our treasurer!"},
       { name: 'Melanie Najera', role: "Very nice, likes the same animes and games as me. Involved with the media club too"},
       { name: 'Patrick Mayer', role: "One of the roomies at Animosh!! Cool guy, came to every road cleanup and almost every meeting."},

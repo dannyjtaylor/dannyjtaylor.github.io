@@ -387,7 +387,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Jacob Sueppel', role: "Crazy smart guy."},
       { name: 'James Swaford', role: "Hell of a guy." },
       { name: 'Cruz Mendez', role: "The OG. Got me into Fortnite. Friends since middle school. Always wore suits to the movies."},
-      { name: 'Jennifer Angeles', role: "Super nice." }, the y
+      { name: 'Jennifer Angeles', role: "Super nice." },
       { name: 'Joshua Spurlock' },
       { name: 'Kevin Su', role: "Super funny, good to be around, great guy"},
       { name: 'Lyra Ganaban', role: "Fellow Teto enjoyer" },
@@ -537,6 +537,8 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Jillian Craig' },
       { name: 'Justis Nazirbage' },
       { name: 'Kaitlyn Surovy' },
+      { name: 'Colby Mullins', role: "Not to be confused with Chandler!"},
+      { name: 'Chandler Mullins', role: "Not to be confused with Colby!"},
       { name: 'Kody Byrd' },
       { name: 'Koral Ruiz' },
       { name: 'Christopher Colon'},

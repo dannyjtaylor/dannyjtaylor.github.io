@@ -566,6 +566,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Pressley Hendrix' },
       { name: 'JCPennys Rita', role: 'for cutting my hair so many times' },
       { name: 'Roland Diaz' },
+      { name: 'Logan Parlato', role: 'In my Capstone class, good speaker and leader' },
       { name: 'Ryan Mullins' },
       { name: 'Stella Asanova' },
       { name: 'Thomas Risalvato' },

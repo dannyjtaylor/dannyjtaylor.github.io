@@ -431,6 +431,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Chris Mather', role: "Really funny. Went camping with him. Really cool guy to be around. W guy." },
       { name: 'Jake Diaz-Iglesias', role: "Might be the smartest person I know. Worked at Amazon like 3 times. Owns a porsche. One of the first friends I made in college. THE GOAT." },
       { name: 'Jorgeandres Alvarez', role: "Really funny and loves Sonic. He's going to be our commencement speaker. Really good friend of mine. Love Jorge." },
+      { name: 'Amanda Preusser', role: "Jorges girlfriend, very cool"},
       { name: 'Josh Alletto', role: "Do NOT mention batteries around him. Especially salt batteries. Nah jk he's the goat, one of the first friends I made here. Genuinely so smart and has changed so much since the beginning." },
       { name: 'Kailey Gibbons', role: "Very smart, working for Northrop!"},
       { name: 'Kyla Harpe', role: "One of the first friends I made here, met at GRADBASH. Super nice."},

@@ -91,7 +91,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Patricia Livingston', role: 'Grandma'},
       { name: 'Caroline Livingston', role: 'Aunt' },
       { name: 'Silvia Livingston', role: 'Aunt' },
-      { name: 'Clagget Taylor', role: 'Uncle' },
+      { name: 'Jim Taylor', role: 'Uncle' },
       { name: 'Sue Taylor', role: 'Aunt' },
       { name: 'Jacob Livingston', role: 'Cousin' },
       { name: 'Andrew Livingston', role: 'Cousin' },

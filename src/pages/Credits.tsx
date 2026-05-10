@@ -271,7 +271,7 @@ const CREDITS_DATA: CreditSection[] = [
     entries: [
       { name: 'Bryon Catlin', role: "Hands down my #1 best friend. The person who has had the most impact on my entire life. He's pushed me professionally and personally. He gave me the referral for IBM and always gives me great advice that makes me a better person. We went to Alaska and the Caribbean together. His entire family has been incredible to me. I am so glad to have met him." },
       { name: 'Domenic Iorfida', role: "President of Rotaract and one of the most dedicated, prominent Rotaractors I know. Has SJ at lot 2. Super involved and truly committed to service. Amazing guy and a great roommate." },
-      { name: 'Mario, [Doms Mom Name], & Adriana Iorfida', role: "Domenic's family, great to be around" }, 
+      { name: 'Mario, Cheryl, & Adriana Iorfida', role: "Domenic's family, great to be around" }, 
       { name: 'George Mancini', role: "The GOAT. W roommate, loved living with him. One of my other best friends. Really good at Brawlhalla. Great guy to talk to." },
       { name: 'Noah Campise', role: "Also W roommate, currently living with him at the Animosh house. Went to Alaska together and did cruises together. Super involved with IEEE and Frisbee at school. Probably one of the smartest guys I know. The king of CS. Really cool guy." },
     ],

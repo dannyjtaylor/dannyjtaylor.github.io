@@ -70,7 +70,7 @@ interface CreditSection {
 }
 
 const CREDITS_DATA: CreditSection[] = [
-  /* ── Top sections ── */
+  /* ── Top sections ── 
   {
     title: 'My Family',
     leftPhotos: [
@@ -108,6 +108,8 @@ const CREDITS_DATA: CreditSection[] = [
       { name: 'Grandpa Livingston', role: 'Papa' },
     ],
   },
+
+   */
   {
     title: 'Professors/Faculty & Staff',
     leftPhotos: [

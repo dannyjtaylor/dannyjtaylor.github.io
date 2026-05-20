@@ -389,6 +389,7 @@ const CREDITS_DATA: CreditSection[] = [
       { name: "Duce D'Anthony Dossey", role: "My Day 1. Got me into Cave Story, got me into Jojo, put up with how lame I was in middle school and high school. Amazing guy and probably the funniest person I know." },
       { name: 'Sean Turnock' },
       { name: 'Esperansa Cerebello' },
+      { name: 'Yasmin Fernandez'},
       { name: 'Gavin Higgs', role: "Amazing football player. Good guy"},
       { name: 'Jacob Sueppel', role: "Crazy smart guy."},
       { name: 'James Swaford', role: "Hell of a guy." },

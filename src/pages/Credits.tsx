@@ -56,7 +56,6 @@ interface CreditEntry {
   needsLastName?: boolean;
 }
 
-
 interface CreditPhoto {
   src: string;
   caption?: string;

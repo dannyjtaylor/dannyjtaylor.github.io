@@ -132,7 +132,14 @@ export function useMultiplayerChat(
       // clock differences. This is more reliable than sorting by
       // timestamp, which used to use Date.now() (client clock).
       const msgs: ChatMessage[] = Object.entries(val)
-        .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+        .sort(([keyA, dataA], [keyB, dataB]) => {
+          const tsA = (dataA as Record<string, unknown>).timestamp as number | null;
+          const tsB = (dataB as Record<string, unknown>).timestamp as number | null;
+          if (tsA != null && tsB != null) return tsA - tsB;
+          if (tsA != null) return -1;
+          if (tsB != null) return 1;
+          return keyA.localeCompare(keyB);
+        })
         .map(([id, data]) => {
           const d = data as Record<string, unknown>;
           return {

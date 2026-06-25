@@ -155,6 +155,7 @@ export function DesktopIcon({ id, label, icon, windowId, externalUrl }: DesktopI
                   'icon-credits': { label: 'Credits', icon: 'credits', windowId: 'credits' },
                   'icon-leaderboard': { label: 'Leaderboard.txt', icon: 'notepad', windowId: 'leaderboard' },
                   'icon-birthdays': { label: 'Birthdays', icon: 'cake', windowId: 'birthdays' },
+                  'icon-jackpot': { label: 'Jackpot.exe', icon: 'jackpot', windowId: 'jackpot' },
                 };
                 const staticInfo = staticIconMap[id];
                 if (staticInfo) {

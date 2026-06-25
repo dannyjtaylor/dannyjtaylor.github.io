@@ -42,6 +42,7 @@ const PNG_ICONS: Record<string, string> = {
   credits: '/icons/credits.svg',
   cake: '/icons/cake.svg',
   mccake: '/icons/mccake.webp',
+  jackpot: '/icons/jackpot.svg',
 };
 
 /* ── Canvas Pixel Art Component ── */

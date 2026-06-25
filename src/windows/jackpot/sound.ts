@@ -1,4 +1,5 @@
 let ctx: AudioContext | null = null;
+let sirenOsc: OscillatorNode | null = null;
 
 function getCtx(): AudioContext | null {
   if (!ctx) {
@@ -24,6 +25,10 @@ function tone(freq: number, duration: number, type: OscillatorType, gain: number
 }
 
 export const Sounds = {
+  pinPress(): void {
+    tone(1100, 0.05, 'sine', 0.07);
+    tone(1400, 0.03, 'sine', 0.04, 0.04);
+  },
   keypress(): void {
     tone(1200, 0.012, 'sine', 0.04);
   },
@@ -42,20 +47,30 @@ export const Sounds = {
   siren(): void {
     const c = getCtx();
     if (!c) return;
+    if (sirenOsc) { try { sirenOsc.stop(); } catch { /* already stopped */ } sirenOsc = null; }
     const osc = c.createOscillator();
     const g = c.createGain();
     osc.connect(g);
     g.connect(c.destination);
-    osc.type = 'sawtooth';
-    g.gain.setValueAtTime(0.28, c.currentTime);
-    for (let i = 0; i < 8; i++) {
-      osc.frequency.setValueAtTime(780, c.currentTime + i * 0.4);
-      osc.frequency.setValueAtTime(1180, c.currentTime + i * 0.4 + 0.2);
+    osc.type = 'sine';
+    // Gentle two-tone alert: 480 Hz / 420 Hz alternating, very soft
+    g.gain.setValueAtTime(0.035, c.currentTime);
+    for (let i = 0; i < 30; i++) {
+      osc.frequency.setValueAtTime(480, c.currentTime + i * 0.55);
+      osc.frequency.setValueAtTime(420, c.currentTime + i * 0.55 + 0.28);
     }
-    g.gain.setValueAtTime(0.28, c.currentTime + 2.8);
-    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 3.4);
+    g.gain.setValueAtTime(0.035, c.currentTime + 15.5);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 16.5);
     osc.start(c.currentTime);
-    osc.stop(c.currentTime + 3.5);
+    osc.stop(c.currentTime + 16.6);
+    sirenOsc = osc;
+    osc.onended = () => { if (sirenOsc === osc) sirenOsc = null; };
+  },
+  stopSiren(): void {
+    if (sirenOsc) {
+      try { sirenOsc.stop(); } catch { /* already stopped */ }
+      sirenOsc = null;
+    }
   },
   cashClick(): void {
     tone(220, 0.04, 'square', 0.1);

@@ -3,87 +3,132 @@ import { motion } from 'framer-motion';
 
 interface Props {
   reason: string;
-  onDismiss: () => void;
+  isBlocking: boolean;   // true = game is paused on this alarm
+  recoverable: boolean;  // true = ENTER can retry (only relevant when isBlocking)
 }
 
-function PoliceCar({ flip }: { flip?: boolean }) {
+function PoliceBadge({ flash }: { flash: boolean }) {
+  const blue = flash ? '#0044dd' : '#002299';
+  const highlight = flash ? '#2266ff' : '#1144cc';
   return (
-    <svg viewBox="0 0 60 30" width="90" height="45" style={{ imageRendering: 'pixelated', shapeRendering: 'crispEdges', transform: flip ? 'scaleX(-1)' : undefined }}>
-      <rect x="4"  y="8"  width="52" height="18" fill="#1a1a88" />
-      <rect x="6"  y="10" width="48" height="14" fill="#2222aa" />
-      <rect x="14" y="8"  width="32" height="8"  fill="#111177" />
-      <rect x="16" y="10" width="12" height="5"  fill="#4444cc" />
-      <rect x="32" y="10" width="12" height="5"  fill="#4444cc" />
-      {/* Light bar */}
-      <rect x="18" y="5"  width="10" height="5"  fill="#ff0033" />
-      <rect x="32" y="5"  width="10" height="5"  fill="#0044ff" />
-      {/* Wheels */}
-      <rect x="4"  y="22" width="10" height="6"  fill="#222" />
-      <rect x="46" y="22" width="10" height="6"  fill="#222" />
-      <rect x="4"  y="8"  width="10" height="6"  fill="#222" />
-      <rect x="46" y="8"  width="10" height="6"  fill="#222" />
-      {/* White stripe */}
-      <rect x="6"  y="14" width="48" height="3"  fill="#fff" opacity="0.12" />
+    <svg viewBox="0 0 22 28" width="28" height="36" style={{ imageRendering: 'pixelated', shapeRendering: 'crispEdges', flexShrink: 0 }}>
+      <rect x="3" y="0" width="16" height="2" fill={blue} />
+      <rect x="1" y="2" width="20" height="14" fill={blue} />
+      <rect x="2" y="16" width="18" height="3" fill={blue} />
+      <rect x="4" y="19" width="14" height="2" fill={blue} />
+      <rect x="6" y="21" width="10" height="2" fill={blue} />
+      <rect x="8" y="23" width="6" height="2" fill={blue} />
+      <rect x="10" y="25" width="2" height="2" fill={blue} />
+      <rect x="1" y="2" width="20" height="2" fill={highlight} />
+      <rect x="1" y="2" width="2" height="14" fill={highlight} />
+      <rect x="10" y="5" width="2" height="12" fill="#ffcc00" />
+      <rect x="6" y="9" width="10" height="2" fill="#ffcc00" />
+      <rect x="8" y="7" width="2" height="2" fill="#ffcc00" />
+      <rect x="12" y="7" width="2" height="2" fill="#ffcc00" />
+      <rect x="8" y="13" width="2" height="2" fill="#ffcc00" />
+      <rect x="12" y="13" width="2" height="2" fill="#ffcc00" />
+      <rect x="19" y="4" width="2" height="12" fill="#001166" />
     </svg>
   );
 }
 
-export function AlarmOverlay({ reason, onDismiss }: Props) {
+export function AlarmOverlay({ reason, isBlocking, recoverable }: Props) {
   const [flash, setFlash] = useState(false);
+  // Countdown runs once from 90 and never resets — persists across dismissals
+  const [countdown, setCountdown] = useState(90);
 
   useEffect(() => {
-    const iv = setInterval(() => setFlash(f => !f), 250);
+    const iv = setInterval(() => setFlash(f => !f), 350);
     return () => clearInterval(iv);
   }, []);
 
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const iv = setInterval(() => setCountdown(c => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(iv);
+  }, [countdown]);
+
+  const arrived = countdown <= 0;
+  const mins = Math.floor(countdown / 60);
+  const secs = countdown % 60;
+  const timeStr = arrived ? 'HERE' : `${mins}:${secs.toString().padStart(2, '0')}`;
+  const urgent = countdown <= 20;
+
+  const borderColor = arrived
+    ? '#ff0000'
+    : flash ? '#ff1133' : '#0033cc';
+  const glowColor = arrived
+    ? '#ff000044'
+    : flash ? '#ff003344' : '#0044ff22';
+
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ position: 'absolute', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: '"Share Tech Mono","Courier New",monospace', overflow: 'hidden' }}
+      initial={{ opacity: 0, x: 20, scale: 0.9 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      transition={{ duration: 0.25 }}
+      style={{
+        position: 'absolute',
+        top: 50,
+        right: 10,
+        zIndex: 20,
+        width: 168,
+        background: '#0a0106',
+        border: `2px solid ${borderColor}`,
+        borderRadius: 3,
+        padding: '10px 12px',
+        fontFamily: '"Share Tech Mono","Courier New",monospace',
+        boxShadow: `0 0 18px ${glowColor}, 0 2px 8px #0004`,
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+      }}
     >
-      {/* Flashing bg */}
-      <div style={{ position: 'absolute', inset: 0, background: flash ? '#ff003322' : '#0044ff18', transition: 'background 0.12s' }} />
-
-      {/* Corner light beams */}
-      <div style={{ position: 'absolute', inset: 0, background: flash ? 'radial-gradient(ellipse at 10% 10%, #ff003444 0%, transparent 55%)' : 'radial-gradient(ellipse at 90% 10%, #0044ff44 0%, transparent 55%)', pointerEvents: 'none' }} />
-
-      {/* Police cars */}
-      <div style={{ position: 'absolute', bottom: 40, display: 'flex', width: '100%', justifyContent: 'space-between', padding: '0 20px' }}>
-        <motion.div initial={{ x: -220 }} animate={{ x: 0 }} transition={{ type: 'spring', stiffness: 80, delay: 0.4 }}>
-          <PoliceCar />
-        </motion.div>
-        <motion.div initial={{ x: 220 }} animate={{ x: 0 }} transition={{ type: 'spring', stiffness: 80, delay: 0.6 }}>
-          <PoliceCar flip />
-        </motion.div>
+      {/* Header: badge + ETA */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <PoliceBadge flash={flash} />
+        <div>
+          <div style={{ fontSize: 7.5, color: arrived ? '#ff4444' : '#ff4455', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 1 }}>
+            {arrived ? 'On Scene' : 'Police ETA'}
+          </div>
+          <div style={{
+            fontSize: arrived ? 14 : 26,
+            fontWeight: 900,
+            letterSpacing: arrived ? 1 : 2,
+            lineHeight: 1,
+            color: arrived ? '#ff2222' : (urgent ? '#ff2244' : '#ff8800'),
+            textShadow: arrived ? '0 0 12px #ff000099' : (urgent ? '0 0 10px #ff224499' : '0 0 8px #ff880066'),
+            fontFamily: 'inherit',
+          }}>
+            {timeStr}
+          </div>
+        </div>
       </div>
 
-      {/* Alert content */}
-      <motion.div
-        initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.2 }}
-        style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 32px' }}
-      >
-        <div style={{ fontSize: 10, letterSpacing: 4, color: '#ff0033', marginBottom: 12, textTransform: 'uppercase' }}>
-          Alert — Bank SIEM Triggered
+      {/* Divider */}
+      <div style={{ borderTop: '1px solid #330a0a', marginBottom: 7 }} />
+
+      {/* Reason — always shown */}
+      <div style={{ fontSize: 8.5, color: '#bb3344', lineHeight: 1.55, marginBottom: 8 }}>
+        {reason}
+      </div>
+
+      {/* Divider */}
+      <div style={{ borderTop: '1px solid #330a0a', marginBottom: 6 }} />
+
+      {/* Actions */}
+      <div style={{ fontSize: 8, color: '#664444', letterSpacing: 1 }}>
+        <span style={{ color: '#ff7755' }}>R</span>
+        <span style={{ color: '#553333' }}> — RESET DEMO</span>
+      </div>
+      {isBlocking && recoverable && (
+        <div style={{ fontSize: 8, color: '#664444', letterSpacing: 1, marginTop: 4 }}>
+          <span style={{ color: '#6699ff' }}>ENTER</span>
+          <span style={{ color: '#553333' }}> — RETRY CHOICE</span>
         </div>
-        <div style={{ fontSize: 22, fontWeight: 'bold', color: '#ffffff', letterSpacing: 3, marginBottom: 8, textShadow: '0 0 20px #ff003380' }}>
-          ATM TAMPER DETECTED
+      )}
+      {isBlocking && !recoverable && (
+        <div style={{ fontSize: 8, color: '#553333', letterSpacing: 1, marginTop: 4 }}>
+          Operation blown — reset only
         </div>
-        <div style={{ fontSize: 10, letterSpacing: 4, color: '#ff003388', marginBottom: 20, textTransform: 'uppercase' }}>
-          Police Dispatched — Operation Blown
-        </div>
-        <div style={{ fontSize: 11, color: '#666', maxWidth: 480, margin: '0 auto 24px', lineHeight: 1.7 }}>
-          {reason}
-        </div>
-        <div style={{ fontSize: 9, color: '#ff003444', letterSpacing: 2, marginBottom: 14 }}>
-          [ R ] or [ ENTER ] to reset and try again
-        </div>
-        <button
-          onClick={onDismiss}
-          style={{ background: '#1a0000', border: '1px solid #ff003366', color: '#ff0033', fontFamily: 'inherit', fontSize: 10, letterSpacing: 2, padding: '8px 28px', cursor: 'pointer', textTransform: 'uppercase' }}
-        >
-          Reset Operation
-        </button>
-      </motion.div>
+      )}
     </motion.div>
   );
 }

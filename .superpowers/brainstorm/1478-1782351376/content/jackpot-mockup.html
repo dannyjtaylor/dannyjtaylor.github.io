@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JACKPOT — Design Mockup</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+body{
+  background:#060606;
+  color:#00e639;
+  font-family:'Share Tech Mono','Courier New',monospace;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  user-select:none;
+}
+
+/* ─── HEADER ─── */
+.hdr{
+  background:#080808;
+  border-bottom:1px solid #ff003322;
+  padding:10px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-shrink:0;
+}
+.logo{display:flex;align-items:center;gap:14px;}
+.logo-text{
+  font-size:32px;
+  font-weight:900;
+  letter-spacing:10px;
+  color:#ff0033;
+  text-shadow:0 0 18px #ff003380,0 0 40px #ff003340,0 0 80px #ff003318;
+}
+.logo-sub{font-size:9px;color:#ff003355;letter-spacing:3px;margin-top:2px;text-transform:uppercase;}
+.hdr-meta{text-align:right;font-size:9px;line-height:1.9;letter-spacing:1.5px;}
+.hdr-meta .r{color:#ff003388;}
+.hdr-meta .g{color:#00e63966;}
+.hdr-meta .w{color:#333;}
+
+/* ─── PHASE BAR ─── */
+.phases{
+  background:#080808;
+  border-bottom:1px solid #111;
+  padding:8px 28px;
+  display:flex;
+  gap:3px;
+  flex-shrink:0;
+}
+.ph{
+  flex:1;
+  font-size:8px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:7px 4px 6px;
+  text-align:center;
+  border:1px solid #151515;
+  color:#252525;
+  position:relative;
+  cursor:default;
+}
+.ph::after{
+  content:'';
+  position:absolute;
+  bottom:-1px;left:0;right:0;
+  height:1px;
+  background:transparent;
+}
+.ph.done{border-color:#00e63922;color:#00e63955;background:#00e63905;}
+.ph.done::after{background:#00e63944;}
+.ph.active{border-color:#ff003388;color:#ff0033;background:#ff003310;
+  text-shadow:0 0 8px #ff003380;}
+.ph.active::after{background:#ff003388;}
+.ph-num{display:block;font-size:7px;color:inherit;opacity:0.5;margin-bottom:2px;}
+
+/* ─── MAIN ─── */
+.main{flex:1;display:flex;overflow:hidden;min-height:0;}
+
+/* ─── TERMINAL ─── */
+.term{
+  width:55%;
+  background:#040404;
+  border-right:1px solid #00e63912;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.term-bar{
+  background:#0a0a0a;
+  border-bottom:1px solid #111;
+  padding:7px 14px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:9px;
+  color:#333;
+  flex-shrink:0;
+}
+.wdot{width:9px;height:9px;border-radius:50%;}
+.term-body{
+  flex:1;
+  padding:18px 22px;
+  overflow-y:auto;
+  font-size:12.5px;
+  line-height:1.85;
+  scrollbar-width:thin;
+  scrollbar-color:#1a1a1a #040404;
+}
+.term-body::-webkit-scrollbar{width:4px;}
+.term-body::-webkit-scrollbar-track{background:#040404;}
+.term-body::-webkit-scrollbar-thumb{background:#1a1a1a;}
+
+/* ASCII banner */
+.banner{
+  font-size:9px;
+  line-height:1.3;
+  color:#ff003366;
+  margin-bottom:16px;
+  letter-spacing:0px;
+}
+.banner span{color:#ff003388;}
+
+/* Terminal lines */
+.tl{display:block;margin:0;}
+.prompt{color:#00e63955;}
+.cmd-txt{color:#00e639;}
+.out{color:#555;padding-left:0;}
+.out.ok{color:#00e639;}
+.out.warn{color:#ff9900;}
+.out.err{color:#ff0033;}
+.out.hi{
+  color:#fff;
+  background:#ffffff08;
+  padding:3px 10px;
+  border-left:2px solid #ff0033;
+  display:block;
+  margin:4px 0;
+}
+.out.phase-announce{
+  color:#ff0033;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:8px 0 4px;
+  display:block;
+}
+.cur{animation:blink 1s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+br+br{display:none;}
+
+/* ─── ATM PANEL ─── */
+.atm-panel{
+  width:45%;
+  background:#040404;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
+/* CRT vignette */
+.atm-panel::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 50%,transparent 40%,#000000aa 100%);
+  pointer-events:none;z-index:2;
+}
+/* scanlines */
+.atm-panel::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.18) 3px,rgba(0,0,0,.18) 4px);
+  pointer-events:none;z-index:3;
+}
+.scene-title{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  font-size:8px;letter-spacing:3px;color:#ff003344;text-transform:uppercase;
+  z-index:4;white-space:nowrap;
+}
+.atm-wrap{position:relative;z-index:1;}
+.atm-legend{
+  display:flex;gap:20px;margin-top:14px;font-size:9px;
+  color:#444;letter-spacing:1px;z-index:4;position:relative;
+}
+.leg-item{display:flex;align-items:center;gap:6px;}
+.leg-dot{width:8px;height:8px;flex-shrink:0;}
+
+/* ─── FOOTER ─── */
+.footer{
+  background:#080808;
+  border-top:1px solid #111;
+  padding:8px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:9px;
+  color:#333;
+  flex-shrink:0;
+  gap:12px;
+}
+.kbd{
+  background:#111;border:1px solid #222;
+  padding:2px 7px;border-radius:2px;
+  color:#555;font-family:inherit;font-size:9px;
+}
+.nav-keys{display:flex;gap:14px;align-items:center;white-space:nowrap;}
+.narrative{
+  flex:1;text-align:center;font-size:10px;
+  color:#444;letter-spacing:.4px;line-height:1.6;
+  max-width:500px;padding:0 20px;
+}
+.phase-id{color:#ff003366;font-size:9px;letter-spacing:2px;white-space:nowrap;}
+
+/* glitch effect for title */
+@keyframes glitch{
+  0%,90%,100%{text-shadow:0 0 18px #ff003380,0 0 40px #ff003340;}
+  92%{text-shadow:-2px 0 #00ffff80,2px 0 #ff003380,0 0 40px #ff003340;}
+  94%{text-shadow:2px 0 #ff003380,-2px 0 #00ffff40,0 0 40px #ff003340;}
+  96%{text-shadow:0 0 18px #ff003380,0 0 40px #ff003340;}
+}
+.logo-text{animation:glitch 6s infinite;}
+
+/* pulse on active phase */
+@keyframes ph-pulse{0%,100%{box-shadow:inset 0 0 0 #ff003300;}50%{box-shadow:inset 0 0 12px #ff003318;}}
+.ph.active{animation:ph-pulse 2s ease-in-out infinite;}
+
+/* ATM glow */
+@keyframes atm-glow{0%,100%{filter:drop-shadow(0 0 8px #ff003322);}50%{filter:drop-shadow(0 0 18px #ff003344);}}
+.atm-wrap{animation:atm-glow 3s ease-in-out infinite;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<div class="hdr">
+  <div class="logo">
+    <!-- Pixelated Lucky 7 SVG -->
+    <svg viewBox="0 0 32 48" width="28" height="42" style="image-rendering:pixelated;shape-rendering:crispEdges;flex-shrink:0;">
+      <!-- Slot machine reel bg -->
+      <rect x="0" y="0" width="32" height="48" fill="#1a0505"/>
+      <rect x="1" y="1" width="30" height="46" fill="#220808"/>
+      <!-- Lucky 7 shape - pixel art -->
+      <!-- Top bar of 7 -->
+      <rect x="4"  y="6"  width="24" height="5" fill="#ff0033"/>
+      <!-- Diagonal/stem of 7 -->
+      <rect x="16" y="11" width="8"  height="5" fill="#ff0033"/>
+      <rect x="12" y="16" width="8"  height="5" fill="#ff0033"/>
+      <rect x="8"  y="21" width="8"  height="5" fill="#ff0033"/>
+      <rect x="4"  y="26" width="8"  height="5" fill="#ff0033"/>
+      <!-- Highlight on 7 -->
+      <rect x="4"  y="6"  width="24" height="2" fill="#ff6666"/>
+      <rect x="4"  y="6"  width="2"  height="5" fill="#ff6666"/>
+      <!-- Stars accent -->
+      <rect x="3"  y="34" width="3"  height="3" fill="#ffd700"/>
+      <rect x="13" y="37" width="3"  height="3" fill="#ffd700"/>
+      <rect x="24" y="34" width="3"  height="3" fill="#ffd700"/>
+      <rect x="8"  y="40" width="3"  height="3" fill="#ffd700"/>
+      <rect x="20" y="40" width="3"  height="3" fill="#ffd700"/>
+    </svg>
+
+    <div>
+      <div class="logo-text">JACKPOT</div>
+      <div class="logo-sub">ATM Jackpotting Attack — Educational Demonstration</div>
+    </div>
+  </div>
+  <div class="hdr-meta">
+    <div class="r">THREAT ACTOR : COBALT GROUP (APT)</div>
+    <div class="r">MALWARE &nbsp;&nbsp;&nbsp;&nbsp;: PLOUTUS-D / DIMBOA</div>
+    <div class="g">TARGET &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: DIEBOLD OPTEVA 740 (XFS)</div>
+    <div class="w">CLASSIFICATION : TRAINING USE ONLY</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ PHASE BAR ═══════════════════════════ -->
+<div class="phases">
+  <div class="ph done"><span class="ph-num">01</span>RECON</div>
+  <div class="ph done"><span class="ph-num">02</span>BREACH</div>
+  <div class="ph active"><span class="ph-num">03</span>INSTALL</div>
+  <div class="ph"><span class="ph-num">04</span>PERSIST</div>
+  <div class="ph"><span class="ph-num">05</span>ACTIVATE</div>
+  <div class="ph"><span class="ph-num">06</span>JACKPOT</div>
+</div>
+
+<!-- ═══════════════════════════════ MAIN ════════════════════════════════ -->
+<div class="main">
+
+  <!-- ─── ATTACKER TERMINAL ─── -->
+  <div class="term">
+    <div class="term-bar">
+      <div class="wdot" style="background:#ff5f57;"></div>
+      <div class="wdot" style="background:#febc2e;"></div>
+      <div class="wdot" style="background:#28c840;"></div>
+      <span style="margin-left:8px;">root@kali — ploutus-loader — ssh atm-kit</span>
+      <span style="margin-left:auto;color:#ff003366;">&#x25CF; LIVE</span>
+    </div>
+    <div class="term-body">
+
+      <!-- ASCII Banner -->
+      <div class="banner">
+██████╗ ██╗      ██████╗ ██╗   ██╗████████╗██╗   ██╗███████╗<br>
+██╔══██╗██║     ██╔═══██╗██║   ██║╚══██╔══╝██║   ██║██╔════╝<br>
+██████╔╝██║     ██║   ██║██║   ██║   ██║   ██║   ██║███████╗<br>
+██╔═══╝ ██║     ██║   ██║██║   ██║   ██║   ██║   ██║╚════██║<br>
+██║     ███████╗╚██████╔╝╚██████╔╝   ██║   ╚██████╔╝███████║<br>
+╚═╝     ╚══════╝ ╚═════╝  ╚═════╝    ╚═╝    ╚═════╝ ╚══════╝<br>
+        <span>Ploutus-D Loader v2.1 — Kalignite XFS — Cobalt Group Toolkit</span>
+      </div>
+
+      <!-- Phase 1 recap -->
+      <span class="out phase-announce">// phase 01: recon [complete]</span>
+      <span class="tl"><span class="out ok">[+] Target: Diebold Opteva 740 AFD — Model 00155890</span></span>
+      <span class="tl"><span class="out ok">[+] OS: Windows XP SP3 — ATM software: Agilis XFS 3.20</span></span>
+      <span class="tl"><span class="out ok">[+] Location: Low-traffic vestibule, 1 camera (blind spot confirmed)</span></span>
+      <span class="tl"><span class="out ok">[+] Access key: Diebold generic T-bar (SKU: 001-0006522) acquired</span></span>
+      <span class="tl"><span class="out warn">[!] Ethernet port: live, logging to bank SIEM — must isolate</span></span>
+
+      <br>
+      <!-- Phase 2 recap -->
+      <span class="out phase-announce">// phase 02: breach [complete]</span>
+      <span class="tl"><span class="out ok">[+] Top-hat panel opened: generic T-bar key (30 sec)</span></span>
+      <span class="tl"><span class="out ok">[+] Ethernet cable: cut + loopback plug inserted — logs suppressed</span></span>
+      <span class="tl"><span class="out ok">[+] Internal USB port located behind maintenance panel</span></span>
+      <span class="tl"><span class="out warn">[!] Alarm sensor: bypassed via magnetic reed switch clamp</span></span>
+      <span class="tl"><span class="out ok">[+] Hard drive (2.5" SATA) accessible — removal tool attached</span></span>
+
+      <br>
+      <!-- Phase 3 active -->
+      <span class="out phase-announce">// phase 03: install — malware deployment [ACTIVE]</span>
+      <span class="tl"><span class="prompt">root@kit:~# </span><span class="cmd-txt">lsblk | grep sdb</span></span>
+      <span class="tl"><span class="out">sdb  &nbsp;&nbsp;8:16  0  80G  0  disk  ← ATM hard drive (via USB-SATA bridge)</span></span>
+      <span class="tl"><span class="out">sdb1 &nbsp;8:17  0  80G  0  part</span></span>
+
+      <br>
+      <span class="tl"><span class="prompt">root@kit:~# </span><span class="cmd-txt">ntfs-3g /dev/sdb1 /mnt/atm --ro -o recover && ls /mnt/atm/Windows/System32/ | grep -i xfs</span></span>
+      <span class="tl"><span class="out ok">MSXFS.dll &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← XFS middleware (Agilis implementation)</span></span>
+      <span class="tl"><span class="out ok">XFSConf.ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← hardware service definitions</span></span>
+      <span class="tl"><span class="out ok">CDM_ServiceProvider.dll  ← cash dispenser module</span></span>
+
+      <br>
+      <span class="tl"><span class="prompt">root@kit:~# </span><span class="cmd-txt">ntfs-3g /dev/sdb1 /mnt/atm -o remove_hiberfile</span></span>
+      <span class="tl"><span class="out ok">[ OK ] Drive remounted read-write</span></span>
+
+      <br>
+      <span class="tl"><span class="prompt">root@kit:~# </span><span class="cmd-txt">cp ~/payload/svchost32.exe /mnt/atm/Windows/System32/svchost32.exe</span></span>
+      <span class="tl"><span class="out">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ploutus-D disguised as legitimate Windows service</span></span>
+      <span class="tl"><span class="out ok">[ OK ] 847,360 bytes written</span></span>
+
+      <br>
+      <span class="tl"><span class="prompt">root@kit:~# </span><span class="cmd-txt">chntpw -e /mnt/atm/Windows/System32/config/SOFTWARE</span></span>
+      <span class="tl"><span class="out">&nbsp;cd \Microsoft\Windows NT\CurrentVersion\Winlogon</span></span>
+      <span class="tl"><span class="out">&nbsp;ed Userinit</span></span>
+      <span class="tl"><span class="out">&nbsp;&nbsp;&nbsp;Old: C:\Windows\system32\userinit.exe,</span></span>
+      <span class="tl"><span class="out warn">&nbsp;&nbsp;&nbsp;New: C:\Windows\system32\userinit.exe,C:\Windows\System32\svchost32.exe</span></span>
+      <span class="out hi">[ PERSISTENCE ] Ploutus-D injected into Winlogon\Userinit autorun key</span>
+      <span class="tl"><span class="out ok">[ OK ] Registry hive saved</span></span>
+
+      <br>
+      <span class="tl"><span class="prompt">root@kit:~# </span><span class="cmd-txt">sync && umount /mnt/atm && echo "DRIVE CLEAN"</span></span>
+      <span class="tl"><span class="out ok">DRIVE CLEAN</span></span>
+      <span class="tl"><span class="out">Total time on-machine: 7m 23s — reinstalling drive...</span></span>
+
+      <br>
+      <span class="tl"><span class="prompt">root@kit:~# </span><span class="cmd-txt"><span class="cur">_</span></span></span>
+    </div>
+  </div>
+
+  <!-- ─── ATM VISUAL PANEL ─── -->
+  <div class="atm-panel">
+    <div class="scene-title">ATM PHYSICAL STATE — PHASE 03 : MALWARE INSTALL</div>
+
+    <div class="atm-wrap">
+      <!--
+        Pixelated Diebold Opteva — front-facing pixel art
+        ViewBox: 240 x 380
+        Using only rect + line (crispEdges) for true pixel look
+      -->
+      <svg viewBox="0 0 240 380" width="230" height="364"
+           style="image-rendering:pixelated;shape-rendering:crispEdges;">
+
+        <!-- ── CABINET BODY ── -->
+        <!-- Main body shadow -->
+        <rect x="28" y="12" width="186" height="360" fill="#111"/>
+        <!-- Main body -->
+        <rect x="24" y="8"  width="186" height="360" fill="#282828"/>
+        <!-- Body highlight left -->
+        <rect x="24" y="8"  width="3"   height="360" fill="#383838"/>
+        <!-- Body highlight top -->
+        <rect x="24" y="8"  width="186" height="3"   fill="#383838"/>
+        <!-- Body shadow right -->
+        <rect x="207" y="8" width="3"   height="360" fill="#181818"/>
+        <!-- Body shadow bottom -->
+        <rect x="24" y="365" width="186" height="3"  fill="#181818"/>
+        <!-- Front panel recess -->
+        <rect x="32" y="16" width="170" height="348" fill="#242424"/>
+
+        <!-- ── TOP HAT PANEL (OPEN - hinge marks) ── -->
+        <!-- Panel outline - open state shown as gap -->
+        <rect x="32" y="16"  width="170" height="12" fill="#1a1a1a"/>
+        <!-- Panel open indicator - red -->
+        <rect x="32" y="16"  width="170" height="2"  fill="#ff0033"/>
+        <!-- Hinge bolts -->
+        <rect x="38" y="17"  width="4"   height="4"  fill="#333"/>
+        <rect x="193" y="17" width="4"   height="4"  fill="#333"/>
+        <!-- "OPEN" indicator -->
+        <rect x="90" y="18"  width="54"  height="8"  fill="#1a0000"/>
+        <rect x="92" y="19"  width="50"  height="6"  fill="#ff003322"/>
+
+        <!-- ── SCREEN BEZEL ── -->
+        <rect x="40" y="32"  width="154" height="108" fill="#111"/>
+        <rect x="42" y="34"  width="150" height="104" fill="#0a0a0a"/>
+        <!-- Screen surface -->
+        <rect x="44" y="36"  width="146" height="100" fill="#050f05"/>
+        <!-- Screen content: boot/normal state -->
+        <rect x="50" y="44"  width="60"  height="5"   fill="#00e63933"/>
+        <rect x="50" y="52"  width="100" height="4"   fill="#00e63922"/>
+        <rect x="50" y="59"  width="80"  height="4"   fill="#00e63922"/>
+        <rect x="50" y="66"  width="90"  height="4"   fill="#00e63922"/>
+        <!-- Screen status bar -->
+        <rect x="44" y="124" width="146" height="10"  fill="#000"/>
+        <rect x="46" y="125" width="40"  height="8"   fill="#00e63918"/>
+        <!-- Screen glow border -->
+        <rect x="44" y="36"  width="146" height="100" fill="none" stroke="#00e63922" stroke-width="1"/>
+
+        <!-- ── CARD READER ── -->
+        <rect x="60" y="148" width="114" height="14"  fill="#1e1e1e"/>
+        <rect x="62" y="150" width="110" height="10"  fill="#0d0d0d"/>
+        <!-- Card slot -->
+        <rect x="68" y="152" width="80"  height="6"   fill="#080808"/>
+        <!-- Card reader indicator light -->
+        <rect x="158" y="152" width="8"  height="6"   fill="#00330d"/>
+        <!-- Card reader label (pixel text sim) -->
+        <rect x="68" y="152" width="80"  height="2"   fill="#00e63908"/>
+
+        <!-- ── KEYPAD ── -->
+        <rect x="55" y="170" width="124" height="90"  fill="#1a1a1a"/>
+        <rect x="57" y="172" width="120" height="86"  fill="#161616"/>
+        <!-- Key grid: 3 cols x 4 rows -->
+        <!-- Row 1 -->
+        <rect x="63"  y="178" width="28" height="16" fill="#1f1f1f"/> <rect x="63"  y="178" width="26" height="14" fill="#222"/> <rect x="64"  y="179" width="12" height="4" fill="#2a2a2a"/>
+        <rect x="97"  y="178" width="28" height="16" fill="#1f1f1f"/> <rect x="97"  y="178" width="26" height="14" fill="#222"/> <rect x="98"  y="179" width="12" height="4" fill="#2a2a2a"/>
+        <rect x="131" y="178" width="28" height="16" fill="#1f1f1f"/> <rect x="131" y="178" width="26" height="14" fill="#222"/> <rect x="132" y="179" width="12" height="4" fill="#2a2a2a"/>
+        <!-- Row 2 -->
+        <rect x="63"  y="200" width="28" height="16" fill="#1f1f1f"/> <rect x="63"  y="200" width="26" height="14" fill="#222"/>
+        <rect x="97"  y="200" width="28" height="16" fill="#1f1f1f"/> <rect x="97"  y="200" width="26" height="14" fill="#222"/>
+        <rect x="131" y="200" width="28" height="16" fill="#1f1f1f"/> <rect x="131" y="200" width="26" height="14" fill="#222"/>
+        <!-- Row 3 -->
+        <rect x="63"  y="222" width="28" height="16" fill="#1f1f1f"/> <rect x="63"  y="222" width="26" height="14" fill="#222"/>
+        <rect x="97"  y="222" width="28" height="16" fill="#1f1f1f"/> <rect x="97"  y="222" width="26" height="14" fill="#222"/>
+        <rect x="131" y="222" width="28" height="16" fill="#1f1f1f"/> <rect x="131" y="222" width="26" height="14" fill="#222"/>
+        <!-- Row 4 function keys -->
+        <rect x="63"  y="244" width="28" height="14" fill="#ff00331a" stroke="#ff003322" stroke-width="1"/>
+        <rect x="97"  y="244" width="28" height="14" fill="#1f1f1f"/>
+        <rect x="131" y="244" width="28" height="14" fill="#ff00331a" stroke="#ff003322" stroke-width="1"/>
+
+        <!-- ── FASCIA / FUNCTION KEY PANEL ── -->
+        <rect x="32" y="148" width="20" height="120" fill="#1c1c1c"/>
+        <rect x="34" y="160" width="14" height="16" fill="#181818"/> <rect x="35" y="162" width="10" height="10" fill="#1a1a1a"/>
+        <rect x="34" y="184" width="14" height="16" fill="#181818"/> <rect x="35" y="186" width="10" height="10" fill="#1a1a1a"/>
+        <rect x="34" y="208" width="14" height="16" fill="#181818"/> <rect x="35" y="210" width="10" height="10" fill="#1a1a1a"/>
+        <rect x="34" y="232" width="14" height="16" fill="#181818"/> <rect x="35" y="234" width="10" height="10" fill="#1a1a1a"/>
+        <!-- right side function keys -->
+        <rect x="182" y="148" width="20" height="120" fill="#1c1c1c"/>
+        <rect x="185" y="160" width="14" height="16" fill="#181818"/>
+        <rect x="185" y="184" width="14" height="16" fill="#181818"/>
+        <rect x="185" y="208" width="14" height="16" fill="#181818"/>
+        <rect x="185" y="232" width="14" height="16" fill="#181818"/>
+
+        <!-- ── CASH DISPENSER ── -->
+        <rect x="40" y="274" width="154" height="28"  fill="#161616"/>
+        <rect x="42" y="276" width="150" height="24"  fill="#0d0d0d"/>
+        <!-- dispenser slot -->
+        <rect x="50" y="280" width="134" height="14"  fill="#080808"/>
+        <rect x="50" y="280" width="134" height="14"  fill="none" stroke="#ff003333" stroke-width="1"/>
+        <!-- dispenser rollers (pixel dots) -->
+        <rect x="58"  y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="68"  y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="78"  y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="88"  y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="98"  y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="108" y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="118" y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="128" y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="138" y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="148" y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="158" y="285" width="4" height="4"   fill="#1a1a1a"/>
+        <rect x="168" y="285" width="4" height="4"   fill="#1a1a1a"/>
+
+        <!-- ── RECEIPT PRINTER ── -->
+        <rect x="80" y="308" width="74" height="10"  fill="#161616"/>
+        <rect x="82" y="310" width="70" height="6"   fill="#0d0d0d"/>
+
+        <!-- ── STATUS LIGHTS ── -->
+        <rect x="180" y="312" width="8" height="8"  fill="#ff0033"/>
+        <rect x="192" y="312" width="8" height="8"  fill="#ff9900"/>
+
+        <!-- ════════════════════════════════
+             ATTACK OVERLAYS — Phase 03
+             ════════════════════════════════ -->
+
+        <!-- ETHERNET CABLE CUT (left side) -->
+        <!-- Cable going into wall -->
+        <rect x="24" y="320" width="10" height="4"  fill="#555"/>
+        <rect x="24" y="320" width="4"  height="4"  fill="#666"/>
+        <!-- Cut marker -->
+        <rect x="32" y="318" width="2"  height="8"  fill="#ff0033"/>
+        <!-- X cross for cut -->
+        <rect x="30" y="319" width="2"  height="2"  fill="#ff0033"/>
+        <rect x="34" y="319" width="2"  height="2"  fill="#ff0033"/>
+        <rect x="30" y="323" width="2"  height="2"  fill="#ff0033"/>
+        <rect x="34" y="323" width="2"  height="2"  fill="#ff0033"/>
+        <!-- Loopback plug (small rect) -->
+        <rect x="20" y="318" width="6"  height="8"  fill="#4488ff"/>
+        <rect x="21" y="319" width="4"  height="6"  fill="#6699ff"/>
+        <!-- Label area -->
+        <rect x="12" y="316" width="14" height="4"  fill="none"/>
+
+        <!-- USB STICK in drive bay area (right side, top panel) -->
+        <!-- Drive bay open slot (highlighted) -->
+        <rect x="202" y="48"  width="16" height="60" fill="#1a0505"/>
+        <rect x="203" y="50"  width="14" height="56" fill="#200808"/>
+        <!-- Hard drive slot - open and empty (drive removed) -->
+        <rect x="204" y="52"  width="12" height="24" fill="#0d0000"/>
+        <rect x="204" y="52"  width="12" height="24" fill="none" stroke="#ff003344" stroke-width="1"/>
+        <!-- Removed drive indicator (drive pulled out, shown partially) -->
+        <rect x="208" y="38"  width="10" height="16" fill="#3a3a3a"/>
+        <rect x="209" y="39"  width="8"  height="14" fill="#333"/>
+        <rect x="210" y="40"  width="4"  height="4"  fill="#444"/>
+        <!-- Arrow showing drive being pulled -->
+        <rect x="210" y="34"  width="4"  height="4"  fill="#ff9900"/>
+        <rect x="209" y="32"  width="2"  height="4"  fill="#ff9900"/>
+        <rect x="213" y="32"  width="2"  height="4"  fill="#ff9900"/>
+        <rect x="208" y="30"  width="8"  height="2"  fill="#ff9900"/>
+
+        <!-- USB adapter cable (going to laptop, shown as cable line) -->
+        <rect x="208" y="76"  width="2"  height="30" fill="#4488ff"/>
+        <rect x="206" y="104" width="6"  height="2"  fill="#4488ff"/>
+        <!-- USB plug end -->
+        <rect x="204" y="106" width="10" height="6"  fill="#4488ff"/>
+        <rect x="205" y="107" width="8"  height="4"  fill="#6699ff"/>
+
+        <!-- Laptop (simplified pixel art, bottom right) -->
+        <rect x="195" y="180" width="38" height="26" fill="#222"/>
+        <rect x="196" y="181" width="36" height="24" fill="#1a1a1a"/>
+        <rect x="197" y="182" width="34" height="22" fill="#0d0d0d"/>
+        <!-- Laptop screen green glow (shell running) -->
+        <rect x="198" y="183" width="32" height="20" fill="#001a00"/>
+        <rect x="200" y="185" width="20" height="3"  fill="#00e63933"/>
+        <rect x="200" y="190" width="26" height="2"  fill="#00e63922"/>
+        <rect x="200" y="194" width="18" height="2"  fill="#00e63922"/>
+        <!-- Laptop base -->
+        <rect x="193" y="206" width="44" height="4"  fill="#282828"/>
+        <rect x="208" y="206" width="14" height="2"  fill="#333"/>
+
+        <!-- Cable from laptop to drive (USB) -->
+        <rect x="208" y="112" width="2"  height="68" fill="#4488ff"/>
+
+        <!-- Highlight glow box around attack area -->
+        <rect x="200" y="28" width="30" height="80"
+              fill="none" stroke="#ff003344" stroke-width="1"/>
+
+        <!-- ── PANEL OPEN INDICATOR (top) ── -->
+        <rect x="80" y="20" width="54" height="8" fill="#1a0000"/>
+        <!-- pixel text: "OPEN" in 4x5 pixels each -->
+        <!-- O -->
+        <rect x="83" y="21" width="6" height="6" fill="#ff003344"/>
+        <rect x="84" y="22" width="4" height="4" fill="#1a0000"/>
+        <!-- Simplified: just a red bar saying "panel open" -->
+        <rect x="84" y="22" width="48" height="4" fill="#ff003333"/>
+        <rect x="84" y="22" width="48" height="4" fill="none" stroke="#ff003366" stroke-width="1"/>
+
+      </svg>
+    </div>
+
+    <!-- Legend -->
+    <div class="atm-legend">
+      <div class="leg-item">
+        <div class="leg-dot" style="background:#4488ff;"></div>
+        <span>USB / ADAPTER</span>
+      </div>
+      <div class="leg-item">
+        <div class="leg-dot" style="background:#ff0033;"></div>
+        <span>COMPROMISED</span>
+      </div>
+      <div class="leg-item">
+        <div class="leg-dot" style="background:#ff9900;"></div>
+        <span>DRIVE REMOVED</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+<div class="footer">
+  <div class="nav-keys">
+    <span><kbd class="kbd">SPACE</kbd> Next</span>
+    <span><kbd class="kbd">B</kbd> Back</span>
+    <span><kbd class="kbd">R</kbd> Reset</span>
+    <span><kbd class="kbd">F</kbd> Fullscreen</span>
+  </div>
+  <div class="narrative">
+    Attacker removes the ATM hard drive via USB-SATA bridge, mounts it on a Kali laptop, deploys Ploutus-D disguised as a Windows service, and writes persistence via the Winlogon Userinit registry key. Ethernet cut to a loopback plug stops log transmission to the bank SIEM. Entire on-machine time: under 10 minutes.
+  </div>
+  <div class="phase-id">PHASE 3 / 6 — MALWARE INSTALL</div>
+</div>
+
+</body>
+</html>

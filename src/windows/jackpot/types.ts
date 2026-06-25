@@ -43,7 +43,10 @@ export interface AtmVisualState {
   dispensing: boolean;
   showCassetteCutaway: boolean;
   showMule: boolean;
+  showClamp: boolean;
 }
+
+export type AtmUiState = 'idle' | 'pin' | 'menu' | 'balance' | 'withdraw';
 
 export interface GameState {
   phase: PhaseId;
@@ -53,10 +56,16 @@ export interface GameState {
   waitingForChoice: ChoiceId | null;
   choices: ToolChoices;
   siemDelayed: boolean;
-  alarm: { active: boolean; reason: string } | null;
+  started: boolean;
+  policeTriggered: boolean;
+  lastAlarmReason: string;
+  alarm: { active: boolean; reason: string; recoverable: boolean; resetToLine: number } | null;
   atm: AtmVisualState;
   cashAmount: number;
   jackpotComplete: boolean;
+  atmUiState: AtmUiState;
+  pinBuffer: string;
+  atmBalance: number;
 }
 
 export type Action =
@@ -67,4 +76,9 @@ export type Action =
   | { type: 'DISMISS_ALARM' }
   | { type: 'CASH_TICK' }
   | { type: 'JACKPOT_COMPLETE' }
-  | { type: 'RESET' };
+  | { type: 'RESET' }
+  | { type: 'ATM_PIN_DIGIT'; digit: string }
+  | { type: 'ATM_CLEAR' }
+  | { type: 'ATM_ENTER' }
+  | { type: 'ATM_MENU'; choice: 'balance' | 'withdraw' | 'cancel' }
+  | { type: 'ATM_OK' };

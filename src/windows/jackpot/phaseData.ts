@@ -102,6 +102,7 @@ export const ATM_INITIAL: AtmVisualState = {
   dispensing: false,
   showCassetteCutaway: false,
   showMule: false,
+  showClamp: false,
 };
 
 export const PHASE_LINES: Record<number, TermLine[]> = {

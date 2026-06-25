@@ -3,6 +3,7 @@ import { BootScreen } from './components/BootScreen/BootScreen';
 import { Desktop } from './components/Desktop/Desktop';
 import { ShutdownDialog } from './components/ShutdownDialog/ShutdownDialog';
 import { Credits } from './pages/Credits';
+import { JackpotPage } from './pages/JackpotPage';
 
 // GitHub Pages SPA redirect: convert /?/credits back to /credits
 (function () {
@@ -23,6 +24,11 @@ export function App() {
   // Route /credits to the standalone credits page
   if (window.location.pathname === '/credits') {
     return <Credits />;
+  }
+
+  // Route /jackpot to the standalone jackpot demo
+  if (window.location.pathname === '/jackpot') {
+    return <JackpotPage />;
   }
 
   if (phase === 'boot') {

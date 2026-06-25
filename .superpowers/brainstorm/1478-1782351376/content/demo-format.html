@@ -1,0 +1,56 @@
+<h2>What kind of Jackpot demo experience?</h2>
+<p class="subtitle">This page will teach your cybersecurity team about ATM jackpotting attacks. Pick the format that fits your workshop best.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="interactive-sim" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0a;padding:20px;font-family:monospace;color:#00ff41;font-size:13px;line-height:1.6;min-height:140px;border-radius:4px;overflow:hidden;">
+      <div style="color:#888;margin-bottom:8px;">ATM-SIM v2.3 — Ploutus-D Loader</div>
+      <div>&#x25B6; Connecting to XFS layer... <span style="color:#ffff00;">OK</span></div>
+      <div>&#x25B6; Injecting payload...........<span style="color:#ff4444;"> &#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2591;&#x2591;&#x2591;&#x2591;&#x2591; 40%</span></div>
+      <div style="margin-top:12px;color:#fff;">[ DISPENSE $20 ] [ DISPENSE $100 ] [ JACKPOT ]</div>
+    </div>
+    <div class="card-body">
+      <h3>Interactive Simulation</h3>
+      <p>Attendees click through a fake ATM interface that "gets jackpotted" step by step. They can trigger dispense commands, see the malware perspective, and watch the attack unfold in real time. Engaging and hands-on.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="slide-walkthrough" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1a1a2e;padding:20px;min-height:140px;border-radius:4px;display:flex;flex-direction:column;gap:12px;">
+      <div style="background:#16213e;border-radius:4px;padding:10px;display:flex;gap:12px;align-items:center;">
+        <div style="width:36px;height:36px;background:#e94560;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:bold;">1</div>
+        <div style="color:#eee;font-size:13px;"><b>Physical Access</b><br/><span style="color:#999;font-size:11px;">Attacker opens ATM top hat with a generic key</span></div>
+      </div>
+      <div style="background:#16213e;border-radius:4px;padding:10px;display:flex;gap:12px;align-items:center;">
+        <div style="width:36px;height:36px;background:#e94560;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:bold;">2</div>
+        <div style="color:#eee;font-size:13px;"><b>Malware Install</b><br/><span style="color:#999;font-size:11px;">USB device injects Ploutus-D via the maintenance port</span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Slide-style Walkthrough</h3>
+      <p>A polished, step-by-step presentation that walks through the full attack chain — physical access, malware install, money mule coordination, and detection/mitigation. Good for a presenter-led session.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="split-screen" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#111;padding:12px;min-height:140px;border-radius:4px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:#1a1a1a;border-radius:4px;padding:10px;border:1px solid #333;">
+        <div style="color:#888;font-size:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Attacker View</div>
+        <div style="color:#00ff41;font-family:monospace;font-size:11px;line-height:1.5;">$ run ploutus.exe<br/>$ jackpot --all-cassettes<br/><span style="color:#ffff00;">Dispensing...</span></div>
+      </div>
+      <div style="background:#1a1a1a;border-radius:4px;padding:10px;border:1px solid #333;">
+        <div style="color:#888;font-size:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">ATM View</div>
+        <div style="background:#222;border-radius:2px;padding:6px;text-align:center;">
+          <div style="color:#ffd700;font-size:20px;">💵💵💵</div>
+          <div style="color:#ff4444;font-size:10px;margin-top:4px;">DISPENSING CASH</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Split-Screen Live Demo</h3>
+      <p>Two panels side by side: the attacker's terminal on the left, the ATM's perspective on the right. As you advance through the attack, both sides update in sync. Great for showing cause and effect dramatically.</p>
+    </div>
+  </div>
+
+</div>

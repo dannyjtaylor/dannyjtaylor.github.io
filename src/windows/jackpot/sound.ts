@@ -72,6 +72,35 @@ export const Sounds = {
       sirenOsc = null;
     }
   },
+  /** Short chirp when ETA is shortened by a re-trigger */
+  etaPenalty(): void {
+    tone(880, 0.06, 'square', 0.1);
+    tone(220, 0.14, 'sawtooth', 0.12, 0.05);
+  },
+  /** Hard arrival sting — radio burst + descending wail */
+  policeArrived(): void {
+    this.stopSiren();
+    const c = getCtx();
+    if (!c) return;
+    // Radio squelch burst
+    tone(1800, 0.04, 'square', 0.08);
+    tone(900, 0.05, 'square', 0.06, 0.05);
+    tone(1400, 0.04, 'square', 0.07, 0.1);
+    // Descending wail
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.connect(g);
+    g.connect(c.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(720, c.currentTime + 0.15);
+    osc.frequency.exponentialRampToValueAtTime(140, c.currentTime + 1.4);
+    g.gain.setValueAtTime(0.12, c.currentTime + 0.15);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 1.5);
+    osc.start(c.currentTime + 0.15);
+    osc.stop(c.currentTime + 1.55);
+    // Low thud
+    tone(80, 0.35, 'triangle', 0.18, 0.2);
+  },
   cashClick(): void {
     tone(220, 0.04, 'square', 0.1);
   },

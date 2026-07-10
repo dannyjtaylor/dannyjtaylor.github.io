@@ -6,7 +6,7 @@ export const CHOICES: Record<ChoiceId, ChoiceConfig> = {
     options: [
       { key: '1', label: 'Ebay Dyebold T-bar Key (SKU 001-0006522)', outcome: 'correct' },
       { key: '2', label: 'Crow bar', outcome: 'wrong', wrongReason: 'Vibration sensor triggered - tamper alarm dispatched to monitoring center' },
-      { key: '3', label: 'Social Engineering - Wear NCR field technician gear & badge', outcome: 'correct' },
+      { key: '3', label: 'Social Engineering - Wear DN field technician gear & badge', outcome: 'correct' },
     ],
   },
   'ethernet': {
@@ -57,7 +57,7 @@ export const CONTINUATIONS: Record<string, TermLine[]> = {
     { t: 'out', text: '# top-hat panel open - cavity exposed', s: 'ok' },
   ],
   'panel-access:3': [
-    { t: 'out', text: '# social: NCR badge accepted - escorted to ATM', s: 'warn' },
+    { t: 'out', text: '# social: DN badge accepted - escorted to ATM', s: 'warn' },
     { t: 'out', text: '# guard unlocked panel - internal access granted', s: 'ok' },
   ],
   'ethernet:1': [
@@ -160,8 +160,6 @@ export const PHASE_LINES: Record<number, TermLine[]> = {
     { t: 'blank' },
     { t: 'cmd', text: 'sudo ./drop/bootstrap.sh' },
     { t: 'out', text: '[sudo] password for danny: ********' },
-    { t: 'out', text: '[sudo] danny is not in the sudoers file.  This incident will be reported.' },
-    { t: 'out', text: '…jk. NOPASSWD:ALL via /etc/sudoers.d/train-de-aqua (planted earlier)', s: 'ok' },
     { t: 'blank' },
     { t: 'out', text: '[*] Train de Aqua // bootstrap v0.9.4', s: 'ann' },
     { t: 'out', text: '[*] verifying drop signature… OK (ed25519)', s: 'ok' },
@@ -208,8 +206,8 @@ export const PHASE_LINES: Record<number, TermLine[]> = {
   2: [
     { t: 'out', text: '// PHASE 02 - BREACH', s: 'ann' },
     { t: 'blank' },
-    { t: 'cmd', text: 'echo "vestibule clear - NCR tech cover ready"' },
-    { t: 'out', text: 'vestibule clear - NCR tech cover ready', s: 'ok' },
+    { t: 'cmd', text: 'echo "vestibule clear - DN tech cover ready"' },
+    { t: 'out', text: 'vestibule clear - DN tech cover ready', s: 'ok' },
     { t: 'blank' },
     { t: 'choice', id: 'panel-access' },
     { t: 'blank' },

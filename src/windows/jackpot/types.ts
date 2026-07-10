@@ -64,13 +64,15 @@ export interface AtmVisualState {
 
 export type AtmUiState =
   | 'idle'
+  | 'inserting'
   | 'pin'
   | 'menu'
   | 'balance'
   | 'amount'
   | 'withdraw'
   | 'error'
-  | 'thankyou';
+  | 'thankyou'
+  | 'ejecting';
 
 /** Interactive terminal pacing mode */
 export type TermMode = 'at-cmd' | 'at-output' | 'at-announce' | 'at-choice' | 'phase-end';
@@ -108,6 +110,8 @@ export interface NarrativeCheckpoint {
   waitingForChoice: ChoiceId | null;
   cashAmount: number;
   jackpotComplete: boolean;
+  /** Sum of customer ATM withdrawals this run (subtracted from jackpot cassette total) */
+  customerWithdrawn: number;
   policeTriggered: boolean;
   policeEtaSeconds: number | null;
   policeArrived: boolean;
@@ -170,12 +174,16 @@ export interface GameState {
   atm: AtmVisualState;
   cashAmount: number;
   jackpotComplete: boolean;
+  /** Sum of customer ATM withdrawals this run (subtracted from jackpot cassette total) */
+  customerWithdrawn: number;
   atmUiState: AtmUiState;
   pinBuffer: string;
   amountBuffer: string;
   atmBalance: number;
   atmError: string;
   lastWithdrawAmount: number;
+  /** Keyboard target: click ATM to enter PIN/menu; click terminal to type cmds */
+  inputFocus: 'terminal' | 'atm';
   /** user = cold-start sandbox; root = scripted demo */
   shellTier: ShellTier;
   /** Absolute cwd for danny@kali sandbox */
@@ -204,10 +212,14 @@ export type Action =
   | { type: 'CLEAR_ETA_PENALTY' }
   | { type: 'CASH_TICK' }
   | { type: 'JACKPOT_COMPLETE' }
+  | { type: 'ATM_DISPENSE_DONE' }
   | { type: 'RESET' }
   | { type: 'ATM_PIN_DIGIT'; digit: string }
   | { type: 'ATM_CLEAR' }
   | { type: 'ATM_ENTER' }
   | { type: 'ATM_MENU'; choice: 'balance' | 'withdraw' | 'cancel' }
   | { type: 'ATM_AMOUNT'; amount: number }
-  | { type: 'ATM_OK' };
+  | { type: 'ATM_OK' }
+  | { type: 'ATM_INSERT_CARD' }
+  | { type: 'ATM_CARD_ANIM_DONE' }
+  | { type: 'SET_INPUT_FOCUS'; focus: 'terminal' | 'atm' };

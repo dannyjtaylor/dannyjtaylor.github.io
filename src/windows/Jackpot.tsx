@@ -17,7 +17,11 @@ import {
   rebuildAtmFromChoices,
   skipNoise,
 } from './jackpot/terminalLogic';
-import { isBasicLinuxCommand, isWorkingDemoCommand } from './jackpot/cheatSheetData';
+import {
+  HELP_EASTER_EGG_LINES,
+  isBasicLinuxCommand,
+  isWorkingDemoCommand,
+} from './jackpot/cheatSheetData';
 import {
   initialSandbox,
   matchesPrologueBootstrap,
@@ -47,6 +51,8 @@ const POLICE_ETA_INITIAL = 40;
 const POLICE_ETA_PENALTY = 20;
 const POLICE_ETA_FLOOR = 5;
 const POLICE_ARRIVED_REASON = 'Police on scene - vestibule locked down, ATM seized as evidence';
+/** Full cassette haul before any customer withdrawals */
+const JACKPOT_CASSETTE_TOTAL = 212_000;
 
 function makeInitialState(): GameState {
   const sand = initialSandbox();
@@ -79,7 +85,9 @@ function makeInitialState(): GameState {
     atm: { ...ATM_INITIAL },
     cashAmount: 0,
     jackpotComplete: false,
+    customerWithdrawn: 0,
     atmUiState: 'idle',
+    inputFocus: 'terminal',
     pinBuffer: '',
     amountBuffer: '',
     atmBalance: 500,
@@ -106,6 +114,7 @@ function snapshotCheckpoint(state: GameState): NarrativeCheckpoint {
     waitingForChoice: state.waitingForChoice,
     cashAmount: state.cashAmount,
     jackpotComplete: state.jackpotComplete,
+    customerWithdrawn: state.customerWithdrawn,
     policeTriggered: state.policeTriggered,
     policeEtaSeconds: state.policeEtaSeconds,
     policeArrived: state.policeArrived,
@@ -162,7 +171,43 @@ function cwdDisplayFor(state: GameState): string {
   return state.sandboxCwd || '/home/danny';
 }
 
+function nextScriptedCmd(state: GameState): string | null {
+  const line = state.effectiveLines[state.revealedLines];
+  if (line?.t === 'cmd') return line.text;
+  return null;
+}
+
+function helpOutputLines(state: GameState): string[] {
+  const hintCmd = nextScriptedCmd(state);
+  const hint = hintCmd ? `Hint: Try the \`${hintCmd}\`` : 'Hint: open the Cheat Sheet (top right) if you\'re stuck.';
+  if (state.shellTier === 'user') {
+    return [...HELP_EASTER_EGG_LINES, hint];
+  }
+  return [hint];
+}
+
+function applyHelpTyped(state: GameState, typed: string): GameState {
+  const echo = {
+    cmd: typed,
+    lines: helpOutputLines(state),
+    tier: state.shellTier,
+    cwdDisplay: cwdDisplayFor(state),
+  };
+  return {
+    ...state,
+    sandboxEchoes: [...state.sandboxEchoes, echo],
+    inputBuffer: '',
+    failedCmds: [],
+    historyBrowseIndex: null,
+    autofillTarget: null,
+    cmdHistory: [...state.cmdHistory.filter((c) => c !== typed), typed],
+  };
+}
+
 function applySandboxTyped(state: GameState, typed: string): GameState {
+  const first = typed.trim().split(/\s+/)[0]?.toLowerCase() ?? '';
+  if (first === 'help') return applyHelpTyped(state, typed);
+
   const result = runSandboxCommand(typed, { cwd: state.sandboxCwd });
   const echo = {
     cmd: typed,
@@ -238,6 +283,15 @@ function applyPoliceTrigger(
 
   const first = state.policeEtaSeconds === null;
   const prevEta = state.policeEtaSeconds ?? POLICE_ETA_INITIAL;
+
+  // Already at the floor (5s) — another strike means they're here. Don't clamp back up to 5.
+  if (!first && prevEta <= POLICE_ETA_FLOOR) {
+    const busted = applyPoliceArrived(state);
+    return atmPatch
+      ? { ...busted, atm: { ...atmPatch, screenMode: 'seized' as const, dispensing: false } }
+      : busted;
+  }
+
   const nextEta = first
     ? POLICE_ETA_INITIAL
     : Math.max(POLICE_ETA_FLOOR, prevEta - POLICE_ETA_PENALTY);
@@ -400,6 +454,10 @@ function updateChoices(choices: ToolChoices, choiceId: string, key: string): Too
   }
 }
 
+function jackpotTarget(state: GameState): number {
+  return Math.max(0, JACKPOT_CASSETTE_TOTAL - state.customerWithdrawn);
+}
+
 function tryWithdraw(state: GameState, amount: number): GameState {
   if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) {
     return { ...state, atmUiState: 'error', atmError: 'INVALID AMOUNT', amountBuffer: '' };
@@ -412,7 +470,8 @@ function tryWithdraw(state: GameState, amount: number): GameState {
     atmUiState: 'withdraw',
     atmBalance: state.atmBalance - amount,
     lastWithdrawAmount: amount,
-    cashAmount: state.cashAmount + amount,
+    // Customer cash leaves the cassettes — jackpot haul shrinks by the same amount
+    customerWithdrawn: state.customerWithdrawn + amount,
     atm: { ...state.atm, dispensing: true },
     atmError: '',
     amountBuffer: '',
@@ -547,8 +606,11 @@ function reducer(state: GameState, action: Action): GameState {
             failedCmds: [],
           };
         }
-        // Working demo builtins (clear) — don't roast, don't advance the script
+        // Working demo builtins — don't roast, don't advance the script
         if (isWorkingDemoCommand(typedTrim)) {
+          const first = typedTrim.split(/\s+/)[0]?.toLowerCase() ?? '';
+          if (first === 'help') return applyHelpTyped(state, typedTrim);
+          // clear
           return {
             ...state,
             failedCmds: [],
@@ -675,6 +737,7 @@ function reducer(state: GameState, action: Action): GameState {
         waitingForChoice: prev.waitingForChoice,
         cashAmount: prev.cashAmount,
         jackpotComplete: prev.jackpotComplete,
+        customerWithdrawn: prev.customerWithdrawn,
         checkpoints: rest,
         charIndex: 0,
         autofillTarget: null,
@@ -829,13 +892,26 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'CASH_TICK': {
       if (state.phase !== 6 || state.jackpotComplete || state.policeArrived || state.alarm) return state;
-      const next = Math.min(state.cashAmount + 2500, 212000);
+      const cap = jackpotTarget(state);
+      const next = Math.min(state.cashAmount + 2500, cap);
       return { ...state, cashAmount: next, atm: { ...state.atm, dispensing: true } };
     }
 
     case 'JACKPOT_COMPLETE':
       if (state.policeArrived) return state;
-      return { ...state, jackpotComplete: true };
+      return {
+        ...state,
+        jackpotComplete: true,
+        cashAmount: jackpotTarget(state),
+        atm: { ...state.atm, dispensing: false },
+      };
+
+    case 'ATM_DISPENSE_DONE': {
+      // Finite customer withdraw burst finished (jackpot rain uses CASH_TICK / JACKPOT_COMPLETE)
+      if (state.atm.screenMode === 'jackpot') return state;
+      if (!state.atm.dispensing) return state;
+      return { ...state, atm: { ...state.atm, dispensing: false } };
+    }
 
     case 'POLICE_TICK': {
       if (state.policeEtaSeconds === null || state.policeArrived) return state;
@@ -873,11 +949,36 @@ function reducer(state: GameState, action: Action): GameState {
 
     /* ── ATM UI actions ── */
 
+    case 'ATM_INSERT_CARD': {
+      if (state.alarm || state.policeArrived) return state;
+      if (state.atmUiState !== 'idle') return state;
+      return { ...state, atmUiState: 'inserting', pinBuffer: '', inputFocus: 'atm' };
+    }
+
+    case 'ATM_CARD_ANIM_DONE': {
+      if (state.alarm || state.policeArrived) return state;
+      if (state.atmUiState === 'inserting') {
+        return { ...state, atmUiState: 'pin', pinBuffer: '', inputFocus: 'atm' };
+      }
+      if (state.atmUiState === 'ejecting') {
+        return {
+          ...state,
+          atmUiState: 'idle',
+          pinBuffer: '',
+          amountBuffer: '',
+          lastWithdrawAmount: 0,
+          atm: { ...state.atm, dispensing: false },
+        };
+      }
+      return state;
+    }
+
     case 'ATM_PIN_DIGIT': {
       if (state.alarm || state.policeArrived) return state;
       const { digit } = action;
-      if (state.atmUiState === 'idle') {
-        return { ...state, atmUiState: 'pin', pinBuffer: digit };
+      // Must insert card before PIN — digits do nothing on idle
+      if (state.atmUiState === 'idle' || state.atmUiState === 'inserting' || state.atmUiState === 'ejecting') {
+        return state;
       }
       if (state.atmUiState === 'pin') {
         // Wrong PIN: next digit starts a fresh attempt
@@ -892,13 +993,9 @@ function reducer(state: GameState, action: Action): GameState {
       if (state.atmUiState === 'menu') {
         if (digit === '1') return { ...state, atmUiState: 'balance' };
         if (digit === '2') return { ...state, atmUiState: 'amount', amountBuffer: '' };
-        if (digit === '3') return { ...state, atmUiState: 'idle', pinBuffer: '' };
+        if (digit === '3') return { ...state, atmUiState: 'ejecting', pinBuffer: '', amountBuffer: '' };
       }
-      if (state.atmUiState === 'amount') {
-        // Custom amount entry via keypad (max 4 digits / $9999)
-        if (state.amountBuffer.length >= 4) return state;
-        return { ...state, amountBuffer: state.amountBuffer + digit };
-      }
+      // Amount screen: presets only (tap $20/$40/$100/$200) — no custom typing
       return state;
     }
 
@@ -912,35 +1009,39 @@ function reducer(state: GameState, action: Action): GameState {
       if (state.alarm || state.policeArrived) return state;
       if (state.atmUiState === 'pin') return { ...state, pinBuffer: '' };
       if (state.atmUiState === 'amount') {
-        if (state.amountBuffer.length > 0) return { ...state, amountBuffer: '' };
         return { ...state, atmUiState: 'menu', amountBuffer: '' };
       }
       if (state.atmUiState === 'error') return { ...state, atmUiState: 'menu', atmError: '' };
+      // Card stays in for more transactions — only Exit (menu #3) ejects
       if (state.atmUiState === 'thankyou' || state.atmUiState === 'withdraw') {
-        return { ...state, atmUiState: 'idle', pinBuffer: '', amountBuffer: '', atm: { ...state.atm, dispensing: false } };
+        return { ...state, atmUiState: 'menu', amountBuffer: '', atm: { ...state.atm, dispensing: false } };
       }
       if (state.atmUiState === 'menu' || state.atmUiState === 'balance') {
-        return { ...state, atmUiState: 'idle', pinBuffer: '', amountBuffer: '' };
+        return { ...state, atmUiState: 'ejecting', pinBuffer: '', amountBuffer: '' };
       }
       return state;
     }
 
     case 'ATM_ENTER': {
       if (state.alarm || state.policeArrived) return state;
+      if (state.atmUiState === 'idle') {
+        return { ...state, atmUiState: 'inserting', pinBuffer: '', inputFocus: 'atm' };
+      }
       if (state.atmUiState === 'pin') {
         if (state.pinBuffer === '1234') return { ...state, atmUiState: 'menu', pinBuffer: '' };
         return { ...state, pinBuffer: '' };
       }
       if (state.atmUiState === 'balance') return { ...state, atmUiState: 'menu' };
-      if (state.atmUiState === 'amount') {
-        if (!state.amountBuffer) return state;
-        return tryWithdraw(state, parseInt(state.amountBuffer, 10));
-      }
+      // Amount screen: Enter does nothing — pick a preset button
+      if (state.atmUiState === 'amount') return state;
       if (state.atmUiState === 'withdraw') {
-        return { ...state, atmUiState: 'thankyou', atm: { ...state.atm, dispensing: false } };
+        // Stay in session — back to menu for another withdrawal
+        return { ...state, atmUiState: 'menu', atm: { ...state.atm, dispensing: false } };
       }
       if (state.atmUiState === 'error') return { ...state, atmUiState: 'menu', atmError: '' };
-      if (state.atmUiState === 'thankyou') return { ...state, atmUiState: 'idle', pinBuffer: '', amountBuffer: '' };
+      if (state.atmUiState === 'thankyou') {
+        return { ...state, atmUiState: 'menu', amountBuffer: '' };
+      }
       return state;
     }
 
@@ -951,21 +1052,28 @@ function reducer(state: GameState, action: Action): GameState {
       }
       if (state.atmUiState === 'menu') {
         if (action.choice === 'balance') return { ...state, atmUiState: 'balance' };
-        if (action.choice === 'cancel') return { ...state, atmUiState: 'idle', pinBuffer: '', amountBuffer: '' };
+        if (action.choice === 'cancel') return { ...state, atmUiState: 'ejecting', pinBuffer: '', amountBuffer: '' };
         if (action.choice === 'withdraw') return { ...state, atmUiState: 'amount', amountBuffer: '' };
       }
       return state;
     }
 
+    case 'SET_INPUT_FOCUS':
+      return state.inputFocus === action.focus ? state : { ...state, inputFocus: action.focus };
+
     case 'ATM_OK': {
       if (state.alarm || state.policeArrived) return state;
+      if (state.atmUiState === 'idle') {
+        return { ...state, atmUiState: 'inserting', pinBuffer: '', inputFocus: 'atm' };
+      }
       if (state.atmUiState === 'balance') return { ...state, atmUiState: 'menu' };
       if (state.atmUiState === 'withdraw') {
-        return { ...state, atmUiState: 'thankyou', atm: { ...state.atm, dispensing: false } };
+        // Stay in session — back to menu for another withdrawal
+        return { ...state, atmUiState: 'menu', atm: { ...state.atm, dispensing: false } };
       }
       if (state.atmUiState === 'error') return { ...state, atmUiState: 'menu', atmError: '' };
       if (state.atmUiState === 'thankyou') {
-        return { ...state, atmUiState: 'idle', pinBuffer: '', amountBuffer: '', lastWithdrawAmount: 0 };
+        return { ...state, atmUiState: 'menu', amountBuffer: '', lastWithdrawAmount: 0 };
       }
       return state;
     }
@@ -1012,13 +1120,24 @@ export function Jackpot() {
     return () => { if (cashTickRef.current) clearInterval(cashTickRef.current); };
   }, [phase6LinesDone, state.jackpotComplete, state.alarm, state.policeArrived]);
 
-  /* Jackpot complete trigger */
+  /* Jackpot complete when counter hits cassette total minus prior customer withdrawals */
+  const jackpotCap = JACKPOT_CASSETTE_TOTAL - state.customerWithdrawn;
   useEffect(() => {
-    if (state.cashAmount >= 212000 && !state.jackpotComplete && !state.policeArrived) {
+    if (state.cashAmount >= jackpotCap && jackpotCap >= 0 && !state.jackpotComplete && !state.policeArrived) {
       dispatch({ type: 'JACKPOT_COMPLETE' });
       Sounds.jackpotWin();
     }
-  }, [state.cashAmount, state.jackpotComplete, state.policeArrived]);
+  }, [state.cashAmount, jackpotCap, state.jackpotComplete, state.policeArrived]);
+
+  /* Customer withdraw: one note per preset — stop rain after a single bill burst */
+  useEffect(() => {
+    if (!state.atm.dispensing) return;
+    if (state.atm.screenMode === 'jackpot') return; // phase-6 rain is continuous until complete
+    if (state.atmUiState !== 'withdraw' && state.lastWithdrawAmount <= 0) return;
+    const ms = 1350;
+    const t = setTimeout(() => dispatch({ type: 'ATM_DISPENSE_DONE' }), ms);
+    return () => clearTimeout(t);
+  }, [state.atm.dispensing, state.atm.screenMode, state.atmUiState, state.lastWithdrawAmount]);
 
   /* Police ETA countdown — owned by reducer, not the overlay */
   const policeTicking = state.policeEtaSeconds !== null && !state.policeArrived && state.policeEtaSeconds > 0;
@@ -1118,6 +1237,41 @@ export function Jackpot() {
         Sounds.stopSiren();
         dispatch({ type: 'STEP_BACK' });
         return;
+      }
+
+      const atmFocused = s.inputFocus === 'atm';
+
+      // ATM focus: digits / CLR / OK go to the pad (click ATM to steal focus from terminal)
+      if (atmFocused && !s.alarm && !s.policeArrived) {
+        // Card mid-animation — ignore pad input
+        if (s.atmUiState === 'inserting' || s.atmUiState === 'ejecting') {
+          if (e.code === 'Space' || e.key === 'Enter' || (e.key.length === 1 && !e.ctrlKey && !e.metaKey)) {
+            e.preventDefault();
+          }
+          return;
+        }
+        if (/^[0-9]$/.test(e.key) && !s.waitingForChoice) {
+          e.preventDefault();
+          Sounds.pinPress();
+          dispatch({ type: 'ATM_PIN_DIGIT', digit: e.key });
+          return;
+        }
+        if (e.key === 'Backspace' || e.key === 'Escape') {
+          e.preventDefault();
+          dispatch({ type: 'ATM_CLEAR' });
+          return;
+        }
+        if (e.key === 'Enter') {
+          if (hasTextSelection()) return;
+          e.preventDefault();
+          dispatch({ type: 'ATM_ENTER' });
+          return;
+        }
+        // Don't let SPACE/letters advance the terminal while driving the ATM
+        if (e.code === 'Space' || (e.key.length === 1 && !e.ctrlKey && !e.metaKey)) {
+          e.preventDefault();
+          return;
+        }
       }
 
       // SPACE → advance / start autofill. At a cmd prompt with typed text, SPACE is a literal.
@@ -1238,7 +1392,7 @@ export function Jackpot() {
         return;
       }
 
-      // ATM digit input when not in narrative command entry
+      // ATM digit input when terminal-focused but not mid-command (idle between beats)
       if (
         /^[0-9]$/.test(e.key) &&
         !s.alarm &&
@@ -1281,6 +1435,12 @@ export function Jackpot() {
   const handleAtmOk = useCallback(() => { dispatch({ type: 'ATM_OK' }); }, []);
   const handleAtmAmountSelect = useCallback((amount: number) => {
     dispatch({ type: 'ATM_AMOUNT', amount });
+  }, []);
+  const handleAtmInsertCard = useCallback(() => {
+    dispatch({ type: 'ATM_INSERT_CARD' });
+  }, []);
+  const handleAtmCardAnimDone = useCallback(() => {
+    dispatch({ type: 'ATM_CARD_ANIM_DONE' });
   }, []);
 
   return (
@@ -1331,7 +1491,10 @@ export function Jackpot() {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0, position: 'relative' }}>
 
         {/* Terminal — left 55% */}
-        <div style={{ width: '55%', borderRight: '1px solid #00ff8820', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div
+          onMouseDown={() => dispatch({ type: 'SET_INPUT_FOCUS', focus: 'terminal' })}
+          style={{ width: '55%', borderRight: '1px solid #00ff8820', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+        >
           <div style={{ background: '#1e1e1e', borderBottom: '1px solid #2d2d2d', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#9a9a9a', flexShrink: 0 }}>
             <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#ff5f57' }} />
             <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#febc2e' }} />
@@ -1364,7 +1527,10 @@ export function Jackpot() {
         </div>
 
         {/* ATM panel — WELSH PHARGO branch exterior */}
-        <div style={{ width: '45%', background: '#c8c3bc', position: 'relative', overflow: 'hidden' }}>
+        <div
+          onMouseDown={() => dispatch({ type: 'SET_INPUT_FOCUS', focus: 'atm' })}
+          style={{ width: '45%', background: '#c8c3bc', position: 'relative', overflow: 'visible' }}
+        >
           {/* Stone block wall texture */}
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 47px, rgba(0,0,0,0.055) 48px), repeating-linear-gradient(90deg, transparent, transparent 95px, rgba(0,0,0,0.04) 96px)', pointerEvents: 'none', zIndex: 0 }} />
           {/* WELSH PHARGO red header signage */}
@@ -1372,13 +1538,12 @@ export function Jackpot() {
             <div style={{ color: '#fff', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: 18, letterSpacing: 0, textTransform: 'uppercase' }}>WELSH PHARGO</div>
             <div style={{ color: '#ffcd11', fontFamily: 'Arial, sans-serif', fontSize: 11, letterSpacing: 0, marginTop: 3 }}>24-HOUR ATM</div>
           </div>
-          {/* Center ATM in the brick area below the red band */}
-          <div style={{ position: 'absolute', left: 0, right: 0, top: 58, bottom: 0, zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12, boxSizing: 'border-box' }}>
+          {/* Center ATM in the brick area below the red band — overflow visible so side callouts aren't clipped */}
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 58, bottom: 0, zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', boxSizing: 'border-box', overflow: 'visible' }}>
             <AtmSvg
               state={state.atm}
               atmUiState={state.atmUiState}
               pinBuffer={state.pinBuffer}
-              amountBuffer={state.amountBuffer}
               atmBalance={state.atmBalance}
               lastWithdrawAmount={state.lastWithdrawAmount}
               atmError={state.atmError}
@@ -1388,6 +1553,8 @@ export function Jackpot() {
               onMenuChoice={handleAtmMenu}
               onAmountSelect={handleAtmAmountSelect}
               onAtmOk={handleAtmOk}
+              onInsertCard={handleAtmInsertCard}
+              onCardAnimDone={handleAtmCardAnimDone}
             />
           </div>
           {/* Police timer — mounts on first alarm, stays until Reset */}

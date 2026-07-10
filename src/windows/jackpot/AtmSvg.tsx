@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { AtmVisualState, AtmUiState } from './types';
 import { Sounds } from './sound';
@@ -6,7 +7,6 @@ interface Props {
   state: AtmVisualState;
   atmUiState: AtmUiState;
   pinBuffer: string;
-  amountBuffer: string;
   atmBalance: number;
   lastWithdrawAmount: number;
   atmError: string;
@@ -16,11 +16,19 @@ interface Props {
   onMenuChoice: (choice: 'balance' | 'withdraw' | 'cancel') => void;
   onAmountSelect: (amount: number) => void;
   onAtmOk: () => void;
+  onInsertCard: () => void;
+  onCardAnimDone: () => void;
 }
 
+/** SVG coords for the card reader mouth (short-edge insert). */
+const CARD_SLOT = { x: 92, y: 168, w: 46, h: 3.5 };
+/** Bank card drawn short-edge-first (portrait) so it feeds into the slot. */
+const CARD_W = 34;
+const CARD_H = 54;
+
 // Bills fall DOWN from the cash slot
-function makeBills() {
-  return Array.from({ length: 18 }, (_, i) => ({
+function makeBills(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
     id: i,
     startX: 52 + (i % 9) * 14,
     dy: 65 + (i % 4) * 22,
@@ -30,22 +38,31 @@ function makeBills() {
     color: i % 3 === 0 ? '#4a7c4e' : i % 3 === 1 ? '#6b9e6e' : '#3d6640',
   }));
 }
-const BILLS = makeBills();
 
-// Larger ATM — viewBox 240×400 scaled up to fill more of the right pane
-const SVG_W = 336;
-const SVG_H = 560;
-const SCALE = SVG_W / 240; // 1.4
+/** Jackpot rain — dense continuous burst (looping). */
+const JACKPOT_BILLS = makeBills(18);
+
+/** Customer withdraw — one note per preset denomination ($5/$10/$20/$50). */
+function billsForWithdraw(amount: number) {
+  if (amount <= 0) return [];
+  return makeBills(1);
+}
+
+// Larger ATM — viewBox 240×400; legend removed so we can scale up
+const SVG_W = 384;
+const SVG_H = 640;
+const SCALE = SVG_W / 240; // 1.6
 
 const SCR_L = Math.round(44 * SCALE);
 const SCR_T = Math.round(46 * SCALE);
 const SCR_W = Math.round(146 * SCALE);
 const SCR_H = Math.round(102 * SCALE);
 
+// Fill the inner keypad housing (svg 57,182 120×88) — no label strip
 const KPD_L = Math.round(57 * SCALE);
-const KPD_T = Math.round(192 * SCALE);
+const KPD_T = Math.round(182 * SCALE);
 const KPD_W = Math.round(120 * SCALE);
-const KPD_H = Math.round(78 * SCALE);
+const KPD_H = Math.round(88 * SCALE);
 
 const PHOS = '#33ff66';
 const PHOS_DIM = '#00aa44';
@@ -72,7 +89,7 @@ const SCREEN_BASE = {
 const SCREEN_HDR = {
   color: AMBER,
   fontWeight: 'bold',
-  fontSize: 10,
+  fontSize: 13,
   letterSpacing: 1.2,
   borderBottom: `1px solid ${AMBER}44`,
   paddingBottom: 3,
@@ -109,26 +126,24 @@ function AtmScreen({
   atmUiState,
   screenMode,
   pinBuffer,
-  amountBuffer,
   atmBalance,
   lastWithdrawAmount,
   atmError,
   onMenuChoice,
   onAmountSelect,
   onAtmOk,
-  onEnter,
+  onInsertCard,
 }: {
   atmUiState: AtmUiState;
   screenMode: AtmVisualState['screenMode'];
   pinBuffer: string;
-  amountBuffer: string;
   atmBalance: number;
   lastWithdrawAmount: number;
   atmError: string;
   onMenuChoice: (choice: 'balance' | 'withdraw' | 'cancel') => void;
   onAmountSelect: (amount: number) => void;
   onAtmOk: () => void;
-  onEnter: () => void;
+  onInsertCard: () => void;
 }) {
   const menuRow = (num: string, label: string, choice: 'balance' | 'withdraw' | 'cancel') => (
     <button
@@ -151,7 +166,7 @@ function AtmScreen({
     </button>
   );
 
-  const quickAmounts = [20, 40, 100, 200] as const;
+  const quickAmounts = [5, 10, 20, 50] as const;
 
   /* Ops overlays take over the CRT when the demo is past customer UI */
   if (screenMode === 'seized') {
@@ -236,15 +251,62 @@ function AtmScreen({
     return (
       <div style={SCREEN_BASE}>
         <div style={SCREEN_HDR}>WELSH PHARGO</div>
-        <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
-          <div style={{ fontSize: 14, color: PHOS, fontWeight: 'bold' }}>Welcome</div>
-          <div style={{ color: PHOS_DIM, fontSize: 11 }}>Enter your PIN</div>
-          <motion.div
-            animate={{ opacity: [1, 0.25, 1] }}
-            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ color: PHOS_MUTED, fontSize: 10, marginTop: 4 }}
+        <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 10 }}>
+          <div style={{ fontSize: 18, color: PHOS, fontWeight: 'bold' }}>Welcome</div>
+          <div style={{ color: PHOS_DIM, fontSize: 13 }}>Please insert your card</div>
+          <button
+            type="button"
+            onClick={onInsertCard}
+            style={{
+              ...BTN_BASE,
+              textAlign: 'center',
+              padding: '8px 10px',
+              fontWeight: 'bold',
+              fontSize: 12,
+              letterSpacing: 1,
+              borderLeft: `3px solid ${AMBER}`,
+              color: AMBER,
+              width: 'auto',
+              alignSelf: 'center',
+            }}
           >
-            Press any number
+            INSERT CARD
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (atmUiState === 'inserting') {
+    return (
+      <div style={SCREEN_BASE}>
+        <div style={SCREEN_HDR}>WELSH PHARGO</div>
+        <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
+          <motion.div
+            animate={{ opacity: [1, 0.35, 1] }}
+            transition={{ duration: 0.9, repeat: Infinity }}
+            style={{ fontSize: 14, color: PHOS, fontWeight: 'bold' }}
+          >
+            Reading card…
+          </motion.div>
+          <div style={{ fontSize: 11, color: PHOS_MUTED }}>Do not remove card</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (atmUiState === 'ejecting') {
+    return (
+      <div style={SCREEN_BASE}>
+        <div style={SCREEN_HDR}>WELSH PHARGO</div>
+        <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
+          <div style={{ fontSize: 14, color: PHOS, fontWeight: 'bold' }}>Please take your card</div>
+          <motion.div
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 0.8, repeat: Infinity }}
+            style={{ fontSize: 11, color: AMBER }}
+          >
+            Ejecting…
           </motion.div>
         </div>
       </div>
@@ -254,25 +316,44 @@ function AtmScreen({
   if (atmUiState === 'pin') {
     const filled = pinBuffer.length;
     const isWrong = filled === 4 && pinBuffer !== '1234';
-    const isComplete = filled === 4 && pinBuffer === '1234';
     return (
-      <div style={SCREEN_BASE}>
-        <div style={SCREEN_HDR}>WELSH PHARGO</div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
-          <div style={{ color: PHOS_DIM, fontSize: 11, textAlign: 'center' }}>Enter your PIN</div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+      <div style={{ ...SCREEN_BASE, padding: '4px 6px' }}>
+        <div style={{ ...SCREEN_HDR, fontSize: 12, marginBottom: 2, paddingBottom: 2 }}>WELSH PHARGO</div>
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 10,
+          minHeight: 0,
+        }}>
+          <div style={{ color: PHOS, fontSize: 16, fontWeight: 'bold', textAlign: 'center', letterSpacing: 0.5 }}>
+            Enter your PIN
+          </div>
+          <div style={{
+            display: 'flex',
+            gap: 6,
+            justifyContent: 'center',
+            width: '100%',
+            padding: '0 2px',
+            boxSizing: 'border-box',
+          }}>
             {Array.from({ length: 4 }, (_, i) => (
               <div
                 key={i}
                 style={{
-                  width: 22,
-                  height: 26,
+                  flex: 1,
+                  maxWidth: 42,
+                  aspectRatio: '3 / 4',
+                  minHeight: 36,
                   border: `2px solid ${i < filled ? PHOS : PHOS_MUTED}`,
                   background: i < filled ? '#042810' : '#010804',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 16,
+                  fontSize: 22,
+                  fontWeight: 'bold',
                   color: PHOS,
                 }}
               >
@@ -281,18 +362,8 @@ function AtmScreen({
             ))}
           </div>
           {isWrong && (
-            <div style={{ textAlign: 'center', fontSize: 10, color: '#ff4444', fontWeight: 'bold', lineHeight: 1.4 }}>
-              INCORRECT PIN<br />Press CLR or type again
-            </div>
-          )}
-          {isComplete && (
-            <div style={{ textAlign: 'center', fontSize: 10, color: PHOS_DIM }}>
-              Press OK when done
-            </div>
-          )}
-          {!isWrong && !isComplete && filled > 0 && (
-            <div style={{ textAlign: 'center', fontSize: 10, color: PHOS_MUTED }}>
-              {4 - filled} digit{4 - filled !== 1 ? 's' : ''} remaining
+            <div style={{ textAlign: 'center', fontSize: 11, color: '#ff4444', fontWeight: 'bold', lineHeight: 1.3 }}>
+              INCORRECT PIN
             </div>
           )}
         </div>
@@ -332,49 +403,42 @@ function AtmScreen({
     return (
       <div style={SCREEN_BASE}>
         <div style={SCREEN_HDR}>SELECT AMOUNT</div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, gap: 3 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, flexShrink: 0 }}>
-            {quickAmounts.map((amount) => (
-              <button
-                key={amount}
-                onClick={() => onAmountSelect(amount)}
-                style={{
-                  ...BTN_BASE,
-                  textAlign: 'center',
-                  padding: '6px 4px',
-                  borderLeft: `3px solid ${PHOS_DIM}`,
-                  fontWeight: 'bold',
-                  color: AMBER,
-                }}
-              >
-                ${amount}
-              </button>
-            ))}
-          </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 4, borderTop: `1px solid ${PHOS_MUTED}66`, marginTop: 2, paddingTop: 4 }}>
-            <div style={{ fontSize: 9, color: PHOS_DIM }}>Custom — type amount, press OK</div>
-            <div style={{ fontSize: 18, fontWeight: 'bold', color: PHOS, letterSpacing: 1, minHeight: 24 }}>
-              {amountBuffer ? `$${amountBuffer}` : <span style={{ color: PHOS_MUTED }}>$____</span>}
-            </div>
+        <div style={{
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gridTemplateRows: '1fr 1fr',
+          gap: 4,
+          minHeight: 0,
+          marginBottom: 4,
+        }}>
+          {quickAmounts.map((amount) => (
             <button
-              onClick={onEnter}
-              disabled={!amountBuffer}
+              key={amount}
+              onClick={() => onAmountSelect(amount)}
               style={{
                 ...BTN_BASE,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 textAlign: 'center',
-                padding: '4px 10px',
-                width: 'auto',
-                opacity: amountBuffer ? 1 : 0.4,
-                cursor: amountBuffer ? 'pointer' : 'default',
+                padding: 0,
+                borderLeft: `3px solid ${PHOS}`,
+                fontWeight: 'bold',
+                fontSize: 22,
+                letterSpacing: 0.5,
+                color: AMBER,
+                height: '100%',
+                minHeight: 0,
               }}
             >
-              OK
+              ${amount}
             </button>
-          </div>
+          ))}
         </div>
         <button
           onClick={() => onMenuChoice('cancel')}
-          style={{ ...OK_BTN, color: PHOS_DIM, borderColor: `${PHOS_MUTED}88`, marginTop: 2 }}
+          style={{ ...OK_BTN, color: PHOS_DIM, borderColor: `${PHOS_MUTED}88` }}
         >
           Back
         </button>
@@ -416,7 +480,7 @@ function AtmScreen({
         <div style={SCREEN_HDR}>WELSH PHARGO</div>
         <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
           <div style={{ fontSize: 14, color: PHOS, fontWeight: 'bold' }}>Thank you</div>
-          <div style={{ fontSize: 11, color: PHOS_DIM }}>Please remove your card</div>
+          <div style={{ fontSize: 11, color: PHOS_DIM }}>Another transaction?</div>
         </div>
         <button onClick={onAtmOk} style={OK_BTN}>OK</button>
       </div>
@@ -426,29 +490,193 @@ function AtmScreen({
   return <div style={SCREEN_BASE} />;
 }
 
+// Phone-style ATM pad (1–9 top→bottom), not calculator layout
 const KEY_ROWS = [
-  ['7', '8', '9'],
-  ['4', '5', '6'],
   ['1', '2', '3'],
+  ['4', '5', '6'],
+  ['7', '8', '9'],
   ['CLR', '0', 'OK'],
 ];
 
-function LegendChip({ color, label }: { color: string; label: string }) {
+/** WELSH PHARGO debit card — Wells Fargo red (#D71E28) + gold (#FFCD11). */
+function BankCardGraphic() {
   return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap' }}>
-      <span style={{ width: 7, height: 7, background: color, display: 'inline-block', flexShrink: 0, border: '1px solid #ccc' }} />
-      {label}
-    </span>
+    <g>
+      {/* Plastic body — brand red */}
+      <rect width={CARD_W} height={CARD_H} rx="2.5" fill="#a81428" stroke="#6e1020" strokeWidth="0.75" />
+      <rect x="1" y="1" width={CARD_W - 2} height={CARD_H - 2} rx="2" fill="#d71e28" />
+      {/* Gold accent stripe under top edge */}
+      <rect x="1" y="1" width={CARD_W - 2} height="3" rx="1.5" fill="#ffcd11" opacity="0.95" />
+      {/* Chip — gold */}
+      <rect x="4" y="9" width="10" height="8" rx="1" fill="#ffcd11" stroke="#c9990a" strokeWidth="0.45" />
+      <rect x="5.5" y="10.5" width="7" height="5" fill="#e6b800" />
+      <line x1="5.5" y1="12" x2="12.5" y2="12" stroke="#8a6800" strokeWidth="0.35" />
+      <line x1="5.5" y1="13.5" x2="12.5" y2="13.5" stroke="#8a6800" strokeWidth="0.35" />
+      {/* Mag stripe */}
+      <rect x="0" y="23" width={CARD_W} height="7" fill="#1a1a1a" />
+      <rect x="0" y="23" width={CARD_W} height="1.5" fill="#333" />
+      {/* Brand — gold on red */}
+      <text x={CARD_W / 2} y="39" textAnchor="middle" fill="#ffcd11" fontFamily="Arial, sans-serif" fontSize="4.2" fontWeight="bold" letterSpacing="0.6">
+        WELSH
+      </text>
+      <text x={CARD_W / 2} y="44.5" textAnchor="middle" fill="#fff4c2" fontFamily="Arial, sans-serif" fontSize="3.2" letterSpacing="0.4">
+        PHARGO
+      </text>
+      {/* Embossed digits */}
+      <text x={CARD_W / 2} y="50.5" textAnchor="middle" fill="#ffcd11" fontFamily="Courier New, monospace" fontSize="2.8" letterSpacing="0.3" opacity="0.85">
+        •••• 4482
+      </text>
+    </g>
   );
 }
 
-const INTERACTIVE_UI: AtmUiState[] = ['menu', 'balance', 'amount', 'withdraw', 'error', 'thankyou'];
+/**
+ * Card insert / eject choreography (original vertical path):
+ * Continuous ease — no hold-then-jerk at the mouth. Fades out as it
+ * swallows so unmounting the overlay doesn't snap.
+ */
+function CardReaderAnimation({
+  mode,
+  onDone,
+}: {
+  mode: 'inserting' | 'ejecting';
+  onDone: () => void;
+}) {
+  const slotCx = CARD_SLOT.x + CARD_SLOT.w / 2;
+  const cardX = slotCx - CARD_W / 2;
+  const yInside = CARD_SLOT.y - CARD_H + 6;
+  const yMid = CARD_SLOT.y + 10; // halfway up the pad → reader
+  const yAtMouth = CARD_SLOT.y - 2;
+  const yBelow = CARD_SLOT.y + 42;
+  const insertMs = 1.85;
+  const ejectMs = 1.45;
+
+  useEffect(() => {
+    const ms = (mode === 'inserting' ? insertMs : ejectMs) * 1000 + 40;
+    const t = setTimeout(onDone, ms);
+    return () => clearTimeout(t);
+  }, [mode, onDone]);
+
+  // Single continuous easeInOut across the whole path (no per-segment snaps)
+  const smooth = [0.4, 0, 0.2, 1] as const;
+
+  return (
+    <g>
+      <motion.ellipse
+        cx={slotCx}
+        cy={CARD_SLOT.y + 10}
+        rx={28}
+        ry={10}
+        fill="#ffcd1144"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.55, 0.4, 0] }}
+        transition={{ duration: mode === 'inserting' ? insertMs : ejectMs, ease: smooth }}
+      />
+
+      {/* Clip so the card disappears into the slot as it feeds upward */}
+      <defs>
+        <clipPath id="card-feed-clip">
+          <rect x={cardX - 4} y={CARD_SLOT.y - 2} width={CARD_W + 8} height={100} />
+        </clipPath>
+      </defs>
+
+      <g clipPath="url(#card-feed-clip)">
+        <motion.g
+          key={mode}
+          initial={
+            mode === 'inserting'
+              ? { y: yBelow, opacity: 0 }
+              : { y: yInside, opacity: 0.35 }
+          }
+          animate={
+            mode === 'inserting'
+              ? {
+                  // Even spacing — rise, kiss mouth, feed in; fade as it vanishes into the slot
+                  y: [yBelow, yMid, yAtMouth, yInside],
+                  opacity: [0, 1, 1, 0],
+                }
+              : {
+                  y: [yInside, yAtMouth, yMid, yBelow + 6],
+                  opacity: [0, 1, 1, 0],
+                }
+          }
+          transition={{
+            duration: mode === 'inserting' ? insertMs : ejectMs,
+            times: mode === 'inserting' ? [0, 0.38, 0.58, 1] : [0, 0.28, 0.55, 1],
+            ease: smooth,
+          }}
+        >
+          <g transform={`translate(${cardX}, 0)`}>
+            <BankCardGraphic />
+          </g>
+        </motion.g>
+      </g>
+
+      <motion.rect
+        x={CARD_SLOT.x}
+        y={CARD_SLOT.y}
+        width={CARD_SLOT.w}
+        height={CARD_SLOT.h}
+        fill="#222"
+        initial={{ opacity: 0.35 }}
+        animate={{ opacity: mode === 'inserting' ? [0.35, 0.45, 0.9, 0.45] : [0.45, 0.85, 0.5, 0.35] }}
+        transition={{
+          duration: mode === 'inserting' ? insertMs : ejectMs,
+          times: [0, 0.4, 0.7, 1],
+          ease: smooth,
+        }}
+      />
+
+      <motion.rect
+        x="141"
+        y="167"
+        width="5"
+        height="5"
+        rx="1"
+        initial={{ fill: '#00cc44' }}
+        animate={{
+          fill: mode === 'inserting'
+            ? ['#00cc44', '#ffcd11', '#ffcd11', '#00cc44']
+            : ['#00cc44', '#ff9900', '#888', '#00cc44'],
+        }}
+        transition={{
+          duration: mode === 'inserting' ? insertMs : ejectMs,
+          times: [0, 0.35, 0.75, 1],
+          ease: smooth,
+        }}
+      />
+
+      {mode === 'inserting' && (
+        <motion.g
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0, 0.65, 0] }}
+          transition={{ duration: insertMs, times: [0, 0.45, 0.68, 1], ease: smooth }}
+        >
+          {[0, 1, 2].map((i) => (
+            <line
+              key={`streak-${i}`}
+              x1={slotCx - 8 + i * 8}
+              y1={CARD_SLOT.y + 6 + i * 3}
+              x2={slotCx - 8 + i * 8}
+              y2={CARD_SLOT.y + 16 + i * 2}
+              stroke="#ffcd11"
+              strokeWidth="1"
+              strokeLinecap="round"
+              opacity={0.5 - i * 0.12}
+            />
+          ))}
+        </motion.g>
+      )}
+    </g>
+  );
+}
+
+const INTERACTIVE_UI: AtmUiState[] = ['idle', 'menu', 'balance', 'amount', 'withdraw', 'error', 'thankyou'];
 
 export function AtmSvg({
   state,
   atmUiState,
   pinBuffer,
-  amountBuffer,
   atmBalance,
   lastWithdrawAmount,
   atmError,
@@ -458,13 +686,34 @@ export function AtmSvg({
   onMenuChoice,
   onAmountSelect,
   onAtmOk,
+  onInsertCard,
+  onCardAnimDone,
 }: Props) {
+  const cardAnimMode =
+    atmUiState === 'inserting' || atmUiState === 'ejecting' ? atmUiState : null;
+  const cardSeated =
+    atmUiState === 'pin'
+    || atmUiState === 'menu'
+    || atmUiState === 'balance'
+    || atmUiState === 'amount'
+    || atmUiState === 'withdraw'
+    || atmUiState === 'error'
+    || atmUiState === 'thankyou';
+
+  const isJackpotRain = state.screenMode === 'jackpot' && state.dispensing;
+  const withdrawBills =
+    state.dispensing && !isJackpotRain && atmUiState === 'withdraw'
+      ? billsForWithdraw(lastWithdrawAmount)
+      : [];
+  const activeBills = isJackpotRain ? JACKPOT_BILLS : withdrawBills;
+
   function handleKeyClick(row: number, col: number) {
+    if (atmUiState === 'inserting' || atmUiState === 'ejecting') return;
     Sounds.pinPress();
     if (row === 3 && col === 0) { onClear(); return; }
     if (row === 3 && col === 2) { onEnter(); return; }
     const digit = row < 3
-      ? (['7', '8', '9', '4', '5', '6', '1', '2', '3'] as const)[row * 3 + col]
+      ? (['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const)[row * 3 + col]
       : col === 1 ? '0' : '';
     if (digit) onPinDigit(digit);
   }
@@ -500,16 +749,41 @@ export function AtmSvg({
         <rect x="42" y="44" width="150" height="106" fill="#111" rx="1" />
         <rect x="44" y="46" width="146" height="102" fill="#021408" />
 
-        {/* Card reader */}
-        <rect x="58" y="162" width="118" height="14" fill="#ccc" rx="1" />
-        <rect x="60" y="164" width="114" height="10" fill="#bbb" rx="1" />
-        <rect x="66" y="166" width="88" height="6" fill="#999" />
-        <rect x="162" y="165" width="7" height="7" fill="#00cc44" rx="1" />
+        {/*
+          Card reader — ID-1 short-edge insert mouth (~card width), not a full-fascia bar.
+          Centered over the keypad; thin shutter slot reads as a real dip/motorized reader.
+        */}
+        <rect x="85" y="163" width="64" height="13" fill="#ccc" rx="1" />
+        <rect x="87" y="165" width="60" height="9" fill="#bbb" rx="1" />
+        <rect x="92" y="168" width="46" height="3.5" fill={cardSeated ? '#333' : '#666'} />
+        <rect
+          x="141"
+          y="167"
+          width="5"
+          height="5"
+          rx="1"
+          fill={cardSeated ? '#00cc44' : cardAnimMode ? '#ffcd11' : '#00cc44'}
+        />
+        {/* Click / tap the reader to insert when idle */}
+        {atmUiState === 'idle' && (
+          <rect
+            x="85"
+            y="163"
+            width="64"
+            height="13"
+            fill="#00000000"
+            style={{ cursor: 'pointer' }}
+            onClick={onInsertCard}
+          />
+        )}
+        {/* Tiny card edge peeking from slot while session is active */}
+        {cardSeated && (
+          <rect x="100" y="169.5" width="30" height="2" fill="#d71e28" rx="0.5" />
+        )}
 
         {/* Keypad housing */}
         <rect x="55" y="180" width="124" height="92" fill="#c8c8c8" />
         <rect x="57" y="182" width="120" height="88" fill="#d8d8d8" />
-        <text x="117" y="191" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="5" letterSpacing="1">PIN PAD</text>
 
         {/* Cash dispenser — slot graphics only, no label */}
         <rect x="40" y="286" width="154" height="30" fill="#bbb" />
@@ -524,21 +798,21 @@ export function AtmSvg({
         <rect x="180" y="328" width="8" height="8" fill="#ffcd11" />
         <rect x="192" y="328" width="8" height="8" fill="#00cc44" />
 
-        {/* USB port on fascia (card reader area) */}
-        <rect x="48" y="168" width="10" height="5" fill="#888" stroke="#666" strokeWidth="0.5" />
-        <rect x="50" y="169" width="6" height="3" fill="#222" />
+        {/* USB port on fascia (left of card reader) */}
+        <text x="53" y="164" textAnchor="middle" fill="#666" fontFamily="Arial, sans-serif" fontSize="6.5" letterSpacing="0.8">USB</text>
+        <rect x="48" y="166" width="10" height="5" fill="#888" stroke="#666" strokeWidth="0.5" />
+        <rect x="50" y="167" width="6" height="3" fill="#222" />
 
-        {/* ── LAN / ETHERNET PORT ── */}
+        {/* ── LAN / ETHERNET PORT ──
+            Wall plate always drawn; empty cavity/pins only when nothing is seated.
+            Plugged states fully cover the mouth so you don't see "exposed port + wire". */}
         <g>
-          <text x="34" y="342" fill="#666" fontFamily="Arial, sans-serif" fontSize="4.5" letterSpacing="0.8">LAN</text>
-          {/* Wall jack housing */}
-          <rect x="34" y="345" width="20" height="14" fill="#bbb" stroke="#999" strokeWidth="0.5" />
-          <rect x="36" y="347" width="16" height="10" fill="#1a1a1a" />
-          <rect x="40" y="347" width="8" height="2" fill="#444" />
-          {/* Gold pins */}
-          {([37, 39, 41, 43, 45, 47, 49, 51] as const).map((px) => (
-            <rect key={`pin-${px}`} x={px} y="350" width="1" height="5" fill="#cc9900" />
-          ))}
+          <text x="44" y="341" textAnchor="middle" fill="#666" fontFamily="Arial, sans-serif" fontSize="6.5" letterSpacing="0.8">LAN</text>
+          {/* Wall jack faceplate */}
+          <rect x="32" y="343" width="24" height="18" fill="#c8c8c8" stroke="#999" strokeWidth="0.75" />
+          <rect x="33" y="344" width="22" height="16" fill="#d4d4d4" />
+          {/* Recessed mouth (empty look — covered by plug overlays below) */}
+          <rect x="36" y="347" width="16" height="10" fill="#1a1a1a" stroke="#555" strokeWidth="0.5" />
 
           <AnimatePresence mode="wait">
             {state.ethState === 'intact' && (
@@ -549,12 +823,37 @@ export function AtmSvg({
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
               >
-                {/* Gray cable plugged in, trailing left */}
-                <rect x="34" y="351" width="10" height="8" fill="#999" stroke="#777" strokeWidth="0.5" />
-                <rect x="36" y="353" width="6" height="4" fill="#888" />
-                <path d="M34 355 L8 355 L8 358 L2 358" fill="none" stroke="#aaa" strokeWidth="3" strokeLinecap="square" />
-                <path d="M34 357 L10 357 L10 360 L4 360" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="square" />
-                <rect x="0" y="354" width="6" height="6" fill="#777" stroke="#666" strokeWidth="0.5" />
+                {/* RJ45 plug fully seated — covers entire cavity */}
+                <rect x="35" y="346" width="18" height="12" fill="#5a5a5a" stroke="#333" strokeWidth="0.75" />
+                <rect x="36" y="347" width="16" height="10" fill="#6e6e6e" />
+                {/* Locking clip tab on top of plug */}
+                <path d="M40 346 L44 343 L48 343 L52 346" fill="#4a4a4a" stroke="#333" strokeWidth="0.4" />
+                {/* Clear plastic tip / contacts edge (flush with jack) */}
+                <rect x="49" y="348" width="3" height="8" fill="#9ab0c0" stroke="#6a8090" strokeWidth="0.4" />
+                {/* Strain-relief boot sticking out left */}
+                <rect x="22" y="348" width="14" height="8" fill="#3a3a3a" stroke="#222" strokeWidth="0.5" rx="1" />
+                <rect x="24" y="350" width="10" height="4" fill="#2a2a2a" />
+                {/* Thick gray Cat5 cable → left, then down a bit (reads as plugged in) */}
+                <path
+                  d="M22 352 L10 352 L4 356 L0 356"
+                  fill="none"
+                  stroke="#6a6a6a"
+                  strokeWidth="4.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M22 352 L10 352 L4 356 L0 356"
+                  fill="none"
+                  stroke="#8a8a8a"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Far connector stub (other end of drop) */}
+                <rect x="-2" y="353" width="5" height="7" fill="#555" stroke="#333" strokeWidth="0.5" />
+                {/* Link LED on faceplate */}
+                <rect x="50" y="344" width="3" height="2" fill="#00cc44" />
               </motion.g>
             )}
             {state.ethState === 'loopback' && (
@@ -565,16 +864,17 @@ export function AtmSvg({
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
               >
-                {/* Blue loopback dongle in jack */}
-                <rect x="34" y="350" width="12" height="10" fill="#4488ff" stroke="#2266cc" strokeWidth="0.75" />
-                <rect x="36" y="352" width="8" height="6" fill="#2266dd" />
-                <path d="M38 352 Q46 346 46 358 Q46 366 38 360" fill="none" stroke="#66aaff" strokeWidth="2" />
-                <text x="43" y="365" textAnchor="middle" fill="#2266cc" fontFamily="Arial, sans-serif" fontSize="3.5" fontWeight="bold">LOOP</text>
-                {/* Severed cable stump with red X */}
-                <rect x="8" y="354" width="8" height="4" fill="#888" />
-                <rect x="6" y="355" width="4" height="3" fill="#666" />
-                <line x1="7" y1="354" x2="13" y2="360" stroke="#ff2244" strokeWidth="1.5" />
-                <line x1="13" y1="354" x2="7" y2="360" stroke="#ff2244" strokeWidth="1.5" />
+                {/* Blue loopback dongle fully seated in jack */}
+                <rect x="35" y="346" width="18" height="12" fill="#2a66cc" stroke="#1a44aa" strokeWidth="0.75" />
+                <rect x="36" y="347" width="16" height="10" fill="#4488ff" />
+                <path d="M40 346 L44 343 L48 343 L52 346" fill="#2266cc" stroke="#1a44aa" strokeWidth="0.4" />
+                <path d="M38 349 Q48 344 48 358 Q48 366 38 361" fill="none" stroke="#88bbff" strokeWidth="2" />
+                <text x="44" y="370" textAnchor="middle" fill="#2266cc" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">LOOP</text>
+                {/* Cut wall cable stump (not in the jack anymore) */}
+                <rect x="6" y="352" width="10" height="5" fill="#555" stroke="#333" strokeWidth="0.5" />
+                <rect x="4" y="353" width="4" height="3" fill="#ff8800" />
+                <line x1="5" y1="351" x2="14" y2="359" stroke="#ff2244" strokeWidth="1.5" />
+                <line x1="14" y1="351" x2="5" y2="359" stroke="#ff2244" strokeWidth="1.5" />
               </motion.g>
             )}
             {state.ethState === 'cut' && (
@@ -585,24 +885,26 @@ export function AtmSvg({
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
               >
-                {/* Plug body still in jack, cable severed */}
-                <rect x="34" y="351" width="8" height="7" fill="#999" stroke="#777" strokeWidth="0.5" />
-                {/* Orange frayed ends — jack side */}
-                <rect x="28" y="352" width="6" height="2" fill="#ff8800" />
-                <rect x="27" y="354" width="5" height="2" fill="#ffaa00" />
-                <rect x="26" y="356" width="4" height="2" fill="#cc6600" />
-                {/* Dangling stump below */}
-                <rect x="30" y="360" width="4" height="8" fill="#888" />
-                <rect x="29" y="366" width="3" height="2" fill="#ff8800" />
-                <rect x="30" y="368" width="2" height="2" fill="#ffaa00" />
-                <rect x="28" y="370" width="4" height="2" fill="#cc6600" />
-                <text x="22" y="364" textAnchor="middle" fill="#cc6600" fontFamily="Arial, sans-serif" fontSize="3.5" fontWeight="bold">CUT</text>
+                {/* Plug still seated — covers cavity; cable chopped off at boot */}
+                <rect x="35" y="346" width="18" height="12" fill="#5a5a5a" stroke="#333" strokeWidth="0.75" />
+                <rect x="36" y="347" width="16" height="10" fill="#6e6e6e" />
+                <path d="M40 346 L44 343 L48 343 L52 346" fill="#4a4a4a" stroke="#333" strokeWidth="0.4" />
+                <rect x="49" y="348" width="3" height="8" fill="#9ab0c0" stroke="#6a8090" strokeWidth="0.4" />
+                <rect x="24" y="348" width="12" height="8" fill="#3a3a3a" stroke="#222" strokeWidth="0.5" rx="1" />
+                {/* Frayed orange conductors at cut */}
+                <rect x="18" y="349" width="7" height="2" fill="#ff8800" />
+                <rect x="17" y="352" width="6" height="2" fill="#ffaa00" />
+                <rect x="16" y="355" width="5" height="2" fill="#cc6600" />
+                {/* Dangling stump */}
+                <path d="M20 356 L16 364 L14 372" fill="none" stroke="#666" strokeWidth="3" strokeLinecap="round" />
+                <rect x="12" y="370" width="5" height="3" fill="#ff8800" />
+                <text x="18" y="366" textAnchor="middle" fill="#cc6600" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">CUT</text>
               </motion.g>
             )}
           </AnimatePresence>
         </g>
 
-        <text x="117" y="378" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="4.5" letterSpacing="0.5">DYEBOLD OPTIVA 740</text>
+        <text x="117" y="378" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="6.5" letterSpacing="0.5">DYEBOLD OPTIVA 740</text>
 
         {/* ── TOP-HAT SERVICE BAY ──
             Closed: red fascia cap sits flush above the screen.
@@ -635,11 +937,11 @@ export function AtmSvg({
               <rect x="86" y="19" width="3" height="3" fill="#ffcd11" />
               <rect x="81" y="25" width="3" height="3" fill="#ff9900" />
               <rect x="86" y="25" width="3" height="3" fill="#4488ff" />
-              <text x="67" y="13.5" textAnchor="middle" fill="#4a6a52" fontFamily="Arial, sans-serif" fontSize="3.2">CTRL</text>
+              <text x="67" y="13.5" textAnchor="middle" fill="#4a6a52" fontFamily="Arial, sans-serif" fontSize="5">CTRL</text>
 
               {/* Center: drive bay */}
               <rect x="102" y="15" width="48" height="20" fill="#0c0c10" stroke="#333344" strokeWidth="0.75" />
-              <text x="126" y="13.5" textAnchor="middle" fill="#555566" fontFamily="Arial, sans-serif" fontSize="3.2">HDD BAY</text>
+              <text x="126" y="13.5" textAnchor="middle" fill="#555566" fontFamily="Arial, sans-serif" fontSize="5">HDD BAY</text>
               {/* Empty bay rails when drive removed */}
               {(state.driveState === 'removed' || state.driveState === 'reinstalled') && (
                 <>
@@ -659,7 +961,7 @@ export function AtmSvg({
 
               {/* Right: harness / power */}
               <rect x="156" y="15" width="40" height="20" fill="#141018" stroke="#3a2a35" strokeWidth="0.75" />
-              <text x="176" y="13.5" textAnchor="middle" fill="#664455" fontFamily="Arial, sans-serif" fontSize="3.2">PWR</text>
+              <text x="176" y="13.5" textAnchor="middle" fill="#664455" fontFamily="Arial, sans-serif" fontSize="5">PWR</text>
               <rect x="160" y="19" width="6" height="6" fill="#ff9900" />
               <rect x="169" y="19" width="6" height="6" fill="#ff3344" />
               <rect x="178" y="19" width="6" height="6" fill="#33ff66" />
@@ -699,7 +1001,7 @@ export function AtmSvg({
           <rect x="42" y="19" width="28" height="2" fill="#a81428" />
           <rect x="164" y="14" width="28" height="2" fill="#a81428" />
           <rect x="164" y="19" width="28" height="2" fill="#a81428" />
-          <text x="117" y="27" textAnchor="middle" fill="#ffcd1188" fontFamily="Arial, sans-serif" fontSize="3.5" letterSpacing="0.8">
+          <text x="117" y="28" textAnchor="middle" fill="#ffcd1188" fontFamily="Arial, sans-serif" fontSize="5.5" letterSpacing="0.8">
             {state.panelOpen ? 'OPEN' : 'SERVICE'}
           </text>
         </motion.g>
@@ -759,7 +1061,7 @@ export function AtmSvg({
               <rect x="52" y="18" width="130" height="4" fill="#c9990a" opacity="0.9" />
               <rect x="52" y="18" width="130" height="1" fill="#ffcd11" />
               <rect x="52" y="21" width="130" height="1" fill="#8a6800" />
-              <text x="117" y="21" textAnchor="middle" fill="#5a4400" fontFamily="Arial, sans-serif" fontSize="2.8" letterSpacing="0.6" fontWeight="bold">SEALED</text>
+              <text x="117" y="21.5" textAnchor="middle" fill="#5a4400" fontFamily="Arial, sans-serif" fontSize="5" letterSpacing="0.6" fontWeight="bold">SEALED</text>
             </motion.g>
           )}
         </AnimatePresence>
@@ -776,7 +1078,7 @@ export function AtmSvg({
             >
               <rect x="30" y="36" width="3" height="6" fill="#ffcd11" />
               <rect x="31" y="37" width="2" height="4" fill="#1a1414" />
-              <text x="24" y="35" textAnchor="middle" fill="#c8a800" fontFamily="Arial, sans-serif" fontSize="3.5" fontWeight="bold">AJAR</text>
+              <text x="24" y="35" textAnchor="middle" fill="#c8a800" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">AJAR</text>
             </motion.g>
           )}
         </AnimatePresence>
@@ -795,7 +1097,7 @@ export function AtmSvg({
               <rect x="116" y="10" width="2" height="10" fill="#ffcd11" />
               <rect x="112" y="8" width="10" height="3" fill="#c9990a" />
               <rect x="114" y="6" width="6" height="2" fill="#ffcd11" />
-              <text x="117" y="5" textAnchor="middle" fill="#c9990a" fontFamily="Arial, sans-serif" fontSize="3" fontWeight="bold">T-BAR</text>
+              <text x="117" y="5" textAnchor="middle" fill="#c9990a" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">T-BAR</text>
             </motion.g>
           )}
           {state.panelOpen && state.accessMethod === 'social' && (
@@ -806,14 +1108,14 @@ export function AtmSvg({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
             >
-              {/* NCR tech badge hanging left */}
+              {/* DN tech badge hanging left */}
               <rect x="8" y="14" width="16" height="22" fill="#2266cc" stroke="#1144aa" strokeWidth="0.75" />
               <rect x="10" y="16" width="12" height="8" fill="#4488ff" />
-              <text x="16" y="22" textAnchor="middle" fill="#fff" fontFamily="Arial, sans-serif" fontSize="4" fontWeight="bold">NCR</text>
+              <text x="16" y="22" textAnchor="middle" fill="#fff" fontFamily="Arial, sans-serif" fontSize="6.5" fontWeight="bold">DN</text>
               <rect x="14" y="26" width="4" height="6" fill="#ddd" />
               <rect x="15" y="12" width="2" height="4" fill="#888" />
               <line x1="16" y1="12" x2="16" y2="8" stroke="#888" strokeWidth="1" />
-              <text x="16" y="40" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="3" fontWeight="bold">SOCIAL</text>
+              <text x="16" y="42" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">SOCIAL</text>
             </motion.g>
           )}
           {state.panelOpen && state.accessMethod === 'crowbar' && (
@@ -829,7 +1131,7 @@ export function AtmSvg({
               <rect x="20" y="4" width="4" height="28" fill="#888" stroke="#666" strokeWidth="0.5" />
               <rect x="18" y="2" width="8" height="5" fill="#aaa" />
               <rect x="22" y="28" width="12" height="3" fill="#777" transform="rotate(25 22 29)" />
-              <text x="14" y="38" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="3.5" fontWeight="bold">PRY</text>
+              <text x="14" y="38" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">PRY</text>
             </motion.g>
           )}
         </AnimatePresence>
@@ -869,7 +1171,7 @@ export function AtmSvg({
               <rect x="30" y="28" width="4" height="3" fill="#222" />
               <rect x="31" y="31" width="2" height="2" fill="#33ff66" />
               <rect x="33" y="22" width="3" height="8" fill="#555599" />
-              <text x="32" y="18" textAnchor="middle" fill="#8888ee" fontFamily="Arial, sans-serif" fontSize="3.2" fontWeight="bold">CLAMP</text>
+              <text x="32" y="17" textAnchor="middle" fill="#8888ee" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">CLAMP</text>
             </motion.g>
           )}
         </AnimatePresence>
@@ -893,7 +1195,7 @@ export function AtmSvg({
               <rect x="27" y="23" width="1" height="1" fill="#ffcc00" />
               <rect x="38" y="25" width="1" height="1" fill="#ffcc00" />
               <rect x="32" y="30" width="1" height="1" fill="#ffaa00" />
-              <text x="24" y="22" textAnchor="middle" fill="#ff6600" fontFamily="Arial, sans-serif" fontSize="3.2" fontWeight="bold">CUT</text>
+              <text x="24" y="20" textAnchor="middle" fill="#ff6600" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">CUT</text>
             </motion.g>
           )}
         </AnimatePresence>
@@ -908,11 +1210,11 @@ export function AtmSvg({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
             >
-              <rect x="46" y="166" width="14" height="6" fill="#222" stroke="#444" strokeWidth="0.5" />
-              <rect x="48" y="167" width="10" height="4" fill="#111" />
-              <rect x="38" y="167" width="10" height="4" fill="#4488ff" stroke="#2266cc" strokeWidth="0.5" />
-              <rect x="40" y="168" width="6" height="2" fill="#66aaff" />
-              <text x="43" y="165" textAnchor="middle" fill="#2266cc" fontFamily="Arial, sans-serif" fontSize="3" fontWeight="bold">LIVE</text>
+              <rect x="46" y="164" width="14" height="6" fill="#222" stroke="#444" strokeWidth="0.5" />
+              <rect x="48" y="165" width="10" height="4" fill="#111" />
+              <rect x="38" y="165" width="10" height="4" fill="#4488ff" stroke="#2266cc" strokeWidth="0.5" />
+              <rect x="40" y="166" width="6" height="2" fill="#66aaff" />
+              <text x="43" y="162" textAnchor="middle" fill="#2266cc" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">LIVE</text>
             </motion.g>
           )}
         </AnimatePresence>
@@ -927,7 +1229,7 @@ export function AtmSvg({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <text x="204" y="186" textAnchor="middle" fill="#33ff66" fontFamily="Arial, sans-serif" fontSize="3.2" fontWeight="bold">KALI</text>
+              <text x="204" y="185" textAnchor="middle" fill="#33ff66" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">KALI</text>
               {/* Screen */}
               <rect x="178" y="188" width="52" height="36" fill="#2a2a2a" stroke="#444" strokeWidth="0.75" />
               <rect x="180" y="190" width="48" height="32" fill="#041204" />
@@ -946,7 +1248,7 @@ export function AtmSvg({
               )}
               {/* USB cable routes right fascia → USB port (avoids keypad) */}
               {state.showUsbStick && (
-                <path d="M204 230 L214 230 L214 171 L58 171" fill="none" stroke="#4488ff" strokeWidth="1.2" strokeDasharray="2 1" />
+                <path d="M204 230 L214 230 L214 169 L58 169" fill="none" stroke="#4488ff" strokeWidth="1.2" strokeDasharray="2 1" />
               )}
             </motion.g>
           )}
@@ -967,17 +1269,17 @@ export function AtmSvg({
               transition={{ duration: 0.35 }}
             >
               {/* Callout card — parked right of cabinet */}
-              <rect x="214" y="200" width="52" height="72" fill="#120818" stroke="#9944cc" strokeWidth="1.25" />
-              <rect x="216" y="202" width="48" height="12" fill="#2a0e30" />
-              <text x="240" y="211" textAnchor="middle" fill="#cc88ee" fontFamily="Arial, sans-serif" fontSize="4" fontWeight="bold" letterSpacing="0.5">INSIDE ATM</text>
+              <rect x="214" y="196" width="56" height="78" fill="#120818" stroke="#9944cc" strokeWidth="1.25" />
+              <rect x="216" y="198" width="52" height="14" fill="#2a0e30" />
+              <text x="242" y="209" textAnchor="middle" fill="#cc88ee" fontFamily="Arial, sans-serif" fontSize="6.5" fontWeight="bold" letterSpacing="0.4">INSIDE ATM</text>
 
               {/* Tiny Pi board */}
-              <rect x="224" y="220" width="32" height="22" fill="#6a2a8a" stroke="#9944cc" strokeWidth="0.75" />
-              <rect x="228" y="224" width="10" height="10" fill="#3a1a4a" />
-              <rect x="242" y="224" width="5" height="5" fill="#33ff66" />
-              <rect x="250" y="224" width="3" height="3" fill="#ff2244" />
-              <text x="240" y="250" textAnchor="middle" fill="#9944cc" fontFamily="Arial, sans-serif" fontSize="3.5" fontWeight="bold">RPi BLACKBOX</text>
-              <text x="240" y="260" textAnchor="middle" fill="#8866aa" fontFamily="Arial, sans-serif" fontSize="2.8">CDM control splice</text>
+              <rect x="226" y="220" width="32" height="22" fill="#6a2a8a" stroke="#9944cc" strokeWidth="0.75" />
+              <rect x="230" y="224" width="10" height="10" fill="#3a1a4a" />
+              <rect x="244" y="224" width="5" height="5" fill="#33ff66" />
+              <rect x="252" y="224" width="3" height="3" fill="#ff2244" />
+              <text x="242" y="252" textAnchor="middle" fill="#9944cc" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">RPi BLACKBOX</text>
+              <text x="242" y="264" textAnchor="middle" fill="#8866aa" fontFamily="Arial, sans-serif" fontSize="4.5">CDM control splice</text>
 
               {/*
                 Dashed lead stays OUTSIDE the fascia: callout → cabinet edge →
@@ -994,7 +1296,7 @@ export function AtmSvg({
               <rect x="207" y="233" width="4" height="6" fill="#aa0022" />
               {/* CDM bus tap at dispenser bay (below PIN pad) */}
               <rect x="112" y="296" width="10" height="6" fill="#aa0022" stroke="#ff4466" strokeWidth="0.5" />
-              <text x="117" y="292" textAnchor="middle" fill="#ff6688" fontFamily="Arial, sans-serif" fontSize="2.8" fontWeight="bold">CDM</text>
+              <text x="117" y="291" textAnchor="middle" fill="#ff6688" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">CDM</text>
             </motion.g>
           )}
         </AnimatePresence>
@@ -1009,7 +1311,7 @@ export function AtmSvg({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
             >
-              <text x="78" y="392" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="3.2" fontWeight="bold">KEYBOARD</text>
+              <text x="78" y="391" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">KEYBOARD</text>
               <rect x="34" y="394" width="88" height="28" fill="#2a2a2a" stroke="#555" strokeWidth="0.75" />
               <rect x="36" y="396" width="84" height="24" fill="#333" />
               {Array.from({ length: 15 }, (_, i) => (
@@ -1025,7 +1327,7 @@ export function AtmSvg({
                 />
               ))}
               {/* Cable routes right edge → USB port */}
-              <path d="M122 408 L214 408 L214 171 L58 171" fill="none" stroke="#4488ff" strokeWidth="1.2" />
+              <path d="M122 408 L214 408 L214 169 L58 169" fill="none" stroke="#4488ff" strokeWidth="1.2" />
               <rect x="120" y="406" width="4" height="4" fill="#2266cc" />
             </motion.g>
           )}
@@ -1041,7 +1343,7 @@ export function AtmSvg({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
             >
-              <text x="13" y="284" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="3" fontWeight="bold">MULE</text>
+              <text x="13" y="283" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">MULE</text>
               {/* Head */}
               <rect x="6" y="288" width="14" height="14" fill="#666" stroke="#555" strokeWidth="0.5" />
               <rect x="9" y="292" width="3" height="2" fill="#444" />
@@ -1063,7 +1365,7 @@ export function AtmSvg({
                   <rect x="18" y="296" width="8" height="12" fill="#222" stroke="#4488ff" strokeWidth="0.6" />
                   <rect x="19" y="298" width="6" height="8" fill="#061a06" />
                   <rect x="21" y="294" width="2" height="3" fill="#888" />
-                  <text x="26" y="286" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="3" fontWeight="bold">CALL</text>
+                  <text x="26" y="285" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">CALL</text>
                 </>
               )}
             </motion.g>
@@ -1084,9 +1386,9 @@ export function AtmSvg({
               transition={{ duration: 0.35 }}
             >
               {/* Callout card left of cabinet */}
-              <rect x="-58" y="188" width="72" height="96" fill="#041208" stroke="#4488ff" strokeWidth="1.25" strokeDasharray="3 2" />
-              <rect x="-56" y="190" width="68" height="11" fill="#0a1a28" />
-              <text x="-22" y="198" textAnchor="middle" fill="#66aaff" fontFamily="Arial, sans-serif" fontSize="4" fontWeight="bold" letterSpacing="0.5">CDM · INSIDE</text>
+              <rect x="-62" y="184" width="78" height="102" fill="#041208" stroke="#4488ff" strokeWidth="1.25" strokeDasharray="3 2" />
+              <rect x="-60" y="186" width="74" height="14" fill="#0a1a28" />
+              <text x="-23" y="197" textAnchor="middle" fill="#66aaff" fontFamily="Arial, sans-serif" fontSize="6.5" fontWeight="bold" letterSpacing="0.4">CDM · INSIDE</text>
 
               {([0, 1, 2, 3] as const).map((i) => (
                 <g key={`cass-${i}`}>
@@ -1105,7 +1407,7 @@ export function AtmSvg({
                     textAnchor="middle"
                     fill="#33ff66"
                     fontFamily="Arial, sans-serif"
-                    fontSize="4"
+                    fontSize="5.5"
                     fontWeight="bold"
                   >
                     {i + 1}
@@ -1116,7 +1418,7 @@ export function AtmSvg({
                   )}
                 </g>
               ))}
-              <text x="-22" y="276" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="2.8">cassettes 1–4</text>
+              <text x="-23" y="278" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="4.5">cassettes 1–4</text>
 
               {/* Lead into cash dispenser area (where bills actually exit) */}
               <path
@@ -1131,18 +1433,22 @@ export function AtmSvg({
           )}
         </AnimatePresence>
 
-        {/* Cash bills */}
+        {/* Cash bills — jackpot loops; customer withdraw is one finite burst */}
         <AnimatePresence>
-          {state.dispensing && BILLS.map((bill) => (
+          {activeBills.map((bill) => (
             <motion.rect
-              key={`bill-${bill.id}`}
+              key={`${isJackpotRain ? 'jp' : `wd-${lastWithdrawAmount}`}-${bill.id}`}
               x={bill.startX} y={299}
               width={20} height={8}
               rx={1}
               fill={bill.color}
               initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }}
               animate={{ x: bill.dx, y: bill.dy, opacity: 0, rotate: bill.rot }}
-              transition={{ duration: 1.1, delay: bill.delay, ease: 'easeIn', repeat: Infinity, repeatDelay: 1.3 }}
+              transition={
+                isJackpotRain
+                  ? { duration: 1.1, delay: bill.delay, ease: 'easeIn', repeat: Infinity, repeatDelay: 1.3 }
+                  : { duration: 1.1, delay: bill.delay, ease: 'easeIn' }
+              }
             />
           ))}
         </AnimatePresence>
@@ -1162,14 +1468,13 @@ export function AtmSvg({
           atmUiState={atmUiState}
           screenMode={state.screenMode}
           pinBuffer={pinBuffer}
-          amountBuffer={amountBuffer}
           atmBalance={atmBalance}
           lastWithdrawAmount={lastWithdrawAmount}
           atmError={atmError}
           onMenuChoice={onMenuChoice}
           onAmountSelect={onAmountSelect}
           onAtmOk={onAtmOk}
-          onEnter={onEnter}
+          onInsertCard={onInsertCard}
         />
       </div>
 
@@ -1186,6 +1491,7 @@ export function AtmSvg({
         gap: 3,
         padding: 4,
         boxSizing: 'border-box',
+        zIndex: 2,
       }}>
         {KEY_ROWS.map((row, ri) =>
           row.map((label, ci) => {
@@ -1246,31 +1552,34 @@ export function AtmSvg({
         )}
       </div>
 
-      {/* State legend — compact chips for active visuals only */}
-      <div style={{ display: 'flex', gap: 8, marginTop: 10, fontSize: 8, color: '#555', letterSpacing: 0.4, fontFamily: 'Arial, sans-serif', justifyContent: 'center', flexWrap: 'wrap', maxWidth: SVG_W }}>
-        {state.accessMethod === 'tbar' && state.panelOpen && <LegendChip color="#ffcd11" label="T-BAR" />}
-        {state.accessMethod === 'social' && state.panelOpen && <LegendChip color="#4488ff" label="NCR BADGE" />}
-        {state.accessMethod === 'crowbar' && state.panelOpen && <LegendChip color="#888" label="PRY OPEN" />}
-        {state.ethState === 'loopback' && <LegendChip color="#4488ff" label="LOGS BLOCKED" />}
-        {state.ethState === 'cut' && <LegendChip color="#ff8800" label="LOGS BUFFERED" />}
-        {state.showClamp && state.panelOpen && <LegendChip color="#8888ee" label="SENSOR BYPASSED" />}
-        {state.showSensorCut && state.panelOpen && <LegendChip color="#ff6600" label="SENSOR CUT" />}
-        {state.showDoorAjar && state.panelOpen && <LegendChip color="#c8a800" label="DOOR AJAR" />}
-        {state.showLaptop && state.driveState === 'removed' && <LegendChip color="#4488ff" label="USB CABLE" />}
-        {state.showLaptop && state.showUsbStick && <LegendChip color="#4488ff" label="USB LIVE" />}
-        {state.showLaptop && !state.showUsbStick && state.driveState !== 'removed' && <LegendChip color="#33ff66" label="LAPTOP" />}
-        {state.showBlackbox && <LegendChip color="#9944cc" label="BLACK BOX" />}
-        {state.showTamperTape && !state.panelOpen && <LegendChip color="#c9990a" label="SEALED" />}
-        {state.screenMode === 'reboot' && <LegendChip color="#ff8844" label="REBOOT" />}
-        {state.screenMode === 'ploutus' && <LegendChip color="#cc66ff" label="PLOUTUS" />}
-        {state.screenMode === 'jackpot' && <LegendChip color="#33ff66" label="JACKPOT" />}
-        {state.screenMode === 'seized' && <LegendChip color="#ff2244" label="SEIZED" />}
-        {state.showExtKeyboard && <LegendChip color="#555" label="KEYBOARD" />}
-        {state.showMule && <LegendChip color="#666" label="MULE" />}
-        {state.showPhone && state.showMule && <LegendChip color="#4488ff" label="PHONE" />}
-        {state.showCassetteCutaway && <LegendChip color="#4488ff" label="CDM" />}
-        {state.dispensing && <LegendChip color="#00cc44" label="DISPENSING" />}
-      </div>
+      {/*
+        Card animation overlay — same viewBox as the ATM SVG, stacked ABOVE the
+        HTML PIN pad so the vertical insert path paints over the buttons.
+      */}
+      {cardAnimMode && (
+        <svg
+          viewBox="0 0 240 400"
+          width={SVG_W}
+          height={SVG_H}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            zIndex: 5,
+            pointerEvents: 'none',
+            overflow: 'visible',
+            imageRendering: 'pixelated',
+            shapeRendering: 'crispEdges',
+          }}
+        >
+          <CardReaderAnimation
+            key={cardAnimMode}
+            mode={cardAnimMode}
+            onDone={onCardAnimDone}
+          />
+        </svg>
+      )}
+
     </div>
   );
 }

@@ -42,7 +42,7 @@ TOTAL: $14.99
 vibration sensor will light you up. boss will kill me.
 `;
 
-const NCR_GUIDE = `Train de Aqua — Dyebold Nyxdwarf field tech cover
+const DN_GUIDE = `Train de Aqua — Dyebold Nyxdwarf field tech cover
 - Badge lanyard, polo, clipboard
 - Walk in like you belong. Ask the guard for panel access.
 - If they push back: "scheduled Agilis XFS inspection, ticket #4482"
@@ -122,7 +122,7 @@ export const SANDBOX_ROOT: SandboxNode = dir({
         '.oprc': file('CREW=train-de-aqua\nOP=welsh-phargo-vestibule\n'),
         tools: dir({
           'crowbar_receipt.txt': file(CROWBAR_RECEIPT),
-          'DNimpersonationguide.txt': file(NCR_GUIDE),
+          'DNimpersonationguide.txt': file(DN_GUIDE),
           'tbar-sku.txt': file(TBAR),
           'rj45-loopback.txt': file(LOOPBACK),
           'reed-clamp.txt': file(REED_CLAMP),
@@ -456,6 +456,9 @@ export function runSandboxCommand(typed: string, sandbox: SandboxState): Sandbox
       ]);
     case 'man':
       return withCwd([`No manual entry for ${args[0] ?? '…'} (sandbox). Try the cheat sheet.`]);
+    case 'help':
+      // Game layer (Jackpot.tsx) owns the real help easter egg + next-cmd hint.
+      return withCwd(['(use `help` from the demo prompt — Train de Aqua left notes.)']);
     case 'sudo': {
       if (!args.length) return withCwd(['usage: sudo -h | -K | -k | -V …']);
       // free-typed sudo something else
@@ -495,7 +498,7 @@ export function matchesPrologueBootstrap(typed: string): boolean {
 
 const TAB_BINS = [
   'ls', 'll', 'la', 'cd', 'cat', 'less', 'more', 'head', 'tail', 'tree',
-  'pwd', 'whoami', 'id', 'uname', 'hostname', 'echo', 'clear', 'history',
+  'pwd', 'whoami', 'id', 'uname', 'hostname', 'echo', 'clear', 'help', 'history',
   'which', 'type', 'sudo', 'ping', 'nmap', 'curl', 'wget', 'ip', 'ps',
   'df', 'free', 'env', 'date', 'uptime', 'man',
 ];

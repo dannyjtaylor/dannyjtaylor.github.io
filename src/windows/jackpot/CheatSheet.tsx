@@ -12,6 +12,8 @@ interface Props {
   choices: ToolChoices;
   /** Cmd texts the demo has reached (completed + next peek) */
   unlockedCmds: string[];
+  /** Cmds whose stdout has already printed — show output breakdown */
+  unlockedOutputs: string[];
   /** Choice ids the demo has reached */
   unlockedChoices: ChoiceId[];
   started: boolean;
@@ -45,7 +47,48 @@ function VerdictChip({ verdict }: { verdict: 'go' | 'maybe' | 'no' }) {
   );
 }
 
-function CmdBlock({ cmd, highlight }: { cmd: CheatCmd; highlight: boolean }) {
+function PartRow({
+  token,
+  meaning,
+  tone,
+}: {
+  token: string;
+  meaning: string;
+  tone: 'cmd' | 'out';
+}) {
+  const colors = tone === 'cmd'
+    ? { fg: GOLD, bg: '#1a1a12', border: '#3a3010' }
+    : { fg: '#88ccff', bg: '#0e1520', border: '#1a3048' };
+  return (
+    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+      <code style={{
+        color: colors.fg,
+        fontSize: 12,
+        fontFamily: FONT,
+        background: colors.bg,
+        border: `1px solid ${colors.border}`,
+        padding: '1px 5px',
+        flexShrink: 0,
+        maxWidth: '42%',
+        wordBreak: 'break-all',
+      }}>
+        {token}
+      </code>
+      <span style={{ color: '#999', fontSize: 12.5, lineHeight: 1.4 }}>{meaning}</span>
+    </div>
+  );
+}
+
+function CmdBlock({
+  cmd,
+  highlight,
+  showOutputs,
+}: {
+  cmd: CheatCmd;
+  highlight: boolean;
+  showOutputs: boolean;
+}) {
+  const outs = cmd.outputs ?? [];
   return (
     <div
       style={{
@@ -60,24 +103,27 @@ function CmdBlock({ cmd, highlight }: { cmd: CheatCmd; highlight: boolean }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {cmd.parts.map((p) => (
-          <div key={`${cmd.cmd}:${p.token}`} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-            <code style={{
-              color: GOLD,
-              fontSize: 12,
-              fontFamily: FONT,
-              background: '#1a1a12',
-              border: '1px solid #3a3010',
-              padding: '1px 5px',
-              flexShrink: 0,
-              maxWidth: '42%',
-              wordBreak: 'break-all',
-            }}>
-              {p.token}
-            </code>
-            <span style={{ color: '#999', fontSize: 12.5, lineHeight: 1.4 }}>{p.meaning}</span>
-          </div>
+          <PartRow key={`${cmd.cmd}:p:${p.token}`} token={p.token} meaning={p.meaning} tone="cmd" />
         ))}
       </div>
+      {showOutputs && outs.length > 0 && (
+        <div style={{ marginTop: 8, paddingTop: 6, borderTop: '1px solid #222' }}>
+          <div style={{
+            color: '#6688aa',
+            fontSize: 10,
+            letterSpacing: 1.2,
+            fontWeight: 700,
+            marginBottom: 5,
+          }}>
+            OUTPUT
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {outs.map((p) => (
+              <PartRow key={`${cmd.cmd}:o:${p.token}`} token={p.token} meaning={p.meaning} tone="out" />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -113,19 +159,25 @@ function pickedKey(ch: CheatChoice, choices: ToolChoices): '1' | '2' | '3' | nul
  * Build unlock sets from the live terminal cursor.
  * Completed beats stay visible; the next upcoming cmd/choice peeks in
  * so interns always see "what do I do now?" without the whole phase dump.
+ * Output breakdowns unlock only after that cmd's stdout has been revealed.
  */
 export function computeCheatUnlocks(
   lines: TermLine[],
   revealedLines: number,
   waitingForChoice: ChoiceId | null,
-): { unlockedCmds: string[]; unlockedChoices: ChoiceId[] } {
+): { unlockedCmds: string[]; unlockedOutputs: string[]; unlockedChoices: ChoiceId[] } {
   const cmds: string[] = [];
+  const outputs: string[] = [];
   const choiceSet = new Set<ChoiceId>();
 
   for (let i = 0; i < revealedLines; i++) {
     const line = lines[i];
     if (!line) continue;
-    if (line.t === 'cmd') cmds.push(line.text);
+    if (line.t === 'cmd') {
+      cmds.push(line.text);
+      // Cursor past this cmd ⇒ stdout already dumped (acceptCommand jumps the block)
+      if (revealedLines > i) outputs.push(line.text);
+    }
     if (line.t === 'choice') choiceSet.add(line.id);
   }
 
@@ -145,7 +197,11 @@ export function computeCheatUnlocks(
     }
   }
 
-  return { unlockedCmds: cmds, unlockedChoices: [...choiceSet] };
+  return {
+    unlockedCmds: cmds,
+    unlockedOutputs: outputs,
+    unlockedChoices: [...choiceSet],
+  };
 }
 
 export function CheatSheet({
@@ -156,12 +212,14 @@ export function CheatSheet({
   currentCmd,
   choices,
   unlockedCmds,
+  unlockedOutputs,
   unlockedChoices,
   started,
 }: Props) {
   const activeRef = useRef<HTMLDivElement>(null);
   const latestRef = useRef<HTMLDivElement>(null);
   const unlockedCmdSet = new Set(unlockedCmds);
+  const unlockedOutputSet = new Set(unlockedOutputs);
   const unlockedChoiceSet = new Set(unlockedChoices);
 
   useEffect(() => {
@@ -170,7 +228,7 @@ export function CheatSheet({
       (latestRef.current ?? activeRef.current)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 80);
     return () => clearTimeout(t);
-  }, [open, phase, waitingForChoice, currentCmd, unlockedCmds.length, unlockedChoices.length]);
+  }, [open, phase, waitingForChoice, currentCmd, unlockedCmds.length, unlockedOutputs.length, unlockedChoices.length]);
 
   const visiblePhases = started
     ? CHEAT_PHASES.filter((p) => p.phase <= phase)
@@ -196,6 +254,10 @@ export function CheatSheet({
             fontFamily: FONT,
             color: '#e0e0e0',
             boxShadow: '-8px 0 24px #0008',
+            // Override global user-select:none so presenters can copy commands
+            userSelect: 'text',
+            WebkitUserSelect: 'text',
+            cursor: 'text',
           }}
         >
           <div style={{
@@ -226,6 +288,8 @@ export function CheatSheet({
                 lineHeight: '24px',
                 padding: 0,
                 cursor: 'pointer',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
               }}
             >
               ×
@@ -284,7 +348,11 @@ export function CheatSheet({
                     const highlight = isActive && currentCmd === c.cmd;
                     return (
                       <div key={c.cmd} ref={highlight ? latestRef : undefined}>
-                        <CmdBlock cmd={c} highlight={highlight} />
+                        <CmdBlock
+                          cmd={c}
+                          highlight={highlight}
+                          showOutputs={past || unlockedOutputSet.has(c.cmd)}
+                        />
                       </div>
                     );
                   })}
@@ -342,7 +410,11 @@ export function CheatSheet({
 
                         {followUps.map((c) => (
                           <div key={c.cmd} ref={currentCmd === c.cmd ? latestRef : undefined} style={{ marginTop: 6 }}>
-                            <CmdBlock cmd={c} highlight={isActive && currentCmd === c.cmd} />
+                            <CmdBlock
+                              cmd={c}
+                              highlight={isActive && currentCmd === c.cmd}
+                              showOutputs={past || unlockedOutputSet.has(c.cmd)}
+                            />
                           </div>
                         ))}
                       </div>

@@ -9,6 +9,11 @@ export interface CheatCmd {
   cmd: string;
   /** Break the command into pieces — flags, pipes, args */
   parts: CheatPart[];
+  /**
+   * Break down the stdout that follows this cmd.
+   * Shown only after the demo has actually printed that output.
+   */
+  outputs?: CheatPart[];
 }
 
 export interface CheatChoiceOpt {
@@ -40,7 +45,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
     phase: 1,
     title: 'RECON',
     blurb:
-      "Train de Aqua left a drop on this laptop. Find it, bootstrap to root, THEN make sure we're on the bank's branch network and dig up the ATM.",
+      "Our guys left ya somethin' on the laptop. Find it, run da script, and make sure you're on the same network as the ATM, y'hear?",
     commands: [
       {
         cmd: 'ls ~/drop',
@@ -48,12 +53,24 @@ export const CHEAT_PHASES: CheatPhase[] = [
           { token: 'ls', meaning: 'list files in a directory' },
           { token: '~/drop', meaning: 'Train de Aqua kit folder in your home dir' },
         ],
+        outputs: [
+          { token: 'bootstrap.sh', meaning: 'the script that escalates you to root + mounts the op overlay' },
+          { token: 'tools/', meaning: 'field kit notes (T-bar, loopback, crowbar receipt, etc.)' },
+          { token: '.oprc', meaning: 'tiny op config — ignore unless you\'re poking around' },
+        ],
       },
       {
         cmd: 'sudo ./drop/bootstrap.sh',
         parts: [
-          { token: 'sudo', meaning: 'run as root (NOPASSWD already planted for this box)' },
+          { token: 'sudo', meaning: 'run as root (danny is a sudoer on this box)' },
           { token: './drop/bootstrap.sh', meaning: 'operator bootstrap — mounts ~/ploutus and flips you to root' },
+        ],
+        outputs: [
+          { token: '[sudo] password…', meaning: 'sudo asking for danny\'s password (demo autofills)' },
+          { token: '[*] Train de Aqua // bootstrap', meaning: 'crew bootstrap banner — you\'re in the kit now' },
+          { token: 'verifying drop signature… OK', meaning: 'ed25519 check passed — drop wasn\'t tampered' },
+          { token: 'mounting … → /root/ploutus', meaning: 'op workspace lands at /root/ploutus' },
+          { token: 'switching uid=0', meaning: 'you\'re root now — prompt becomes root@kali' },
         ],
       },
       {
@@ -65,6 +82,10 @@ export const CHEAT_PHASES: CheatPhase[] = [
           { token: '|', meaning: 'pipe stdout into the next command' },
           { token: 'grep inet', meaning: 'keep lines that mention inet (your IPv4 address)' },
         ],
+        outputs: [
+          { token: 'inet 192.168.1.104/24', meaning: 'your laptop\'s IPv4 on the branch LAN' },
+          { token: 'scope global eth0', meaning: 'address is on eth0 (the cable you plugged in)' },
+        ],
       },
       {
         cmd: 'ip route | head -n1',
@@ -72,6 +93,10 @@ export const CHEAT_PHASES: CheatPhase[] = [
           { token: 'ip route', meaning: 'print the routing table' },
           { token: '|', meaning: 'pipe into head' },
           { token: 'head -n1', meaning: 'first line only — usually the default gateway' },
+        ],
+        outputs: [
+          { token: 'default via 192.168.1.1', meaning: 'branch router / gateway — same /24 as the ATM' },
+          { token: 'dev eth0 proto dhcp', meaning: 'got the route from DHCP on eth0' },
         ],
       },
       {
@@ -83,6 +108,12 @@ export const CHEAT_PHASES: CheatPhase[] = [
           { token: '--open', meaning: 'only show hosts that actually have the port open' },
           { token: '192.168.1.0/24', meaning: 'whole /24 subnet (256 addresses)' },
         ],
+        outputs: [
+          { token: '192.168.1.47', meaning: 'the ATM\'s IP on the branch LAN' },
+          { token: '8080/tcp open http', meaning: 'Agilis status/service port is open' },
+          { token: 'Agilis ATM XFS 3.20', meaning: 'XFS stack version — matches our Ploutus target' },
+          { token: 'Windows XP … SP3', meaning: 'EOL OS — soft target for the install phase' },
+        ],
       },
       {
         cmd: 'curl -s http://192.168.1.47/status | python3 -m json.tool',
@@ -93,12 +124,25 @@ export const CHEAT_PHASES: CheatPhase[] = [
           { token: '|', meaning: 'pipe the body into python' },
           { token: 'python3 -m json.tool', meaning: 'pretty-print JSON so it\'s readable' },
         ],
+        outputs: [
+          { token: '"model": "Optiva740"', meaning: 'Dyebold Optiva 740 confirmed' },
+          { token: '"vendor": "Dyebold"', meaning: 'vendor string from the status API' },
+          { token: '"cassettes": 4', meaning: 'four cash cassettes in this AFD' },
+          { token: '"xfs": "Kalignite"', meaning: 'XFS middleware brand — CDM path we abuse later' },
+        ],
       },
       {
         cmd: 'cat recon/target.md',
         parts: [
           { token: 'cat', meaning: 'print a file to the terminal' },
           { token: 'recon/target.md', meaning: 'op notes for this ATM (model, OS, kit, blind spot)' },
+        ],
+        outputs: [
+          { token: 'Dyebold Optiva 740', meaning: 'target model + ~$50K per cassette' },
+          { token: 'Windows XP SP3', meaning: 'EOL since 2014 — no patches' },
+          { token: 'CDM_DISPENSE via MSXFS.dll', meaning: 'the dispense call we\'ll hit in jackpot' },
+          { token: 'camera blind … 02:00-05:30', meaning: 'vestibule corner dead zone for the mule' },
+          { token: 'kit: T-bar … Ploutus-D', meaning: 'what you should have in the drop/tools bag' },
         ],
       },
     ],
@@ -111,10 +155,13 @@ export const CHEAT_PHASES: CheatPhase[] = [
       "Physical access time. Open the top-hat, kill the log stream, keep the door sensor happy. Wrong picks start the police timer.",
     commands: [
       {
-        cmd: 'echo "vestibule clear - NCR tech cover ready"',
+        cmd: 'echo "vestibule clear - DN tech cover ready"',
         parts: [
           { token: 'echo', meaning: 'print the string (just a beat marker in this demo)' },
           { token: '"…"', meaning: 'vestibule clear + cover story set — then the choices hit' },
+        ],
+        outputs: [
+          { token: 'vestibule clear - DN tech cover ready', meaning: 'echo just repeats the string — green light to start the choices' },
         ],
       },
       {
@@ -122,6 +169,9 @@ export const CHEAT_PHASES: CheatPhase[] = [
         parts: [
           { token: 'echo', meaning: 'print confirmation after the three breach choices' },
           { token: '"[*] …"', meaning: 'you\'re inside — install is next' },
+        ],
+        outputs: [
+          { token: '[*] internal access confirmed', meaning: 'all three breach beats done — cabinet is yours' },
         ],
       },
     ],
@@ -133,7 +183,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
         options: [
           { key: '1', label: 'Ebay Dyebold T-bar Key (SKU 001-0006522)', verdict: 'go', note: 'Real Dyebold top-hat key. Quiet, panel opens.' },
           { key: '2', label: 'Crow bar', verdict: 'no', note: 'Vibration sensor → monitoring center. Police ETA starts.' },
-          { key: '3', label: 'Social Engineering - Wear NCR field technician gear & badge', verdict: 'go', note: 'Badge + cover story. Guard opens it for you.' },
+          { key: '3', label: 'Social Engineering - Wear DN field technician gear & badge', verdict: 'go', note: 'Badge + cover story. Guard opens it for you.' },
         ],
       },
       {
@@ -152,6 +202,10 @@ export const CHEAT_PHASES: CheatPhase[] = [
               parts: [
                 { token: 'ip link show eth0', meaning: 'link-layer status for eth0 (UP / NO-CARRIER / etc.)' },
                 { token: '| head -n2', meaning: 'first two lines only' },
+              ],
+              outputs: [
+                { token: 'NO-CARRIER … UP', meaning: 'cable cut but interface still administratively UP' },
+                { token: 'RJ45 loopback seated', meaning: 'SIEM stream dead — NIC still looks healthy to the ATM' },
               ],
             },
           ],
@@ -181,6 +235,10 @@ export const CHEAT_PHASES: CheatPhase[] = [
           { token: 'lsblk', meaning: 'list block devices (disks/partitions)' },
           { token: '-o NAME,SIZE,TYPE,MODEL', meaning: 'only show those columns' },
           { token: '| grep -E "…"', meaning: 'keep the header + sda/sdb lines (-E = extended regex)' },
+        ],
+        outputs: [
+          { token: 'sdb … 80G … ATM-HDD-2.5SATA', meaning: 'ATM hard drive visible — that\'s the install target' },
+          { token: 'Winlogon\\Userinit -> svchost32.exe', meaning: 'persistence hook we\'ll plant on the XP disk' },
         ],
       },
     ],
@@ -217,6 +275,9 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: 'lsblk', meaning: 'list disks again' },
                 { token: '| grep sdb', meaning: 'confirm the ATM HDD showed up as sdb' },
               ],
+              outputs: [
+                { token: 'sdb … ATM HDD via USB-SATA', meaning: 'drive is on your USB-SATA bridge — ready to mount' },
+              ],
             },
             {
               cmd: 'ntfs-3g /dev/sdb1 /mnt/atm -o remove_hiberfile',
@@ -226,12 +287,20 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: '/mnt/atm', meaning: 'mount point' },
                 { token: '-o remove_hiberfile', meaning: 'clear Windows hibernation lock so the mount works' },
               ],
+              outputs: [
+                { token: 'Mounted /dev/sdb1 at /mnt/atm', meaning: 'XP filesystem is readable/writable now' },
+                { token: 'Windows XP SP3 - Agilis XFS 3.20', meaning: 'confirms the target stack before we drop payload' },
+              ],
             },
             {
               cmd: 'ls /mnt/atm/Windows/System32/ | grep -iE "xfs|cdm"',
               parts: [
                 { token: 'ls …/System32/', meaning: 'list system DLLs on the mounted XP disk' },
                 { token: '| grep -iE "xfs|cdm"', meaning: '-i ignore case, -E regex — find XFS/CDM bits' },
+              ],
+              outputs: [
+                { token: 'MSXFS.dll', meaning: 'XFS middleware — the API Ploutus will call' },
+                { token: 'CDM_ServiceProvider.dll', meaning: 'cash dispenser service provider' },
               ],
             },
             {
@@ -241,6 +310,9 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: '~/ploutus/payload/svchost32.exe', meaning: 'Ploutus payload (disguised name)' },
                 { token: '…/System32/', meaning: 'drop it where Windows will load it from' },
               ],
+              outputs: [
+                { token: 'svchost32.exe (847360 bytes)', meaning: 'payload landed in System32 under a boring name' },
+              ],
             },
             {
               cmd: 'chntpw -e /mnt/atm/Windows/System32/config/SOFTWARE',
@@ -249,6 +321,11 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: '-e', meaning: 'edit mode (interactive hive editor)' },
                 { token: '…/config/SOFTWARE', meaning: 'SOFTWARE hive — patch Winlogon\\Userinit here' },
               ],
+              outputs: [
+                { token: '> ed Userinit', meaning: 'editing the Winlogon Userinit value' },
+                { token: 'userinit.exe,…\\svchost32.exe', meaning: 'autorun chain now includes Ploutus' },
+                { token: '[ PERSISTENCE ] … modified', meaning: 'registry hook stuck — survives reboot' },
+              ],
             },
             {
               cmd: 'sync && umount /mnt/atm',
@@ -256,6 +333,9 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: 'sync', meaning: 'flush pending writes to disk' },
                 { token: '&&', meaning: 'only run umount if sync succeeded' },
                 { token: 'umount /mnt/atm', meaning: 'unmount so you can reseat the drive' },
+              ],
+              outputs: [
+                { token: 'umount: /mnt/atm: clean', meaning: 'safe to pull the drive and reseat it in the bay' },
               ],
             },
           ],
@@ -266,6 +346,10 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: 'lsusb', meaning: 'list USB devices' },
                 { token: '| grep -i kingston', meaning: 'confirm the installer stick is plugged in' },
               ],
+              outputs: [
+                { token: 'Kingston DataTraveler 32GB', meaning: 'live-OS installer stick is attached' },
+                { token: 'BIOS USB-first set', meaning: 'ATM will boot the stick on next power cycle' },
+              ],
             },
             {
               cmd: './ploutus-installer.sh --target ntfs --persist userinit',
@@ -273,6 +357,11 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: './ploutus-installer.sh', meaning: 'run the live-OS installer script' },
                 { token: '--target ntfs', meaning: 'write onto the NTFS Windows partition' },
                 { token: '--persist userinit', meaning: 'hook Winlogon\\Userinit for reboot persistence' },
+              ],
+              outputs: [
+                { token: '[*] mounting NTFS via live OS…', meaning: 'installer mounts the XP disk from the stick' },
+                { token: '[*] payload written; Userinit patched', meaning: 'same end state as the HDD-pull path' },
+                { token: '[ PERSISTENCE ] … modified', meaning: 'autorun hook is in place' },
               ],
             },
           ],
@@ -304,12 +393,21 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: 'echo', meaning: 'beat marker for reseal + reboot' },
                 { token: '"reseal; …"', meaning: 'what you physically do before the boot log' },
               ],
+              outputs: [
+                { token: 'reseal; unclamp; power-cycle', meaning: 'physical steps done — watch the serial boot log next' },
+              ],
             },
             {
               cmd: 'cat /tmp/atm-serial.log',
               parts: [
                 { token: 'cat', meaning: 'print the file' },
                 { token: '/tmp/atm-serial.log', meaning: 'boot log — XP → Userinit → svchost32.exe (Ploutus)' },
+              ],
+              outputs: [
+                { token: 'Windows XP loading…', meaning: 'ATM is booting like a normal branch machine' },
+                { token: 'executing userinit.exe', meaning: 'Winlogon running the autorun chain' },
+                { token: 'svchost32.exe <- PLOUTUS-D LOADING', meaning: 'payload loaded — still invisible to customers' },
+                { token: 'ATM UI: ready for customer', meaning: 'looks normal; waits for USB keyboard + code' },
               ],
             },
           ],
@@ -340,6 +438,9 @@ export const CHEAT_PHASES: CheatPhase[] = [
               parts: [
                 { token: 'echo', meaning: 'mule is on site, keyboard plugged in' },
               ],
+              outputs: [
+                { token: 'mule1 on-site; USB HID keyboard attached', meaning: 'keyboard is live — Ploutus will accept the code next' },
+              ],
             },
             {
               cmd: 'cat codes/today.txt',
@@ -347,12 +448,20 @@ export const CHEAT_PHASES: CheatPhase[] = [
                 { token: 'cat', meaning: 'print the file' },
                 { token: 'codes/today.txt', meaning: "today's rotating activation code" },
               ],
+              outputs: [
+                { token: 'X9K2-M7PQ-…', meaning: "today's rotating code — mule types this on the hidden UI" },
+                { token: 'rotating activation code accepted', meaning: 'Ploutus unlocked the F-key menu' },
+              ],
             },
             {
               cmd: 'cat /proc/ploutus/menu',
               parts: [
                 { token: 'cat', meaning: 'print the file' },
                 { token: '/proc/ploutus/menu', meaning: 'hidden F-key menu — demo path is F4 DISPENSE ALL' },
+              ],
+              outputs: [
+                { token: '[F1]…[F4] DISPENSE ALL', meaning: 'hidden menu — demo path is F4 (all cassettes)' },
+                { token: 'mule selects F4', meaning: 'jackpot path armed — next phase is dispense' },
               ],
             },
           ],
@@ -371,6 +480,12 @@ export const CHEAT_PHASES: CheatPhase[] = [
         parts: [
           { token: 'dmesg', meaning: 'kernel ring buffer (driver / hardware messages)' },
           { token: '| tail -n 8', meaning: 'last 8 lines — CDM_DISPENSE chatter in the demo' },
+        ],
+        outputs: [
+          { token: 'WFSExecute(… CDM_DISPENSE …)', meaning: 'XFS dispense call — no bank auth, no txn record' },
+          { token: 'cassette1 $20 … DISPENSING', meaning: 'cassette 1 dumping twenties' },
+          { token: 'cassette2 $50 … DISPENSING', meaning: 'cassette 2 dumping fifties' },
+          { token: 'cassette3/4 $100 … DISPENSING', meaning: 'hundreds flying — that\'s the jackpot animation' },
         ],
       },
     ],
@@ -429,8 +544,15 @@ export const BASIC_LINUX_CMDS = new Set([
 /** Commands that actually do something in this demo terminal (not a roast). */
 export function isWorkingDemoCommand(typed: string): boolean {
   const first = typed.trim().split(/\s+/)[0]?.toLowerCase() ?? '';
-  return first === 'clear';
+  return first === 'clear' || first === 'help';
 }
+
+/** Cold-start `help` easter egg (user shell). Hint line is appended by the game. */
+export const HELP_EASTER_EGG_LINES = [
+  'hey, this is just a demo — no real bash help on this box.',
+  'Listen up, kid: Train de Aqua made ya a cheat sheet. Use it when ya get lost.',
+  'Boss needs this money. Quit pokin\' at help and start sniffin\' around your home dir.',
+] as const;
 
 export function isBasicLinuxCommand(typed: string): boolean {
   if (isWorkingDemoCommand(typed)) return false;

@@ -155,14 +155,14 @@ export const ATM_INITIAL: AtmVisualState = {
 
 export const PHASE_LINES: Record<number, TermLine[]> = {
   1: [
-    { t: 'cmd', text: 'ls ~/drop' },
+    { t: 'cmd', text: 'ls ~/kit' },
     { t: 'out', text: 'bootstrap.sh  tools/  .oprc' },
     { t: 'blank' },
-    { t: 'cmd', text: 'sudo ./drop/bootstrap.sh' },
+    { t: 'cmd', text: 'sudo ./kit/bootstrap.sh' },
     { t: 'out', text: '[sudo] password for danny: ********' },
     { t: 'blank' },
     { t: 'out', text: '[*] Train de Aqua // bootstrap v0.9.4', s: 'ann' },
-    { t: 'out', text: '[*] verifying drop signature… OK (ed25519)', s: 'ok' },
+    { t: 'out', text: '[*] verifying kit signature… OK (ed25519)', s: 'ok' },
     { t: 'out', text: '[*] mounting operator overlay → /root/ploutus', s: 'ok' },
     { t: 'out', text: '[*] seeding recon notes, payload tree, codes/', s: 'ok' },
     { t: 'out', text: '[*] switching uid=0 cwd=/root/ploutus', s: 'ok' },

@@ -141,6 +141,8 @@ export interface GameState {
   termMode: TermMode;
   /** Live command being typed at the prompt */
   inputBuffer: string;
+  /** Caret index into inputBuffer (0…length) */
+  cursorIndex: number;
   /** Mistyped commands shown above the live prompt */
   failedCmds: FailedCmd[];
   /**
@@ -200,6 +202,8 @@ export type Action =
   | { type: 'TERM_TYPE'; key: string }
   | { type: 'TERM_PASTE'; text: string }
   | { type: 'TERM_BACKSPACE' }
+  | { type: 'TERM_DELETE' }
+  | { type: 'TERM_CURSOR'; dir: 'left' | 'right' | 'home' | 'end' }
   | { type: 'TERM_TAB' }
   | { type: 'AUTOFILL_TICK' }
   | { type: 'OUT_TICK' }

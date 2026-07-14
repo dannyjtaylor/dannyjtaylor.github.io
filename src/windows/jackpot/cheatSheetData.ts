@@ -45,104 +45,86 @@ export const CHEAT_PHASES: CheatPhase[] = [
     phase: 1,
     title: 'RECON',
     blurb:
-      "Our guys left ya somethin' on the laptop. Find it, run da script, and make sure you're on the same network as the ATM, y'hear?",
+      "Our guys left a kit on the laptop. Find ~/kit, run bootstrap, then make sure you're on the same network as the ATM, y'hear?",
     commands: [
       {
-        cmd: 'ls ~/drop',
+        // Canonical unlock key (phase line). Display path localizes from live cwd in CheatSheet.
+        cmd: 'ls ~/kit',
         parts: [
-          { token: 'ls', meaning: 'list files in a directory' },
-          { token: '~/drop', meaning: 'Train de Aqua kit folder in your home dir' },
-        ],
-        outputs: [
-          { token: 'bootstrap.sh', meaning: 'the script that escalates you to root + mounts the op overlay' },
-          { token: 'tools/', meaning: 'field kit notes (T-bar, loopback, crowbar receipt, etc.)' },
-          { token: '.oprc', meaning: 'tiny op config — ignore unless you\'re poking around' },
+          { token: 'ls', meaning: 'lists files' },
+          { token: '~/kit', meaning: 'that\'s the kit folder. cd into it if you want.' },
         ],
       },
       {
-        cmd: 'sudo ./drop/bootstrap.sh',
+        cmd: 'sudo ./kit/bootstrap.sh',
         parts: [
-          { token: 'sudo', meaning: 'run as root (danny is a sudoer on this box)' },
-          { token: './drop/bootstrap.sh', meaning: 'operator bootstrap — mounts ~/ploutus and flips you to root' },
-        ],
-        outputs: [
-          { token: '[sudo] password…', meaning: 'sudo asking for danny\'s password (demo autofills)' },
-          { token: '[*] Train de Aqua // bootstrap', meaning: 'crew bootstrap banner — you\'re in the kit now' },
-          { token: 'verifying drop signature… OK', meaning: 'ed25519 check passed — drop wasn\'t tampered' },
-          { token: 'mounting … → /root/ploutus', meaning: 'op workspace lands at /root/ploutus' },
-          { token: 'switching uid=0', meaning: 'you\'re root now — prompt becomes root@kali' },
+          { token: 'sudo', meaning: 'runs as root. danny can do that here.' },
+          { token: './kit/bootstrap.sh', meaning: 'this gets you to root, kid. use it.' },
         ],
       },
       {
         cmd: 'ip -4 addr show eth0 | grep inet',
         parts: [
-          { token: 'ip', meaning: 'iproute2 tool — talk to the kernel about interfaces/routes' },
-          { token: '-4', meaning: 'IPv4 only (skip IPv6 noise)' },
-          { token: 'addr show eth0', meaning: 'print addresses on the eth0 NIC' },
-          { token: '|', meaning: 'pipe stdout into the next command' },
-          { token: 'grep inet', meaning: 'keep lines that mention inet (your IPv4 address)' },
+          { token: 'ip', meaning: 'tool to talk to kernel about interfaces & routes' },
+          { token: '-4', meaning: 'IPv4 only' },
+          { token: 'addr show eth0', meaning: 'what\'s on eth0' },
+          { token: '|', meaning: 'pipes into the next bit' },
+          { token: 'grep inet', meaning: 'just the address line' },
         ],
         outputs: [
-          { token: 'inet 192.168.1.104/24', meaning: 'your laptop\'s IPv4 on the branch LAN' },
-          { token: 'scope global eth0', meaning: 'address is on eth0 (the cable you plugged in)' },
+          { token: 'inet 192.168.1.104/24', meaning: 'your box on the branch LAN' },
+          { token: 'scope global eth0', meaning: 'yeah, that\'s the cable you plugged in' },
         ],
       },
       {
         cmd: 'ip route | head -n1',
         parts: [
-          { token: 'ip route', meaning: 'print the routing table' },
-          { token: '|', meaning: 'pipe into head' },
-          { token: 'head -n1', meaning: 'first line only — usually the default gateway' },
+          { token: 'ip route', meaning: 'routing table' },
+          { token: '|', meaning: 'pipes into head' },
+          { token: 'head -n1', meaning: 'first line. usually the gateway.' },
         ],
         outputs: [
-          { token: 'default via 192.168.1.1', meaning: 'branch router / gateway — same /24 as the ATM' },
-          { token: 'dev eth0 proto dhcp', meaning: 'got the route from DHCP on eth0' },
+          { token: 'default via 192.168.1.1', meaning: 'branch router. same neighborhood as the ATM.' },
+          { token: 'dev eth0 proto dhcp', meaning: 'DHCP handed you that route' },
         ],
       },
       {
         cmd: 'nmap -sV -p8080 --open 192.168.1.0/24',
         parts: [
-          { token: 'nmap', meaning: 'network scanner' },
-          { token: '-sV', meaning: 'probe open ports and guess service/version' },
-          { token: '-p8080', meaning: 'only scan port 8080' },
-          { token: '--open', meaning: 'only show hosts that actually have the port open' },
-          { token: '192.168.1.0/24', meaning: 'whole /24 subnet (256 addresses)' },
+          { token: 'nmap', meaning: 'scans the network' },
+          { token: '-sV', meaning: 'guesses what\'s listening' },
+          { token: '-p8080', meaning: 'only port 8080' },
+          { token: '--open', meaning: 'skip the closed junk' },
+          { token: '192.168.1.0/24', meaning: 'the whole branch subnet' },
         ],
         outputs: [
-          { token: '192.168.1.47', meaning: 'the ATM\'s IP on the branch LAN' },
-          { token: '8080/tcp open http', meaning: 'Agilis status/service port is open' },
-          { token: 'Agilis ATM XFS 3.20', meaning: 'XFS stack version — matches our Ploutus target' },
-          { token: 'Windows XP … SP3', meaning: 'EOL OS — soft target for the install phase' },
+          { token: '192.168.1.47', meaning: 'that\'s the ATM' },
+          { token: '8080/tcp open http', meaning: 'Agilis is up on 8080' },
+          { token: 'Agilis ATM XFS 3.20', meaning: 'same stack Ploutus wants' },
+          { token: 'Windows XP … SP3', meaning: 'old XP. soft target.' },
         ],
       },
       {
         cmd: 'curl -s http://192.168.1.47/status | python3 -m json.tool',
         parts: [
-          { token: 'curl', meaning: 'HTTP client' },
-          { token: '-s', meaning: 'silent — no progress meter' },
-          { token: 'http://192.168.1.47/status', meaning: 'hit the ATM status endpoint' },
-          { token: '|', meaning: 'pipe the body into python' },
-          { token: 'python3 -m json.tool', meaning: 'pretty-print JSON so it\'s readable' },
+          { token: 'curl', meaning: 'hits HTTP' },
+          { token: '-s', meaning: 'quiet, no progress bar' },
+          { token: 'http://192.168.1.47/status', meaning: 'ATM status page' },
+          { token: '|', meaning: 'pipes the body along' },
+          { token: 'python3 -m json.tool', meaning: 'makes the JSON readable' },
         ],
         outputs: [
-          { token: '"model": "Optiva740"', meaning: 'Dyebold Optiva 740 confirmed' },
-          { token: '"vendor": "Dyebold"', meaning: 'vendor string from the status API' },
-          { token: '"cassettes": 4', meaning: 'four cash cassettes in this AFD' },
-          { token: '"xfs": "Kalignite"', meaning: 'XFS middleware brand — CDM path we abuse later' },
+          { token: '"model": "Optiva740"', meaning: 'Optiva 740. that\'s our machine.' },
+          { token: '"vendor": "Dyebold"', meaning: 'Dyebold box' },
+          { token: '"cassettes": 4', meaning: 'four cash trays' },
+          { token: '"xfs": "Kalignite"', meaning: 'XFS stack we mess with later' },
         ],
       },
       {
         cmd: 'cat recon/target.md',
         parts: [
-          { token: 'cat', meaning: 'print a file to the terminal' },
-          { token: 'recon/target.md', meaning: 'op notes for this ATM (model, OS, kit, blind spot)' },
-        ],
-        outputs: [
-          { token: 'Dyebold Optiva 740', meaning: 'target model + ~$50K per cassette' },
-          { token: 'Windows XP SP3', meaning: 'EOL since 2014 — no patches' },
-          { token: 'CDM_DISPENSE via MSXFS.dll', meaning: 'the dispense call we\'ll hit in jackpot' },
-          { token: 'camera blind … 02:00-05:30', meaning: 'vestibule corner dead zone for the mule' },
-          { token: 'kit: T-bar … Ploutus-D', meaning: 'what you should have in the drop/tools bag' },
+          { token: 'cat', meaning: 'dumps a file' },
+          { token: 'recon/target.md', meaning: 'op notes. read \'em in the terminal.' },
         ],
       },
     ],
@@ -152,26 +134,20 @@ export const CHEAT_PHASES: CheatPhase[] = [
     phase: 2,
     title: 'BREACH',
     blurb:
-      "Physical access time. Open the top-hat, kill the log stream, keep the door sensor happy. Wrong picks start the police timer.",
+      "Physical access time. Open the top-hat, kill the log stream, keep the door sensor happy. Wrong picks start the cops.",
     commands: [
       {
         cmd: 'echo "vestibule clear - DN tech cover ready"',
         parts: [
-          { token: 'echo', meaning: 'print the string (just a beat marker in this demo)' },
-          { token: '"…"', meaning: 'vestibule clear + cover story set — then the choices hit' },
-        ],
-        outputs: [
-          { token: 'vestibule clear - DN tech cover ready', meaning: 'echo just repeats the string — green light to start the choices' },
+          { token: 'echo', meaning: 'just prints text. demo marker.' },
+          { token: '"…"', meaning: 'cover story\'s set. choices come next.' },
         ],
       },
       {
         cmd: 'echo "[*] internal access confirmed"',
         parts: [
-          { token: 'echo', meaning: 'print confirmation after the three breach choices' },
-          { token: '"[*] …"', meaning: 'you\'re inside — install is next' },
-        ],
-        outputs: [
-          { token: '[*] internal access confirmed', meaning: 'all three breach beats done — cabinet is yours' },
+          { token: 'echo', meaning: 'prints after the three breach picks' },
+          { token: '"[*] …"', meaning: 'you\'re in. install next.' },
         ],
       },
     ],
@@ -181,31 +157,31 @@ export const CHEAT_PHASES: CheatPhase[] = [
         prompt: 'SELECT PANEL ACCESS METHOD',
         tip: '1 or 3. Crowbar is a trap.',
         options: [
-          { key: '1', label: 'Ebay Dyebold T-bar Key (SKU 001-0006522)', verdict: 'go', note: 'Real Dyebold top-hat key. Quiet, panel opens.' },
-          { key: '2', label: 'Crow bar', verdict: 'no', note: 'Vibration sensor → monitoring center. Police ETA starts.' },
-          { key: '3', label: 'Social Engineering - Wear DN field technician gear & badge', verdict: 'go', note: 'Badge + cover story. Guard opens it for you.' },
+          { key: '1', label: 'Ebay Dyebold T-bar Key (SKU 001-0006522)', verdict: 'go', note: 'Real Dyebold key. Quiet open.' },
+          { key: '2', label: 'Crow bar', verdict: 'no', note: 'Vibration sensor screams. Cops start coming.' },
+          { key: '3', label: 'Social Engineering - Wear DN field technician gear & badge', verdict: 'go', note: 'Badge + cover. Guard opens it for ya.' },
         ],
       },
       {
         id: 'ethernet',
         prompt: 'HANDLE NETWORK / LOG STREAM',
-        tip: 'Loopback is the clean play. Cut-only is a delayed SIEM bomb.',
+        tip: 'Loopback is clean. Cut-only is a delayed SIEM bomb.',
         options: [
-          { key: '1', label: 'Cut cable + insert RJ45 loopback plug', verdict: 'go', note: 'SIEM stream dies, NIC still looks "up" to the ATM.' },
-          { key: '2', label: 'Cut cable only', verdict: 'maybe', note: 'Looks fine now. Buffered logs flush when the cable comes back — police hit on phase advance.' },
-          { key: '3', label: 'Leave cable intact', verdict: 'no', note: 'Live tamper hits SIEM immediately.' },
+          { key: '1', label: 'Cut cable + insert RJ45 loopback plug', verdict: 'go', note: 'Logs die. NIC still looks up.' },
+          { key: '2', label: 'Cut cable only', verdict: 'maybe', note: 'Fine for now. Logs flush later when the cable comes back.' },
+          { key: '3', label: 'Leave cable intact', verdict: 'no', note: 'SIEM sees you right away.' },
         ],
         afterPick: {
           '1': [
             {
               cmd: 'ip link show eth0 | head -n2',
               parts: [
-                { token: 'ip link show eth0', meaning: 'link-layer status for eth0 (UP / NO-CARRIER / etc.)' },
-                { token: '| head -n2', meaning: 'first two lines only' },
+                { token: 'ip link show eth0', meaning: 'is eth0 up or dead?' },
+                { token: '| head -n2', meaning: 'first two lines' },
               ],
               outputs: [
-                { token: 'NO-CARRIER … UP', meaning: 'cable cut but interface still administratively UP' },
-                { token: 'RJ45 loopback seated', meaning: 'SIEM stream dead — NIC still looks healthy to the ATM' },
+                { token: 'NO-CARRIER … UP', meaning: 'cable cut, but the NIC still says up' },
+                { token: 'RJ45 loopback seated', meaning: 'logs dead. ATM still thinks the link\'s fine.' },
               ],
             },
           ],
@@ -216,9 +192,9 @@ export const CHEAT_PHASES: CheatPhase[] = [
         prompt: 'DOOR ALARM SENSOR',
         tip: "Clamp it. Don't cut it. Don't ignore it.",
         options: [
-          { key: '1', label: 'Magnetic reed-switch clamp', verdict: 'go', note: 'Sensor still reads CLOSED while the lid is open.' },
-          { key: '2', label: 'Cut alarm sensor wire', verdict: 'no', note: 'Broken loop → central station alarm.' },
-          { key: '3', label: 'Ignore sensor & hope nobody is watching', verdict: 'no', note: 'Door-open alert fires. Units rolling.' },
+          { key: '1', label: 'Magnetic reed-switch clamp', verdict: 'go', note: 'Still reads CLOSED with the lid open.' },
+          { key: '2', label: 'Cut alarm sensor wire', verdict: 'no', note: 'Broken loop. Central station wakes up.' },
+          { key: '3', label: 'Ignore sensor & hope nobody is watching', verdict: 'no', note: 'Door-open alert. Units rolling.' },
         ],
       },
     ],
@@ -227,18 +203,18 @@ export const CHEAT_PHASES: CheatPhase[] = [
     phase: 3,
     title: 'INSTALL',
     blurb:
-      'Get Ploutus on the box. All three paths work — HDD pull, USB live, or black box. Follow-up cmds show up after you pick.',
+      'Get Ploutus on the box. HDD pull, USB live, or black box. All three work. Follow-up cmds show after you pick.',
     commands: [
       {
         cmd: 'lsblk -o NAME,SIZE,TYPE,MODEL | grep -E "NAME|sda|sdb"',
         parts: [
-          { token: 'lsblk', meaning: 'list block devices (disks/partitions)' },
-          { token: '-o NAME,SIZE,TYPE,MODEL', meaning: 'only show those columns' },
-          { token: '| grep -E "…"', meaning: 'keep the header + sda/sdb lines (-E = extended regex)' },
+          { token: 'lsblk', meaning: 'lists disks' },
+          { token: '-o NAME,SIZE,TYPE,MODEL', meaning: 'just those columns' },
+          { token: '| grep -E "…"', meaning: 'header + sda/sdb only' },
         ],
         outputs: [
-          { token: 'sdb … 80G … ATM-HDD-2.5SATA', meaning: 'ATM hard drive visible — that\'s the install target' },
-          { token: 'Winlogon\\Userinit -> svchost32.exe', meaning: 'persistence hook we\'ll plant on the XP disk' },
+          { token: 'sdb … 80G … ATM-HDD-2.5SATA', meaning: 'ATM hard drive. that\'s the target.' },
+          { token: 'Winlogon\\Userinit -> svchost32.exe', meaning: 'where persistence hooks in later' },
         ],
       },
     ],
@@ -252,19 +228,19 @@ export const CHEAT_PHASES: CheatPhase[] = [
             key: '1',
             label: 'Remove the HDD and deploy Ploutus on NTFS partition',
             verdict: 'go',
-            note: 'Mount XP, drop svchost32.exe, patch Winlogon\\Userinit with chntpw.',
+            note: 'Mount XP, plant svchost32.exe, patch Userinit with chntpw.',
           },
           {
             key: '2',
             label: 'Boot from USB live OS and inject Ploutus',
             verdict: 'go',
-            note: 'Boot the stick, run ploutus-installer.sh. Same Userinit persist.',
+            note: 'Boot the stick, run the installer. Same Userinit trick.',
           },
           {
             key: '3',
             label: 'Use a Raspberry Pi black box',
             verdict: 'go',
-            note: 'Hardware shim on the dispenser cable. Skips phases 4–5 in this demo.',
+            note: 'Hardware shim on the dispenser cable. Skips phases 4–5 here.',
           },
         ],
         afterPick: {
@@ -272,70 +248,70 @@ export const CHEAT_PHASES: CheatPhase[] = [
             {
               cmd: 'lsblk | grep sdb',
               parts: [
-                { token: 'lsblk', meaning: 'list disks again' },
-                { token: '| grep sdb', meaning: 'confirm the ATM HDD showed up as sdb' },
+                { token: 'lsblk', meaning: 'disks again' },
+                { token: '| grep sdb', meaning: 'looking for the ATM drive' },
               ],
               outputs: [
-                { token: 'sdb … ATM HDD via USB-SATA', meaning: 'drive is on your USB-SATA bridge — ready to mount' },
+                { token: 'sdb … ATM HDD via USB-SATA', meaning: 'drive\'s on your bridge. mount it.' },
               ],
             },
             {
               cmd: 'ntfs-3g /dev/sdb1 /mnt/atm -o remove_hiberfile',
               parts: [
-                { token: 'ntfs-3g', meaning: 'FUSE driver — mount an NTFS volume on Linux' },
-                { token: '/dev/sdb1', meaning: 'first partition on the ATM drive' },
-                { token: '/mnt/atm', meaning: 'mount point' },
-                { token: '-o remove_hiberfile', meaning: 'clear Windows hibernation lock so the mount works' },
+                { token: 'ntfs-3g', meaning: 'mounts NTFS on Linux' },
+                { token: '/dev/sdb1', meaning: 'first partition on that drive' },
+                { token: '/mnt/atm', meaning: 'where it lands' },
+                { token: '-o remove_hiberfile', meaning: 'kills the hibernate lock so it mounts' },
               ],
               outputs: [
-                { token: 'Mounted /dev/sdb1 at /mnt/atm', meaning: 'XP filesystem is readable/writable now' },
-                { token: 'Windows XP SP3 - Agilis XFS 3.20', meaning: 'confirms the target stack before we drop payload' },
+                { token: 'Mounted /dev/sdb1 at /mnt/atm', meaning: 'XP disk is open. write to it.' },
+                { token: 'Windows XP SP3 - Agilis XFS 3.20', meaning: 'yep, that\'s the target stack' },
               ],
             },
             {
               cmd: 'ls /mnt/atm/Windows/System32/ | grep -iE "xfs|cdm"',
               parts: [
-                { token: 'ls …/System32/', meaning: 'list system DLLs on the mounted XP disk' },
-                { token: '| grep -iE "xfs|cdm"', meaning: '-i ignore case, -E regex — find XFS/CDM bits' },
+                { token: 'ls …/System32/', meaning: 'DLL folder on the XP disk' },
+                { token: '| grep -iE "xfs|cdm"', meaning: 'find the XFS / CDM bits' },
               ],
               outputs: [
-                { token: 'MSXFS.dll', meaning: 'XFS middleware — the API Ploutus will call' },
-                { token: 'CDM_ServiceProvider.dll', meaning: 'cash dispenser service provider' },
+                { token: 'MSXFS.dll', meaning: 'XFS middleware Ploutus calls' },
+                { token: 'CDM_ServiceProvider.dll', meaning: 'cash dispenser guts' },
               ],
             },
             {
               cmd: 'cp ~/ploutus/payload/svchost32.exe /mnt/atm/Windows/System32/',
               parts: [
-                { token: 'cp', meaning: 'copy a file' },
-                { token: '~/ploutus/payload/svchost32.exe', meaning: 'Ploutus payload (disguised name)' },
-                { token: '…/System32/', meaning: 'drop it where Windows will load it from' },
+                { token: 'cp', meaning: 'copies a file' },
+                { token: '~/ploutus/payload/svchost32.exe', meaning: 'Ploutus in a boring name' },
+                { token: '…/System32/', meaning: 'where Windows will load it from' },
               ],
               outputs: [
-                { token: 'svchost32.exe (847360 bytes)', meaning: 'payload landed in System32 under a boring name' },
+                { token: 'svchost32.exe (847360 bytes)', meaning: 'payload\'s in System32. looks normal.' },
               ],
             },
             {
               cmd: 'chntpw -e /mnt/atm/Windows/System32/config/SOFTWARE',
               parts: [
-                { token: 'chntpw', meaning: 'offline Windows registry editor' },
-                { token: '-e', meaning: 'edit mode (interactive hive editor)' },
-                { token: '…/config/SOFTWARE', meaning: 'SOFTWARE hive — patch Winlogon\\Userinit here' },
+                { token: 'chntpw', meaning: 'edits the Windows registry offline' },
+                { token: '-e', meaning: 'edit mode' },
+                { token: '…/config/SOFTWARE', meaning: 'SOFTWARE hive. patch Userinit here.' },
               ],
               outputs: [
-                { token: '> ed Userinit', meaning: 'editing the Winlogon Userinit value' },
-                { token: 'userinit.exe,…\\svchost32.exe', meaning: 'autorun chain now includes Ploutus' },
-                { token: '[ PERSISTENCE ] … modified', meaning: 'registry hook stuck — survives reboot' },
+                { token: '> ed Userinit', meaning: 'editing Userinit' },
+                { token: 'userinit.exe,…\\svchost32.exe', meaning: 'autorun now pulls Ploutus in' },
+                { token: '[ PERSISTENCE ] … modified', meaning: 'hook stuck. survives reboot.' },
               ],
             },
             {
               cmd: 'sync && umount /mnt/atm',
               parts: [
-                { token: 'sync', meaning: 'flush pending writes to disk' },
-                { token: '&&', meaning: 'only run umount if sync succeeded' },
+                { token: 'sync', meaning: 'flush writes' },
+                { token: '&&', meaning: 'umount only if sync worked' },
                 { token: 'umount /mnt/atm', meaning: 'unmount so you can reseat the drive' },
               ],
               outputs: [
-                { token: 'umount: /mnt/atm: clean', meaning: 'safe to pull the drive and reseat it in the bay' },
+                { token: 'umount: /mnt/atm: clean', meaning: 'safe to pull and put back in the bay' },
               ],
             },
           ],
@@ -343,25 +319,25 @@ export const CHEAT_PHASES: CheatPhase[] = [
             {
               cmd: 'lsusb | grep -i kingston',
               parts: [
-                { token: 'lsusb', meaning: 'list USB devices' },
-                { token: '| grep -i kingston', meaning: 'confirm the installer stick is plugged in' },
+                { token: 'lsusb', meaning: 'lists USB devices' },
+                { token: '| grep -i kingston', meaning: 'looking for the stick' },
               ],
               outputs: [
-                { token: 'Kingston DataTraveler 32GB', meaning: 'live-OS installer stick is attached' },
-                { token: 'BIOS USB-first set', meaning: 'ATM will boot the stick on next power cycle' },
+                { token: 'Kingston DataTraveler 32GB', meaning: 'installer stick\'s plugged in' },
+                { token: 'BIOS USB-first set', meaning: 'ATM boots the stick next power cycle' },
               ],
             },
             {
               cmd: './ploutus-installer.sh --target ntfs --persist userinit',
               parts: [
-                { token: './ploutus-installer.sh', meaning: 'run the live-OS installer script' },
-                { token: '--target ntfs', meaning: 'write onto the NTFS Windows partition' },
-                { token: '--persist userinit', meaning: 'hook Winlogon\\Userinit for reboot persistence' },
+                { token: './ploutus-installer.sh', meaning: 'runs the live-OS installer' },
+                { token: '--target ntfs', meaning: 'writes onto the XP partition' },
+                { token: '--persist userinit', meaning: 'hooks Userinit on reboot' },
               ],
               outputs: [
-                { token: '[*] mounting NTFS via live OS…', meaning: 'installer mounts the XP disk from the stick' },
-                { token: '[*] payload written; Userinit patched', meaning: 'same end state as the HDD-pull path' },
-                { token: '[ PERSISTENCE ] … modified', meaning: 'autorun hook is in place' },
+                { token: '[*] mounting NTFS via live OS…', meaning: 'installer mounts the XP disk' },
+                { token: '[*] payload written; Userinit patched', meaning: 'same end state as the HDD pull' },
+                { token: '[ PERSISTENCE ] … modified', meaning: 'autorun hook is in' },
               ],
             },
           ],
@@ -373,7 +349,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
     phase: 4,
     title: 'PERSIST',
     blurb:
-      'Payload is on disk. Leave the machine looking normal. Only option 1 is safe. If you cut eth earlier (option 2), advancing past this phase detonates SIEM.',
+      'Payload\'s on disk. Leave the machine looking normal. Only option 1 is safe. If you cut eth earlier (option 2), advancing past this phase wakes SIEM.',
     commands: [],
     choices: [
       {
@@ -381,33 +357,30 @@ export const CHEAT_PHASES: CheatPhase[] = [
         prompt: 'SELECT PERSISTENCE / EXIT METHOD',
         tip: 'Only option 1. Everything else is a bust.',
         options: [
-          { key: '1', label: 'Reseal panel, restore sensor, power-cycle ATM', verdict: 'go', note: 'Tamper tape on, sensor restored, XP boots, Ploutus loads via Userinit.' },
-          { key: '2', label: 'Leave panel ajar / skip reseal', verdict: 'no', note: 'Passerby / camera → silent alarm.' },
-          { key: '3', label: 'Skip reboot - leave malware unloaded until next crash', verdict: 'no', note: 'Malware never loads. Op wasted.' },
+          { key: '1', label: 'Reseal panel, restore sensor, power-cycle ATM', verdict: 'go', note: 'Tape on, sensor back, XP boots, Ploutus loads.' },
+          { key: '2', label: 'Leave panel ajar / skip reseal', verdict: 'no', note: 'Someone sees it. Silent alarm.' },
+          { key: '3', label: 'Skip reboot - leave malware unloaded until next crash', verdict: 'no', note: 'Malware never loads. You wasted the op.' },
         ],
         afterPick: {
           '1': [
             {
               cmd: 'echo "reseal; unclamp; power-cycle"',
               parts: [
-                { token: 'echo', meaning: 'beat marker for reseal + reboot' },
-                { token: '"reseal; …"', meaning: 'what you physically do before the boot log' },
-              ],
-              outputs: [
-                { token: 'reseal; unclamp; power-cycle', meaning: 'physical steps done — watch the serial boot log next' },
+                { token: 'echo', meaning: 'marker for reseal + reboot' },
+                { token: '"reseal; …"', meaning: 'what you do with your hands before the boot log' },
               ],
             },
             {
               cmd: 'cat /tmp/atm-serial.log',
               parts: [
-                { token: 'cat', meaning: 'print the file' },
-                { token: '/tmp/atm-serial.log', meaning: 'boot log — XP → Userinit → svchost32.exe (Ploutus)' },
+                { token: 'cat', meaning: 'dumps a file' },
+                { token: '/tmp/atm-serial.log', meaning: 'boot log. watch Userinit pull Ploutus in.' },
               ],
               outputs: [
-                { token: 'Windows XP loading…', meaning: 'ATM is booting like a normal branch machine' },
+                { token: 'Windows XP loading…', meaning: 'boots like a normal branch machine' },
                 { token: 'executing userinit.exe', meaning: 'Winlogon running the autorun chain' },
-                { token: 'svchost32.exe <- PLOUTUS-D LOADING', meaning: 'payload loaded — still invisible to customers' },
-                { token: 'ATM UI: ready for customer', meaning: 'looks normal; waits for USB keyboard + code' },
+                { token: 'svchost32.exe <- PLOUTUS-D LOADING', meaning: 'payload\'s up. customers see nothing.' },
+                { token: 'ATM UI: ready for customer', meaning: 'looks fine. waits for keyboard + code.' },
               ],
             },
           ],
@@ -419,7 +392,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
     phase: 5,
     title: 'ACTIVATE',
     blurb:
-      "ATM looks fine to customers. Mule shows up later with a keyboard + today's code. Do NOT try the customer PIN screen.",
+      "ATM looks fine to customers. Mule shows up later with a keyboard + today's code. Do NOT touch the customer PIN screen.",
     commands: [],
     choices: [
       {
@@ -428,40 +401,37 @@ export const CHEAT_PHASES: CheatPhase[] = [
         tip: "Keyboard + code. That's it.",
         options: [
           { key: '1', label: 'Plug USB keyboard + enter rotating activation code', verdict: 'go', note: 'Hidden F-key menu. F4 dumps all cassettes.' },
-          { key: '2', label: 'Trigger dispense from the normal customer PIN screen', verdict: 'no', note: 'No jackpot path there. Attempt gets logged.' },
-          { key: '3', label: 'Call activation server from a phone next to the ATM', verdict: 'no', note: 'Cellular burst near vestibule is a fraud flag.' },
+          { key: '2', label: 'Trigger dispense from the normal customer PIN screen', verdict: 'no', note: 'No jackpot there. Just gets logged.' },
+          { key: '3', label: 'Call activation server from a phone next to the ATM', verdict: 'no', note: 'Cell burst by the vestibule is a fraud flag.' },
         ],
         afterPick: {
           '1': [
             {
               cmd: 'echo "mule1 on-site; USB HID keyboard attached"',
               parts: [
-                { token: 'echo', meaning: 'mule is on site, keyboard plugged in' },
-              ],
-              outputs: [
-                { token: 'mule1 on-site; USB HID keyboard attached', meaning: 'keyboard is live — Ploutus will accept the code next' },
+                { token: 'echo', meaning: 'mule\'s there. keyboard plugged in.' },
               ],
             },
             {
               cmd: 'cat codes/today.txt',
               parts: [
-                { token: 'cat', meaning: 'print the file' },
-                { token: 'codes/today.txt', meaning: "today's rotating activation code" },
+                { token: 'cat', meaning: 'dumps a file' },
+                { token: 'codes/today.txt', meaning: "today's rotating code" },
               ],
               outputs: [
-                { token: 'X9K2-M7PQ-…', meaning: "today's rotating code — mule types this on the hidden UI" },
-                { token: 'rotating activation code accepted', meaning: 'Ploutus unlocked the F-key menu' },
+                { token: 'X9K2-M7PQ-…', meaning: 'mule types this on the hidden UI' },
+                { token: 'rotating activation code accepted', meaning: 'F-key menu unlocked' },
               ],
             },
             {
               cmd: 'cat /proc/ploutus/menu',
               parts: [
-                { token: 'cat', meaning: 'print the file' },
-                { token: '/proc/ploutus/menu', meaning: 'hidden F-key menu — demo path is F4 DISPENSE ALL' },
+                { token: 'cat', meaning: 'dumps a file' },
+                { token: '/proc/ploutus/menu', meaning: 'hidden F-key menu. demo path is F4.' },
               ],
               outputs: [
-                { token: '[F1]…[F4] DISPENSE ALL', meaning: 'hidden menu — demo path is F4 (all cassettes)' },
-                { token: 'mule selects F4', meaning: 'jackpot path armed — next phase is dispense' },
+                { token: '[F1]…[F4] DISPENSE ALL', meaning: 'F4. all cassettes.' },
+                { token: 'mule selects F4', meaning: 'jackpot armed. next phase dumps cash.' },
               ],
             },
           ],
@@ -473,19 +443,19 @@ export const CHEAT_PHASES: CheatPhase[] = [
     phase: 6,
     title: 'JACKPOT',
     blurb:
-      'Cash is coming out. Hit SPACE through dmesg — CDM_DISPENSE fires, cassettes spin, money animation runs. That\'s the win.',
+      "Cash is coming out. Hit SPACE through dmesg. CDM_DISPENSE fires, cassettes spin, money animation runs. That's the win.",
     commands: [
       {
         cmd: 'dmesg | tail -n 8',
         parts: [
-          { token: 'dmesg', meaning: 'kernel ring buffer (driver / hardware messages)' },
-          { token: '| tail -n 8', meaning: 'last 8 lines — CDM_DISPENSE chatter in the demo' },
+          { token: 'dmesg', meaning: 'kernel messages' },
+          { token: '| tail -n 8', meaning: 'last 8 lines. CDM chatter.' },
         ],
         outputs: [
-          { token: 'WFSExecute(… CDM_DISPENSE …)', meaning: 'XFS dispense call — no bank auth, no txn record' },
-          { token: 'cassette1 $20 … DISPENSING', meaning: 'cassette 1 dumping twenties' },
-          { token: 'cassette2 $50 … DISPENSING', meaning: 'cassette 2 dumping fifties' },
-          { token: 'cassette3/4 $100 … DISPENSING', meaning: 'hundreds flying — that\'s the jackpot animation' },
+          { token: 'WFSExecute(… CDM_DISPENSE …)', meaning: 'XFS dispense. no bank auth, no txn.' },
+          { token: 'cassette1 $20 … DISPENSING', meaning: 'twenties coming out' },
+          { token: 'cassette2 $50 … DISPENSING', meaning: 'fifties too' },
+          { token: 'cassette3/4 $100 … DISPENSING', meaning: 'hundreds. that\'s the jackpot.' },
         ],
       },
     ],

@@ -67,6 +67,7 @@ function makeInitialState(): GameState {
     started: false,
     termMode: 'at-announce',
     inputBuffer: '',
+    cursorIndex: 0,
     failedCmds: [],
     termClearAt: null,
     cmdHistory: [],
@@ -149,6 +150,7 @@ function settleAt(state: GameState, revealedLines: number, lines = state.effecti
     termMode: mode,
     waitingForChoice: mode === 'at-choice' && line && line.t === 'choice' ? line.id : null,
     inputBuffer: '',
+    cursorIndex: 0,
     failedCmds: [],
     historyBrowseIndex: null,
     autofillTarget: null,
@@ -197,6 +199,7 @@ function applyHelpTyped(state: GameState, typed: string): GameState {
     ...state,
     sandboxEchoes: [...state.sandboxEchoes, echo],
     inputBuffer: '',
+    cursorIndex: 0,
     failedCmds: [],
     historyBrowseIndex: null,
     autofillTarget: null,
@@ -220,6 +223,7 @@ function applySandboxTyped(state: GameState, typed: string): GameState {
     sandboxCwd: result.cwd || state.sandboxCwd,
     sandboxEchoes: [...state.sandboxEchoes, echo],
     inputBuffer: '',
+    cursorIndex: 0,
     failedCmds: [],
     historyBrowseIndex: null,
     autofillTarget: null,
@@ -483,7 +487,7 @@ function tryWithdraw(state: GameState, amount: number): GameState {
 function acceptCommand(state: GameState, cmdIndex: number): GameState {
   const line = state.effectiveLines[cmdIndex];
   const cmdText = line && line.t === 'cmd' ? line.text : '';
-  const isBootstrap = !!(cmdText && matchesPrologueBootstrap(cmdText));
+  const isBootstrap = !!(cmdText && matchesPrologueBootstrap(cmdText, '/home/danny'));
   const history = cmdText
     ? [...state.cmdHistory.filter(c => c !== cmdText), cmdText]
     : state.cmdHistory;
@@ -493,6 +497,7 @@ function acceptCommand(state: GameState, cmdIndex: number): GameState {
     historyBrowseIndex: null,
     autofillTarget: null,
     inputBuffer: '',
+    cursorIndex: 0,
     failedCmds: [],
     ...(isBootstrap
       ? {
@@ -522,10 +527,10 @@ function acceptCommand(state: GameState, cmdIndex: number): GameState {
   return settleAt(withCp, cmdIndex + 1);
 }
 
-function scriptedCmdMatches(typed: string, expected: string): boolean {
+function scriptedCmdMatches(typed: string, expected: string, cwd: string): boolean {
   if (cmdsMatch(typed, expected)) return true;
-  if (matchesPrologueLs(expected) && matchesPrologueLs(typed)) return true;
-  if (matchesPrologueBootstrap(expected) && matchesPrologueBootstrap(typed)) return true;
+  if (matchesPrologueLs(expected, '/home/danny') && matchesPrologueLs(typed, cwd)) return true;
+  if (matchesPrologueBootstrap(expected, '/home/danny') && matchesPrologueBootstrap(typed, cwd)) return true;
   return false;
 }
 
@@ -584,7 +589,12 @@ function reducer(state: GameState, action: Action): GameState {
         // Mid-autofill: finish instantly and accept
         if (state.autofillTarget) {
           return acceptCommand(
-            { ...state, inputBuffer: state.autofillTarget, autofillTarget: null },
+            {
+              ...state,
+              inputBuffer: state.autofillTarget,
+              cursorIndex: state.autofillTarget.length,
+              autofillTarget: null,
+            },
             state.revealedLines,
           );
         }
@@ -593,7 +603,7 @@ function reducer(state: GameState, action: Action): GameState {
         const typedTrim = typed.trim();
 
         // Exact / alias match → accept scripted beat
-        if (typedTrim && scriptedCmdMatches(typedTrim, line.text)) {
+        if (typedTrim && scriptedCmdMatches(typedTrim, line.text, state.sandboxCwd)) {
           return acceptCommand(state, state.revealedLines);
         }
         // Empty SPACE → letter-by-letter autofill (never on the very first wake)
@@ -602,6 +612,7 @@ function reducer(state: GameState, action: Action): GameState {
             ...state,
             autofillTarget: line.text,
             inputBuffer: '',
+            cursorIndex: 0,
             historyBrowseIndex: null,
             failedCmds: [],
           };
@@ -615,6 +626,7 @@ function reducer(state: GameState, action: Action): GameState {
             ...state,
             failedCmds: [],
             inputBuffer: '',
+            cursorIndex: 0,
             historyBrowseIndex: null,
             autofillTarget: null,
             termClearAt: state.revealedLines,
@@ -637,6 +649,7 @@ function reducer(state: GameState, action: Action): GameState {
             },
           ],
           inputBuffer: '',
+          cursorIndex: 0,
           historyBrowseIndex: null,
           autofillTarget: null,
         };
@@ -663,11 +676,11 @@ function reducer(state: GameState, action: Action): GameState {
       const nextLen = state.inputBuffer.length + 1;
       if (nextLen >= target.length) {
         return acceptCommand(
-          { ...state, inputBuffer: target, autofillTarget: null },
+          { ...state, inputBuffer: target, cursorIndex: target.length, autofillTarget: null },
           state.revealedLines,
         );
       }
-      return { ...state, inputBuffer: target.slice(0, nextLen) };
+      return { ...state, inputBuffer: target.slice(0, nextLen), cursorIndex: nextLen };
     }
 
     case 'OUT_TICK': {
@@ -688,10 +701,12 @@ function reducer(state: GameState, action: Action): GameState {
       const idx = state.historyBrowseIndex === null
         ? state.cmdHistory.length - 1
         : Math.max(0, state.historyBrowseIndex - 1);
+      const hist = state.cmdHistory[idx]!;
       return {
         ...state,
         historyBrowseIndex: idx,
-        inputBuffer: state.cmdHistory[idx]!,
+        inputBuffer: hist,
+        cursorIndex: hist.length,
         autofillTarget: null,
       };
     }
@@ -701,13 +716,15 @@ function reducer(state: GameState, action: Action): GameState {
       if (state.alarm || state.policeArrived) return state;
       if (state.historyBrowseIndex === null) return state;
       if (state.historyBrowseIndex >= state.cmdHistory.length - 1) {
-        return { ...state, historyBrowseIndex: null, inputBuffer: '', autofillTarget: null };
+        return { ...state, historyBrowseIndex: null, inputBuffer: '', cursorIndex: 0, autofillTarget: null };
       }
       const idx = state.historyBrowseIndex + 1;
+      const hist = state.cmdHistory[idx]!;
       return {
         ...state,
         historyBrowseIndex: idx,
-        inputBuffer: state.cmdHistory[idx]!,
+        inputBuffer: hist,
+        cursorIndex: hist.length,
         autofillTarget: null,
       };
     }
@@ -717,7 +734,7 @@ function reducer(state: GameState, action: Action): GameState {
       if (!state.started) return state;
       if (state.checkpoints.length === 0) {
         if (state.inputBuffer || state.failedCmds.length || state.autofillTarget) {
-          return { ...state, inputBuffer: '', failedCmds: [], autofillTarget: null, historyBrowseIndex: null };
+          return { ...state, inputBuffer: '', cursorIndex: 0, failedCmds: [], autofillTarget: null, historyBrowseIndex: null };
         }
         return state;
       }
@@ -733,6 +750,7 @@ function reducer(state: GameState, action: Action): GameState {
         atm: { ...prev.atm },
         termMode: prev.termMode,
         inputBuffer: '',
+        cursorIndex: 0,
         failedCmds: [],
         waitingForChoice: prev.waitingForChoice,
         cashAmount: prev.cashAmount,
@@ -764,9 +782,13 @@ function reducer(state: GameState, action: Action): GameState {
       if (state.termMode !== 'at-cmd') return state;
       if (action.key.length !== 1) return state;
       // Manual typing cancels autofill
+      const base = state.autofillTarget ? '' : state.inputBuffer;
+      const idx = state.autofillTarget ? 0 : Math.min(state.cursorIndex, base.length);
+      const next = base.slice(0, idx) + action.key + base.slice(idx);
       return {
         ...state,
-        inputBuffer: (state.autofillTarget ? '' : state.inputBuffer) + action.key,
+        inputBuffer: next,
+        cursorIndex: idx + 1,
         autofillTarget: null,
         historyBrowseIndex: null,
       };
@@ -778,9 +800,13 @@ function reducer(state: GameState, action: Action): GameState {
       // Strip newlines — paste as a single command line
       const pasted = action.text.replace(/[\r\n]+/g, ' ');
       if (!pasted) return state;
+      const base = state.autofillTarget ? '' : state.inputBuffer;
+      const idx = state.autofillTarget ? 0 : Math.min(state.cursorIndex, base.length);
+      const next = base.slice(0, idx) + pasted + base.slice(idx);
       return {
         ...state,
-        inputBuffer: (state.autofillTarget ? '' : state.inputBuffer) + pasted,
+        inputBuffer: next,
+        cursorIndex: idx + pasted.length,
         autofillTarget: null,
         historyBrowseIndex: null,
       };
@@ -800,6 +826,7 @@ function reducer(state: GameState, action: Action): GameState {
           return {
             ...state,
             inputBuffer: toward,
+            cursorIndex: toward.length,
             autofillTarget: null,
             historyBrowseIndex: null,
           };
@@ -813,6 +840,7 @@ function reducer(state: GameState, action: Action): GameState {
           return {
             ...state,
             inputBuffer: result.buffer,
+            cursorIndex: result.buffer.length,
             autofillTarget: null,
             historyBrowseIndex: null,
           };
@@ -824,6 +852,7 @@ function reducer(state: GameState, action: Action): GameState {
         return {
           ...state,
           inputBuffer: expected,
+          cursorIndex: expected.length,
           autofillTarget: null,
           historyBrowseIndex: null,
         };
@@ -835,10 +864,40 @@ function reducer(state: GameState, action: Action): GameState {
       if (!state.started || state.alarm || state.policeArrived) return state;
       if (state.termMode !== 'at-cmd') return state;
       if (state.autofillTarget) {
-        return { ...state, autofillTarget: null, inputBuffer: '', historyBrowseIndex: null };
+        return { ...state, autofillTarget: null, inputBuffer: '', cursorIndex: 0, historyBrowseIndex: null };
       }
-      if (!state.inputBuffer) return state;
-      return { ...state, inputBuffer: state.inputBuffer.slice(0, -1), historyBrowseIndex: null };
+      if (state.cursorIndex <= 0) return state;
+      const i = state.cursorIndex;
+      const next = state.inputBuffer.slice(0, i - 1) + state.inputBuffer.slice(i);
+      return { ...state, inputBuffer: next, cursorIndex: i - 1, historyBrowseIndex: null };
+    }
+
+    case 'TERM_DELETE': {
+      if (!state.started || state.alarm || state.policeArrived) return state;
+      if (state.termMode !== 'at-cmd') return state;
+      if (state.autofillTarget) {
+        return { ...state, autofillTarget: null, inputBuffer: '', cursorIndex: 0, historyBrowseIndex: null };
+      }
+      if (state.cursorIndex >= state.inputBuffer.length) return state;
+      const i = state.cursorIndex;
+      const next = state.inputBuffer.slice(0, i) + state.inputBuffer.slice(i + 1);
+      return { ...state, inputBuffer: next, cursorIndex: i, historyBrowseIndex: null };
+    }
+
+    case 'TERM_CURSOR': {
+      if (!state.started || state.alarm || state.policeArrived) return state;
+      if (state.termMode !== 'at-cmd') return state;
+      if (state.autofillTarget) {
+        return { ...state, autofillTarget: null, inputBuffer: '', cursorIndex: 0, historyBrowseIndex: null };
+      }
+      const len = state.inputBuffer.length;
+      let next = state.cursorIndex;
+      if (action.dir === 'left') next = Math.max(0, state.cursorIndex - 1);
+      else if (action.dir === 'right') next = Math.min(len, state.cursorIndex + 1);
+      else if (action.dir === 'home') next = 0;
+      else next = len;
+      if (next === state.cursorIndex) return state;
+      return { ...state, cursorIndex: next, historyBrowseIndex: null };
     }
 
     case 'CHOOSE': {
@@ -1323,6 +1382,41 @@ export function Jackpot() {
         }
         return;
       }
+      if (e.key === 'ArrowLeft') {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+          e.preventDefault();
+          dispatch({ type: 'TERM_CURSOR', dir: 'left' });
+        }
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+          e.preventDefault();
+          dispatch({ type: 'TERM_CURSOR', dir: 'right' });
+        }
+        return;
+      }
+      if (e.key === 'Home') {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+          e.preventDefault();
+          dispatch({ type: 'TERM_CURSOR', dir: 'home' });
+        }
+        return;
+      }
+      if (e.key === 'End') {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+          e.preventDefault();
+          dispatch({ type: 'TERM_CURSOR', dir: 'end' });
+        }
+        return;
+      }
+      if (e.key === 'Delete') {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+          e.preventDefault();
+          dispatch({ type: 'TERM_DELETE' });
+        }
+        return;
+      }
 
       if (e.key === 'Enter') {
         if (hasTextSelection()) return;
@@ -1515,6 +1609,7 @@ export function Jackpot() {
             started={state.started}
             termMode={state.termMode}
             inputBuffer={state.inputBuffer}
+            cursorIndex={state.cursorIndex}
             failedCmds={state.failedCmds}
             charIndex={state.charIndex}
             typingOutIndex={state.typingOutIndex}
@@ -1577,6 +1672,7 @@ export function Jackpot() {
             currentCmd={currentCheatCmd}
             choices={state.choices}
             started={state.started}
+            sandboxCwd={state.sandboxCwd}
             {...computeCheatUnlocks(
               state.effectiveLines,
               state.revealedLines,

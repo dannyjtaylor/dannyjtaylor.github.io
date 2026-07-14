@@ -12,6 +12,7 @@ interface Props {
   started: boolean;
   termMode: TermMode;
   inputBuffer: string;
+  cursorIndex: number;
   failedCmds: FailedCmd[];
   charIndex: number;
   typingOutIndex: number | null;
@@ -151,6 +152,7 @@ export function TerminalPanel({
   started,
   termMode,
   inputBuffer,
+  cursorIndex,
   failedCmds,
   charIndex,
   typingOutIndex,
@@ -164,7 +166,7 @@ export function TerminalPanel({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [revealedLines, waitingForChoice, cashAmount, inputBuffer, failedCmds.length, termMode, charIndex, typingOutIndex, termClearAt, sandboxEchoes.length, showPloutusBanner]);
+  }, [revealedLines, waitingForChoice, cashAmount, inputBuffer, cursorIndex, failedCmds.length, termMode, charIndex, typingOutIndex, termClearAt, sandboxEchoes.length, showPloutusBanner]);
 
   const historyEnd = revealedLines;
   const historyStart = Math.max(0, termClearAt ?? 0);
@@ -287,8 +289,16 @@ export function TerminalPanel({
       {((!started) || (started && termMode === 'at-cmd' && expectedCmd !== null && !typingLine)) && (
         <span style={{ display: 'block', color: CMD_GREEN }}>
           {renderPrompt(livePrompt.tier, livePrompt.cwd)}
-          {started && <span>{inputBuffer}</span>}
-          <span style={{ color: CMD_GREEN, animation: 'blink 1s step-end infinite' }}>█</span>
+          {started && (
+            <>
+              <span>{inputBuffer.slice(0, cursorIndex)}</span>
+              <span style={{ color: CMD_GREEN, animation: 'blink 1s step-end infinite' }}>█</span>
+              <span>{inputBuffer.slice(cursorIndex)}</span>
+            </>
+          )}
+          {!started && (
+            <span style={{ color: CMD_GREEN, animation: 'blink 1s step-end infinite' }}>█</span>
+          )}
         </span>
       )}
 

@@ -17,6 +17,87 @@ interface Props {
   /** Choice ids the demo has reached */
   unlockedChoices: ChoiceId[];
   started: boolean;
+  /** Live sandbox cwd — localizes prologue cheat paths while still on danny@kali */
+  sandboxCwd: string;
+}
+
+const SANDBOX_HOME = '/home/danny';
+const KIT_DIR = `${SANDBOX_HOME}/kit`;
+const BOOTSTRAP_PATH = `${KIT_DIR}/bootstrap.sh`;
+
+/** Relative shell path from cwd → abs target (`./x`, `../x`, …). */
+function shellRelPath(cwd: string, absTarget: string): string {
+  const cwdParts = cwd.split('/').filter(Boolean);
+  const tgtParts = absTarget.split('/').filter(Boolean);
+  let i = 0;
+  while (i < cwdParts.length && i < tgtParts.length && cwdParts[i] === tgtParts[i]) i++;
+  const ups = cwdParts.length - i;
+  const down = tgtParts.slice(i);
+  if (ups === 0 && down.length === 0) return '.';
+  if (ups === 0) return `./${down.join('/')}`;
+  return `${'../'.repeat(ups)}${down.join('/')}`;
+}
+
+/** Rewrite kit prologue cheat lines so the typed path matches the player's cwd. */
+function localizePrologueCheatCmd(cmd: CheatCmd, cwd: string): CheatCmd {
+  if (cmd.cmd === 'ls ~/kit') {
+    if (cwd === KIT_DIR) {
+      return {
+        ...cmd,
+        cmd: 'ls',
+        parts: [
+          { token: 'ls', meaning: 'lists files. you\'re already in the kit.' },
+        ],
+      };
+    }
+    if (cwd === SANDBOX_HOME) {
+      return {
+        ...cmd,
+        cmd: 'ls ~/kit',
+        parts: [
+          { token: 'ls', meaning: 'lists files' },
+          { token: '~/kit', meaning: 'that\'s the kit folder. cd into it if you want.' },
+        ],
+      };
+    }
+    const rel = shellRelPath(cwd, KIT_DIR);
+    return {
+      ...cmd,
+      cmd: `ls ${rel}`,
+      parts: [
+        { token: 'ls', meaning: 'lists files' },
+        { token: rel, meaning: 'path to the kit from where you are' },
+      ],
+    };
+  }
+
+  if (cmd.cmd === 'sudo ./kit/bootstrap.sh') {
+    const rel = shellRelPath(cwd, BOOTSTRAP_PATH);
+    return {
+      ...cmd,
+      cmd: `sudo ${rel}`,
+      parts: [
+        { token: 'sudo', meaning: 'runs as root. danny can do that here.' },
+        {
+          token: rel,
+          meaning: 'this gets you to root, kid. use it.',
+        },
+      ],
+    };
+  }
+
+  return cmd;
+}
+
+function localizePhase1Blurb(cwd: string, fallback: string): string {
+  if (!cwd.startsWith(SANDBOX_HOME)) return fallback;
+  if (cwd === KIT_DIR) {
+    return "You're in the kit. `ls`, then `sudo ./bootstrap.sh`, then get on the ATM's network, y'hear?";
+  }
+  if (cwd === SANDBOX_HOME) {
+    return "Our guys left a kit on the laptop. `cd kit` or `ls ~/kit`, run bootstrap, then get on the ATM's network, y'hear?";
+  }
+  return "Find the kit from where you are, run bootstrap, then get on the ATM's network, y'hear?";
 }
 
 const FONT = '"Courier New", Courier, monospace';
@@ -215,6 +296,7 @@ export function CheatSheet({
   unlockedOutputs,
   unlockedChoices,
   started,
+  sandboxCwd,
 }: Props) {
   const activeRef = useRef<HTMLDivElement>(null);
   const latestRef = useRef<HTMLDivElement>(null);
@@ -228,7 +310,7 @@ export function CheatSheet({
       (latestRef.current ?? activeRef.current)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 80);
     return () => clearTimeout(t);
-  }, [open, phase, waitingForChoice, currentCmd, unlockedCmds.length, unlockedOutputs.length, unlockedChoices.length]);
+  }, [open, phase, waitingForChoice, currentCmd, unlockedCmds.length, unlockedOutputs.length, unlockedChoices.length, sandboxCwd]);
 
   const visiblePhases = started
     ? CHEAT_PHASES.filter((p) => p.phase <= phase)
@@ -340,16 +422,19 @@ export function CheatSheet({
 
                   {isActive && (
                     <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5, marginBottom: 8 }}>
-                      {p.blurb}
+                      {p.phase === 1 ? localizePhase1Blurb(sandboxCwd, p.blurb) : p.blurb}
                     </div>
                   )}
 
                   {shownCmds.map((c) => {
                     const highlight = isActive && currentCmd === c.cmd;
+                    const display = isActive && p.phase === 1 && sandboxCwd.startsWith(SANDBOX_HOME)
+                      ? localizePrologueCheatCmd(c, sandboxCwd)
+                      : c;
                     return (
                       <div key={c.cmd} ref={highlight ? latestRef : undefined}>
                         <CmdBlock
-                          cmd={c}
+                          cmd={display}
                           highlight={highlight}
                           showOutputs={past || unlockedOutputSet.has(c.cmd)}
                         />

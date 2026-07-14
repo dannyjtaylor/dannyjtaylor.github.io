@@ -11,11 +11,14 @@ export interface SandboxState {
   cwd: string; // absolute, e.g. /home/danny
 }
 
+const KIT_DIR = '/home/danny/kit';
+const BOOTSTRAP_PATH = `${KIT_DIR}/bootstrap.sh`;
+
 const BOOTSTRAP_SH = `#!/usr/bin/env bash
 # Train de Aqua — operator bootstrap
 # Plants /root/ploutus overlay + drops you into the recon workspace.
 set -euo pipefail
-echo "[*] verifying drop signature…"
+echo "[*] verifying kit signature…"
 # … ed25519 check, overlay mount, profile switch …
 exec sudo -i
 `;
@@ -93,7 +96,7 @@ const BASH_HISTORY = `whoami
 pwd
 ip -4 addr show eth0 | head
 ping -c1 192.168.1.1
-cd ~/drop
+cd ~/kit
 ls
 ls tools
 cat ~/train-de-aqua/mission.txt
@@ -117,7 +120,7 @@ export const SANDBOX_ROOT: SandboxNode = dir({
       Documents: dir({}),
       Downloads: dir({}),
       Pictures: dir({}),
-      drop: dir({
+      kit: dir({
         'bootstrap.sh': file(BOOTSTRAP_SH),
         '.oprc': file('CREW=train-de-aqua\nOP=welsh-phargo-vestibule\n'),
         tools: dir({
@@ -172,7 +175,7 @@ function splitPath(path: string): string[] {
   return path.split('/').filter(Boolean);
 }
 
-function resolvePath(cwd: string, input?: string): string {
+export function resolvePath(cwd: string, input?: string): string {
   if (!input || input === '.') return cwd;
   let raw = input;
   if (raw.startsWith('~/')) raw = `/home/danny/${raw.slice(2)}`;
@@ -473,27 +476,26 @@ export function runSandboxCommand(typed: string, sandbox: SandboxState): Sandbox
   }
 }
 
-/** Aliases that count as the scripted prologue cmds */
-export function matchesPrologueLs(typed: string): boolean {
-  const n = typed.trim().replace(/\s+/g, ' ');
-  return (
-    n === 'ls ~/drop' ||
-    n === 'ls ~/drop/' ||
-    n === 'ls drop' ||
-    n === 'ls drop/' ||
-    n === 'ls -la ~/drop' ||
-    n === 'ls -l ~/drop'
-  );
+/** True when `ls` (optional short flags) lists the kit directory. */
+export function matchesPrologueLs(typed: string, cwd: string): boolean {
+  const parts = typed.trim().replace(/\s+/g, ' ').split(' ').filter(Boolean);
+  if (parts[0] !== 'ls') return false;
+  let i = 1;
+  while (i < parts.length && parts[i]!.startsWith('-') && parts[i] !== '--') {
+    if (!/^-[alA]+$/.test(parts[i]!)) return false;
+    i++;
+  }
+  if (i < parts.length - 1) return false;
+  const target = resolvePath(cwd, parts[i] ?? '.');
+  return target === KIT_DIR;
 }
 
-export function matchesPrologueBootstrap(typed: string): boolean {
-  const n = typed.trim().replace(/\s+/g, ' ');
-  return (
-    n === 'sudo ./drop/bootstrap.sh' ||
-    n === 'sudo ~/drop/bootstrap.sh' ||
-    n === 'sudo /home/danny/drop/bootstrap.sh' ||
-    n === './drop/bootstrap.sh' // forgive missing sudo in demo
-  );
+/** True when the resolved executable is ~/kit/bootstrap.sh (optional sudo). */
+export function matchesPrologueBootstrap(typed: string, cwd: string): boolean {
+  let n = typed.trim().replace(/\s+/g, ' ');
+  if (n.startsWith('sudo ')) n = n.slice(5).trim();
+  if (!n || n.includes(' ')) return false;
+  return resolvePath(cwd, n) === BOOTSTRAP_PATH;
 }
 
 const TAB_BINS = [

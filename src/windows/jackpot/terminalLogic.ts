@@ -94,8 +94,6 @@ export function rebuildAtmFromChoices(choices: ToolChoices): AtmVisualState {
 
   if (choices.installMethod === 'hdd') {
     atm = { ...atm, driveState: 'removed', showLaptop: true, showUsbStick: false, showBlackbox: false };
-  } else if (choices.installMethod === 'usb') {
-    atm = { ...atm, showLaptop: true, showUsbStick: true, showBlackbox: false };
   } else if (choices.installMethod === 'blackbox') {
     atm = { ...atm, showBlackbox: true, showLaptop: false, showUsbStick: false };
   }
@@ -110,7 +108,6 @@ export function rebuildAtmFromChoices(choices: ToolChoices): AtmVisualState {
       showClamp: false,
       showSensorCut: false,
       showDoorAjar: false,
-      showTamperTape: true,
       accessMethod: null,
       screenMode: 'reboot',
     };

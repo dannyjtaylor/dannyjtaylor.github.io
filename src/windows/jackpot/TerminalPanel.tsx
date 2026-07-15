@@ -165,8 +165,9 @@ export function TerminalPanel({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Don't yank scroll during the jackpot cash ticker — let the player read history
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [revealedLines, waitingForChoice, cashAmount, inputBuffer, cursorIndex, failedCmds.length, termMode, charIndex, typingOutIndex, termClearAt, sandboxEchoes.length, showPloutusBanner]);
+  }, [revealedLines, waitingForChoice, inputBuffer, cursorIndex, failedCmds.length, termMode, charIndex, typingOutIndex, termClearAt, sandboxEchoes.length, showPloutusBanner, jackpotComplete]);
 
   const historyEnd = revealedLines;
   const historyStart = Math.max(0, termClearAt ?? 0);
@@ -207,47 +208,80 @@ export function TerminalPanel({
     >
       <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}@keyframes svgGlow{0%,90%,100%{filter:drop-shadow(0 0 6px #e8203a88) drop-shadow(0 0 14px #e8203a33)}92%{filter:drop-shadow(-2px 0 #0066ff66) drop-shadow(0 0 14px #e8203a55)}94%{filter:drop-shadow(2px 0 #e8203aaa) drop-shadow(-2px 0 #0066ff44)}}`}</style>
 
-      {/* Fully revealed history */}
+      {/* Scripted history interleaved with free-explore echoes (chronological) */}
       {historyLines.map((line, i) => {
         const absIdx = historyStart + i;
+        const echoesHere = line.t === 'cmd'
+          ? sandboxEchoes.filter((e) => e.beforeCmdIndex === absIdx)
+          : [];
+        const echoNodes = echoesHere.map((echo, ei) => (
+          <div key={`sand-${absIdx}-${ei}`} style={{ margin: '2px 0 6px' }}>
+            {echo.cmd !== '' && (
+              <span style={{ display: 'block', color: CMD_GREEN }}>
+                {renderPrompt(echo.tier, echo.cwdDisplay)}{echo.cmd}
+              </span>
+            )}
+            {echo.lines.map((l, j) => (
+              <span key={j} style={{ display: 'block', color: OUT_WHITE, whiteSpace: 'pre-wrap' }}>{l}</span>
+            ))}
+          </div>
+        ));
+
         if (line.t === 'banner') {
-          return bannerRevealed && absIdx === bannerIdx ? (
-            <div key={`h-${absIdx}`} style={{ color: '#888888', fontSize: 10, lineHeight: 1.3, margin: '10px 0 14px', whiteSpace: 'pre', letterSpacing: 0 }}>
-              {BANNER}
-            </div>
-          ) : null;
-        }
-        if (line.t === 'choice') {
-          if (line.id === waitingForChoice) return null;
-          const cfg = CHOICES[line.id];
           return (
-            <div key={`h-${absIdx}`} style={{ background: '#12080c', border: '1px solid #ff224455', padding: '10px 14px', margin: '6px 0', borderRadius: 2, opacity: 0.55 }}>
-              <div style={{ color: '#ff2244', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>{cfg.prompt}</div>
-              {cfg.options.map(opt => (
-                <span key={opt.key} style={{ display: 'block', color: '#888888', padding: '3px 0' }}>
-                  <kbd style={{ background: '#1a1a1a', border: '1px solid #333', padding: '0 6px', color: '#aaa', marginRight: 8, fontFamily: 'inherit', fontSize: 13 }}>{opt.key}</kbd>
-                  {opt.label}
-                </span>
-              ))}
+            <div key={`h-wrap-${absIdx}`}>
+              {echoNodes}
+              {bannerRevealed && absIdx === bannerIdx ? (
+                <div style={{ color: '#888888', fontSize: 10, lineHeight: 1.3, margin: '10px 0 14px', whiteSpace: 'pre', letterSpacing: 0 }}>
+                  {BANNER}
+                </div>
+              ) : null}
             </div>
           );
         }
-        return renderFullLine(line, `h-${absIdx}`, promptForHistoryLine(lines, absIdx, showPloutusBanner));
+        if (line.t === 'choice') {
+          if (line.id === waitingForChoice) {
+            return echoNodes.length ? <div key={`h-wrap-${absIdx}`}>{echoNodes}</div> : null;
+          }
+          const cfg = CHOICES[line.id];
+          return (
+            <div key={`h-wrap-${absIdx}`}>
+              {echoNodes}
+              <div style={{ background: '#12080c', border: '1px solid #ff224455', padding: '10px 14px', margin: '6px 0', borderRadius: 2, opacity: 0.55 }}>
+                <div style={{ color: '#ff2244', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>{cfg.prompt}</div>
+                {cfg.options.map(opt => (
+                  <span key={opt.key} style={{ display: 'block', color: '#888888', padding: '3px 0' }}>
+                    <kbd style={{ background: '#1a1a1a', border: '1px solid #333', padding: '0 6px', color: '#aaa', marginRight: 8, fontFamily: 'inherit', fontSize: 13 }}>{opt.key}</kbd>
+                    {opt.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div key={`h-wrap-${absIdx}`}>
+            {echoNodes}
+            {renderFullLine(line, `h-${absIdx}`, promptForHistoryLine(lines, absIdx, showPloutusBanner))}
+          </div>
+        );
       })}
 
-      {/* Free-explore sandbox echoes (user tier) */}
-      {sandboxEchoes.map((echo, i) => (
-        <div key={`sand-${i}`} style={{ margin: '2px 0 6px' }}>
-          {echo.cmd !== '' && (
-            <span style={{ display: 'block', color: CMD_GREEN }}>
-              {renderPrompt(echo.tier, echo.cwdDisplay)}{echo.cmd}
-            </span>
-          )}
-          {echo.lines.map((l, j) => (
-            <span key={j} style={{ display: 'block', color: OUT_WHITE, whiteSpace: 'pre-wrap' }}>{l}</span>
-          ))}
-        </div>
-      ))}
+      {/* Free-explore while waiting on the current (not-yet-accepted) scripted cmd */}
+      {sandboxEchoes
+        .filter((e) => e.beforeCmdIndex >= historyEnd)
+        .map((echo, i) => (
+          <div key={`sand-pending-${i}`} style={{ margin: '2px 0 6px' }}>
+            {echo.cmd !== '' && (
+              <span style={{ display: 'block', color: CMD_GREEN }}>
+                {renderPrompt(echo.tier, echo.cwdDisplay)}{echo.cmd}
+              </span>
+            )}
+            {echo.lines.map((l, j) => (
+              <span key={j} style={{ display: 'block', color: OUT_WHITE, whiteSpace: 'pre-wrap' }}>{l}</span>
+            ))}
+          </div>
+        ))}
 
       {/* Failed command attempts (bash-style) — root tier */}
       {failedCmds.map((f, i) => {
@@ -285,8 +319,15 @@ export function TerminalPanel({
         </span>
       )}
 
-      {/* Live prompt — shown from cold boot so it feels like a real shell */}
-      {((!started) || (started && termMode === 'at-cmd' && expectedCmd !== null && !typingLine)) && (
+      {/* Live prompt — hidden on jackpot win / cash count (that's the win screen) */}
+      {((!started) || (
+        started
+        && termMode === 'at-cmd'
+        && expectedCmd !== null
+        && !typingLine
+        && !jackpotComplete
+        && !(phaseId === 6 && cashAmount > 0)
+      )) && (
         <span style={{ display: 'block', color: CMD_GREEN }}>
           {renderPrompt(livePrompt.tier, livePrompt.cwd)}
           {started && (
@@ -309,7 +350,13 @@ export function TerminalPanel({
       )}
 
       {waitingForChoice && (
-        <div style={{ background: '#12080c', border: '1px solid #ff224499', padding: '10px 14px', margin: '6px 0', borderRadius: 2 }}>
+        <div style={{
+          background: '#12080c',
+          border: '1px solid #ff224499',
+          padding: '10px 14px',
+          margin: '6px 0',
+          borderRadius: 2,
+        }}>
           <div style={{ color: '#ff2244', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>{CHOICES[waitingForChoice].prompt}</div>
           {CHOICES[waitingForChoice].options.map(opt => (
             <span key={opt.key} style={{ display: 'block', color: '#e0e0e0', padding: '3px 0' }}>
@@ -342,7 +389,12 @@ export function TerminalPanel({
         </>
       )}
 
-      {started && !waitingForChoice && !jackpotComplete && !typingLine && (termMode === 'at-output' || termMode === 'at-announce' || termMode === 'phase-end') && (
+      {started
+        && !waitingForChoice
+        && !jackpotComplete
+        && !typingLine
+        && !(phaseId === 6 && (termMode === 'phase-end' || cashAmount > 0))
+        && (termMode === 'at-output' || termMode === 'at-announce' || termMode === 'phase-end') && (
         <span style={{ display: 'block', color: '#e0e0e0', marginTop: 2 }}>
           {renderPrompt(livePrompt.tier, livePrompt.cwd)}
           <span style={{ color: '#33ff66', animation: 'blink 1s step-end infinite' }}>█</span>

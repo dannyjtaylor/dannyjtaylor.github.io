@@ -31,7 +31,7 @@ export interface ToolChoices {
   panelAccess: 'tbar' | 'social' | null;
   ethernet: 'loopback' | 'cut' | 'live' | null;
   alarmSensor: 'clamp' | null;
-  installMethod: 'hdd' | 'usb' | 'blackbox' | null;
+  installMethod: 'hdd' | 'blackbox' | null;
   persistMethod: 'reseal' | null;
   activateMethod: 'keyboard' | null;
 }
@@ -50,7 +50,6 @@ export interface AtmVisualState {
   showClamp: boolean;
   /** How the top-hat was opened */
   accessMethod: 'tbar' | 'social' | 'crowbar' | null;
-  /** USB live-OS stick in the ATM USB port */
   showUsbStick: boolean;
   /** Alarm sensor wire severed */
   showSensorCut: boolean;
@@ -58,8 +57,6 @@ export interface AtmVisualState {
   showDoorAjar: boolean;
   /** Mule calling activation server on phone */
   showPhone: boolean;
-  /** Fresh tamper tape after reseal */
-  showTamperTape: boolean;
 }
 
 export type AtmUiState =
@@ -94,6 +91,11 @@ export interface SandboxEcho {
   /** Prompt tier when the cmd was run */
   tier: ShellTier;
   cwdDisplay: string;
+  /**
+   * Scripted `revealedLines` index when this was typed (the pending beat).
+   * Rendered immediately before that scripted cmd so free-explore stays chronological.
+   */
+  beforeCmdIndex: number;
 }
 
 /** Snapshot for CTRL+SPACE undo (includes police so demo can rewind a bust) */
@@ -125,6 +127,7 @@ export interface NarrativeCheckpoint {
   sandboxCwd: string;
   sandboxEchoes: SandboxEcho[];
   showPloutusBanner: boolean;
+  termClearAt: number | null;
 }
 
 export interface GameState {
@@ -165,6 +168,11 @@ export interface GameState {
   policeEtaSeconds: number | null;
   /** True after ETA hits 0 — operation permanently blown until RESET */
   policeArrived: boolean;
+  /**
+   * After R on a bust: hide the BUSTED veil, hold the yellow evidence tape
+   * on the ATM for a beat, then hard-reset the demo.
+   */
+  seizedLinger: boolean;
   /** How many times police were (re)dispatched this run */
   policeStrikeCount: number;
   /** Seconds just shaved off ETA (for overlay flash); cleared next tick */
@@ -218,6 +226,7 @@ export type Action =
   | { type: 'JACKPOT_COMPLETE' }
   | { type: 'ATM_DISPENSE_DONE' }
   | { type: 'RESET' }
+  | { type: 'SEIZED_LINGER_DONE' }
   | { type: 'ATM_PIN_DIGIT'; digit: string }
   | { type: 'ATM_CLEAR' }
   | { type: 'ATM_ENTER' }

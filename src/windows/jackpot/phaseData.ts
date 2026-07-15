@@ -4,15 +4,15 @@ export const CHOICES: Record<ChoiceId, ChoiceConfig> = {
   'panel-access': {
     prompt: 'SELECT PANEL ACCESS METHOD:',
     options: [
-      { key: '1', label: 'Ebay Dyebold T-bar Key (SKU 001-0006522)', outcome: 'correct' },
+      { key: '1', label: 'Key from Dyebold off of Ebay', outcome: 'correct' },
       { key: '2', label: 'Crow bar', outcome: 'wrong', wrongReason: 'Vibration sensor triggered - tamper alarm dispatched to monitoring center' },
-      { key: '3', label: 'Social Engineering - Wear DN field technician gear & badge', outcome: 'correct' },
+      { key: '3', label: 'Wear DN branded ATM field technician gear and badge', outcome: 'correct' },
     ],
   },
   'ethernet': {
     prompt: 'SELECT LOG HANDLING METHOD:',
     options: [
-      { key: '1', label: 'Cut cable + insert RJ45 loopback plug', outcome: 'correct' },
+      { key: '1', label: 'Replace cable with RJ45 loopback plug', outcome: 'correct' },
       { key: '2', label: 'Cut cable only', outcome: 'partial', wrongReason: 'Buffered logs flushed to bank SIEM on reconnect - alert dispatched' },
       { key: '3', label: 'Leave cable intact', outcome: 'wrong', wrongReason: 'Live tamper log received by SIEM - police dispatched (ETA ~40s)' },
     ],
@@ -20,7 +20,7 @@ export const CHOICES: Record<ChoiceId, ChoiceConfig> = {
   'alarm-sensor': {
     prompt: 'SELECT DOOR-ALARM BYPASS METHOD:',
     options: [
-      { key: '1', label: 'Magnetic reed-switch clamp', outcome: 'correct' },
+      { key: '1', label: 'Magnetic clamp', outcome: 'correct' },
       { key: '2', label: 'Cut alarm sensor wire', outcome: 'wrong', wrongReason: 'Monitoring loop broken - tamper alarm triggered at central station' },
       { key: '3', label: 'Ignore sensor & hope nobody is watching', outcome: 'wrong', wrongReason: 'Door-open alert fired - units rolling (ETA ~40s)' },
     ],
@@ -29,8 +29,7 @@ export const CHOICES: Record<ChoiceId, ChoiceConfig> = {
     prompt: 'SELECT MALWARE INSTALLATION METHOD:',
     options: [
       { key: '1', label: 'Remove the HDD and deploy Ploutus on NTFS partition', outcome: 'correct' },
-      { key: '2', label: 'Boot from USB live OS and inject Ploutus', outcome: 'correct' },
-      { key: '3', label: 'Use a Raspberry Pi black box', outcome: 'correct' },
+      { key: '2', label: 'Use a Raspberry Pi black box', outcome: 'correct' },
     ],
   },
   'persist-method': {
@@ -38,13 +37,13 @@ export const CHOICES: Record<ChoiceId, ChoiceConfig> = {
     options: [
       { key: '1', label: 'Reseal panel, restore sensor, power-cycle ATM', outcome: 'correct' },
       { key: '2', label: 'Leave panel ajar / skip reseal', outcome: 'wrong', wrongReason: 'Open cabinet spotted by passerby - silent alarm tripped' },
-      { key: '3', label: 'Skip reboot - leave malware unloaded until next crash', outcome: 'wrong', wrongReason: 'Payload never loaded - ATM still clean; wasted op' },
+      { key: '3', label: 'Skip reboot - leave malware unloaded until next crash', outcome: 'wrong', wrongReason: 'No reboot — payload never loaded. You left a half-done cabinet and walked. Guard noticed.' },
     ],
   },
   'activate-method': {
     prompt: 'SELECT ACTIVATION METHOD:',
     options: [
-      { key: '1', label: 'Plug USB keyboard + enter rotating activation code', outcome: 'correct' },
+      { key: '1', label: 'Plug USB keyboard in and enter activation code', outcome: 'correct' },
       { key: '2', label: 'Trigger dispense from the normal customer PIN screen', outcome: 'wrong', wrongReason: 'Customer UI has no jackpot path - failed attempt logged' },
       { key: '3', label: 'Call activation server from a phone next to the ATM', outcome: 'wrong', wrongReason: 'Cellular burst near vestibule flagged by fraud analytics' },
     ],
@@ -57,20 +56,20 @@ export const CONTINUATIONS: Record<string, TermLine[]> = {
     { t: 'out', text: '# top-hat panel open - cavity exposed', s: 'ok' },
   ],
   'panel-access:3': [
-    { t: 'out', text: '# social: DN badge accepted - escorted to ATM', s: 'warn' },
+    { t: 'out', text: '# DN badge accepted - escorted to ATM', s: 'warn' },
     { t: 'out', text: '# guard unlocked panel - internal access granted', s: 'ok' },
   ],
   'ethernet:1': [
     { t: 'cmd', text: 'ip link show eth0 | head -n2' },
     { t: 'out', text: '2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500' },
-    { t: 'out', text: '# wall jack: RJ45 loopback seated - SIEM stream dead', s: 'ok' },
+    { t: 'out', text: '# wall jack: cable out, RJ45 loopback seated - SIEM stream dead', s: 'ok' },
   ],
   'ethernet:2': [
     { t: 'out', text: '# eth cut - NIC buffering locally (no loopback)', s: 'warn' },
     { t: 'out', text: '# WARNING: buffer flushes to SIEM on reconnect', s: 'warn' },
   ],
   'alarm-sensor:1': [
-    { t: 'out', text: '# reed clamp on door sensor - reads CLOSED', s: 'ok' },
+    { t: 'out', text: '# magnetic clamp on door sensor - reads CLOSED', s: 'ok' },
     { t: 'out', text: '# monitoring loop intact - no central-station hit', s: 'ok' },
   ],
   'install-method:1': [
@@ -92,15 +91,6 @@ export const CONTINUATIONS: Record<string, TermLine[]> = {
     { t: 'out', text: 'umount: /mnt/atm: clean - reinstall drive in bay', s: 'ok' },
   ],
   'install-method:2': [
-    { t: 'cmd', text: 'lsusb | grep -i kingston' },
-    { t: 'out', text: 'Bus 001 Device 003: ID 0951:1666 Kingston DataTraveler 32GB', s: 'ok' },
-    { t: 'out', text: '# BIOS USB-first set - ATM will boot installer stick', s: 'ok' },
-    { t: 'cmd', text: './ploutus-installer.sh --target ntfs --persist userinit' },
-    { t: 'out', text: '[*] mounting NTFS via live OS...' },
-    { t: 'out', text: '[*] payload written; Userinit patched', s: 'ok' },
-    { t: 'out', text: '[ PERSISTENCE ] Winlogon\\Userinit modified', s: 'hi' },
-  ],
-  'install-method:3': [
     { t: 'out', text: '# blackbox: RPi Zero W + CDM firmware shim', s: 'ann' },
     { t: 'out', text: '# splice dispenser control cable behind safe door', s: 'ok' },
     { t: 'out', text: '# inline between ATM CPU and CDM module', s: 'ok' },
@@ -150,7 +140,6 @@ export const ATM_INITIAL: AtmVisualState = {
   showSensorCut: false,
   showDoorAjar: false,
   showPhone: false,
-  showTamperTape: false,
 };
 
 export const PHASE_LINES: Record<number, TermLine[]> = {
@@ -211,9 +200,9 @@ export const PHASE_LINES: Record<number, TermLine[]> = {
     { t: 'blank' },
     { t: 'choice', id: 'panel-access' },
     { t: 'blank' },
-    { t: 'choice', id: 'ethernet' },
-    { t: 'blank' },
     { t: 'choice', id: 'alarm-sensor' },
+    { t: 'blank' },
+    { t: 'choice', id: 'ethernet' },
     { t: 'blank' },
     { t: 'cmd', text: 'echo "[*] internal access confirmed"' },
     { t: 'out', text: '[*] internal access confirmed', s: 'ok' },
@@ -264,7 +253,7 @@ export const PHASE_LINES: Record<number, TermLine[]> = {
 
 export const NARRATIVES: Record<number, string> = {
   1: 'Attacker plugs into the branch LAN and maps the ATM on the same subnet - model, OS, XFS version, camera coverage.',
-  2: 'Physical access at the machine. The ethernet loopback plug is critical - without it, the bank SIEM receives a live tamper alert.',
+  2: 'Physical access at the machine. Open the panel, keep the door sensor happy, then kill the log stream so SIEM stays blind.',
   3: 'Ploutus-D is deployed as a disguised Windows service and wired into the Winlogon autorun registry key. Survives reboots invisibly.',
   4: 'The ATM reboots normally. Customers use it. The bank sees nothing. Ploutus-D waits silently for an activation code.',
   5: 'The money mule arrives later with a pre-generated activation code. The hidden UI bypasses the entire transaction authorization system.',

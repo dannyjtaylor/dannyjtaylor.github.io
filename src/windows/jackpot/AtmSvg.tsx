@@ -48,10 +48,13 @@ function billsForWithdraw(amount: number) {
   return makeBills(1);
 }
 
-// Larger ATM — viewBox 240×400; legend removed so we can scale up
-const SVG_W = 384;
-const SVG_H = 640;
-const SCALE = SVG_W / 240; // 1.6
+// ATM art lives in x≈24–210; right gutter (laptop / HDD / keyboard) needs room.
+// Keep 1.6px per SVG unit so HTML screen/keypad overlays stay aligned.
+const VB_W = 270;
+const VB_H = 400;
+const SCALE = 1.6;
+const SVG_W = Math.round(VB_W * SCALE); // 432
+const SVG_H = Math.round(VB_H * SCALE); // 640
 
 const SCR_L = Math.round(44 * SCALE);
 const SCR_T = Math.round(46 * SCALE);
@@ -721,7 +724,7 @@ export function AtmSvg({
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <svg
-        viewBox="0 0 240 400"
+        viewBox={`0 0 ${VB_W} ${VB_H}`}
         width={SVG_W}
         height={SVG_H}
         style={{ imageRendering: 'pixelated', shapeRendering: 'crispEdges', display: 'block', overflow: 'visible' }}
@@ -869,7 +872,6 @@ export function AtmSvg({
                 <rect x="36" y="347" width="16" height="10" fill="#4488ff" />
                 <path d="M40 346 L44 343 L48 343 L52 346" fill="#2266cc" stroke="#1a44aa" strokeWidth="0.4" />
                 <path d="M38 349 Q48 344 48 358 Q48 366 38 361" fill="none" stroke="#88bbff" strokeWidth="2" />
-                <text x="44" y="370" textAnchor="middle" fill="#2266cc" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">LOOP</text>
                 {/* Cut wall cable stump (not in the jack anymore) */}
                 <rect x="6" y="352" width="10" height="5" fill="#555" stroke="#333" strokeWidth="0.5" />
                 <rect x="4" y="353" width="4" height="3" fill="#ff8800" />
@@ -1047,25 +1049,6 @@ export function AtmSvg({
           )}
         </AnimatePresence>
 
-        {/* Tamper tape on resealed closed lid */}
-        <AnimatePresence>
-          {!state.panelOpen && state.showTamperTape && (
-            <motion.g
-              key="tamper-tape"
-              initial={{ opacity: 0, scaleX: 0.3 }}
-              animate={{ opacity: 1, scaleX: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              style={{ transformOrigin: '117px 20px' }}
-            >
-              <rect x="52" y="18" width="130" height="4" fill="#c9990a" opacity="0.9" />
-              <rect x="52" y="18" width="130" height="1" fill="#ffcd11" />
-              <rect x="52" y="21" width="130" height="1" fill="#8a6800" />
-              <text x="117" y="21.5" textAnchor="middle" fill="#5a4400" fontFamily="Arial, sans-serif" fontSize="5" letterSpacing="0.6" fontWeight="bold">SEALED</text>
-            </motion.g>
-          )}
-        </AnimatePresence>
-
         {/* Door ajar gap indicator */}
         <AnimatePresence>
           {state.showDoorAjar && state.panelOpen && (
@@ -1115,7 +1098,6 @@ export function AtmSvg({
               <rect x="14" y="26" width="4" height="6" fill="#ddd" />
               <rect x="15" y="12" width="2" height="4" fill="#888" />
               <line x1="16" y1="12" x2="16" y2="8" stroke="#888" strokeWidth="1" />
-              <text x="16" y="42" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">SOCIAL</text>
             </motion.g>
           )}
           {state.panelOpen && state.accessMethod === 'crowbar' && (
@@ -1136,21 +1118,25 @@ export function AtmSvg({
           )}
         </AnimatePresence>
 
-        {/* Drive removed — floats beside bay with USB-SATA cable (only while panel open) */}
+        {/*
+          Drive pulled — parked above the laptop in the right gutter.
+          Blue lead = USB-SATA bridge into the laptop (drawn after the laptop
+          so it never paints over the screen).
+        */}
         <AnimatePresence>
           {state.panelOpen && state.driveState === 'removed' && (
             <motion.g
-              initial={{ opacity: 0, x: 0, y: 0 }}
-              animate={{ opacity: 1, x: 52, y: -22 }}
+              key="hdd-pulled"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
             >
-              <rect x="106" y="18" width="40" height="14" fill="#3a3a42" stroke="#777" strokeWidth="0.6" />
-              <rect x="108" y="20" width="36" height="6" fill="#4a4a55" />
-              <rect x="110" y="28" width="8" height="2" fill="#ffaa00" />
-              {/* USB-SATA cable routes right edge → laptop (avoids keypad) */}
-              <path d="M146 25 L168 25 L168 200 L190 200" fill="none" stroke="#4488ff" strokeWidth="1.5" />
-              <rect x="188" y="198" width="6" height="4" fill="#2266cc" />
+              <rect x="216" y="10" width="42" height="16" fill="#3a3a42" stroke="#777" strokeWidth="0.6" />
+              <rect x="218" y="12" width="38" height="7" fill="#4a4a55" />
+              <rect x="220" y="21" width="10" height="2.5" fill="#ffaa00" />
+              {/* USB-SATA dongle stub on the drive */}
+              <rect x="252" y="14" width="8" height="8" fill="#2266cc" stroke="#4488ff" strokeWidth="0.5" />
             </motion.g>
           )}
         </AnimatePresence>
@@ -1214,42 +1200,64 @@ export function AtmSvg({
               <rect x="48" y="165" width="10" height="4" fill="#111" />
               <rect x="38" y="165" width="10" height="4" fill="#4488ff" stroke="#2266cc" strokeWidth="0.5" />
               <rect x="40" y="166" width="6" height="2" fill="#66aaff" />
-              <text x="43" y="162" textAnchor="middle" fill="#2266cc" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">LIVE</text>
             </motion.g>
           )}
         </AnimatePresence>
 
-        {/* Laptop — HDD/USB install path */}
+        {/*
+          Laptop — right gutter outside the cabinet. USB port on the RIGHT so the
+          HDD bridge cable can drop beside the screen instead of through it.
+        */}
         <AnimatePresence>
           {state.showLaptop && (
             <motion.g
               key="laptop"
-              initial={{ opacity: 0, x: 16 }}
+              initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0 }}
+              exit={{ opacity: 0, x: 8 }}
               transition={{ duration: 0.4 }}
             >
-              <text x="204" y="185" textAnchor="middle" fill="#33ff66" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">KALI</text>
               {/* Screen */}
-              <rect x="178" y="188" width="52" height="36" fill="#2a2a2a" stroke="#444" strokeWidth="0.75" />
-              <rect x="180" y="190" width="48" height="32" fill="#041204" />
-              <rect x="182" y="194" width="32" height="3" fill="#33ff66" />
-              <rect x="182" y="199" width="40" height="2" fill="#22cc55" />
-              <rect x="182" y="203" width="28" height="2" fill="#118833" />
-              <rect x="182" y="207" width="36" height="2" fill="#22cc55" />
-              <rect x="182" y="211" width="20" height="2" fill="#118833" />
-              <rect x="182" y="215" width="34" height="2" fill="#33ff6644" />
+              <rect x="216" y="150" width="48" height="34" fill="#2a2a2a" stroke="#444" strokeWidth="0.75" />
+              <rect x="218" y="152" width="44" height="30" fill="#041204" />
+              <rect x="220" y="156" width="28" height="2.5" fill="#33ff66" />
+              <rect x="220" y="161" width="36" height="2" fill="#22cc55" />
+              <rect x="220" y="165" width="24" height="2" fill="#118833" />
+              <rect x="220" y="169" width="32" height="2" fill="#22cc55" />
+              <rect x="220" y="173" width="18" height="2" fill="#118833" />
               {/* Base / hinge */}
-              <rect x="174" y="224" width="60" height="6" fill="#333" stroke="#555" strokeWidth="0.5" />
-              <rect x="198" y="224" width="12" height="3" fill="#444" />
-              {/* USB cable to laptop when HDD removed */}
-              {state.driveState === 'removed' && (
-                <path d="M190 200 L190 224 L204 224" fill="none" stroke="#4488ff" strokeWidth="1.5" />
-              )}
-              {/* USB cable routes right fascia → USB port (avoids keypad) */}
-              {state.showUsbStick && (
-                <path d="M204 230 L214 230 L214 169 L58 169" fill="none" stroke="#4488ff" strokeWidth="1.2" strokeDasharray="2 1" />
-              )}
+              <rect x="212" y="184" width="56" height="7" fill="#333" stroke="#555" strokeWidth="0.5" />
+              <rect x="234" y="184" width="12" height="3" fill="#444" />
+              {/* USB-A port on the right edge of the base */}
+              <rect x="263" y="185.5" width="6" height="4" fill="#111" stroke="#4488ff" strokeWidth="0.45" />
+            </motion.g>
+          )}
+        </AnimatePresence>
+
+        {/*
+          USB-SATA bridge: pulled ATM drive → laptop USB.
+          Runs in the margin RIGHT of the laptop so it never covers the screen.
+          (Live-USB install has no cable — stick stays in the ATM port alone.)
+        */}
+        <AnimatePresence>
+          {state.showLaptop && state.panelOpen && state.driveState === 'removed' && (
+            <motion.g
+              key="cable-hdd-laptop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <path
+                d="M260 18 L268 18 L268 187.5 L269 187.5"
+                fill="none"
+                stroke="#4488ff"
+                strokeWidth="1.75"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+              {/* Plug tip into the laptop USB port */}
+              <rect x="266" y="185.5" width="4" height="4" fill="#2266cc" />
             </motion.g>
           )}
         </AnimatePresence>
@@ -1301,39 +1309,27 @@ export function AtmSvg({
           )}
         </AnimatePresence>
 
-        {/* External USB keyboard — parked below cabinet so it clears model text */}
+        {/* External USB keyboard — just the Type-A plug seated in the fascia port */}
         <AnimatePresence>
           {state.showExtKeyboard && (
             <motion.g
               key="ext-keyboard"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -4 }}
+              animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
             >
-              <text x="78" y="391" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="5.5" fontWeight="bold">KEYBOARD</text>
-              <rect x="34" y="394" width="88" height="28" fill="#2a2a2a" stroke="#555" strokeWidth="0.75" />
-              <rect x="36" y="396" width="84" height="24" fill="#333" />
-              {Array.from({ length: 15 }, (_, i) => (
-                <rect
-                  key={`ek-${i}`}
-                  x={38 + (i % 5) * 16}
-                  y={399 + Math.floor(i / 5) * 7}
-                  width={13}
-                  height={5.5}
-                  fill="#444"
-                  stroke="#555"
-                  strokeWidth="0.4"
-                />
-              ))}
-              {/* Cable routes right edge → USB port */}
-              <path d="M122 408 L214 408 L214 169 L58 169" fill="none" stroke="#4488ff" strokeWidth="1.2" />
-              <rect x="120" y="406" width="4" height="4" fill="#2266cc" />
+              <rect x="46" y="163" width="16" height="10" fill="#1a1a1a" stroke="#4488ff" strokeWidth="0.9" />
+              <rect x="48" y="165" width="10" height="6" fill="#333" />
+              <rect x="38" y="165" width="10" height="6" fill="#222" stroke="#555" strokeWidth="0.5" />
+              <rect x="39" y="166.5" width="6" height="3" fill="#666" />
+              {/* Short cable stub hanging off the plug */}
+              <path d="M38 168 L28 168 L28 178" fill="none" stroke="#4488ff" strokeWidth="1.5" strokeLinecap="round" />
             </motion.g>
           )}
         </AnimatePresence>
 
-        {/* Money mule silhouette */}
+        {/* Money mule — kept above the LAN jack so feet don't cover the cut-cable X */}
         <AnimatePresence>
           {state.showMule && (
             <motion.g
@@ -1343,31 +1339,52 @@ export function AtmSvg({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
             >
-              <text x="13" y="283" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">MULE</text>
+              <text x="13" y="218" textAnchor="middle" fill="#888" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">MULE</text>
               {/* Head */}
-              <rect x="6" y="288" width="14" height="14" fill="#666" stroke="#555" strokeWidth="0.5" />
-              <rect x="9" y="292" width="3" height="2" fill="#444" />
-              <rect x="14" y="292" width="3" height="2" fill="#444" />
+              <rect x="6" y="223" width="14" height="14" fill="#666" stroke="#555" strokeWidth="0.5" />
+              <rect x="9" y="227" width="3" height="2" fill="#444" />
+              <rect x="14" y="227" width="3" height="2" fill="#444" />
               {/* Body */}
-              <rect x="4" y="302" width="18" height="28" fill="#555" stroke="#444" strokeWidth="0.5" />
-              <rect x="6" y="306" width="14" height="4" fill="#666" />
+              <rect x="4" y="237" width="18" height="28" fill="#555" stroke="#444" strokeWidth="0.5" />
+              <rect x="6" y="241" width="14" height="4" fill="#666" />
               {/* Legs */}
-              <rect x="6" y="330" width="6" height="24" fill="#444" />
-              <rect x="14" y="330" width="6" height="24" fill="#444" />
-              <rect x="5" y="352" width="8" height="4" fill="#333" />
-              <rect x="13" y="352" width="8" height="4" fill="#333" />
+              <rect x="6" y="265" width="6" height="24" fill="#444" />
+              <rect x="14" y="265" width="6" height="24" fill="#444" />
+              <rect x="5" y="287" width="8" height="4" fill="#333" />
+              <rect x="13" y="287" width="8" height="4" fill="#333" />
               {/* Toolbag */}
-              <rect x="20" y="318" width="12" height="14" fill="#3a3a2a" stroke="#555" strokeWidth="0.5" />
-              <rect x="22" y="316" width="8" height="3" fill="#555" />
+              <rect x="20" y="253" width="12" height="14" fill="#3a3a2a" stroke="#555" strokeWidth="0.5" />
+              <rect x="22" y="251" width="8" height="3" fill="#555" />
               {/* Phone when calling */}
               {state.showPhone && (
                 <>
-                  <rect x="18" y="296" width="8" height="12" fill="#222" stroke="#4488ff" strokeWidth="0.6" />
-                  <rect x="19" y="298" width="6" height="8" fill="#061a06" />
-                  <rect x="21" y="294" width="2" height="3" fill="#888" />
-                  <text x="26" y="285" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">CALL</text>
+                  <rect x="18" y="231" width="8" height="12" fill="#222" stroke="#4488ff" strokeWidth="0.6" />
+                  <rect x="19" y="233" width="6" height="8" fill="#061a06" />
+                  <rect x="21" y="229" width="2" height="3" fill="#888" />
+                  <text x="26" y="220" textAnchor="middle" fill="#4488ff" fontFamily="Arial, sans-serif" fontSize="5" fontWeight="bold">CALL</text>
                 </>
               )}
+            </motion.g>
+          )}
+        </AnimatePresence>
+
+        {/*
+          Loopback cut-cable X redrawn on top of mule/USB overlays so the
+          severed wall drop stays readable after activation props appear.
+        */}
+        <AnimatePresence>
+          {state.ethState === 'loopback' && (
+            <motion.g
+              key="eth-loopback-x-top"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <rect x="6" y="352" width="10" height="5" fill="#555" stroke="#333" strokeWidth="0.5" />
+              <rect x="4" y="353" width="4" height="3" fill="#ff8800" />
+              <line x1="5" y1="351" x2="14" y2="359" stroke="#ff2244" strokeWidth="1.5" />
+              <line x1="14" y1="351" x2="5" y2="359" stroke="#ff2244" strokeWidth="1.5" />
             </motion.g>
           )}
         </AnimatePresence>
@@ -1558,7 +1575,7 @@ export function AtmSvg({
       */}
       {cardAnimMode && (
         <svg
-          viewBox="0 0 240 400"
+          viewBox={`0 0 ${VB_W} ${VB_H}`}
           width={SVG_W}
           height={SVG_H}
           style={{

@@ -58,7 +58,7 @@ function makeInitialState(): GameState {
   const sand = initialSandbox();
   return {
     phase: 1,
-    effectiveLines: PHASE_LINES[1]!,
+    effectiveLines: [...PHASE_LINES[1]!],
     revealedLines: 0,
     charIndex: 0,
     waitingForChoice: null,
@@ -78,6 +78,7 @@ function makeInitialState(): GameState {
     policeTriggered: false,
     policeEtaSeconds: null,
     policeArrived: false,
+    seizedLinger: false,
     policeStrikeCount: 0,
     lastEtaPenalty: null,
     lastAlarmReason: '',
@@ -129,6 +130,7 @@ function snapshotCheckpoint(state: GameState): NarrativeCheckpoint {
     sandboxCwd: state.sandboxCwd,
     sandboxEchoes: state.sandboxEchoes,
     showPloutusBanner: state.showPloutusBanner,
+    termClearAt: state.termClearAt,
   };
 }
 
@@ -142,7 +144,7 @@ function pushCheckpoint(state: GameState): GameState {
 /** Align termMode / waitingForChoice with content at revealedLines. */
 function settleAt(state: GameState, revealedLines: number, lines = state.effectiveLines): GameState {
   const { index, mode, line } = classifyAt(lines, revealedLines);
-  return {
+  const next: GameState = {
     ...state,
     effectiveLines: lines,
     revealedLines: index,
@@ -156,14 +158,26 @@ function settleAt(state: GameState, revealedLines: number, lines = state.effecti
     autofillTarget: null,
     typingOutIndex: null,
   };
+  // Safety: if anything lands on phase-6 dmesg, auto-run it (win path)
+  if (
+    next.phase === 6
+    && next.termMode === 'at-cmd'
+    && line
+    && line.t === 'cmd'
+    && line.text.startsWith('dmesg')
+  ) {
+    return acceptCommand(next, index);
+  }
+  return next;
 }
 
 /**
  * Enter a phase at the first interactive beat.
- * Phase 1 cold-start: bare danny@kali prompt — no history, no autofill.
+ * `startFrom` is the index of newly appended phase content (0 for cold start).
+ * Transcript is cumulative — prior phases stay in `lines` for scrollback.
  */
-function beginPhaseContent(state: GameState, lines: TermLine[]): GameState {
-  const start = skipNoise(lines, 0);
+function beginPhaseContent(state: GameState, lines: TermLine[], startFrom = 0): GameState {
+  const start = skipNoise(lines, startFrom);
   return settleAt({ ...state, effectiveLines: lines, started: true }, start, lines);
 }
 
@@ -194,6 +208,7 @@ function applyHelpTyped(state: GameState, typed: string): GameState {
     lines: helpOutputLines(state),
     tier: state.shellTier,
     cwdDisplay: cwdDisplayFor(state),
+    beforeCmdIndex: state.revealedLines,
   };
   return {
     ...state,
@@ -217,6 +232,7 @@ function applySandboxTyped(state: GameState, typed: string): GameState {
     lines: result.lines,
     tier: state.shellTier,
     cwdDisplay: cwdDisplayFor(state),
+    beforeCmdIndex: state.revealedLines,
   };
   return {
     ...state,
@@ -234,7 +250,9 @@ function applySandboxTyped(state: GameState, typed: string): GameState {
 function enterPhase(state: GameState, nextPhase: PhaseId): GameState {
   const baseAtm = rebuildAtmFromChoices(state.choices);
   const newAtm = atmForPhase(nextPhase, baseAtm);
-  return beginPhaseContent(
+  const phaseStart = state.effectiveLines.length;
+  const lines = [...state.effectiveLines, ...PHASE_LINES[nextPhase]!];
+  const started = beginPhaseContent(
     {
       ...state,
       phase: nextPhase,
@@ -242,8 +260,17 @@ function enterPhase(state: GameState, nextPhase: PhaseId): GameState {
       cashAmount: nextPhase === 6 ? state.cashAmount : state.cashAmount,
       jackpotComplete: nextPhase === 6 ? state.jackpotComplete : false,
     },
-    PHASE_LINES[nextPhase]!,
+    lines,
+    phaseStart,
   );
+  // Ploutus win path: dump PHASE 06 + dmesg automatically so the jackpot can start
+  if (nextPhase === 6) {
+    const dmesgIdx = lines.findIndex(
+      (l, i) => i >= phaseStart && l.t === 'cmd' && l.text.startsWith('dmesg'),
+    );
+    if (dmesgIdx >= 0) return acceptCommand(started, dmesgIdx);
+  }
+  return started;
 }
 
 function finishTypingOut(state: GameState): GameState {
@@ -260,7 +287,6 @@ function applyPoliceTrigger(
   state: GameState,
   reason: string,
   recoverable: boolean,
-  resetToLine: number,
   atmPatch?: AtmVisualState,
 ): GameState {
   if (state.policeArrived || state.policeEtaSeconds === 0) {
@@ -281,7 +307,7 @@ function applyPoliceTrigger(
         screenMode: 'seized',
         dispensing: false,
       },
-      waitingForChoice: null,
+      waitingForChoice: null, // permanent bust — no retry
     };
   }
 
@@ -301,6 +327,7 @@ function applyPoliceTrigger(
     : Math.max(POLICE_ETA_FLOOR, prevEta - POLICE_ETA_PENALTY);
   const penalty = first ? null : prevEta - nextEta;
 
+  // ETA / overlay only — no blocking alarm. Race the clock until policeArrived.
   return {
     ...state,
     policeTriggered: true,
@@ -308,14 +335,10 @@ function applyPoliceTrigger(
     policeStrikeCount: state.policeStrikeCount + 1,
     lastEtaPenalty: penalty && penalty > 0 ? penalty : null,
     lastAlarmReason: reason,
-    alarm: {
-      active: true,
-      reason,
-      recoverable,
-      resetToLine,
-    },
+    alarm: null,
     atm: atmPatch ?? state.atm,
-    waitingForChoice: null,
+    atmBeforeAlarm: null,
+    waitingForChoice: recoverable ? state.waitingForChoice : null,
   };
 }
 
@@ -394,8 +417,7 @@ function applyChoiceToAtm(atm: AtmVisualState, choiceId: string, key: string): A
   }
   if (choiceId === 'install-method') {
     if (key === '1') return { ...atm, driveState: 'removed', showLaptop: true, showUsbStick: false, showBlackbox: false };
-    if (key === '2') return { ...atm, showLaptop: true, showUsbStick: true, showBlackbox: false, driveState: atm.driveState === 'removed' ? 'present' : atm.driveState };
-    if (key === '3') return { ...atm, showBlackbox: true, showLaptop: false, showUsbStick: false, driveState: atm.driveState === 'removed' ? 'present' : atm.driveState };
+    if (key === '2') return { ...atm, showBlackbox: true, showLaptop: false, showUsbStick: false, driveState: atm.driveState === 'removed' ? 'present' : atm.driveState };
   }
   if (choiceId === 'persist-method') {
     if (key === '1') {
@@ -408,7 +430,6 @@ function applyChoiceToAtm(atm: AtmVisualState, choiceId: string, key: string): A
         showClamp: false,
         showSensorCut: false,
         showDoorAjar: false,
-        showTamperTape: true,
         accessMethod: null,
         screenMode: 'reboot',
       };
@@ -418,7 +439,6 @@ function applyChoiceToAtm(atm: AtmVisualState, choiceId: string, key: string): A
         ...atm,
         panelOpen: true,
         showDoorAjar: true,
-        showTamperTape: false,
         showLaptop: false,
         showUsbStick: false,
       };
@@ -427,7 +447,6 @@ function applyChoiceToAtm(atm: AtmVisualState, choiceId: string, key: string): A
       return {
         ...atm,
         panelOpen: false,
-        showTamperTape: false,
         showClamp: false,
         showSensorCut: false,
         showDoorAjar: false,
@@ -451,7 +470,7 @@ function updateChoices(choices: ToolChoices, choiceId: string, key: string): Too
     case 'panel-access': return { ...choices, panelAccess: key === '1' ? 'tbar' : 'social' };
     case 'ethernet': return { ...choices, ethernet: key === '1' ? 'loopback' : key === '2' ? 'cut' : 'live' };
     case 'alarm-sensor': return { ...choices, alarmSensor: 'clamp' };
-    case 'install-method': return { ...choices, installMethod: key === '1' ? 'hdd' : key === '2' ? 'usb' : 'blackbox' };
+    case 'install-method': return { ...choices, installMethod: key === '1' ? 'hdd' : 'blackbox' };
     case 'persist-method': return { ...choices, persistMethod: 'reseal' };
     case 'activate-method': return { ...choices, activateMethod: 'keyboard' };
     default: return choices;
@@ -560,8 +579,9 @@ function tryAdvancePhase(state: GameState): GameState {
   if (nextPhase > 6) return state;
   const withCp = pushCheckpoint(state);
   if (nextPhase === 5 && state.siemDelayed) {
+    // Still advance — cops are coming, but the mule can finish if they're fast
     const reason = 'Buffered logs flushed to bank SIEM when cable reconnected - police dispatched';
-    return applyPoliceTrigger(withCp, reason, false, -1);
+    return enterPhase(applyPoliceTrigger(withCp, reason, false), nextPhase);
   }
   return enterPhase(withCp, nextPhase);
 }
@@ -572,9 +592,9 @@ function reducer(state: GameState, action: Action): GameState {
     case 'ADVANCE': {
       if (!state.started) {
         // Start → bare danny@kali prompt only (no history, no autofill)
-        return beginPhaseContent({ ...state, started: true }, PHASE_LINES[1]!);
+        return beginPhaseContent({ ...state, started: true }, [...PHASE_LINES[1]!]);
       }
-      if (state.alarm || state.policeArrived || state.jackpotComplete) return state;
+      if (state.policeArrived || state.jackpotComplete) return state;
       if (state.termMode === 'at-choice' || state.waitingForChoice) return state;
 
       // Skip remaining typewriter on narrative outs
@@ -671,7 +691,7 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'AUTOFILL_TICK': {
       if (state.termMode !== 'at-cmd' || !state.autofillTarget) return state;
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       const target = state.autofillTarget;
       const nextLen = state.inputBuffer.length + 1;
       if (nextLen >= target.length) {
@@ -685,7 +705,7 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'OUT_TICK': {
       if (state.typingOutIndex === null) return state;
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       const line = state.effectiveLines[state.typingOutIndex];
       if (!line || line.t !== 'out') return finishTypingOut(state);
       if (state.charIndex + 1 >= line.text.length) {
@@ -696,7 +716,7 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'HISTORY_UP': {
       if (!state.started || state.termMode !== 'at-cmd') return state;
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.cmdHistory.length === 0) return state;
       const idx = state.historyBrowseIndex === null
         ? state.cmdHistory.length - 1
@@ -713,7 +733,7 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'HISTORY_DOWN': {
       if (!state.started || state.termMode !== 'at-cmd') return state;
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.historyBrowseIndex === null) return state;
       if (state.historyBrowseIndex >= state.cmdHistory.length - 1) {
         return { ...state, historyBrowseIndex: null, inputBuffer: '', cursorIndex: 0, autofillTarget: null };
@@ -765,6 +785,7 @@ function reducer(state: GameState, action: Action): GameState {
         policeTriggered: prev.policeTriggered,
         policeEtaSeconds: prev.policeEtaSeconds,
         policeArrived: prev.policeArrived,
+        seizedLinger: false,
         policeStrikeCount: prev.policeStrikeCount,
         lastEtaPenalty: prev.lastEtaPenalty,
         lastAlarmReason: prev.lastAlarmReason,
@@ -774,11 +795,12 @@ function reducer(state: GameState, action: Action): GameState {
         sandboxCwd: prev.sandboxCwd,
         sandboxEchoes: prev.sandboxEchoes,
         showPloutusBanner: prev.showPloutusBanner,
+        termClearAt: prev.termClearAt,
       };
     }
 
     case 'TERM_TYPE': {
-      if (!state.started || state.alarm || state.policeArrived) return state;
+      if (!state.started || state.policeArrived) return state;
       if (state.termMode !== 'at-cmd') return state;
       if (action.key.length !== 1) return state;
       // Manual typing cancels autofill
@@ -795,7 +817,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'TERM_PASTE': {
-      if (!state.started || state.alarm || state.policeArrived) return state;
+      if (!state.started || state.policeArrived) return state;
       if (state.termMode !== 'at-cmd') return state;
       // Strip newlines — paste as a single command line
       const pasted = action.text.replace(/[\r\n]+/g, ' ');
@@ -813,7 +835,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'TERM_TAB': {
-      if (!state.started || state.alarm || state.policeArrived) return state;
+      if (!state.started || state.policeArrived) return state;
       if (state.termMode !== 'at-cmd') return state;
       const line = state.effectiveLines[state.revealedLines];
       const expected = line && line.t === 'cmd' ? line.text : null;
@@ -861,7 +883,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'TERM_BACKSPACE': {
-      if (!state.started || state.alarm || state.policeArrived) return state;
+      if (!state.started || state.policeArrived) return state;
       if (state.termMode !== 'at-cmd') return state;
       if (state.autofillTarget) {
         return { ...state, autofillTarget: null, inputBuffer: '', cursorIndex: 0, historyBrowseIndex: null };
@@ -873,7 +895,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'TERM_DELETE': {
-      if (!state.started || state.alarm || state.policeArrived) return state;
+      if (!state.started || state.policeArrived) return state;
       if (state.termMode !== 'at-cmd') return state;
       if (state.autofillTarget) {
         return { ...state, autofillTarget: null, inputBuffer: '', cursorIndex: 0, historyBrowseIndex: null };
@@ -885,7 +907,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'TERM_CURSOR': {
-      if (!state.started || state.alarm || state.policeArrived) return state;
+      if (!state.started || state.policeArrived) return state;
       if (state.termMode !== 'at-cmd') return state;
       if (state.autofillTarget) {
         return { ...state, autofillTarget: null, inputBuffer: '', cursorIndex: 0, historyBrowseIndex: null };
@@ -901,7 +923,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'CHOOSE': {
-      if (!state.waitingForChoice || state.policeArrived || state.alarm) return state;
+      if (!state.waitingForChoice || state.policeArrived) return state;
       const choiceId = state.waitingForChoice;
       const cfg = CHOICES[choiceId];
       const option = cfg.options.find(o => o.key === action.key);
@@ -912,13 +934,7 @@ function reducer(state: GameState, action: Action): GameState {
         const wrongAtm = applyChoiceToAtm(state.atm, choiceId, action.key);
         // Checkpoint BEFORE the bust so CTRL+SPACE can rewind it
         const withCp = pushCheckpoint(state);
-        return applyPoliceTrigger(
-          { ...withCp, atmBeforeAlarm: { ...state.atm } },
-          reason,
-          true,
-          state.revealedLines,
-          wrongAtm,
-        );
+        return applyPoliceTrigger(withCp, reason, true, wrongAtm);
       }
 
       const withCp = pushCheckpoint(state);
@@ -950,7 +966,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'CASH_TICK': {
-      if (state.phase !== 6 || state.jackpotComplete || state.policeArrived || state.alarm) return state;
+      if (state.phase !== 6 || state.jackpotComplete || state.policeArrived) return state;
       const cap = jackpotTarget(state);
       const next = Math.min(state.cashAmount + 2500, cap);
       return { ...state, cashAmount: next, atm: { ...state.atm, dispensing: true } };
@@ -1003,19 +1019,38 @@ function reducer(state: GameState, action: Action): GameState {
       );
     }
 
-    case 'RESET':
+    case 'RESET': {
+      // Bust → drop the overlay (tape visible), linger ~1.4s, then hard reset.
+      // Keep policeArrived so input stays locked; clear policeTriggered to unmount overlay.
+      if (state.seizedLinger) return makeInitialState();
+      if (state.policeArrived || state.atm.screenMode === 'seized') {
+        return {
+          ...state,
+          seizedLinger: true,
+          policeArrived: true,
+          policeTriggered: false,
+          policeEtaSeconds: null,
+          alarm: null,
+          atm: { ...state.atm, screenMode: 'seized', dispensing: false },
+        };
+      }
+      return makeInitialState();
+    }
+
+    case 'SEIZED_LINGER_DONE':
+      if (!state.seizedLinger) return state;
       return makeInitialState();
 
     /* ── ATM UI actions ── */
 
     case 'ATM_INSERT_CARD': {
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.atmUiState !== 'idle') return state;
       return { ...state, atmUiState: 'inserting', pinBuffer: '', inputFocus: 'atm' };
     }
 
     case 'ATM_CARD_ANIM_DONE': {
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.atmUiState === 'inserting') {
         return { ...state, atmUiState: 'pin', pinBuffer: '', inputFocus: 'atm' };
       }
@@ -1033,7 +1068,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'ATM_PIN_DIGIT': {
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       const { digit } = action;
       // Must insert card before PIN — digits do nothing on idle
       if (state.atmUiState === 'idle' || state.atmUiState === 'inserting' || state.atmUiState === 'ejecting') {
@@ -1059,13 +1094,13 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'ATM_AMOUNT': {
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.atmUiState !== 'amount') return state;
       return tryWithdraw(state, action.amount);
     }
 
     case 'ATM_CLEAR': {
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.atmUiState === 'pin') return { ...state, pinBuffer: '' };
       if (state.atmUiState === 'amount') {
         return { ...state, atmUiState: 'menu', amountBuffer: '' };
@@ -1082,7 +1117,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'ATM_ENTER': {
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.atmUiState === 'idle') {
         return { ...state, atmUiState: 'inserting', pinBuffer: '', inputFocus: 'atm' };
       }
@@ -1105,7 +1140,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'ATM_MENU': {
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.atmUiState === 'amount' && action.choice === 'cancel') {
         return { ...state, atmUiState: 'menu', amountBuffer: '' };
       }
@@ -1121,7 +1156,7 @@ function reducer(state: GameState, action: Action): GameState {
       return state.inputFocus === action.focus ? state : { ...state, inputFocus: action.focus };
 
     case 'ATM_OK': {
-      if (state.alarm || state.policeArrived) return state;
+      if (state.policeArrived) return state;
       if (state.atmUiState === 'idle') {
         return { ...state, atmUiState: 'inserting', pinBuffer: '', inputFocus: 'atm' };
       }
@@ -1157,6 +1192,11 @@ export function Jackpot() {
   stateRef.current = state;
   cheatOpenRef.current = cheatOpen;
 
+  // Only slam the cheat sheet on a hard bust — countdown is still playable
+  useEffect(() => {
+    if (state.policeArrived) setCheatOpen(false);
+  }, [state.policeArrived]);
+
   const currentCheatCmd = (() => {
     if (state.termMode !== 'at-cmd' || state.waitingForChoice) return null;
     const line = state.effectiveLines[state.revealedLines];
@@ -1170,14 +1210,14 @@ export function Jackpot() {
     !state.waitingForChoice;
 
   useEffect(() => {
-    if (phase6LinesDone && !state.jackpotComplete && !state.alarm && !state.policeArrived) {
+    if (phase6LinesDone && !state.jackpotComplete && !state.policeArrived) {
       cashTickRef.current = setInterval(() => {
         dispatch({ type: 'CASH_TICK' });
         Sounds.cashClick();
       }, 60);
     }
     return () => { if (cashTickRef.current) clearInterval(cashTickRef.current); };
-  }, [phase6LinesDone, state.jackpotComplete, state.alarm, state.policeArrived]);
+  }, [phase6LinesDone, state.jackpotComplete, state.policeArrived]);
 
   /* Jackpot complete when counter hits cassette total minus prior customer withdrawals */
   const jackpotCap = JACKPOT_CASSETTE_TOTAL - state.customerWithdrawn;
@@ -1215,6 +1255,13 @@ export function Jackpot() {
     prevArrivedRef.current = state.policeArrived;
   }, [state.policeArrived]);
 
+  /* After R on a bust: hold the taped ATM in view, then hard reset */
+  useEffect(() => {
+    if (!state.seizedLinger) return;
+    const t = setTimeout(() => dispatch({ type: 'SEIZED_LINGER_DONE' }), 1400);
+    return () => clearTimeout(t);
+  }, [state.seizedLinger]);
+
   /* Siren on recoverable/blocking alarm — not during final bust (arrival sting owns that) */
   useEffect(() => {
     if (state.alarm && !state.policeArrived) {
@@ -1242,18 +1289,18 @@ export function Jackpot() {
   /* Autofill typewriter — letter-by-letter with keypress sounds */
   useEffect(() => {
     if (!state.autofillTarget || state.termMode !== 'at-cmd') return;
-    if (state.alarm || state.policeArrived) return;
+    if (state.policeArrived) return;
     const t = setTimeout(() => {
       Sounds.keypress();
       dispatch({ type: 'AUTOFILL_TICK' });
     }, 28);
     return () => clearTimeout(t);
-  }, [state.autofillTarget, state.inputBuffer, state.termMode, state.alarm, state.policeArrived]);
+  }, [state.autofillTarget, state.inputBuffer, state.termMode, state.policeArrived]);
 
   /* Narrative out typewriter (e.g. on-site line after phase header) */
   useEffect(() => {
     if (state.typingOutIndex === null) return;
-    if (state.alarm || state.policeArrived) return;
+    if (state.policeArrived) return;
     const line = state.effectiveLines[state.typingOutIndex];
     if (!line || line.t !== 'out') return;
     if (state.charIndex >= line.text.length) {
@@ -1265,7 +1312,7 @@ export function Jackpot() {
       dispatch({ type: 'OUT_TICK' });
     }, 12);
     return () => clearTimeout(t);
-  }, [state.typingOutIndex, state.charIndex, state.effectiveLines, state.alarm, state.policeArrived]);
+  }, [state.typingOutIndex, state.charIndex, state.effectiveLines, state.policeArrived]);
 
   /* Keyboard — narrative SPACE/ENTER, CTRL+SPACE back, typed commands, ↑ history */
   useEffect(() => {
@@ -1301,7 +1348,7 @@ export function Jackpot() {
       const atmFocused = s.inputFocus === 'atm';
 
       // ATM focus: digits / CLR / OK go to the pad (click ATM to steal focus from terminal)
-      if (atmFocused && !s.alarm && !s.policeArrived) {
+      if (atmFocused && !s.policeArrived) {
         // Card mid-animation — ignore pad input
         if (s.atmUiState === 'inserting' || s.atmUiState === 'ejecting') {
           if (e.code === 'Space' || e.key === 'Enter' || (e.key.length === 1 && !e.ctrlKey && !e.metaKey)) {
@@ -1342,7 +1389,6 @@ export function Jackpot() {
         if (
           s.started &&
           s.termMode === 'at-cmd' &&
-          !s.alarm &&
           !s.policeArrived &&
           !s.autofillTarget &&
           s.inputBuffer.length > 0
@@ -1369,49 +1415,49 @@ export function Jackpot() {
       }
 
       if (e.key === 'ArrowUp') {
-        if (s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           dispatch({ type: 'HISTORY_UP' });
         }
         return;
       }
       if (e.key === 'ArrowDown') {
-        if (s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           dispatch({ type: 'HISTORY_DOWN' });
         }
         return;
       }
       if (e.key === 'ArrowLeft') {
-        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           dispatch({ type: 'TERM_CURSOR', dir: 'left' });
         }
         return;
       }
       if (e.key === 'ArrowRight') {
-        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           dispatch({ type: 'TERM_CURSOR', dir: 'right' });
         }
         return;
       }
       if (e.key === 'Home') {
-        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           dispatch({ type: 'TERM_CURSOR', dir: 'home' });
         }
         return;
       }
       if (e.key === 'End') {
-        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           dispatch({ type: 'TERM_CURSOR', dir: 'end' });
         }
         return;
       }
       if (e.key === 'Delete') {
-        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (!atmFocused && s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           dispatch({ type: 'TERM_DELETE' });
         }
@@ -1436,14 +1482,14 @@ export function Jackpot() {
           dispatch({ type: 'ADVANCE' });
           return;
         }
-        if (!s.alarm && !s.policeArrived && !s.waitingForChoice) {
+        if (!s.policeArrived && !s.waitingForChoice) {
           dispatch({ type: 'ATM_ENTER' });
         }
         return;
       }
 
       if (e.key === 'Backspace') {
-        if (s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           dispatch({ type: 'TERM_BACKSPACE' });
         }
@@ -1451,7 +1497,7 @@ export function Jackpot() {
       }
 
       if (e.key === 'Tab') {
-        if (s.termMode === 'at-cmd' && s.started && !s.alarm && !s.policeArrived) {
+        if (s.termMode === 'at-cmd' && s.started && !s.policeArrived) {
           e.preventDefault();
           Sounds.keypress();
           dispatch({ type: 'TERM_TAB' });
@@ -1460,7 +1506,7 @@ export function Jackpot() {
       }
 
       // Choice keys
-      if (['1', '2', '3'].includes(e.key) && s.waitingForChoice && !s.policeArrived && !s.alarm) {
+      if (['1', '2', '3'].includes(e.key) && s.waitingForChoice && !s.policeArrived) {
         const cfg = CHOICES[s.waitingForChoice];
         const opt = cfg.options.find(o => o.key === e.key);
         if (opt?.outcome === 'wrong') Sounds.wrong();
@@ -1473,7 +1519,6 @@ export function Jackpot() {
       if (
         s.started &&
         s.termMode === 'at-cmd' &&
-        !s.alarm &&
         !s.policeArrived &&
         e.key.length === 1 &&
         !e.ctrlKey &&
@@ -1489,7 +1534,6 @@ export function Jackpot() {
       // ATM digit input when terminal-focused but not mid-command (idle between beats)
       if (
         /^[0-9]$/.test(e.key) &&
-        !s.alarm &&
         !s.policeArrived &&
         !s.waitingForChoice &&
         s.termMode !== 'at-cmd' &&
@@ -1502,7 +1546,7 @@ export function Jackpot() {
 
     const onPaste = (e: ClipboardEvent) => {
       const s = stateRef.current;
-      if (!s.started || s.termMode !== 'at-cmd' || s.alarm || s.policeArrived) return;
+      if (!s.started || s.termMode !== 'at-cmd' || s.policeArrived) return;
       const text = e.clipboardData?.getData('text');
       if (!text) return;
       e.preventDefault();
@@ -1547,7 +1591,11 @@ export function Jackpot() {
         </div>
         <button
           type="button"
-          onClick={() => setCheatOpen((v) => !v)}
+          onClick={() => {
+            // Don't reopen over an active bust / arrived screen
+            if (state.policeArrived) return;
+            setCheatOpen((v) => !v);
+          }}
           title="Train de Aqua Notes"
           style={{
             background: '#e8203a',
@@ -1558,10 +1606,10 @@ export function Jackpot() {
             fontWeight: 700,
             letterSpacing: 1.5,
             padding: '8px 14px',
-            cursor: 'pointer',
+            cursor: state.policeArrived ? 'not-allowed' : 'pointer',
             textTransform: 'uppercase',
             boxShadow: '2px 2px 0 #a8142844',
-            opacity: cheatOpen ? 0.85 : 1,
+            opacity: state.policeArrived ? 0.45 : cheatOpen ? 0.85 : 1,
           }}
         >
           Cheat Sheet
@@ -1655,9 +1703,7 @@ export function Jackpot() {
           {/* Police timer — mounts on first alarm, stays until Reset */}
           {state.policeTriggered && state.policeEtaSeconds !== null && (
             <AlarmOverlay
-              reason={state.alarm?.reason ?? state.lastAlarmReason}
-              isBlocking={state.alarm !== null || state.policeArrived}
-              recoverable={(state.alarm?.recoverable ?? false) && !state.policeArrived}
+              reason={state.lastAlarmReason}
               etaSeconds={state.policeEtaSeconds}
               arrived={state.policeArrived}
               strikeCount={state.policeStrikeCount}

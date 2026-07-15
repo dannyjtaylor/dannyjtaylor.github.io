@@ -134,7 +134,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
     phase: 2,
     title: 'BREACH',
     blurb:
-      "Physical access time. Open the top-hat, kill the log stream, keep the door sensor happy. Wrong picks start the cops.",
+      "Physical access time. Open the top-hat, clamp the door sensor, then kill the log stream. Wrong picks start the cops.",
     commands: [
       {
         cmd: 'echo "vestibule clear - DN tech cover ready"',
@@ -157,9 +157,19 @@ export const CHEAT_PHASES: CheatPhase[] = [
         prompt: 'SELECT PANEL ACCESS METHOD',
         tip: '1 or 3. Crowbar is a trap.',
         options: [
-          { key: '1', label: 'Ebay Dyebold T-bar Key (SKU 001-0006522)', verdict: 'go', note: 'Real Dyebold key. Quiet open.' },
+          { key: '1', label: 'Key from Dyebold off of Ebay', verdict: 'go', note: 'Real Dyebold key. Quiet open.' },
           { key: '2', label: 'Crow bar', verdict: 'no', note: 'Vibration sensor screams. Cops start coming.' },
-          { key: '3', label: 'Social Engineering - Wear DN field technician gear & badge', verdict: 'go', note: 'Badge + cover. Guard opens it for ya.' },
+          { key: '3', label: 'Wear DN branded ATM field technician gear and badge', verdict: 'go', note: 'Badge + cover. Guard opens it for ya.' },
+        ],
+      },
+      {
+        id: 'alarm-sensor',
+        prompt: 'DOOR ALARM SENSOR',
+        tip: "Clamp it. Don't cut it. Don't ignore it.",
+        options: [
+          { key: '1', label: 'Magnetic clamp', verdict: 'go', note: 'Still reads CLOSED with the lid open.' },
+          { key: '2', label: 'Cut alarm sensor wire', verdict: 'no', note: 'Broken loop. Central station wakes up.' },
+          { key: '3', label: 'Ignore sensor & hope nobody is watching', verdict: 'no', note: 'Door-open alert. Units rolling.' },
         ],
       },
       {
@@ -167,7 +177,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
         prompt: 'HANDLE NETWORK / LOG STREAM',
         tip: 'Loopback is clean. Cut-only is a delayed SIEM bomb.',
         options: [
-          { key: '1', label: 'Cut cable + insert RJ45 loopback plug', verdict: 'go', note: 'Logs die. NIC still looks up.' },
+          { key: '1', label: 'Replace cable with RJ45 loopback plug', verdict: 'go', note: 'Pull the wall cable, seat the loopback. Logs die. NIC still looks up.' },
           { key: '2', label: 'Cut cable only', verdict: 'maybe', note: 'Fine for now. Logs flush later when the cable comes back.' },
           { key: '3', label: 'Leave cable intact', verdict: 'no', note: 'SIEM sees you right away.' },
         ],
@@ -187,23 +197,13 @@ export const CHEAT_PHASES: CheatPhase[] = [
           ],
         },
       },
-      {
-        id: 'alarm-sensor',
-        prompt: 'DOOR ALARM SENSOR',
-        tip: "Clamp it. Don't cut it. Don't ignore it.",
-        options: [
-          { key: '1', label: 'Magnetic reed-switch clamp', verdict: 'go', note: 'Still reads CLOSED with the lid open.' },
-          { key: '2', label: 'Cut alarm sensor wire', verdict: 'no', note: 'Broken loop. Central station wakes up.' },
-          { key: '3', label: 'Ignore sensor & hope nobody is watching', verdict: 'no', note: 'Door-open alert. Units rolling.' },
-        ],
-      },
     ],
   },
   {
     phase: 3,
     title: 'INSTALL',
     blurb:
-      'Get Ploutus on the box. HDD pull, USB live, or black box. All three work. Follow-up cmds show after you pick.',
+      'Get Ploutus on the box. HDD pull onto NTFS, or Pi black box. Follow-up cmds show after you pick.',
     commands: [
       {
         cmd: 'lsblk -o NAME,SIZE,TYPE,MODEL | grep -E "NAME|sda|sdb"',
@@ -222,7 +222,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
       {
         id: 'install-method',
         prompt: 'SELECT INSTALL METHOD',
-        tip: "All three work. Know which path you're demoing.",
+        tip: 'HDD for the malware path. Black box skips persist/activate.',
         options: [
           {
             key: '1',
@@ -232,12 +232,6 @@ export const CHEAT_PHASES: CheatPhase[] = [
           },
           {
             key: '2',
-            label: 'Boot from USB live OS and inject Ploutus',
-            verdict: 'go',
-            note: 'Boot the stick, run the installer. Same Userinit trick.',
-          },
-          {
-            key: '3',
             label: 'Use a Raspberry Pi black box',
             verdict: 'go',
             note: 'Hardware shim on the dispenser cable. Skips phases 4–5 here.',
@@ -317,27 +311,14 @@ export const CHEAT_PHASES: CheatPhase[] = [
           ],
           '2': [
             {
-              cmd: 'lsusb | grep -i kingston',
+              cmd: 'echo "blackbox: RPi Zero W + CDM firmware shim"',
               parts: [
-                { token: 'lsusb', meaning: 'lists USB devices' },
-                { token: '| grep -i kingston', meaning: 'looking for the stick' },
+                { token: 'echo', meaning: 'marker — this path is hardware, not shell' },
+                { token: '"blackbox: …"', meaning: 'Pi spliced on the CDM control cable' },
               ],
               outputs: [
-                { token: 'Kingston DataTraveler 32GB', meaning: 'installer stick\'s plugged in' },
-                { token: 'BIOS USB-first set', meaning: 'ATM boots the stick next power cycle' },
-              ],
-            },
-            {
-              cmd: './ploutus-installer.sh --target ntfs --persist userinit',
-              parts: [
-                { token: './ploutus-installer.sh', meaning: 'runs the live-OS installer' },
-                { token: '--target ntfs', meaning: 'writes onto the XP partition' },
-                { token: '--persist userinit', meaning: 'hooks Userinit on reboot' },
-              ],
-              outputs: [
-                { token: '[*] mounting NTFS via live OS…', meaning: 'installer mounts the XP disk' },
-                { token: '[*] payload written; Userinit patched', meaning: 'same end state as the HDD pull' },
-                { token: '[ PERSISTENCE ] … modified', meaning: 'autorun hook is in' },
+                { token: 'splice … CPU and CDM', meaning: 'inline. ATM CPU never sees a payload' },
+                { token: 'no malware / no reboot', meaning: 'skips persist + activate in this demo' },
               ],
             },
           ],
@@ -359,7 +340,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
         options: [
           { key: '1', label: 'Reseal panel, restore sensor, power-cycle ATM', verdict: 'go', note: 'Tape on, sensor back, XP boots, Ploutus loads.' },
           { key: '2', label: 'Leave panel ajar / skip reseal', verdict: 'no', note: 'Someone sees it. Silent alarm.' },
-          { key: '3', label: 'Skip reboot - leave malware unloaded until next crash', verdict: 'no', note: 'Malware never loads. You wasted the op.' },
+          { key: '3', label: 'Skip reboot - leave malware unloaded until next crash', verdict: 'no', note: 'No reboot, payload never loads. Half-done cabinet gets spotted.' },
         ],
         afterPick: {
           '1': [
@@ -400,7 +381,7 @@ export const CHEAT_PHASES: CheatPhase[] = [
         prompt: 'SELECT ACTIVATION METHOD',
         tip: "Keyboard + code. That's it.",
         options: [
-          { key: '1', label: 'Plug USB keyboard + enter rotating activation code', verdict: 'go', note: 'Hidden F-key menu. F4 dumps all cassettes.' },
+          { key: '1', label: 'Plug USB keyboard in and enter activation code', verdict: 'go', note: 'Hidden F-key menu. F4 dumps all cassettes.' },
           { key: '2', label: 'Trigger dispense from the normal customer PIN screen', verdict: 'no', note: 'No jackpot there. Just gets logged.' },
           { key: '3', label: 'Call activation server from a phone next to the ATM', verdict: 'no', note: 'Cell burst by the vestibule is a fraud flag.' },
         ],

@@ -224,8 +224,7 @@ function pickedKey(ch: CheatChoice, choices: ToolChoices): '1' | '2' | '3' | nul
       return choices.alarmSensor === 'clamp' ? '1' : null;
     case 'install-method':
       if (choices.installMethod === 'hdd') return '1';
-      if (choices.installMethod === 'usb') return '2';
-      if (choices.installMethod === 'blackbox') return '3';
+      if (choices.installMethod === 'blackbox') return '2';
       return null;
     case 'persist-method':
       return choices.persistMethod === 'reseal' ? '1' : null;
@@ -262,9 +261,10 @@ export function computeCheatUnlocks(
     if (line.t === 'choice') choiceSet.add(line.id);
   }
 
+  // Choice trees only unlock when the terminal is actually on them (or already past)
   if (waitingForChoice) choiceSet.add(waitingForChoice);
 
-  // Peek forward to the next interactive beat (cmd or choice)
+  // Peek the next cmd only — never peek a choice before SPACE lands on it
   for (let i = revealedLines; i < lines.length; i++) {
     const line = lines[i];
     if (!line) continue;
@@ -272,10 +272,7 @@ export function computeCheatUnlocks(
       if (!cmds.includes(line.text)) cmds.push(line.text);
       break;
     }
-    if (line.t === 'choice') {
-      choiceSet.add(line.id);
-      break;
-    }
+    if (line.t === 'choice') break;
   }
 
   return {
@@ -443,6 +440,7 @@ export function CheatSheet({
                   })}
 
                   {p.choices.map((ch) => {
+                    // Unlocks only when waiting on this choice or already past it (no forward peek)
                     const reached = past || unlockedChoiceSet.has(ch.id);
                     if (!reached) return null;
                     const choiceLive = isActive && waitingForChoice === ch.id;

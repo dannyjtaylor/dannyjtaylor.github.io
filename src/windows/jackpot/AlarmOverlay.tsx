@@ -3,8 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
   reason: string;
-  isBlocking: boolean;
-  recoverable: boolean;
   etaSeconds: number;
   arrived: boolean;
   strikeCount: number;
@@ -86,8 +84,6 @@ function RadioTicker({ arrived }: { arrived: boolean }) {
 
 export function AlarmOverlay({
   reason,
-  isBlocking,
-  recoverable,
   etaSeconds,
   arrived,
   strikeCount,
@@ -105,6 +101,17 @@ export function AlarmOverlay({
   const timeStr = arrived ? 'HERE' : `${mins}:${secs.toString().padStart(2, '0')}`;
   const urgent = !arrived && etaSeconds <= 15;
   const critical = !arrived && etaSeconds <= 5;
+
+  // Let the yellow evidence tape read on the ATM before the BUSTED veil covers it
+  const [showBustVeil, setShowBustVeil] = useState(false);
+  useEffect(() => {
+    if (!arrived) {
+      setShowBustVeil(false);
+      return;
+    }
+    const t = setTimeout(() => setShowBustVeil(true), 1200);
+    return () => clearTimeout(t);
+  }, [arrived]);
 
   const borderColor = arrived
     ? (flash ? '#ff2244' : '#aa0011')
@@ -128,7 +135,7 @@ export function AlarmOverlay({
           position: 'absolute',
           top: 50,
           right: 10,
-          zIndex: 20,
+          zIndex: 50, // above cheat sheet (40) so retry hints aren't buried
           width: 178,
           background: arrived ? '#120208' : '#0a0106',
           border: `2px solid ${borderColor}`,
@@ -213,22 +220,21 @@ export function AlarmOverlay({
           <span style={{ color: '#ff7755' }}>R</span>
           <span style={{ color: '#553333' }}> — RESET DEMO</span>
         </div>
-        {isBlocking && recoverable && !arrived && (
-          <div style={{ fontSize: 8, color: '#664444', letterSpacing: 1, marginTop: 4 }}>
-            <span style={{ color: '#6699ff' }}>ENTER</span>
-            <span style={{ color: '#553333' }}> — RETRY CHOICE</span>
+        {!arrived && (
+          <div style={{ fontSize: 8, color: '#446655', letterSpacing: 1, marginTop: 4 }}>
+            Keep going — beat the clock
           </div>
         )}
-        {isBlocking && (!recoverable || arrived) && (
+        {arrived && (
           <div style={{ fontSize: 8, color: '#553333', letterSpacing: 1, marginTop: 4 }}>
-            {arrived ? 'Busted — reset only' : 'Operation blown — reset only'}
+            Busted — reset only
           </div>
         )}
       </motion.div>
 
-      {/* Full-screen bust takeover — red/blue police wash */}
+      {/* Full-screen bust takeover — delayed so evidence tape is visible first */}
       <AnimatePresence>
-        {arrived && (
+        {arrived && showBustVeil && (
           <motion.div
             key="bust-veil"
             initial={{ opacity: 0 }}
